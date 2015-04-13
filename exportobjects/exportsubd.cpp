@@ -304,7 +304,7 @@ namespace ATG
 
         m_BoundaryEdges.clear();
 
-        DWORD dwTotalEdgeCount = m_Triangles.size() * 3 + m_Quads.size() * 4;
+        size_t dwTotalEdgeCount = m_Triangles.size() * 3 + m_Quads.size() * 4;
         ExportLog::LogMsg( 4, "Scanning %d edges in control mesh for boundary edges.", dwTotalEdgeCount );
 
         // add the edges in all of the triangles
@@ -335,8 +335,8 @@ namespace ATG
             }
         }
 
-        const DWORD dwBoundaryEdgeCount = m_BoundaryEdges.size();
-        const DWORD dwPositionCount = m_Positions.size();
+        const size_t dwBoundaryEdgeCount = m_BoundaryEdges.size();
+        const size_t dwPositionCount = m_Positions.size();
 
         // anything left over in the boundary edge table is a boundary edge
         ExportLog::LogMsg( 3, "Control mesh has %d boundary edges.", dwBoundaryEdgeCount );
@@ -436,7 +436,7 @@ namespace ATG
 
         ExportLog::LogMsg( 4, "Creating %d degenerate quads from %d boundary edges.", m_BoundaryEdges.size(), m_BoundaryEdges.size() );
 
-        const DWORD dwPositionCount = m_Positions.size();
+        const size_t dwPositionCount = m_Positions.size();
 
         // initialize the position to degenerate position map
         m_PositionToDegeneratePositionMapping.clear();
@@ -505,7 +505,7 @@ namespace ATG
         assert( iPositionIndex >= 0 && iPositionIndex < (INT)m_PositionToDegeneratePositionMapping.size() );
 
         // search for a degenerate position for this position index
-        INT iDegeneratePositionIndex = m_PositionToDegeneratePositionMapping[iPositionIndex];
+        size_t iDegeneratePositionIndex = m_PositionToDegeneratePositionMapping[iPositionIndex];
         if( iDegeneratePositionIndex == -1 )
         {
             // create a new degenerate position, which is equivalent to its position
@@ -513,9 +513,9 @@ namespace ATG
             m_Positions.push_back( m_Positions[iPositionIndex] );
             m_PositionToMeshVertexMapping.push_back( m_PositionToMeshVertexMapping[iPositionIndex] );
             // update the position to degenerate position map
-            m_PositionToDegeneratePositionMapping[iPositionIndex] = iDegeneratePositionIndex;
+            m_PositionToDegeneratePositionMapping[iPositionIndex] = static_cast<UINT>( iDegeneratePositionIndex );
         }
-        return iDegeneratePositionIndex;
+        return static_cast<INT>( iDegeneratePositionIndex );
     }
 
     VOID ExportSubDProcessMesh::ComputeAdjacency()
@@ -1055,7 +1055,7 @@ namespace ATG
         }
 
         // Recompute the adjacency of the quads that were modified.
-        DWORD dwCount = QuadsForAdjacency.size();
+        size_t dwCount = QuadsForAdjacency.size();
         for( DWORD i = 0; i < dwCount; ++i )
         {
             ComputeQuadAdjacency( QuadsForAdjacency[i] );
@@ -1222,7 +1222,7 @@ namespace ATG
 
     VOID ExportSubDProcessMesh::ConvertSubsets()
     {
-        DWORD dwQuadCount = m_Quads.size();
+        size_t dwQuadCount = m_Quads.size();
 
         ExportSubDPatchSubset CurrentSubset = { 0 };
         CurrentSubset.bQuadPatches = TRUE;
@@ -1255,7 +1255,7 @@ namespace ATG
         }
 
         iPatchCount = 0;
-        DWORD dwTriCount = m_Triangles.size();
+        size_t dwTriCount = m_Triangles.size();
         CurrentSubset.bQuadPatches = FALSE;
         CurrentSubset.dwStartPatch = 0;
         CurrentSubset.dwPatchCount = 0;

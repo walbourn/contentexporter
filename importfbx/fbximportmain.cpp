@@ -44,6 +44,8 @@ VOID FBXTransformer::Initialize( KFbxScene* pScene )
     {
         m_bMaxConversion = FALSE;
     }
+
+    SetUnitScale( (FLOAT)g_pScene->Settings().fExportScale );
 }
 
 VOID FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST
@@ -219,7 +221,8 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
     CHAR strTemp[200];
     g_pScene->Information().ExporterName = g_strExporterName;
     INT iMajorVersion, iMinorVersion, iRevision;
-    KFbxIO::GetCurrentVersion( iMajorVersion, iMinorVersion, iRevision );
+    g_pSDKManager->GetFileFormatVersion( iMajorVersion, iMinorVersion, iRevision );
+
 
     sprintf_s( strTemp, "FBX SDK %d.%d.%d", iMajorVersion, iMinorVersion, iRevision );
     g_pScene->Information().DCCNameAndVersion = strTemp;
@@ -228,14 +231,7 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
     ExportLog::LogMsg( 1, "Loading FBX file \"%s\"...", strFileName );
 
     INT iFileFormat = -1;
-
-    if( !g_pSDKManager->GetIOPluginRegistry()->DetectFileFormat( strFileName, iFileFormat ) )
-    {
-        iFileFormat = g_pSDKManager->GetIOPluginRegistry()->FindReaderIDByDescription( "FBX binary (*.fbx)" );
-    }
-    g_pImporter->SetFileFormat( iFileFormat );
-
-    BOOL bResult = g_pImporter->Initialize( strFileName );
+    BOOL bResult = g_pImporter->Initialize( strFileName, iFileFormat, g_pSDKManager->GetIOSettings() );
 
     if( !bResult )
     {

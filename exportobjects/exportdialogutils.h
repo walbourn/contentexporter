@@ -75,14 +75,14 @@ namespace ATG
         {
             if (pDlg)   
             {
-                ::SetWindowLong( hwndDlg, GWL_USERDATA, (LONG)(LPARAM)pDlg );
+                ::SetWindowLongPtr( hwndDlg, GWLP_USERDATA, (LONG_PTR)pDlg );
                 pDlg->m_hwnd = hwndDlg;
             }
         };
 
         static  ThinDialog* GetInstance( HWND hwndDlg )
         {
-            return ( ThinDialog* )( ::GetWindowLong( hwndDlg, GWL_USERDATA ) );
+            return ( ThinDialog* )( ::GetWindowLongPtr( hwndDlg, GWLP_USERDATA ) );
         }
     };
 

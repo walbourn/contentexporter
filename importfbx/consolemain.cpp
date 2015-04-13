@@ -79,7 +79,8 @@ enum ExportFileFormat
     FILEFORMAT_XATG = 0,
     FILEFORMAT_SDKMESH = 1,
 };
-INT g_ExportFileFormat = FILEFORMAT_XATG;
+
+INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
 
 typedef BOOL MacroCommandCallback( const CHAR* strArgument );
 

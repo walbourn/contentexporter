@@ -9,13 +9,14 @@
 
 #pragma once
 
-#pragma warning( disable: 4512 )
-#pragma warning( disable: 4505 )
-#pragma warning( disable: 4100 )
-#pragma warning( disable: 4996 )
+#pragma warning( disable: 4100 4296 4505 4512 4996 )
 
 #ifndef _SECURE_SCL
 #define _SECURE_SCL 0
+#endif
+
+#ifndef _ITERATOR_DEBUG_LEVEL
+#define _ITERATOR_DEBUG_LEVEL 0
 #endif
 
 #include <stdio.h>

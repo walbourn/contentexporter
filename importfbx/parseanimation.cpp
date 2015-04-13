@@ -91,7 +91,7 @@ VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, KFbxXMatr
     asn.pTrack->TransformTrack.AddKey( fTime, *(D3DXVECTOR3*)&vTranslation, *(D3DXQUATERNION*)&qRotation, *(D3DXVECTOR3*)&vScale );
 }
 
-VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim )
+VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, KFbxScene* pFbxScene )
 {
     const FLOAT fDeltaTime = pAnim->fSourceSamplingInterval;
     const FLOAT fStartTime = pAnim->fStartTime;
@@ -109,7 +109,8 @@ VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim )
         for( DWORD i = 0; i < dwNodeCount; ++i )
         {
             AnimationScanNode& asn = scanlist[i];
-            KFbxXMatrix& matGlobal = asn.pNode->GetGlobalFromCurrentTake( CurrentTime );
+            KFbxAnimEvaluator* pAnimEvaluator = pFbxScene->GetEvaluator();
+            KFbxXMatrix& matGlobal = pAnimEvaluator->GetNodeGlobalTransform( asn.pNode, CurrentTime );
             AnimationScanNode* pParent = NULL;
             if( asn.iParentIndex >= 0 )
                 pParent = &scanlist[asn.iParentIndex];
@@ -182,7 +183,7 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
         scanlist[i].pTrack = pTrack;
     }
 
-    CaptureAnimation( scanlist, pAnim );
+    CaptureAnimation( scanlist, pAnim, pFbxScene );
 
     pAnim->Optimize();
 }

@@ -140,7 +140,11 @@ BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
             
             KFbxXMatrix matXBindPose;
             pCluster->GetTransformLinkMatrix( matXBindPose );
-            KFbxMatrix matBindPose = matXBindPose;
+            KFbxXMatrix matReferenceGlobalInitPosition;
+            pCluster->GetTransformMatrix(matReferenceGlobalInitPosition);
+ 
+            KFbxMatrix matBindPose = matReferenceGlobalInitPosition.Inverse() * matXBindPose;
+
             CaptureBindPoseMatrix( pLink, matBindPose );
 
             INT* pIndices = pCluster->GetControlPointIndices();
@@ -179,8 +183,8 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
 
     BOOL bSmoothMesh = FALSE;
 
-    KFbxMesh::MeshSmoothness Smoothness = pFbxMesh->GetMeshSmoothness();
-    if( Smoothness != KFbxMesh::HULL && g_pScene->Settings().bConvertMeshesToSubD )
+    KFbxMesh::EMeshSmoothness Smoothness = pFbxMesh->GetMeshSmoothness();
+    if( Smoothness != KFbxMesh::eHULL && g_pScene->Settings().bConvertMeshesToSubD )
     {
         bSubDProcess = TRUE;
         bSmoothMesh = TRUE;

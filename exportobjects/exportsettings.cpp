@@ -540,7 +540,7 @@ namespace ATG
         CHAR* strBuffer = new CHAR[dwBufferSize];
         ZeroMemory( strBuffer, dwBufferSize * sizeof( CHAR ) );
 
-        DWORD dwReadBytes = fread( strBuffer, sizeof(CHAR), dwBufferSize, fp );
+        size_t dwReadBytes = fread( strBuffer, sizeof(CHAR), dwBufferSize, fp );
         fclose( fp );
 
         if( dwReadBytes == 0 )
@@ -575,6 +575,7 @@ namespace ATG
         g_SettingsManager.AddFloatBounded( pCategoryScene, "Light Range Scale", "lightrangescale", 1.0f, 0.0f, 1000.0f, &fLightRangeScale );
         g_SettingsManager.AddBool( pCategoryScene, "Export Cameras", "exportcameras", TRUE, &bExportCameras );
         g_SettingsManager.AddBool( pCategoryScene, "Export in Bind Pose", "exportbindpose", TRUE, &bSetBindPoseBeforeSceneParse );
+        g_SettingsManager.AddFloatBounded( pCategoryScene, "Export Scene Scale (1.0 = default)", "exportscale", 1.0f, 0.0f, 1000000.f, &fExportScale );
         pCategoryScene->ReverseChildOrder();
 
         ExportSettingsEntry* pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );

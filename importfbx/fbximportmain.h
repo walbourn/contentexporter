@@ -25,6 +25,12 @@ public:
     virtual VOID TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST;
     virtual FLOAT TransformLength( FLOAT fInputLength ) CONST;
 
+    // Sets unit scale for exporting all geometry - works with characters too.
+    void SetUnitScale( const FLOAT fScale )
+    {
+        m_fUnitScale = fScale;
+    }
+
 protected:
 	FLOAT m_fUnitScale;
     BOOL  m_bMaxConversion;

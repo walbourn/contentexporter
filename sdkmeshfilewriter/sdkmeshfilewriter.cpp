@@ -718,6 +718,9 @@ namespace ATG
             return FALSE;
 
         ExportAnimation* pAnim = g_pScene->GetAnimation( 0 );
+        const DWORD dwTrackCount = pAnim->GetTrackCount();
+        if ( dwTrackCount == 0 )
+            return FALSE;
 
         CHAR strAnimFileName[MAX_PATH];
         strcpy_s( strAnimFileName, strFileName );
@@ -736,7 +739,6 @@ namespace ATG
         ZeroMemory( &AnimHeader, sizeof( SDKANIMATION_FILE_HEADER ) );
 
         const DWORD dwKeyCount = (DWORD)( pAnim->GetDuration() / pAnim->fSourceFrameInterval );
-        const DWORD dwTrackCount = pAnim->GetTrackCount();
         DWORD dwTrackHeadersDataSize = dwTrackCount * sizeof( SDKANIMATION_FRAME_DATA );
         DWORD dwSingleTrackDataSize = dwKeyCount * sizeof( SDKANIMATION_DATA );
 

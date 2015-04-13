@@ -50,10 +50,10 @@ namespace ATG
 		case WM_PAINT:
 		case WM_ERASEBKGND:
 			{
-				DWORD dwID = (DWORD)GetWindowLong( hWnd, GWL_ID );
+				DWORD dwID = (DWORD)GetWindowLongPtr( hWnd, GWLP_ID );
 				if( dwID != IDC_DYNAMICCONTROL )
 				{
-					ExportSettingsDialog* pDlg = (ExportSettingsDialog*)GetWindowLong( hWnd, GWL_USERDATA );
+					ExportSettingsDialog* pDlg = (ExportSettingsDialog*)GetWindowLongPtr( hWnd, GWLP_USERDATA );
 					return CallWindowProc( pDlg->m_pStaticWndProc, hWnd, message, wParam, lParam );
 				}
 				return DefWindowProc( hWnd, message, wParam, lParam );
@@ -95,8 +95,8 @@ namespace ATG
 			NULL        // pointer not needed 
 			); 
 
-		SetWindowLong( m_hScrollingPane, GWL_USERDATA, (LONG)(LPARAM)this );
-		m_pStaticWndProc = (WNDPROC)SetWindowLong( m_hScrollingPane, GWL_WNDPROC, (LONG)ScrollPaneWndProc );
+		SetWindowLongPtr( m_hScrollingPane, GWLP_USERDATA, (LONG_PTR)this );
+		m_pStaticWndProc = (WNDPROC)SetWindowLongPtr( m_hScrollingPane, GWLP_WNDPROC, (LONG_PTR)ScrollPaneWndProc );
 
 		SetWindowText( m_hwnd, g_strTitle );
 
@@ -143,8 +143,8 @@ namespace ATG
 			dwX, dwY, 25, 25,
 			hParent, 
 			NULL, g_hInstance, NULL );
-		SetWindowLong( hCheckbox, GWL_USERDATA, (LONG)pData );
-		SetWindowLong( hCheckbox, GWL_ID, IDC_DYNAMICCONTROL );
+		SetWindowLongPtr( hCheckbox, GWLP_USERDATA, (LONG_PTR)pData );
+		SetWindowLongPtr( hCheckbox, GWLP_ID, IDC_DYNAMICCONTROL );
 		return hCheckbox;
 	}
 
@@ -158,8 +158,8 @@ namespace ATG
 			dwX, dwY, dwWidth, 25,
 			hParent,
 			NULL, g_hInstance, NULL );
-		SetWindowLong( hEditBox, GWL_USERDATA, (LONG)pData );
-		SetWindowLong( hEditBox, GWL_ID, IDC_DYNAMICCONTROL );
+		SetWindowLongPtr( hEditBox, GWLP_USERDATA, (LONG_PTR)pData );
+		SetWindowLongPtr( hEditBox, GWLP_ID, IDC_DYNAMICCONTROL );
 		return hEditBox;
 	}
 
@@ -171,8 +171,8 @@ namespace ATG
 			dwX, dwY, dwWidth, 30,
 			hParent,
 			NULL, g_hInstance, NULL );
-		SetWindowLong( hTrackBar, GWL_USERDATA, (LONG)pData );
-		SetWindowLong( hTrackBar, GWL_ID, IDC_DYNAMICCONTROL );
+		SetWindowLongPtr( hTrackBar, GWLP_USERDATA, (LONG_PTR)pData );
+		SetWindowLongPtr( hTrackBar, GWLP_ID, IDC_DYNAMICCONTROL );
 		SendMessage( hTrackBar, TBM_SETRANGE, TRUE, MAKELONG( pData->m_MinValue.m_iValue, pData->m_MaxValue.m_iValue ) );
 		SendMessage( hTrackBar, TBM_SETTICFREQ, 10, 0 );
 		return hTrackBar;
@@ -186,8 +186,8 @@ namespace ATG
 			dwX, dwY, dwWidth, 30,
 			hParent,
 			NULL, g_hInstance, NULL );
-		SetWindowLong( hTrackBar, GWL_USERDATA, (LONG)pData );
-		SetWindowLong( hTrackBar, GWL_ID, IDC_DYNAMICCONTROL );
+		SetWindowLongPtr( hTrackBar, GWLP_USERDATA, (LONG_PTR)pData );
+		SetWindowLongPtr( hTrackBar, GWLP_ID, IDC_DYNAMICCONTROL );
 		SendMessage( hTrackBar, TBM_SETRANGE, TRUE, MAKELONG( 0, 1000 ) );
 		SendMessage( hTrackBar, TBM_SETTICFREQ, 100, 0 );
 		return hTrackBar;
@@ -201,8 +201,8 @@ namespace ATG
 			CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE,
 			dwX, dwY, dwWidth, 300,
 			hParent, NULL, g_hInstance, NULL );
-		SetWindowLong( hDropList, GWL_USERDATA, (LONG)pData );
-		SetWindowLong( hDropList, GWL_ID, IDC_DYNAMICDROPLIST );
+		SetWindowLongPtr( hDropList, GWLP_USERDATA, (LONG_PTR)pData );
+		SetWindowLongPtr( hDropList, GWLP_ID, IDC_DYNAMICDROPLIST );
 
 		for( DWORD i = 0; i < pData->m_dwEnumValueCount; ++i )
 		{
@@ -340,7 +340,7 @@ namespace ATG
 	{
 		if( hwndControl == NULL )
 			return;
-		ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLong( hwndControl, GWL_USERDATA );
+		ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndControl, GWLP_USERDATA );
 		if( pEntry == NULL )
 			return;
         m_bControlDataUpdate = TRUE;
@@ -406,7 +406,7 @@ namespace ATG
 	{
 		if( idCtrl == 0 )
 		{
-			idCtrl = (WORD)GetWindowLong( hwndCtrl, GWL_ID );
+			idCtrl = (WORD)GetWindowLongPtr( hwndCtrl, GWLP_ID );
 		}
 		switch (idCtrl)
 		{
@@ -428,7 +428,7 @@ namespace ATG
 			{
                 if( m_bControlDataUpdate )
                     return TRUE;
-				ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLong( hwndCtrl, GWL_USERDATA );
+				ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndCtrl, GWLP_USERDATA );
 				if( wNotifyCode == BN_CLICKED && pEntry->m_Type == ExportSettingsEntry::CT_CHECKBOX )
 				{
 					pEntry->SetValue( !pEntry->GetValueBool() );
@@ -446,7 +446,7 @@ namespace ATG
 			{
                 if( m_bControlDataUpdate )
                     return TRUE;
-				ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLong( hwndCtrl, GWL_USERDATA );
+				ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndCtrl, GWLP_USERDATA );
 				assert( pEntry->m_Type == ExportSettingsEntry::CT_ENUM );
 				if( wNotifyCode == CBN_SELCHANGE )
 				{
@@ -577,9 +577,9 @@ namespace ATG
                 if( m_bControlDataUpdate )
                     return FALSE;
 				HWND hwndControl = (HWND)lParam;
-				if( GetWindowLong( hwndControl, GWL_ID ) != IDC_DYNAMICCONTROL )
+				if( GetWindowLongPtr( hwndControl, GWLP_ID ) != IDC_DYNAMICCONTROL )
 					return 1;
-				ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLong( hwndControl, GWL_USERDATA );
+				ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndControl, GWLP_USERDATA );
 				if( pEntry == NULL )
 					return FALSE;
 				INT iPos = (INT)SendMessage( hwndControl, TBM_GETPOS, 0, 0 );

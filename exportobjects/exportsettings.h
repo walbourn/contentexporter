@@ -191,6 +191,7 @@ namespace ATG
         CHAR        strMeshNameDecoration[SETTINGS_STRING_LENGTH];
         CHAR        strAnimationRootNodeName[SETTINGS_STRING_LENGTH];
         BOOL        bOptimizeAnimations;
+        FLOAT       fExportScale;
     };
 
     extern ExportCoreSettings       g_ExportCoreSettings;

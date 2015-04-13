@@ -13,6 +13,10 @@
 #define _SECURE_SCL 0
 #endif
 
+#ifndef _ITERATOR_DEBUG_LEVEL
+#define _ITERATOR_DEBUG_LEVEL 0
+#endif
+
 #pragma warning( disable: 4100 )
 
 #include <stdio.h>

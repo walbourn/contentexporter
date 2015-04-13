@@ -13,13 +13,13 @@
 
 #define CONTENT_EXPORTER_MAJOR_VERSION 2
 #define CONTENT_EXPORTER_MINOR_VERSION 5
-#define CONTENT_EXPORTER_REVISION 8
+#define CONTENT_EXPORTER_REVISION 9
 #define MAKEVERSION(major, minor, rev) "" #major "." #minor "." #rev
 #define CONTENT_EXPORTER_VERSION MAKEVERSION( CONTENT_EXPORTER_MAJOR_VERSION, CONTENT_EXPORTER_MINOR_VERSION, CONTENT_EXPORTER_REVISION )
 
 #define CONTENT_EXPORTER_GLOBAL_TITLE "Samples Content Exporter"
 #define CONTENT_EXPORTER_SETTINGS_TOKEN "SamplesContentExporter"
-#define CONTENT_EXPORTER_VENDOR "Microsoft XNA Developer Connection (gameds@microsoft.com)"
+#define CONTENT_EXPORTER_VENDOR "Microsoft Advanced Technology Group (gameds@microsoft.com)"
 #define CONTENT_EXPORTER_COPYRIGHT "Copyright (c) Microsoft Corporation.  All Rights Reserved."
 #define CONTENT_EXPORTER_FILE_EXTENSION "xatg"
 #define CONTENT_EXPORTER_FILE_FILTER "*." CONTENT_EXPORTER_FILE_EXTENSION

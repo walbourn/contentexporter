@@ -167,11 +167,11 @@ VOID ParseLight( KFbxLight* pFbxLight, ExportFrame* pParentFrame )
     pLight->SetDCCObject( pFbxLight );
     pParentFrame->AddLight( pLight );
 
-    DOUBLE* pColorRGB = (DOUBLE*)pFbxLight->Color.Get();
+    fbxDouble3 colorRGB = pFbxLight->Color.Get();
     FLOAT fIntensity = (FLOAT)pFbxLight->Intensity.Get();
     fIntensity *= 0.01f;
 
-    D3DXCOLOR Color( (FLOAT)pColorRGB[0], (FLOAT)pColorRGB[1], (FLOAT)pColorRGB[2], 1.0f );
+    D3DXCOLOR Color( (FLOAT)colorRGB[0], (FLOAT)colorRGB[1], (FLOAT)colorRGB[2], 1.0f );
     Color *= fIntensity;
     pLight->Color = Color;
 

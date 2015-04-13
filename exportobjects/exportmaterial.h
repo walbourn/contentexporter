@@ -25,6 +25,7 @@ public:
         EMPF_NORMALMAP = 4,
         EMPF_SPECULARMAP = 8,
         EMPF_ALPHACHANNEL = 16,
+        EMPF_AOMAP = 32,
     };
     ExportMaterialParameter()
     {
