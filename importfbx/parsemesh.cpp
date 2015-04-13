@@ -200,7 +200,10 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
     }
 
     pMesh->SetVertexColorCount( 0 );
-    if( pFbxMesh->GetNormals() == NULL )
+
+    KFbxLayerElementArrayTemplate<KFbxVector4> *pNormals = NULL;
+    pFbxMesh->GetNormals( &pNormals );
+    if( pNormals == NULL )
     {
         pFbxMesh->InitNormals();
         pFbxMesh->ComputeVertexNormals();

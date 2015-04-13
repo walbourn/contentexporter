@@ -1,0 +1,23 @@
+<sample>
+	<name>Samples Content Exporter</name>
+	<dxarea>Tools</dxarea>
+	<dxsubarea></dxsubarea>
+	<type>sample</type>
+	<description>
+	<![CDATA[The Samples Content Exporter is a content processing tool that creates sample-ready assets from FBX format input files.]]>
+	</description>
+	<folder>Samples\C++\Misc\ContentExporter\</folder>
+	<exefolder>Samples\C++\Misc\Bin\</exefolder>
+	<screenshot>ContentExporter.jpg</screenshot>
+  	<doc>Documentation/DirectX9/directx_sdk.chm::/graphics_tools_contentexporter.htm</doc>  	       	
+	<projectfile7>ContentExporter.sln</projectfile7>
+	<install dxut="false" common="false">
+	</install>
+	<consoleapp>yes</consoleapp>	
+	<language>C++</language>
+	<keywords>
+		<keyword>exporter</keyword>
+		<keyword>SDKMESH</keyword>
+		<keyword>FBX</keyword>
+	</keywords>
+<visible>true</visible></sample>

@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(DXSDK_DIR)\Include"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="_WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				ExceptionHandling="1"
@@ -108,7 +108,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				AdditionalIncludeDirectories="$(DXSDK_DIR)\Include"
+				AdditionalIncludeDirectories=""
 				PreprocessorDefinitions="_WIN32;NDEBUG;_LIB"
 				ExceptionHandling="1"
 				BasicRuntimeChecks="0"
