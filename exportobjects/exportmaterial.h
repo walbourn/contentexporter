@@ -45,9 +45,6 @@ class ExportMaterial :
     public ExportBase
 {
 public:
-    static const ExportString DefaultDiffuseTextureName;
-    static const ExportString DefaultNormalMapTextureName;
-
     ExportMaterial();
     ExportMaterial( ExportString name );
     ~ExportMaterial();
@@ -68,6 +65,9 @@ public:
 
     static LPDIRECT3DDEVICE9 GetDirect3DDevice();
     static VOID ReleaseDirect3DDevice();
+
+    static ExportString GetDefaultDiffuseMapTextureName();
+    static ExportString GetDefaultNormalMapTextureName();
 
 protected:
     const ExportMaterialDefinition*     m_pMaterialDefinition;

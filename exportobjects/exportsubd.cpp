@@ -30,11 +30,32 @@ namespace ATG
         BuildBoundaryEdgeTable();
         CreateDegenerateGeometry();
         ComputeAdjacency();
+        SortPatches();
         BuildQuadPatchBuffer();
         BuildTriPatchBuffer();
         ConvertSubsets();
 
         ClearIntermediateBuffers();
+    }
+
+    VOID ExportSubDProcessMesh::ByteSwap()
+    {
+        if( m_pQuadPatchDataVB != NULL )
+        {
+            //m_pQuadPatchDataVB->ByteSwap( GetPatchDataDecl(), GetPatchDataDeclElementCount() );
+        }
+        if( m_pQuadPatchIB != NULL )
+        {
+            m_pQuadPatchIB->ByteSwap();
+        }
+        if( m_pTrianglePatchDataVB != NULL )
+        {
+            //m_pTrianglePatchDataVB->ByteSwap( GetPatchDataDecl(), GetPatchDataDeclElementCount() );
+        }
+        if( m_pTrianglePatchIB != NULL )
+        {
+            m_pTrianglePatchIB->ByteSwap();
+        }
     }
 
     VOID ExportSubDProcessMesh::ClearIntermediateBuffers()
@@ -45,6 +66,7 @@ namespace ATG
         m_MeshVertexToPositionMapping.clear();
         m_PositionToMeshVertexMapping.clear();
         m_PositionToDegeneratePositionMapping.clear();
+        m_IncidentBoundaryEdgesPerPosition.clear();
         m_BoundaryEdges.clear();
     }
 
@@ -180,7 +202,7 @@ namespace ATG
         // sanity check our final triangle and quad counts
         assert( dwTriangleCount == ( m_Triangles.size() + m_Quads.size() * 2 ) );
 
-        ExportLog::LogMsg( 4, "Subdivision surface control mesh complete; %d triangles and %d quads found, %d unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
+        ExportLog::LogMsg( 3, "Subdivision surface control mesh complete; %d triangles and %d quads found, %d unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
     }
 
     INT ExportSubDProcessMesh::CreateOrAddPosition( const D3DXVECTOR3& vPosition, INT iMeshVertexIndex )
@@ -257,6 +279,22 @@ namespace ATG
             quad.iMeshIndices[3] = pMeshIndices[3];
         }
 
+        BOOL bDegenerate = FALSE;
+        for( DWORD i = 0; i < 4; ++i )
+        {
+            for( DWORD j = i + 1; j < 4; ++j )
+            {
+                if( pIndices[i] == pIndices[j] || pMeshIndices[i] == pMeshIndices[j] )
+                {
+                    bDegenerate = TRUE;
+                }
+            }
+        }
+        if( bDegenerate )
+        {
+            ExportLog::LogWarning( "Degenerate quad detected with poly index %d.", iPolyIndex );
+        }
+
         m_Quads.push_back( quad );
     }
 
@@ -297,8 +335,59 @@ namespace ATG
             }
         }
 
+        const DWORD dwBoundaryEdgeCount = m_BoundaryEdges.size();
+        const DWORD dwPositionCount = m_Positions.size();
+
         // anything left over in the boundary edge table is a boundary edge
-        ExportLog::LogMsg( 4, "Control mesh has %d boundary edges.", m_BoundaryEdges.size() );
+        ExportLog::LogMsg( 3, "Control mesh has %d boundary edges.", dwBoundaryEdgeCount );
+
+        // scan for more than 2 incident boundary edges on any position vertex
+        m_IncidentBoundaryEdgesPerPosition.clear();
+        m_IncidentBoundaryEdgesPerPosition.resize( dwPositionCount, 0 );
+
+        EdgeMap::iterator iter = m_BoundaryEdges.begin();
+        EdgeMap::iterator end = m_BoundaryEdges.end();
+        while( iter != end )
+        {
+            const Edge& BoundaryEdge = (*iter).second;
+
+            // decode the edge into start and end position indices
+            INT iPositionIndexA = -1;
+            INT iPositionIndexB = -1;
+            if( BoundaryEdge.iTriangleIndex >= 0 )
+            {
+                const Triangle& tri = m_Triangles[BoundaryEdge.iTriangleIndex];
+                iPositionIndexA = tri.iIndices[ BoundaryEdge.iLocalIndex ];
+                iPositionIndexB = tri.iIndices[ ( BoundaryEdge.iLocalIndex + 1 ) % 3 ];
+            }
+            else
+            {
+                const Quad& quad = m_Quads[BoundaryEdge.iQuadIndex];
+                iPositionIndexA = quad.iIndices[ BoundaryEdge.iLocalIndex ];
+                iPositionIndexB = quad.iIndices[ ( BoundaryEdge.iLocalIndex + 1 ) % 4 ];
+            }
+
+            // increment the incident boundary edge counter for each position
+            m_IncidentBoundaryEdgesPerPosition[iPositionIndexA]++;
+            m_IncidentBoundaryEdgesPerPosition[iPositionIndexB]++;
+
+            ++iter;
+        }
+
+        BOOL bInvalidData = FALSE;
+        for( DWORD i = 0; i < dwPositionCount; ++i )
+        {
+            if( m_IncidentBoundaryEdgesPerPosition[i] > 2 )
+            {
+                D3DXVECTOR3 vPos = m_Positions[i];
+                ExportLog::LogWarning( "Detected %d incident boundary edges on position %d, which will result in invalid adjacency data.  Location: <%0.3f %0.3f %0.3f>", m_IncidentBoundaryEdgesPerPosition[i], i, vPos.x, vPos.y, vPos.z );
+                bInvalidData = TRUE;
+            }
+        }
+        if( bInvalidData )
+        {
+            ExportLog::LogError( "Adjacency data is invalid due to non-manifold boundary edge geometry." );
+        }
     }
 
     INT ExportSubDProcessMesh::AddOrRemoveEdge( INT iPositionIndexA, INT iPositionIndexB, INT iTriangleIndex, INT iQuadIndex, INT iLocalIndex )
@@ -347,9 +436,11 @@ namespace ATG
 
         ExportLog::LogMsg( 4, "Creating %d degenerate quads from %d boundary edges.", m_BoundaryEdges.size(), m_BoundaryEdges.size() );
 
+        const DWORD dwPositionCount = m_Positions.size();
+
         // initialize the position to degenerate position map
         m_PositionToDegeneratePositionMapping.clear();
-        m_PositionToDegeneratePositionMapping.resize( m_Positions.size(), -1 );
+        m_PositionToDegeneratePositionMapping.resize( dwPositionCount, -1 );
 
         // walk through the boundary edges
         EdgeMap::iterator iter = m_BoundaryEdges.begin();
@@ -433,6 +524,7 @@ namespace ATG
         if( dwTriangleCount > 0 )
         {
             ExportLog::LogMsg( 4, "Computing triangle adjacency." );
+
             for( DWORD i = 0; i < dwTriangleCount; ++i )
             {
                 ComputeTriangleAdjacency( i );
@@ -444,13 +536,46 @@ namespace ATG
         {
             ExportLog::LogMsg( 4, "Computing quad adjacency." );
 
+            DWORD dwRegularQuadCount = 0;
+            DWORD dwExtraordinaryQuadCount = 0;
+
+            deque<INT> ValenceTwoQuads;
+
             for( DWORD i = 0; i < dwQuadCount; ++i )
             {
                 if( m_Quads[i].bDegenerate )
                     continue;
 
                 ComputeQuadAdjacency( i );
+
+                const Quad& ProcessedQuad = m_Quads[i];
+                if( ProcessedQuad.bValence[0] == 4 &&
+                    ProcessedQuad.bValence[1] == 4 &&
+                    ProcessedQuad.bValence[2] == 4 &&
+                    ProcessedQuad.bValence[3] == 4 )
+                {
+                    ++dwRegularQuadCount;
+                }
+                else
+                {
+                    ++dwExtraordinaryQuadCount;
+                }
+
+                if( ProcessedQuad.bValence[0] == 2 ||
+                    ProcessedQuad.bValence[1] == 2 ||
+                    ProcessedQuad.bValence[2] == 2 ||
+                    ProcessedQuad.bValence[3] == 2 )
+                {
+                    ValenceTwoQuads.push_back( (INT)i );
+                }
             }
+
+            FLOAT fTotalQuadCount = (FLOAT)( dwRegularQuadCount + dwExtraordinaryQuadCount );
+            FLOAT fRegularPercent = 100.0f * (FLOAT)dwRegularQuadCount / fTotalQuadCount;
+
+            ExportLog::LogMsg( 3, "%d regular quads (%0.0f%% of total), %d extraordinary quads.", dwRegularQuadCount, fRegularPercent, dwExtraordinaryQuadCount );
+
+            RemoveValenceTwoQuads( ValenceTwoQuads );
         }
     }
 
@@ -575,6 +700,13 @@ namespace ATG
 
         while( !bSweepComplete )
         {
+            if( iValence >= MAX_QUAD_NEIGHBOR_COUNT )
+            {
+                ExportLog::LogError( "Maximum valence encountered.  Terminating sweep to prevent infinite loop." );
+                bSweepComplete = TRUE;
+                continue;
+            }
+
             // Look for a quad with the active edge, except for the current quad
             INT iNextQuadIndex = FindQuadWithEdge( iSweepPositionIndex, iPivotPositionIndex, iCurrentQuadIndex );
             if( iNextQuadIndex != -1 )
@@ -651,7 +783,27 @@ namespace ATG
             bSweepComplete = TRUE;
         }
 
+        if( iValence <= 2 && iStartQuadIndex != -1 )
+        {
+            D3DXVECTOR3 vQuadCenter = GetQuadCenter( iStartQuadIndex );
+            ExportLog::LogWarning( "Valence of 2 encountered in quad %d.  This indicates neighboring quads sharing 2 edges.  Quad will be merged with the adjacent quad.  Quad center: <%0.3f %0.3f %0.3f>", iStartQuadIndex, vQuadCenter.x, vQuadCenter.y, vQuadCenter.z );
+        }
+
         return iValence;
+    }
+
+    D3DXVECTOR3 ExportSubDProcessMesh::GetQuadCenter( INT iQuadIndex )
+    {
+        const Quad& CurrentQuad = m_Quads[iQuadIndex];
+        
+        D3DXVECTOR3 vCenter( 0, 0, 0 );
+        for( DWORD i = 0; i < 4; ++i )
+        {
+            vCenter += m_Positions[ CurrentQuad.iIndices[i] ];
+        }
+
+        vCenter *= 0.25f;
+        return vCenter;
     }
 
     INT ExportSubDProcessMesh::FindTriangleWithEdge( INT iStartPositionIndex, INT iEndPositionIndex, INT iExcludeThisTriangle )
@@ -762,6 +914,200 @@ namespace ATG
             }
         }
         return -1;
+    }
+
+    BOOL QuadsHaveTwoMatchingEdges( const ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
+    {
+        DWORD dwMatchingVertexCount = 0;
+        for( DWORD i = 0; i < 4; ++i )
+        {
+            for( DWORD j = 0; j < 4; ++j )
+            {
+                if( QuadA.iIndices[i] == QuadB.iIndices[j] )
+                {
+                    ++dwMatchingVertexCount;
+                }
+            }
+        }
+
+        return dwMatchingVertexCount == 3;
+    }
+
+    VOID MergeQuads( ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
+    {
+        INT iUniqueIndexA = -1;
+        INT iUniquePositionInA = -1;
+        for( INT i = 0; i < 4; ++i )
+        {
+            BOOL bFound = FALSE;
+            for( INT j = 0; j < 4; ++j )
+            {
+                if( QuadA.iIndices[i] == QuadB.iIndices[j] )
+                {
+                    bFound = TRUE;
+                }
+            }
+            if( !bFound )
+            {
+                iUniqueIndexA = QuadA.iIndices[i];
+                iUniquePositionInA = i;
+            }
+        }
+        assert( iUniqueIndexA != -1 );
+        assert( iUniquePositionInA != -1 );
+
+        INT iUniqueIndexB = -1;
+        INT iUniquePositionInB = -1;
+        for( INT i = 0; i < 4; ++i )
+        {
+            BOOL bFound = FALSE;
+            for( INT j = 0; j < 4; ++j )
+            {
+                if( QuadB.iIndices[i] == QuadA.iIndices[j] )
+                {
+                    bFound = TRUE;
+                }
+            }
+            if( !bFound )
+            {
+                iUniqueIndexB = QuadB.iIndices[i];
+                iUniquePositionInB = i;
+            }
+        }
+        assert( iUniqueIndexB != -1 );
+        assert( iUniquePositionInB != -1 );
+
+        INT iReplacementPositionInA = ( iUniquePositionInA + 2 ) % 4;
+
+        QuadA.iIndices[iReplacementPositionInA] = iUniqueIndexB;
+        QuadA.iMeshIndices[iReplacementPositionInA] = QuadB.iMeshIndices[iUniquePositionInB];
+
+        // Erase the valence, prefix, and neighbor data for quad A, since it needs to be recomputed
+        for( DWORD i = 0; i < 4; ++i )
+        {
+            QuadA.bValence[i] = 0;
+            QuadA.bPrefix[i] = 0;
+        }
+        for( DWORD i = 0; i < ExportSubDProcessMesh::MAX_QUAD_NEIGHBOR_COUNT; ++i )
+        {
+            QuadA.iNeighbors[i] = 0;
+        }
+    }
+
+    VOID ExportSubDProcessMesh::RemoveValenceTwoQuads( deque<INT>& BadQuads )
+    {
+        if( BadQuads.empty() )
+        {
+            return;
+        }
+
+        // The valence 2 quads (bad quads) should come in pairs.
+        assert( BadQuads.size() % 2 == 0 );
+
+        vector<INT> QuadsForAdjacency;
+
+        // Find pairs of quads that share two edges.
+        while( !BadQuads.empty() )
+        {
+            // Remove the first quad (quad A) from the bad quad list.
+            INT iQuadAIndex = BadQuads.front();
+            BadQuads.pop_front();
+            Quad& QuadA = m_Quads[iQuadAIndex];
+            
+            // Find a quad in the bad quad list that adjoins quad A.
+            BOOL bMatchedQuad = FALSE;
+            deque<INT>::iterator iter = BadQuads.begin();
+            while( iter != BadQuads.end() )
+            {
+                int iQuadBIndex = *iter;
+                Quad& QuadB = m_Quads[iQuadBIndex];
+
+                if( QuadsHaveTwoMatchingEdges( QuadA, QuadB ) )
+                {
+                    ExportLog::LogMsg( 4, "Merging quad %d into quad %d, and eliminating quad %d.", iQuadBIndex, iQuadAIndex, iQuadBIndex );
+
+                    // Merge the second quad into the first quad.
+                    bMatchedQuad = TRUE;
+                    MergeQuads( QuadA, QuadB );
+
+                    // The first quad needs to have its adjacency recomputed.
+                    QuadsForAdjacency.push_back( iQuadAIndex );
+
+                    // The second quad needs to be removed from the quad array.
+                    // Setting the degenerate flag will effectively do this.
+                    QuadB.bDegenerate = TRUE;
+
+                    // Remove the second quad from the bad quad list.
+                    BadQuads.erase( iter );
+                    break;
+                }
+
+                ++iter;
+            }
+
+            if( !bMatchedQuad )
+            {
+                // Can this error condition ever be encountered?
+                ExportLog::LogError( "Quad %d has a vertex with valence 2, but was not matched with an adjacent quad.  Quad will be removed.", iQuadAIndex );
+                QuadA.bDegenerate = TRUE;
+                break;
+            }
+        }
+
+        // Recompute the adjacency of the quads that were modified.
+        DWORD dwCount = QuadsForAdjacency.size();
+        for( DWORD i = 0; i < dwCount; ++i )
+        {
+            ComputeQuadAdjacency( QuadsForAdjacency[i] );
+        }
+    }
+
+    BOOL QuadPatchSortPredicate( const ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
+    {
+        INT iScoreA = 0;
+        if( !QuadA.bDegenerate )
+        {
+            iScoreA += QuadA.iMeshSubsetIndex;
+            if( QuadA.bValence[0] != 4 || QuadA.bValence[1] != 4 || QuadA.bValence[2] != 4 || QuadA.bValence[3] != 4 )
+            {
+                iScoreA += 1000000;
+            }
+        }
+
+        INT iScoreB = 0;
+        if( !QuadB.bDegenerate )
+        {
+            iScoreB += QuadB.iMeshSubsetIndex;
+            if( QuadB.bValence[0] != 4 || QuadB.bValence[1] != 4 || QuadB.bValence[2] != 4 || QuadB.bValence[3] != 4 )
+            {
+                iScoreB += 1000000;
+            }
+        }
+
+        return iScoreA < iScoreB;
+    }
+
+    BOOL TrianglePatchSortPredicate( const ExportSubDProcessMesh::Triangle& TriangleA, const ExportSubDProcessMesh::Triangle& TriangleB )
+    {
+        INT iScoreA = TriangleA.iMeshSubsetIndex;
+        if( TriangleA.bValence[0] != 4 || TriangleA.bValence[1] != 4 || TriangleA.bValence[2] != 4 || TriangleA.bValence[3] != 4 )
+        {
+            iScoreA += 1000000;
+        }
+
+        INT iScoreB = TriangleB.iMeshSubsetIndex;
+        if( TriangleB.bValence[0] != 4 || TriangleB.bValence[1] != 4 || TriangleB.bValence[2] != 4 || TriangleB.bValence[3] != 4 )
+        {
+            iScoreB += 1000000;
+        }
+
+        return iScoreA < iScoreB;
+    }
+
+    VOID ExportSubDProcessMesh::SortPatches()
+    {
+        std::stable_sort( m_Quads.begin(), m_Quads.end(), QuadPatchSortPredicate );
+        std::stable_sort( m_Triangles.begin(), m_Triangles.end(), TrianglePatchSortPredicate );
     }
 
     VOID ExportSubDProcessMesh::BuildQuadPatchBuffer()

@@ -18,6 +18,8 @@ public:
 		: m_fUnitScale( 1.0f )
 	{ }
 
+    VOID Initialize( KFbxScene* pScene );
+
     virtual VOID TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST;
     virtual VOID TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVECTOR3* pSrcPosition ) CONST;
     virtual VOID TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST;
@@ -25,6 +27,7 @@ public:
 
 protected:
 	FLOAT m_fUnitScale;
+    BOOL  m_bMaxConversion;
 };
 
 class FBXImport

@@ -15,7 +15,6 @@
 
 #pragma warning( disable: 4100 )
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>

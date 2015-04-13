@@ -721,10 +721,12 @@ VOID WriteIndexBuffer( ExportIB* pIB )
 
 VOID WritePolyMesh( ExportMesh* pMesh )
 {
-    if( !g_pScene->Settings().bLittleEndian && g_XATGSettings.bBinaryBlobExport )
-        pMesh->ByteSwap();
-
     ExportSubDProcessMesh* pSubDMesh = pMesh->GetSubDMesh();
+
+    if( !g_pScene->Settings().bLittleEndian && g_XATGSettings.bBinaryBlobExport )
+    {
+        pMesh->ByteSwap();
+    }
 
     g_pXMLWriter->StartElement( "Mesh" );
     g_pXMLWriter->AddAttribute( "Name", pMesh->GetName() );
@@ -773,6 +775,10 @@ VOID WritePolyMesh( ExportMesh* pMesh )
         for( UINT i = 0; i < uSubsetCount; i++ )
         {
             WritePatchSubset( pSubDMesh->GetSubset( i ) );
+        }
+        if( pSubDMesh->GetTrianglePatchDataVB() != NULL )
+        {
+            ExportLog::LogWarning( "Subdivision surface mesh \"%s\" contains triangle patches, which are not currently written to XATG files.", pMesh->GetName().SafeString() );
         }
     }
 

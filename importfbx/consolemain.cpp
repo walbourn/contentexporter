@@ -42,8 +42,7 @@ public:
     }
     virtual VOID LogMessage( const CHAR* strMessage )
     {
-        printf( strMessage );
-        printf( "\n" );
+        puts( strMessage );
     }
     virtual VOID LogWarning( const CHAR* strMessage )
     {
@@ -210,6 +209,18 @@ BOOL MacroSubD11( const CHAR* strArgument )
     g_pScene->Settings().bExportBinormal = FALSE;
     g_pScene->Settings().bForceExportSkinWeights = TRUE;
     g_pScene->Settings().iMaxUVSetCount = 1;
+    g_pScene->Settings().bOptimizeAnimations = FALSE;
+    return FALSE;
+}
+
+BOOL MacroSubDXbox( const CHAR* strArgument )
+{
+    MacroXbox360( NULL );
+    g_pScene->Settings().bCompressVertexData = TRUE;
+    g_pScene->Settings().bConvertMeshesToSubD = TRUE;
+    g_pScene->Settings().bExportBinormal = FALSE;
+    g_pScene->Settings().bForceExportSkinWeights = TRUE;
+    g_pScene->Settings().iMaxUVSetCount = 1;
     return FALSE;
 }
 
@@ -313,6 +324,7 @@ MacroCommand g_MacroCommands[] = {
     { "animation", "", "Sets export options for animation track export", MacroAnimation },
     { "character", "", "Sets export options for character (mesh & skeleton) export", MacroCharacter },
     { "subd11", "", "Sets export options for subdivision surface processing for SubD11 sample", MacroSubD11 },
+    { "subdxbox", "", "Sets export options for subdivision surface processing for Xbox SubD sample", MacroSubDXbox },
     { "savesettings", " <filename>", "Saves all settings to the specified filename", MacroSaveSettings },
     { "loadsettings", " <filename>", "Loads settings from the specified filename", MacroLoadSettings },
     { "filelist", " <filename>", "Loads a list of input filenames from the specified filename", MacroLoadFileList },
@@ -518,7 +530,7 @@ VOID PrintEntryHelp( ExportSettingsEntry* pEntry )
             break;
         }
     case ExportSettingsEntry::CT_STRING:
-        strcpy_s( strAnnotation, " <string value>" );
+        sprintf_s( strAnnotation, " <string default: \"%s\">", pEntry->m_DefaultValue.m_strValue );
         break;
     }
 
@@ -633,8 +645,11 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 	g_WorkingPath = ExportPath::GetCurrentPath();
 
     ExportLog::AddListener( &g_ConsoleOutListener );
-#ifdef _DEBUG
-	ExportLog::AddListener( &g_DebugSpewListener );
+#if _MSC_VER >= 1500
+    if( IsDebuggerPresent() )
+    {
+        ExportLog::AddListener( &g_DebugSpewListener );
+    }
 #endif
 
 #ifdef _DEBUG
@@ -663,6 +678,8 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 
     XATGInitializeSettings();
     ParseCommandLine( argc, argv );
+
+    ExportLog::LogMsg( 9, "Microsoft C++ compiler version %d", _MSC_VER );
 
     DWORD dwInputFileCount = (DWORD)g_InputFileNames.size();
     if( dwInputFileCount == 0 )

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <deque>
 using namespace stdext;
 
 namespace ATG
@@ -37,7 +38,6 @@ namespace ATG
             BYTE bValence[4];
             BYTE bPrefix[4];
         };
-    protected:
         struct Triangle
         {
             INT iIndices[3];
@@ -59,6 +59,7 @@ namespace ATG
             INT iMeshSubsetIndex;
             BOOL bDegenerate;
         };
+    protected:
         struct Edge
         {
             INT iTriangleIndex;
@@ -73,6 +74,7 @@ namespace ATG
         vector< INT >               m_MeshVertexToPositionMapping;
         vector< INT >               m_PositionToMeshVertexMapping;
         vector< INT >               m_PositionToDegeneratePositionMapping;
+        vector< INT >               m_IncidentBoundaryEdgesPerPosition;
         EdgeMap                     m_BoundaryEdges;
 
         ExportMesh*             m_pPolyMesh;
@@ -85,6 +87,8 @@ namespace ATG
     public:
         ExportSubDProcessMesh();
         VOID Initialize( ExportMesh* pMesh );
+
+        VOID ByteSwap();
 
         DWORD GetQuadPatchCount() const { return ( m_pQuadPatchDataVB != NULL ) ? m_pQuadPatchDataVB->GetVertexCount() : 0; }
         ExportVB* GetQuadPatchDataVB() const { return m_pQuadPatchDataVB; }
@@ -123,6 +127,12 @@ namespace ATG
         INT GetNextPositionIndexInTriangle( INT iTriangleIndex, INT iPivotPositionIndex, INT iSweepPositionIndex );
         INT GetNextPositionIndexInQuad( INT iQuadIndex, INT iPivotPositionIndex, INT iSweepPositionIndex );
         INT GetOppositePositionIndexInQuad( INT iQuadIndex, INT iPositionIndex );
+
+        VOID RemoveValenceTwoQuads( deque<INT>& BadQuads );
+
+        D3DXVECTOR3 GetQuadCenter( INT iQuadIndex );
+
+        VOID SortPatches();
 
         VOID BuildQuadPatchBuffer();
         VOID BuildTriPatchBuffer();

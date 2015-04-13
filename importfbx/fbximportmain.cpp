@@ -15,11 +15,36 @@ using namespace ATG;
 KFbxSdkManager* g_pSDKManager = NULL;
 KFbxImporter* g_pImporter = NULL;
 KFbxScene* g_pFBXScene = NULL;
-KFbxPose* g_pBindPose = NULL;
+
+std::vector<KFbxPose*> g_BindPoses;
+PoseMap g_BindPoseMap;
+BOOL g_bBindPoseFixupRequired = FALSE;
 
 extern ATG::ExportScene* g_pScene;
 
 extern ExportPath g_CurrentOutputFileName;
+
+VOID FBXTransformer::Initialize( KFbxScene* pScene )
+{
+    ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
+    KFbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
+
+    // convert scene to Maya Y up coordinate system
+    KFbxAxisSystem::MayaYUp.ConvertScene( pScene );
+
+    INT iUpAxisSign;
+    KFbxAxisSystem::eUpVector UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
+
+    if( UpVector == KFbxAxisSystem::ZAxis )
+    {
+        ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
+        m_bMaxConversion = TRUE;
+    }
+    else
+    {
+        m_bMaxConversion = FALSE;
+    }
+}
 
 VOID FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST
 {
@@ -59,9 +84,19 @@ VOID FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVE
 		SrcVector = *pSrcPosition;
 		pSrcPosition = &SrcVector;
 	}
-	pDestPosition->x = pSrcPosition->x * m_fUnitScale;
-	pDestPosition->y = pSrcPosition->y * m_fUnitScale;
-	pDestPosition->z = -pSrcPosition->z * m_fUnitScale;
+
+    if( m_bMaxConversion )
+    {
+        pDestPosition->x = pSrcPosition->x * m_fUnitScale;
+        pDestPosition->y = pSrcPosition->z * m_fUnitScale;
+        pDestPosition->z = pSrcPosition->y * m_fUnitScale;
+    }
+    else
+    {
+        pDestPosition->x = pSrcPosition->x * m_fUnitScale;
+        pDestPosition->y = pSrcPosition->y * m_fUnitScale;
+        pDestPosition->z = -pSrcPosition->z * m_fUnitScale;
+    }
 }
 
 VOID FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST
@@ -72,9 +107,19 @@ VOID FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DX
 		SrcVector = *pSrcDirection;
 		pSrcDirection = &SrcVector;
 	}
-	pDestDirection->x = pSrcDirection->x;
-	pDestDirection->y = pSrcDirection->y;
-	pDestDirection->z = -pSrcDirection->z;
+
+    if( m_bMaxConversion )
+    {
+        pDestDirection->x = pSrcDirection->x;
+        pDestDirection->y = pSrcDirection->z;
+        pDestDirection->z = pSrcDirection->y;
+    }
+    else
+    {
+        pDestDirection->x = pSrcDirection->x;
+        pDestDirection->y = pSrcDirection->y;
+        pDestDirection->z = -pSrcDirection->z;
+    }
 }
 
 FLOAT FBXTransformer::TransformLength( FLOAT fInputLength ) CONST
@@ -110,42 +155,57 @@ VOID SetBindPose()
 {
 	assert( g_pFBXScene != NULL );
 
-    g_pBindPose = NULL;
+    g_BindPoses.clear();
 	INT iPoseCount = g_pFBXScene->GetPoseCount();
-	INT iBindPoseIndex = -1;
-    BOOL bMultipleBindPoses = FALSE;
 	for( INT i = 0; i < iPoseCount; ++i )
 	{
 		KFbxPose* pPose = g_pFBXScene->GetPose( i );
-        ExportLog::LogMsg( 4, "Found %spose: \"%s\"", pPose->IsBindPose() ? "bind " : "", pPose->GetName() );
-		if( pPose->IsBindPose() && pPose->IsValidBindPose( g_pFBXScene->GetRootNode() ) )
+        INT iNodeCount = pPose->GetCount();
+        ExportLog::LogMsg( 4, "Found %spose: \"%s\" with %d nodes", pPose->IsBindPose() ? "bind " : "", pPose->GetName(), iNodeCount );
+        for( INT j = 0; j < iNodeCount; ++j )
+        {
+            KFbxNode* pPoseNode = pPose->GetNode( j );
+            ExportLog::LogMsg( 5, "Pose node %d: %s", j, pPoseNode->GetName() );
+        }
+		if( pPose->IsBindPose() )
 		{
-			if( iBindPoseIndex != -1 && !bMultipleBindPoses )
-			{
-                bMultipleBindPoses = TRUE;
-				ExportLog::LogWarning( "More than one valid bind pose found." );
-			}
-			iBindPoseIndex = i;
+            g_BindPoses.push_back( pPose );
 		}
 	}
-	if( iBindPoseIndex == -1 )
+	if( g_BindPoses.empty() )
 	{
         if( g_pScene->Settings().bExportAnimations )
         {
             ExportLog::LogWarning( "No valid bind pose found; will export scene using the default pose." );
         }
+        return;
 	}
-	else
-	{
-		KFbxPose* pBindPose = g_pFBXScene->GetPose( iBindPoseIndex );
-		ExportLog::LogMsg( 2, "Using bind pose \"%s\".", pBindPose->GetName() );
-		if( !pBindPose->IsValidBindPose( g_pFBXScene->GetRootNode() ) )
-		{
-			ExportLog::LogWarning( "Bind pose \"%s\" is not a valid bind pose.", pBindPose->GetName() );
-		}
-		// apply bind pose
-		g_pBindPose = pBindPose;
-	}
+
+    DWORD dwPoseCount = (DWORD)g_BindPoses.size();
+    for( DWORD i = 0; i < dwPoseCount; ++i )
+    {
+        KFbxPose* pPose = g_BindPoses[i];
+        INT iNodeCount = pPose->GetCount();
+        for( INT j = 0; j < iNodeCount; ++j )
+        {
+            KFbxNode* pNode = pPose->GetNode( j );
+            KFbxMatrix matNode = pPose->GetMatrix( j );
+
+            PoseMap::iterator iter = g_BindPoseMap.find( pNode );
+            if( iter != g_BindPoseMap.end() )
+            {
+                KFbxMatrix matExisting = iter->second;
+                if( matExisting != matNode )
+                {
+                    ExportLog::LogWarning( "Node \"%s\" found in more than one bind pose, with conflicting transforms.", pNode->GetName() );
+                }
+            }
+
+            g_BindPoseMap[pNode] = matNode;
+        }
+    }
+
+    ExportLog::LogMsg( 3, "Created bind pose map with %d nodes.", (INT)g_BindPoseMap.size() );
 }
 
 HRESULT FBXImport::ImportFile( const CHAR* strFileName )
@@ -156,10 +216,11 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
 
     assert( g_pScene != NULL );
 
-    CHAR strTemp[100];
+    CHAR strTemp[200];
     g_pScene->Information().ExporterName = g_strExporterName;
     INT iMajorVersion, iMinorVersion, iRevision;
     KFbxIO::GetCurrentVersion( iMajorVersion, iMinorVersion, iRevision );
+
     sprintf_s( strTemp, "FBX SDK %d.%d.%d", iMajorVersion, iMinorVersion, iRevision );
     g_pScene->Information().DCCNameAndVersion = strTemp;
 
@@ -196,7 +257,11 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
 
     ExportLog::LogMsg( 2, "Parsing scene." );
 
+    FBXTransformer* pTransformer = (FBXTransformer*)g_pScene->GetDCCTransformer();
+    pTransformer->Initialize( g_pFBXScene );
+
 	SetBindPose();
+    g_bBindPoseFixupRequired = FALSE;
 
     assert( g_pFBXScene->GetRootNode() != NULL );
 	D3DXMATRIX matIdentity;
@@ -212,6 +277,12 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
 	{
 		ParseNode( pCameraSettings->GetCameraProducerPerspective()->GetNode(), pRootFrame, matIdentity );
 	}
+
+    if( g_bBindPoseFixupRequired )
+    {
+        ExportLog::LogMsg( 2, "Fixing up frames with updated bind pose." );
+        FixupNode( g_pScene, matIdentity );
+    }
 
     if( g_pScene->Settings().bExportAnimations )
     {

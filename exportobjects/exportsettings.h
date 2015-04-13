@@ -12,6 +12,8 @@
 
 namespace ATG
 {
+    static const DWORD SETTINGS_STRING_LENGTH = 256;
+
     class ExportVariant
     {
     public:
@@ -166,10 +168,13 @@ namespace ATG
         BOOL        bComputeVertexTangentSpace;
         BOOL        bExportBinormal;
         BOOL        bSetBindPoseBeforeSceneParse;
+        INT         iAnimSampleCountPerFrame;
         INT         iAnimPositionExportQuality;
         INT         iAnimOrientationExportQuality;
         BOOL        bRenameAnimationsToFileName;
-        CHAR        strDefaultMaterialName[256];
+        CHAR        strDefaultMaterialName[SETTINGS_STRING_LENGTH];
+        CHAR        strDefaultDiffuseMapTextureName[SETTINGS_STRING_LENGTH];
+        CHAR        strDefaultNormalMapTextureName[SETTINGS_STRING_LENGTH];
         BOOL        bCompressVertexData;
         DWORD       dwNormalCompressedType;
         DWORD       dwTexCoordCompressedType;
@@ -183,8 +188,9 @@ namespace ATG
         FLOAT       fUVAtlasGutter;
         INT         iUVAtlasTextureSize;
         FLOAT       fLightRangeScale;
-        CHAR        strMeshNameDecoration[256];
-        CHAR        strAnimationRootNodeName[256];
+        CHAR        strMeshNameDecoration[SETTINGS_STRING_LENGTH];
+        CHAR        strAnimationRootNodeName[SETTINGS_STRING_LENGTH];
+        BOOL        bOptimizeAnimations;
     };
 
     extern ExportCoreSettings       g_ExportCoreSettings;

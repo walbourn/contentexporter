@@ -17,7 +17,11 @@ VOID ExportStatistics::FinalReport()
     DWORD ExportParseTime = StartSaveTime - StartSceneParseTime;
     DWORD ExportSaveTime = EndExportTime - StartSaveTime;
 
-    ExportLog::LogMsg( 2, "%d vertices, %d triangles, and %d materials exported.", VertsExported, TrisExported, MaterialsExported );
+    ExportLog::LogMsg( 2, "%d poly meshes consisting of %d vertices, %d triangles, and %d materials exported.", MeshesExported, VertsExported, TrisExported, MaterialsExported );
+    if( SubDMeshesProcessed > 0 )
+    {
+        ExportLog::LogMsg( 2, "%d subdivision surface meshes processed, including %d quads and %d triangles.", SubDMeshesProcessed, SubDQuadsProcessed, SubDTrisProcessed );
+    }
     ExportLog::LogMsg( 2, "Export complete in %0.2f seconds; %0.2f seconds for scene parse and %0.2f seconds for file writing.", 
         (FLOAT)ExportTotalTime / 1000.0f, (FLOAT)ExportParseTime / 1000.0f, (FLOAT)ExportSaveTime / 1000.0f );
 }

@@ -8,6 +8,7 @@
 #include "StdAfx.h"
 #include "ParseMesh.h"
 #include "ParseMaterial.h"
+#include "ParseMisc.h"
 
 extern ATG::ExportScene* g_pScene;
 
@@ -84,6 +85,29 @@ public:
     }
 };
 
+VOID CaptureBindPoseMatrix( KFbxNode* pNode, const KFbxMatrix& matBindPose )
+{
+    PoseMap::iterator iter = g_BindPoseMap.find( pNode );
+    if( iter != g_BindPoseMap.end() )
+    {
+        KFbxMatrix matExisting = iter->second;
+        if( matExisting != matBindPose )
+        {
+            // found the bind pose matrix, but it is different than what we prevoiusly encountered
+            g_BindPoseMap[pNode] = matBindPose;
+            g_bBindPoseFixupRequired = TRUE;
+            ExportLog::LogMsg( 4, "Updating bind pose matrix for frame \"%s\"", pNode->GetName() );
+        }
+    }
+    else
+    {
+        // have not encountered this frame in the bind pose yet
+        g_BindPoseMap[pNode] = matBindPose;
+        g_bBindPoseFixupRequired = TRUE;
+        ExportLog::LogMsg( 4, "Adding bind pose matrix for frame \"%s\"", pNode->GetName() );
+    }
+}
+
 BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
 {
     DWORD dwDeformerCount = pMesh->GetDeformerCount( KFbxDeformer::eSKIN );
@@ -112,8 +136,12 @@ BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
 
             DWORD dwBoneIndex = pSkinData->GetBoneCount();
             pSkinData->InfluenceNodes.push_back( pLink );
-
             ExportLog::LogMsg( 4, "Influence %d: %s", dwBoneIndex, pLink->GetName() );
+            
+            KFbxXMatrix matXBindPose;
+            pCluster->GetTransformLinkMatrix( matXBindPose );
+            KFbxMatrix matBindPose = matXBindPose;
+            CaptureBindPoseMatrix( pLink, matBindPose );
 
             INT* pIndices = pCluster->GetControlPointIndices();
             DOUBLE* pWeights = pCluster->GetControlPointWeights();
@@ -128,12 +156,11 @@ BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
     return TRUE;
 }
 
-VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
+VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess, const CHAR* strSuffix )
 {
     if( !g_pScene->Settings().bExportMeshes )
         return;
 
-    KFbxMesh* pFbxMesh = pNode->GetMesh();
     if( pFbxMesh == NULL )
         return;
 
@@ -141,12 +168,25 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
 	if( strName == NULL || strName[0] == '\0' )
 		strName = pParentFrame->GetName().SafeString();
 
-    ExportLog::LogMsg( 2, "Parsing mesh \"%s\"", strName );
-
+    if( strSuffix == NULL )
+    {
+        strSuffix = "";
+    }
 	CHAR strDecoratedName[512];
-	sprintf_s( strDecoratedName, "%s_%s", g_pScene->Settings().strMeshNameDecoration, strName );
+	sprintf_s( strDecoratedName, "%s_%s%s", g_pScene->Settings().strMeshNameDecoration, strName, strSuffix );
 	ExportMesh* pMesh = new ExportMesh( strDecoratedName );
 	pMesh->SetDCCObject( pFbxMesh );
+
+    BOOL bSmoothMesh = FALSE;
+
+    KFbxMesh::MeshSmoothness Smoothness = pFbxMesh->GetMeshSmoothness();
+    if( Smoothness != KFbxMesh::HULL && g_pScene->Settings().bConvertMeshesToSubD )
+    {
+        bSubDProcess = TRUE;
+        bSmoothMesh = TRUE;
+    }
+
+    ExportLog::LogMsg( 2, "Parsing %s mesh \"%s\", renamed to \"%s\"", bSmoothMesh ? "smooth" : "poly", strName, strDecoratedName );
 
     SkinData skindata;
     BOOL bSkinnedMesh = ParseMeshSkinning( pFbxMesh, &skindata );
@@ -220,7 +260,7 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
             DWORD dwMaterialCount = pMaterialSet->GetDirectArray().GetCount();
             for( DWORD i = 0; i < dwMaterialCount; ++i )
             {
-                ExportMaterial* pMaterial = ParseMaterialInLayer( pFbxMesh->GetLayer( dwLayerIndex ), i );
+                ExportMaterial* pMaterial = ParseMaterialInLayer( pFbxMesh, pFbxMesh->GetLayer( dwLayerIndex ), i );
                 MaterialList.push_back( pMaterial );
             }
         }
@@ -253,6 +293,8 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
     
     ExportLog::LogMsg( 4, "%d vertices, %d polygons", dwVertexCount, dwPolyCount );
 
+    DWORD dwNonConformingSubDPolys = 0;
+
     // Loop over polygons.
     for( DWORD dwPolyIndex = 0; dwPolyIndex < dwPolyCount; ++dwPolyIndex )
     {
@@ -262,12 +304,10 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
         DWORD dwTriangleCount = dwPolySize - 2;
         assert( dwTriangleCount > 0 );
 
-        /*
-        for( DWORD i = 0; i < dwPolySize; ++i )
+        if( dwPolySize > 4 )
         {
-            ExportLog::LogMsg( 4, "Poly %d vertex %d: %d", dwPolyIndex, i, pFbxMesh->GetPolygonVertex( dwPolyIndex, i ) );
+            ++dwNonConformingSubDPolys;
         }
-        */
 
         DWORD dwMaterialIndex = 0;
         if( pMaterialSet != NULL )
@@ -417,6 +457,11 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
         }
     }
 
+    if( bSubDProcess )
+    {
+        dwMeshOptimizationFlags |= ExportMesh::FORCE_SUBD_CONVERSION;
+    }
+
     pMesh->Optimize( dwMeshOptimizationFlags );
 
     ExportModel* pModel = new ExportModel( pMesh );
@@ -440,6 +485,7 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
         for( DWORD dwSubset = 0; dwSubset < dwSubsetCount; ++dwSubset )
         {
             ExportSubDPatchSubset* pSubset = pSubDMesh->GetSubset( dwSubset );
+            assert( pSubset != NULL );
             assert( pSubset->iOriginalMeshSubset < (INT)dwMaterialCount );
             ExportMaterial* pMaterial = MaterialList[pSubset->iOriginalMeshSubset];
             CHAR strUniqueSubsetName[100];
@@ -449,10 +495,70 @@ VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame )
         }
     }
 
+    if( bSubDProcess && ( dwNonConformingSubDPolys > 0 ) )
+    {
+        ExportLog::LogWarning( "Encountered %d polygons with 5 or more sides in mesh \"%s\", which were subdivided into quad and triangle patches.  Mesh appearance may have been affected.", dwNonConformingSubDPolys, pMesh->GetName().SafeString() );
+    }
+
     // update statistics
-    g_pScene->Statistics().TrisExported += pMesh->GetIB()->GetIndexCount() / 3;
-    g_pScene->Statistics().VertsExported += pMesh->GetVB()->GetVertexCount();
+    if( pMesh->GetSubDMesh() != NULL )
+    {
+        g_pScene->Statistics().SubDMeshesProcessed++;
+        g_pScene->Statistics().SubDQuadsProcessed += pMesh->GetSubDMesh()->GetQuadPatchCount();
+        g_pScene->Statistics().SubDTrisProcessed += pMesh->GetSubDMesh()->GetTrianglePatchCount();
+    }
+    else
+    {
+        g_pScene->Statistics().TrisExported += pMesh->GetIB()->GetIndexCount() / 3;
+        g_pScene->Statistics().VertsExported += pMesh->GetVB()->GetVertexCount();
+        g_pScene->Statistics().MeshesExported++;
+    }
 
     pParentFrame->AddModel( pModel );
     g_pScene->AddMesh( pMesh );
+}
+
+VOID ParseSubDiv( KFbxSubdiv* pFbxSubD, ExportFrame* pParentFrame )
+{
+    if( !g_pScene->Settings().bExportMeshes )
+        return;
+
+    if( pFbxSubD == NULL )
+    {
+        return;
+    }
+
+    const CHAR* strName = pFbxSubD->GetName();
+    if( strName == NULL || strName[0] == '\0' )
+        strName = pParentFrame->GetName().SafeString();
+
+    DWORD dwLevelCount = (DWORD)pFbxSubD->GetLevelCount();
+    ExportLog::LogMsg( 2, "Parsing subdivision surface \"%s\" with %d levels", strName, dwLevelCount );
+    if( dwLevelCount == 0 )
+    {
+        ExportLog::LogWarning( "Subdivision surface \"%s\" has no levels.", strName );
+        return;
+    }
+
+    KFbxMesh* pLevelMesh = NULL;
+    DWORD dwCurrentLevel = dwLevelCount - 1;
+    while( pLevelMesh == NULL && dwCurrentLevel > 0 )
+    {
+        pLevelMesh = pFbxSubD->GetMesh( dwCurrentLevel );
+        if( pLevelMesh == NULL )
+        {
+            --dwCurrentLevel;
+        }
+    }
+    if( pLevelMesh == NULL )
+    {
+        pLevelMesh = pFbxSubD->GetBaseMesh();
+    }
+
+    assert( pLevelMesh != NULL );
+
+    ExportLog::LogMsg( 3, "Parsing level %d", dwCurrentLevel );
+    CHAR strSuffix[32];
+    sprintf_s( strSuffix, "_level%d", dwCurrentLevel );
+    ParseMesh( pLevelMesh, pParentFrame, TRUE, strSuffix );
 }

@@ -11,9 +11,6 @@
 namespace ATG
 {
 
-    const ExportString ExportMaterial::DefaultDiffuseTextureName( "default.dds" );
-    const ExportString ExportMaterial::DefaultNormalMapTextureName( "default-normalmap.dds" );
-
 ExportMaterial::ExportMaterial()
 : ExportBase( NULL ),
   m_pMaterialDefinition( NULL ),
@@ -112,6 +109,16 @@ VOID ExportMaterial::ReleaseDirect3DDevice()
         g_pd3dDevice = NULL;
         ExportLog::LogMsg( 5, "D3D device released." );
     }
+}
+
+ExportString ExportMaterial::GetDefaultDiffuseMapTextureName()
+{
+    return ExportString( g_ExportCoreSettings.strDefaultDiffuseMapTextureName );
+}
+
+ExportString ExportMaterial::GetDefaultNormalMapTextureName()
+{
+    return ExportString( g_ExportCoreSettings.strDefaultNormalMapTextureName );
 }
 
 };

@@ -53,7 +53,17 @@ namespace ATG
 
 	VOID ProcessTexture( CHAR* strDest, const DWORD dwDestLength, const CHAR* strSrc )
 	{
-        strcpy_s( strDest, dwDestLength, strSrc );
+        DWORD dwLength = (DWORD)strlen( strSrc ) + 1;
+        if( dwLength > dwDestLength )
+        {
+            ExportLog::LogWarning( "Truncating texture path \"%s\".", strSrc );
+            strncpy_s( strDest, dwDestLength, strSrc, dwDestLength - 1 );
+            strDest[dwDestLength - 1] = '\0';
+        }
+        else
+        {
+            strcpy_s( strDest, dwDestLength, strSrc );
+        }
 	}
 
     DWORD CaptureMaterial( ExportMaterial* pMaterial )
@@ -123,6 +133,10 @@ namespace ATG
             CaptureIndexBuffer( pSubDMesh->GetQuadPatchIB() );
             CaptureVertexBuffer( pMesh->GetVB(), &pMesh->GetVertexDeclElement( 0 ), pMesh->GetVertexDeclElementCount() );
             CaptureVertexBuffer( pSubDMesh->GetQuadPatchDataVB(), pSubDMesh->GetPatchDataDecl(), pSubDMesh->GetPatchDataDeclElementCount() );
+            if( pSubDMesh->GetTrianglePatchDataVB() != NULL )
+            {
+                ExportLog::LogWarning( "Subdivision surface mesh \"%s\" contains triangle patches, which are not currently written to SDKMESH files.", pMesh->GetName().SafeString() );
+            }
         }
         else
         {
@@ -258,17 +272,17 @@ namespace ATG
         DWORD dwCurrentIndex = (DWORD)g_FrameArray.size();
 
         DWORD dwModelCount = pRootFrame->GetModelCount();
-        // Only one mesh per frame is supported in the SDKMesh format.
-        if( dwModelCount > 1 )
-        {
-            ExportLog::LogWarning( "Frame \"%s\" has %d meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName(), dwModelCount );
-        }
-        else if ( dwModelCount == 0 )
+        if ( dwModelCount == 0 )
         {
             Frame.Mesh = INVALID_MESH;
         }
         else
         {
+            // Only one mesh per frame is supported in the SDKMesh format.
+            if( dwModelCount > 1 )
+            {
+                ExportLog::LogWarning( "Frame \"%s\" has %d meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName(), dwModelCount );
+            }
             Frame.Mesh = (UINT)g_MeshHeaderArray.size();
             ExportModel* pModel = pRootFrame->GetModelByIndex( 0 );
             CaptureModel( pModel );
@@ -599,9 +613,9 @@ namespace ATG
             }
             else
             {
-                assert( fTime >= StartKey.fTime && fTime < EndKey.fTime );
+                assert( fTime <= EndKey.fTime );
                 FLOAT fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
-                assert( fLerpFactor >= 0 && fLerpFactor < 1.0f );
+                fLerpFactor = min( max( 0.0f, fLerpFactor ), 1.0f );
                 D3DXVec3Lerp( &pDestKeys[i].Translation, &StartKey.Position, &EndKey.Position, fLerpFactor );
             }
             fTime += fKeyInterval;
@@ -642,9 +656,9 @@ namespace ATG
             }
             else
             {
-                assert( fTime >= StartKey.fTime && fTime < EndKey.fTime );
+                assert( fTime <= EndKey.fTime );
                 FLOAT fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
-                assert( fLerpFactor >= 0 && fLerpFactor < 1.0f );
+                fLerpFactor = min( max( 0.0f, fLerpFactor ), 1.0f );
                 D3DXVec4Lerp( &pDestKeys[i].Orientation, (D3DXVECTOR4*)&StartKey.Orientation, (D3DXVECTOR4*)&EndKey.Orientation, fLerpFactor );
             }
             fTime += fKeyInterval;
@@ -685,9 +699,9 @@ namespace ATG
             }
             else
             {
-                assert( fTime >= StartKey.fTime && fTime < EndKey.fTime );
+                assert( fTime <= EndKey.fTime );
                 FLOAT fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
-                assert( fLerpFactor >= 0 && fLerpFactor < 1.0f );
+                fLerpFactor = min( max( 0.0f, fLerpFactor ), 1.0f );
                 D3DXVec3Lerp( &pDestKeys[i].Scaling, &StartKey.Scale, &EndKey.Scale, fLerpFactor );
             }
             fTime += fKeyInterval;

@@ -29,7 +29,7 @@ VOID FixupGenericMaterial( ExportMaterial* pMaterial )
     {
         ExportLog::LogWarning( "Material \"%s\" has no diffuse texture.  Assigning a default diffuse texture.", pMaterial->GetName().SafeString() );
         OutputParam.Name = "DiffuseTexture";
-        OutputParam.ValueString = ExportMaterial::DefaultDiffuseTextureName;
+        OutputParam.ValueString = ExportMaterial::GetDefaultDiffuseMapTextureName();
         pMaterial->AddParameter( OutputParam );
     }
 
@@ -38,7 +38,7 @@ VOID FixupGenericMaterial( ExportMaterial* pMaterial )
     {
         ExportLog::LogWarning( "Material \"%s\" has no normal map texture.  Assigning a default normal map texture.", pMaterial->GetName().SafeString() );
         OutputParam.Name = "NormalMapTexture";
-        OutputParam.ValueString = ExportMaterial::DefaultNormalMapTextureName;
+        OutputParam.ValueString = ExportMaterial::GetDefaultNormalMapTextureName();
         pMaterial->AddParameter( OutputParam );
     }
 
@@ -120,17 +120,23 @@ BOOL ExtractTextures( KFbxProperty Property, const CHAR* strParameterName, Expor
     return bResult;
 }
 
-ExportMaterial* ParseMaterialInLayer( KFbxLayer* pLayer, DWORD dwMaterialIndex )
+ExportMaterial* ParseMaterialInLayer( KFbxMesh* pMesh, KFbxLayer* pLayer, DWORD dwMaterialIndex )
 {
     KFbxLayerElementMaterial* pMaterials = pLayer->GetMaterials();
     assert( dwMaterialIndex < (DWORD)pMaterials->GetDirectArray().GetCount() );
-    KFbxSurfaceMaterial* pFbxMaterial = pMaterials->GetDirectArray().GetAt( dwMaterialIndex );
+    UNUSED( pMaterials );
+
+    KFbxSurfaceMaterial* pFbxMaterial = pMesh->GetNode()->GetMaterial( (INT) dwMaterialIndex );
+    assert( pFbxMaterial != NULL );
 
     ExportMaterial* pExistingMaterial = g_pScene->FindMaterial( pFbxMaterial );
     if( pExistingMaterial != NULL )
+    {
+        ExportLog::LogMsg( 4, "Found existing material \"%s\".", pFbxMaterial->GetName() );
         return pExistingMaterial;
+    }
 
-    ExportLog::LogMsg( 4, "Parsing material \"%s\".", pFbxMaterial->GetName() );
+    ExportLog::LogMsg( 2, "Parsing material \"%s\".", pFbxMaterial->GetName() );
 
     BOOL bRenameMaterial = FALSE;
     ExportString MaterialName( pFbxMaterial->GetName() );

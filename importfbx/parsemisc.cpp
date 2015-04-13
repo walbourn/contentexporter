@@ -10,7 +10,6 @@
 #include "ParseMesh.h"
 
 extern ATG::ExportScene* g_pScene;
-extern KFbxPose* g_pBindPose;
 
 D3DXMATRIX ConvertMatrix( const KFbxMatrix& matFbx )
 {
@@ -29,36 +28,24 @@ inline BOOL IsEqual( FLOAT A, FLOAT B )
     return fabs( A - B ) <= 1e-5f;
 }
 
-D3DXMATRIX ParseTransform( KFbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX& matParentWorld )
+D3DXMATRIX ParseTransform( KFbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX& matParentWorld, const BOOL bWarnings = TRUE )
 {
 	D3DXMATRIX matWorld;
 	D3DXMATRIX matLocal;
 	BOOL bProcessDefaultTransform = TRUE;
 
-	if( g_pBindPose != NULL )
+	if( !g_BindPoseMap.empty() )
 	{
-		INT iPoseIndex = g_pBindPose->Find( pNode );
-		if( iPoseIndex != -1 )
-		{
-			KFbxMatrix PoseMatrix = g_pBindPose->GetMatrix( iPoseIndex );
-			if( g_pBindPose->IsLocalMatrix( iPoseIndex ) )
-			{
-				matLocal = ConvertMatrix( PoseMatrix );
-				D3DXMatrixMultiply( &matWorld, &matParentWorld, &matLocal );
-			}
-			else
-			{
-				matWorld = ConvertMatrix( PoseMatrix );
-				D3DXMATRIX matInvParentWorld;
-				D3DXMatrixInverse( &matInvParentWorld, NULL, &matParentWorld );
-				D3DXMatrixMultiply( &matLocal, &matWorld, &matInvParentWorld );
-			}
-			bProcessDefaultTransform = FALSE;
-		}
-		else
-		{
-			//ExportLog::LogWarning( "Node \"%s\" is not included in the bind pose.", pNode->GetName() );
-		}
+        PoseMap::iterator iter = g_BindPoseMap.find( pNode );
+        if( iter != g_BindPoseMap.end() )
+        {
+            KFbxMatrix PoseMatrix = iter->second;
+            matWorld = ConvertMatrix( PoseMatrix );
+            D3DXMATRIX matInvParentWorld;
+            D3DXMatrixInverse( &matInvParentWorld, NULL, &matParentWorld );
+            D3DXMatrixMultiply( &matLocal, &matWorld, &matInvParentWorld );
+            bProcessDefaultTransform = FALSE;
+        }
 	}
 
 	if( bProcessDefaultTransform )
@@ -76,15 +63,16 @@ D3DXMATRIX ParseTransform( KFbxNode* pNode, ExportFrame* pFrame, const D3DXMATRI
     pFrame->Transform().InitializeFromFloats( (FLOAT*)&matLocal );
 
     const D3DXVECTOR3& Scale = pFrame->Transform().Scale();
-    if( !IsEqual( Scale.x, Scale.y ) ||
-        !IsEqual( Scale.y, Scale.z ) ||
-        !IsEqual( Scale.x, Scale.z ) )
+    if( bWarnings && 
+        ( !IsEqual( Scale.x, Scale.y ) ||
+          !IsEqual( Scale.y, Scale.z ) ||
+          !IsEqual( Scale.x, Scale.z ) ) )
     {
         ExportLog::LogWarning( "Non-uniform scale found on node \"%s\".", pFrame->GetName().SafeString() );
     }
 
     const ExportTransform& Transform = pFrame->Transform();
-    ExportLog::LogMsg( 4, "Node transform for \"%s\": Translation <%0.3f %0.3f %0.3f> Rotation <%0.3f %0.3f %0.3f %0.3f> Scale <%0.3f %0.3f %0.3f>",
+    ExportLog::LogMsg( 5, "Node transform for \"%s\": Translation <%0.3f %0.3f %0.3f> Rotation <%0.3f %0.3f %0.3f %0.3f> Scale <%0.3f %0.3f %0.3f>",
         pFrame->GetName().SafeString(),
         Transform.Position().x,
         Transform.Position().y,
@@ -103,14 +91,21 @@ D3DXMATRIX ParseTransform( KFbxNode* pNode, ExportFrame* pFrame, const D3DXMATRI
 
 VOID ParseNode( KFbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& matParentWorld )
 {
-    ExportLog::LogMsg( 3, "Parsing node \"%s\".", pNode->GetName() );
+    ExportLog::LogMsg( 2, "Parsing node \"%s\".", pNode->GetName() );
 
     ExportFrame* pFrame = new ExportFrame( pNode->GetName() );
     pFrame->SetDCCObject( pNode );
     D3DXMATRIX matWorld = ParseTransform( pNode, pFrame, matParentWorld );
     pParentFrame->AddChild( pFrame );
 
-    ParseMesh( pNode, pFrame );
+    if( pNode->GetSubdiv() != NULL )
+    {
+        ParseSubDiv( pNode->GetSubdiv(), pFrame );
+    }
+    else if( pNode->GetMesh() != NULL )
+    {
+        ParseMesh( pNode->GetMesh(), pFrame, FALSE );
+    }
     ParseCamera( pNode->GetCamera(), pFrame );
     ParseLight( pNode->GetLight(), pFrame );
 
@@ -118,6 +113,28 @@ VOID ParseNode( KFbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& ma
     for( DWORD i = 0; i < dwChildCount; ++i )
     {
         ParseNode( pNode->GetChild( i ), pFrame, matWorld );
+    }
+}
+
+VOID FixupNode( ExportFrame* pFrame, const D3DXMATRIX& matParentWorld )
+{
+    KFbxNode* pNode = (KFbxNode*)pFrame->GetDCCObject();
+
+    D3DXMATRIX matWorld;
+    if( pNode != NULL )
+    {
+        ExportLog::LogMsg( 4, "Fixing up frame \"%s\".", pFrame->GetName().SafeString() );
+        matWorld = ParseTransform( pNode, pFrame, matParentWorld, FALSE );
+    }
+    else
+    {
+        matWorld = matParentWorld;
+    }
+
+    DWORD dwChildCount = pFrame->GetChildCount();
+    for( DWORD i = 0; i < dwChildCount; ++i )
+    {
+        FixupNode( pFrame->GetChildByIndex( i ), matWorld );
     }
 }
 

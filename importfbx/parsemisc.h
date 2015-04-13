@@ -16,3 +16,10 @@ VOID ParseNode( KFbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& ma
 
 VOID ParseCamera( KFbxCamera* pFbxCamera, ExportFrame* pParentFrame );
 VOID ParseLight( KFbxLight* pFbxLight, ExportFrame* pParentFrame );
+
+VOID FixupNode( ExportFrame* pFrame, const D3DXMATRIX& matParentWorld );
+
+typedef stdext::hash_map<KFbxNode*,KFbxMatrix> PoseMap;
+extern PoseMap g_BindPoseMap;
+extern BOOL g_bBindPoseFixupRequired;
+

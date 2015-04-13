@@ -114,9 +114,9 @@ namespace ATG
         }
 
         // Skip processing if it's the default texture.
-        if( pParameter->ValueString == ExportMaterial::DefaultDiffuseTextureName )
+        if( pParameter->ValueString == ExportMaterial::GetDefaultDiffuseMapTextureName() )
             return;
-        if( pParameter->ValueString == ExportMaterial::DefaultNormalMapTextureName )
+        if( pParameter->ValueString == ExportMaterial::GetDefaultNormalMapTextureName() )
             return;
 
         // Look for our texture in the location specified by the content file.
@@ -233,11 +233,11 @@ namespace ATG
 
         if( CompressedFormat != D3DFMT_A8R8G8B8 )
         {
-            ExportLog::LogMsg( 4, "Compressing and converting file %s to file %s.", strSourceFileName, strDestFileName );
+            ExportLog::LogMsg( 4, "Compressing and converting file \"%s\" to file \"%s\".", strSourceFileName, strDestFileName );
         }
         else
         {
-            ExportLog::LogMsg( 4, "Converting file %s to file %s.", strSourceFileName, strDestFileName );
+            ExportLog::LogMsg( 4, "Converting file \"%s\" to file \"%s\".", strSourceFileName, strDestFileName );
         }
 
         DWORD dwMipCount = 1;
@@ -265,7 +265,7 @@ namespace ATG
 
         if( FAILED( hr ) || pTexture == NULL )
         {
-            ExportLog::LogError( "Could not load texture %s.", strSourceFileName );
+            ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
             return;
         }
 
@@ -289,7 +289,7 @@ namespace ATG
     {
         assert( pd3dDevice != NULL );
 
-        ExportLog::LogMsg( 4, "Converting bump map file %s to normal map file %s.", strSourceFileName, strDestFileName );
+        ExportLog::LogMsg( 4, "Converting bump map file \"%s\" to normal map file %s.", strSourceFileName, strDestFileName );
 
         DWORD dwMipCount = 1;
         if( g_pScene->Settings().bGenerateTextureMipMaps )
@@ -316,7 +316,7 @@ namespace ATG
 
         if( pTexture == NULL )
         {
-            ExportLog::LogError( "Could not load texture %s.", strSourceFileName );
+            ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
         }
 
         D3DSURFACE_DESC SurfDesc;
@@ -368,7 +368,7 @@ namespace ATG
 
             if( ExportManifest::FileExists( File.strIntermediateFileName.SafeString() ) && !g_pScene->Settings().bForceTextureOverwrite )
             {
-                ExportLog::LogMsg( 4, "Destination texture file %s already exists.", File.strIntermediateFileName );
+                ExportLog::LogMsg( 4, "Destination texture file \"%s\" already exists.", File.strIntermediateFileName );
                 continue;
             }
 
@@ -376,7 +376,7 @@ namespace ATG
             {
             case ETO_NOTHING:
                 // Copy file to intermediate location.
-                ExportLog::LogMsg( 4, "Copying texture '%s' to '%s'...", File.strSourceFileName, File.strIntermediateFileName );
+                ExportLog::LogMsg( 4, "Copying texture \"%s\" to \"%s\"...", File.strSourceFileName, File.strIntermediateFileName );
                 CopyFile( File.strSourceFileName, File.strIntermediateFileName, FALSE );
                 ExportLog::LogMsg( 4, "Texture copy complete." );
                 break;

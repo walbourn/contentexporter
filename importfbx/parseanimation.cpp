@@ -65,6 +65,7 @@ D3DXMATRIX ConvertMatrix( const KFbxXMatrix& matrix )
     return matResult;
 }
 
+
 VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, KFbxXMatrix& matFBXGlobal, FLOAT fTime )
 {
     D3DXMATRIX matGlobal = ConvertMatrix( matFBXGlobal );
@@ -81,20 +82,13 @@ VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, KFbxXMatr
     D3DXMATRIX matLocalFinal;
     g_pScene->GetDCCTransformer()->TransformMatrix( &matLocalFinal, &matLocal );
 
-    D3DXVECTOR3 vPosition;
-    vPosition.x = matLocalFinal._41;
-    vPosition.y = matLocalFinal._42;
-    vPosition.z = matLocalFinal._43;
+    XMVECTOR vScale;
+    XMVECTOR qRotation;
+    XMVECTOR vTranslation;
 
-    D3DXQUATERNION qRotation;
-    D3DXQuaternionRotationMatrix( &qRotation, &matLocalFinal );
+    XMMatrixDecompose( &vScale, &qRotation, &vTranslation, (XMMATRIX)matLocalFinal );
 
-    D3DXVECTOR3 vScale;
-    vScale.x = D3DXVec3Length( (D3DXVECTOR3*)&matLocalFinal._11 );
-    vScale.y = D3DXVec3Length( (D3DXVECTOR3*)&matLocalFinal._21 );
-    vScale.z = D3DXVec3Length( (D3DXVECTOR3*)&matLocalFinal._31 );
-
-    asn.pTrack->TransformTrack.AddKey( fTime, vPosition, qRotation, vScale );
+    asn.pTrack->TransformTrack.AddKey( fTime, *(D3DXVECTOR3*)&vTranslation, *(D3DXQUATERNION*)&qRotation, *(D3DXVECTOR3*)&vScale );
 }
 
 VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim )
@@ -150,7 +144,8 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
     FLOAT fEndTime = 1.0f;
     //FLOAT fFrameTime = 1.0f / (FLOAT)KTime::GetFrameRate( TimeMode );
     FLOAT fFrameTime = (FLOAT)FrameTime.GetSecondDouble();
-    FLOAT fSampleTime = fFrameTime * 0.25f;
+    FLOAT fSampleTime = fFrameTime / (FLOAT)g_pScene->Settings().iAnimSampleCountPerFrame;
+    assert( fSampleTime > 0 );
 
     if( pTakeInfo != NULL )
     {
@@ -182,6 +177,7 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
         ExportLog::LogMsg( 4, "Track: %s", strTrackName );
         ExportAnimationTrack* pTrack = new ExportAnimationTrack();
         pTrack->SetName( strTrackName );
+        pTrack->TransformTrack.pSourceFrame = g_pScene->FindFrameByDCCObject( scanlist[i].pNode );
         pAnim->AddTrack( pTrack );
         scanlist[i].pTrack = pTrack;
     }
@@ -194,6 +190,9 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
 VOID ParseAnimation( KFbxScene* pFbxScene )
 {
     assert( pFbxScene != NULL );
+
+    // set animation quality settings
+    ExportAnimation::SetAnimationExportQuality( g_pScene->Settings().iAnimPositionExportQuality, g_pScene->Settings().iAnimOrientationExportQuality, 50 );
 
     KArrayTemplate<KString*> TakeNameArray;
     pFbxScene->FillTakeNameArray( TakeNameArray );

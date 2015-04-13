@@ -16,6 +16,8 @@ namespace ATG
 
 extern IDirect3DDevice9* g_pd3dDevice;
 
+INT GetElementSizeFromDeclType(DWORD Type);
+
 ExportMeshTriangleAllocator g_MeshTriangleAllocator;
 
 ExportMeshBase::ExportMeshBase( ExportString name )
@@ -70,6 +72,10 @@ VOID ExportMesh::ByteSwap()
         m_pIB->ByteSwap();
     if( m_pVB != NULL && m_VertexElements.size() > 0 )
         m_pVB->ByteSwap( &m_VertexElements[0], GetVertexDeclElementCount() );
+    if( m_pSubDMesh != NULL )
+    {
+        m_pSubDMesh->ByteSwap();
+    }
 }
 
 VOID ExportVB::Allocate()
@@ -90,7 +96,7 @@ BYTE* ExportVB::GetVertex( UINT uIndex )
     return m_pVertexData + ( uIndex * m_uVertexSizeBytes );
 }
 
-VOID ExportVB::ByteSwap( D3DVERTEXELEMENT9* pVertexElements, DWORD dwVertexElementCount )
+VOID ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD dwVertexElementCount )
 {
     for( DWORD dwVertexIndex = 0; dwVertexIndex < m_uVertexCount; dwVertexIndex++ )
     {
@@ -384,7 +390,7 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
         m_TriangleToPolygonMapping.push_back( pTriangle->PolygonIndex );
         pCurrentIBSubset->IncrementIndexCount( 3 );
     }
-    ExportLog::LogMsg( 4, "Triangle list mesh: %d verts, %d indices, %d subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
+    ExportLog::LogMsg( 3, "Triangle list mesh: %d verts, %d indices, %d subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
     if( VertexData.size() > 16777215 )
     {
         ExportLog::LogError( "Mesh \"%s\" has more than 16777215 vertices.  Index buffer is invalid.", GetName().SafeString() );
@@ -472,10 +478,29 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
     ClearRawTriangles();
     ComputeBounds();
 
-    ExportLog::LogMsg( 4, "Vertex size: %d bytes; VB size: %d bytes", m_pVB->GetVertexSize(), m_pVB->GetVertexDataSize() );
+    ExportLog::LogMsg( 3, "Vertex size: %d bytes; VB size: %d bytes", m_pVB->GetVertexSize(), m_pVB->GetVertexDataSize() );
+
+    if( ExportLog::GetLogLevel() >= 4 )
+    {
+        DWORD dwDeclSize = GetVertexDeclElementCount();
+        
+        static const CHAR* strDeclUsages[] = { "Position", "BlendWeight", "BlendIndices", "Normal", "PSize", "TexCoord", "Tangent", "Binormal", "TessFactor", "PositionT", "Color", "Fog", "Depth", "Sample" };
+        C_ASSERT( ARRAYSIZE(strDeclUsages) == ( MAXD3DDECLUSAGE + 1 ) );
+
+        static const CHAR* strDeclTypes[] = { "Float1", "Float2", "Float3", "Float4", "D3DColor", "UByte", "Short2", "Short4", "UByte4N", "Short2N", "Short4N", "UShort2N", "UShort4N", "UDec3", "Dec3N", "Float16_2", "Float16_4", "Unused" };
+        C_ASSERT( ARRAYSIZE(strDeclTypes) == ( MAXD3DDECLTYPE + 1 ) );
+
+        for( DWORD i = 0; i < dwDeclSize; ++i )
+        {
+            const D3DVERTEXELEMENT9& Element = GetVertexDeclElement( i );
+
+            ExportLog::LogMsg( 4, "Element %2d Stream %2d Offset %2d: %12s.%-2d Type %s (%d bytes)", i, Element.Stream, Element.Offset, strDeclUsages[Element.Usage], Element.UsageIndex, strDeclTypes[Element.Type], GetElementSizeFromDeclType( Element.Type ) );
+        }
+    }
+
     ExportLog::LogMsg( 4, "DCC stored %d verts; final vertex count is %d due to duplication.", m_uDCCVertexCount, m_pVB->GetVertexCount() );
 
-    if( g_pScene->Settings().bConvertMeshesToSubD )
+    if( dwFlags & FORCE_SUBD_CONVERSION )
     {
         ExportLog::LogMsg( 2, "Converting mesh \"%s\" to a subdivision surface mesh.", GetName().SafeString() );
         m_pSubDMesh = new ExportSubDProcessMesh();

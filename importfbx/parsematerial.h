@@ -11,4 +11,4 @@
 
 using namespace ATG;
 
-ExportMaterial* ParseMaterialInLayer( KFbxLayer* pLayer, DWORD dwMaterialIndex );
+ExportMaterial* ParseMaterialInLayer( KFbxMesh* pMesh, KFbxLayer* pLayer, DWORD dwMaterialIndex );

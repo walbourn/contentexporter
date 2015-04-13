@@ -11,4 +11,5 @@
 
 using namespace ATG;
 
-VOID ParseMesh( KFbxNode* pNode, ExportFrame* pParentFrame );
+VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess = FALSE, const CHAR* strSuffix = NULL );
+VOID ParseSubDiv( KFbxSubdiv* pFbxSubD, ExportFrame* pParentFrame );

@@ -41,7 +41,7 @@ namespace ATG
         if( m_pLinkedCurrentValue != NULL )
         {
             if( m_DefaultValue.m_Type == ExportVariant::VT_STRING )
-                strcpy_s( (CHAR*)m_pLinkedCurrentValue, 256, m_DefaultValue.m_strValue );
+                strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, m_DefaultValue.m_strValue );
             else
                 *(INT*)m_pLinkedCurrentValue = m_DefaultValue.m_iValue;
         }
@@ -144,7 +144,7 @@ namespace ATG
         assert( m_Type == CT_STRING );
         if( m_pLinkedCurrentValue != NULL )
         {
-            strcpy_s( (CHAR*)m_pLinkedCurrentValue, 256, strValue );
+            strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, strValue );
         }
         else
         {
@@ -618,11 +618,15 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", TRUE, &bTextureCompression );
         g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", FALSE, &bGenerateTextureMipMaps );
         g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", FALSE, &bForceTextureOverwrite );
+        g_SettingsManager.AddString( pCategoryMaterials, "Default Diffuse Map Texture Filename", "defaultdiffusemap", "default.dds", strDefaultDiffuseMapTextureName );
+        g_SettingsManager.AddString( pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "default-normalmap.dds", strDefaultNormalMapTextureName );
         pCategoryMaterials->ReverseChildOrder();
 
         ExportSettingsEntry* pCategoryAnimation = g_SettingsManager.AddRootCategory( "Animation" );
         g_SettingsManager.AddBool( pCategoryAnimation, "Export Animations", "exportanimations", TRUE, &bExportAnimations );
+        g_SettingsManager.AddBool( pCategoryAnimation, "Optimize Animations", "optimizeanimations", TRUE, &bOptimizeAnimations );
         g_SettingsManager.AddBool( pCategoryAnimation, "Rename Animations To Match Output File Name", "renameanimations", TRUE, &bRenameAnimationsToFileName );
+        g_SettingsManager.AddIntBounded( pCategoryAnimation, "Animation Baking Sample Count Per Frame", "animsamplecount", 1, 1, 10, &iAnimSampleCountPerFrame );
         g_SettingsManager.AddIntBounded( pCategoryAnimation, "Position Curve Quality", "positioncurvequality", 50, 0, 100, &iAnimPositionExportQuality );
         g_SettingsManager.AddIntBounded( pCategoryAnimation, "Orientation Curve Quality", "orientationcurvequality", 50, 0, 100, &iAnimOrientationExportQuality );
         g_SettingsManager.AddString( pCategoryAnimation, "Animation Root Node Name (default includes all nodes)", "animationrootnode", "", strAnimationRootNodeName );

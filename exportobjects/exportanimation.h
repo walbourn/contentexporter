@@ -75,9 +75,9 @@ protected:
     VOID OptimizeOrientationKeys();
     VOID OptimizeScaleKeys();
 
-    BOOL PositionChangedFromLastKey( const ExportAnimationPositionKey& pk );
-    BOOL OrientationChangedFromLastKey( const ExportAnimationOrientationKey& ok );
-    BOOL ScaleChangedFromLastKey( const ExportAnimationScaleKey& sk );
+    BOOL PositionChangedFromLastTwoKeys( const ExportAnimationPositionKey& pk );
+    BOOL OrientationChangedFromLastTwoKeys( const ExportAnimationOrientationKey& ok );
+    BOOL ScaleChangedFromLastTwoKeys( const ExportAnimationScaleKey& sk );
 public:
     PositionKeyList         PositionKeys;
     OrientationKeyList      OrientationKeys;

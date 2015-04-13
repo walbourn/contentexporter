@@ -44,6 +44,10 @@ public:
     UINT        MaterialsExported;
     UINT        VertexBytesExported;
     UINT        IndexBytesExported;
+    UINT        MeshesExported;
+    UINT        SubDMeshesProcessed;
+    UINT        SubDQuadsProcessed;
+    UINT        SubDTrisProcessed;
     VOID FinalReport();
 };
 

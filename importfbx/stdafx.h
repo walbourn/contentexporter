@@ -13,13 +13,11 @@
 #pragma warning( disable: 4505 )
 #pragma warning( disable: 4100 )
 #pragma warning( disable: 4996 )
-#pragma warning( disable: 4296 )
 
 #ifndef _SECURE_SCL
 #define _SECURE_SCL 0
 #endif
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
@@ -55,3 +53,6 @@
 #define CONTENT_EXPORTER_TITLE CONTENT_EXPORTER_GLOBAL_TITLE " for FBX"
 extern CHAR g_strExporterName[100];
 
+#ifndef UNUSED
+#define UNUSED(x) (x)
+#endif

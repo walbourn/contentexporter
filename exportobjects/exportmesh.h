@@ -38,7 +38,7 @@ public:
     BYTE* GetVertexData() { return m_pVertexData; }
     const BYTE* GetVertexData() const { return m_pVertexData; }
 
-    VOID ByteSwap( D3DVERTEXELEMENT9* pVertexElements, DWORD dwVertexElementCount );
+    VOID ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD dwVertexElementCount );
 protected:
     UINT        m_uVertexSizeBytes;
     UINT        m_uVertexCount;
@@ -293,7 +293,8 @@ public:
     enum OptimizationFlags
     {
         COMPRESS_VERTEX_DATA = 1,
-        FLIP_TRIANGLES = 2
+        FLIP_TRIANGLES = 2,
+        FORCE_SUBD_CONVERSION = 4,
     };
 
     ExportMesh( ExportString name );
