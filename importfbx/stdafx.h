@@ -1,23 +1,21 @@
 //-------------------------------------------------------------------------------------
-//  stdafx.h
+// stdafx.h
 //
-//  Precompiled header for the ImportFBX project.
+// Precompiled header for the ImportFBX project.
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 #pragma warning( disable: 4100 4296 4505 4512 4996 )
-
-#ifndef _SECURE_SCL
-#define _SECURE_SCL 0
-#endif
-
-#ifndef _ITERATOR_DEBUG_LEVEL
-#define _ITERATOR_DEBUG_LEVEL 0
-#endif
 
 #include <stdio.h>
 #include <tchar.h>

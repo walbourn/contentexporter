@@ -1,19 +1,19 @@
 //-------------------------------------------------------------------------------------
-//  ExportBase.h
+// ExportBase.h
 //
-//  Base functionality for all of the export objects.
+// Base functionality for all of the export objects.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
-#ifndef EXPORTBASE_H
-#define EXPORTBASE_H
-
-#if _SECURE_SCL != 0
-#error SECURE_SCL is not properly set.
-#endif
 
 #include "ExportString.h"
 
@@ -35,7 +35,6 @@ public:
     const D3DXVECTOR3& Scale() const { return m_Scale; }
 protected:
     BOOL DecomposeMatrix();
-    VOID ComposeMatrix();
 protected:
     D3DXMATRIX      m_Matrix;
     D3DXVECTOR3     m_Position;
@@ -94,5 +93,3 @@ protected:
 };
 
 };
-
-#endif

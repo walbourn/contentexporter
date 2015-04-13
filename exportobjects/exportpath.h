@@ -1,14 +1,20 @@
 //-------------------------------------------------------------------------------------
-//  ExportPath.h
+// ExportPath.h
 //
-//  The ExportPath class manages a path string, representing a relative or absolute
-//  path.  Common operations such as replacing the filename, replacing the extension,
-//  and appending paths are supported.
+// The ExportPath class manages a path string, representing a relative or absolute
+// path.  Common operations such as replacing the filename, replacing the extension,
+// and appending paths are supported.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 class ExportPath
@@ -40,13 +46,13 @@ public:
     BOOL HasFileName() const;
     const CHAR* GetExtension() const;
     BOOL IsAbsolutePath() const;
-	BOOL IsEmpty() const { return m_strPath[0] == '\0'; }
+    BOOL IsEmpty() const { return m_strPath[0] == '\0'; }
 
     VOID ChangeExtension( const CHAR* strExtension );
     VOID ChangeFileName( const CHAR* strFileName );
     VOID ChangeFileName( const ExportPath& OtherPath );
-	VOID ChangeFileNameWithExtension( const CHAR* strFileName );
-	VOID ChangeFileNameWithExtension( const ExportPath& OtherPath );
+    VOID ChangeFileNameWithExtension( const CHAR* strFileName );
+    VOID ChangeFileNameWithExtension( const ExportPath& OtherPath );
     VOID Append( const ExportPath& OtherPath );
     VOID AppendToFileName( const CHAR* strText );
     VOID TrimOffFileName();

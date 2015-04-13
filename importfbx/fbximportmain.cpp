@@ -1,8 +1,15 @@
 //-------------------------------------------------------------------------------------
-//  FBXImportMain.cpp
+// FBXImportMain.cpp
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "StdAfx.h"
@@ -12,11 +19,11 @@
 
 using namespace ATG;
 
-KFbxSdkManager* g_pSDKManager = NULL;
-KFbxImporter* g_pImporter = NULL;
-KFbxScene* g_pFBXScene = NULL;
+FbxManager* g_pSDKManager = NULL;
+FbxImporter* g_pImporter = NULL;
+FbxScene* g_pFBXScene = NULL;
 
-std::vector<KFbxPose*> g_BindPoses;
+std::vector<FbxPose*> g_BindPoses;
 PoseMap g_BindPoseMap;
 BOOL g_bBindPoseFixupRequired = FALSE;
 
@@ -24,18 +31,18 @@ extern ATG::ExportScene* g_pScene;
 
 extern ExportPath g_CurrentOutputFileName;
 
-VOID FBXTransformer::Initialize( KFbxScene* pScene )
+VOID FBXTransformer::Initialize( FbxScene* pScene )
 {
     ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
-    KFbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
+    auto SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
 
     // convert scene to Maya Y up coordinate system
-    KFbxAxisSystem::MayaYUp.ConvertScene( pScene );
+    FbxAxisSystem::MayaYUp.ConvertScene( pScene );
 
     INT iUpAxisSign;
-    KFbxAxisSystem::eUpVector UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
+    auto UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
 
-    if( UpVector == KFbxAxisSystem::ZAxis )
+    if( UpVector == FbxAxisSystem::eZAxis )
     {
         ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
         m_bMaxConversion = TRUE;
@@ -50,42 +57,42 @@ VOID FBXTransformer::Initialize( KFbxScene* pScene )
 
 VOID FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST
 {
-	D3DXMATRIX SrcMatrix;
-	if( pSrcMatrix == pDestMatrix )
-	{
-		memcpy( &SrcMatrix, pSrcMatrix, sizeof( D3DXMATRIX ) );
-		pSrcMatrix = &SrcMatrix;
-	}
-	memcpy( pDestMatrix, pSrcMatrix, sizeof( D3DXMATRIX ) );
+    D3DXMATRIX SrcMatrix;
+    if( pSrcMatrix == pDestMatrix )
+    {
+        memcpy( &SrcMatrix, pSrcMatrix, sizeof( D3DXMATRIX ) );
+        pSrcMatrix = &SrcMatrix;
+    }
+    memcpy( pDestMatrix, pSrcMatrix, sizeof( D3DXMATRIX ) );
 
-	// What we're doing here is premultiplying by a left hand -> right hand matrix,
-	// and then postmultiplying by a right hand -> left hand matrix.
-	// The end result of those multiplications is that the third row and the third
-	// column are negated (so element _33 is left alone).  So instead of actually
-	// carrying out the multiplication, we just negate the 6 matrix elements.
+    // What we're doing here is premultiplying by a left hand -> right hand matrix,
+    // and then postmultiplying by a right hand -> left hand matrix.
+    // The end result of those multiplications is that the third row and the third
+    // column are negated (so element _33 is left alone).  So instead of actually
+    // carrying out the multiplication, we just negate the 6 matrix elements.
 
-	pDestMatrix->_13 = -pSrcMatrix->_13;
-	pDestMatrix->_23 = -pSrcMatrix->_23;
-	pDestMatrix->_43 = -pSrcMatrix->_43;
+    pDestMatrix->_13 = -pSrcMatrix->_13;
+    pDestMatrix->_23 = -pSrcMatrix->_23;
+    pDestMatrix->_43 = -pSrcMatrix->_43;
 
-	pDestMatrix->_31 = -pSrcMatrix->_31;
-	pDestMatrix->_32 = -pSrcMatrix->_32;
-	pDestMatrix->_34 = -pSrcMatrix->_34;
+    pDestMatrix->_31 = -pSrcMatrix->_31;
+    pDestMatrix->_32 = -pSrcMatrix->_32;
+    pDestMatrix->_34 = -pSrcMatrix->_34;
 
-	// Apply the global unit scale to the translation components of the matrix.
-	pDestMatrix->_41 *= m_fUnitScale;
-	pDestMatrix->_42 *= m_fUnitScale;
-	pDestMatrix->_43 *= m_fUnitScale;
+    // Apply the global unit scale to the translation components of the matrix.
+    pDestMatrix->_41 *= m_fUnitScale;
+    pDestMatrix->_42 *= m_fUnitScale;
+    pDestMatrix->_43 *= m_fUnitScale;
 }
 
 VOID FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVECTOR3* pSrcPosition ) CONST
 {
-	D3DXVECTOR3 SrcVector;
-	if( pSrcPosition == pDestPosition )
-	{
-		SrcVector = *pSrcPosition;
-		pSrcPosition = &SrcVector;
-	}
+    D3DXVECTOR3 SrcVector;
+    if( pSrcPosition == pDestPosition )
+    {
+        SrcVector = *pSrcPosition;
+        pSrcPosition = &SrcVector;
+    }
 
     if( m_bMaxConversion )
     {
@@ -103,12 +110,12 @@ VOID FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVE
 
 VOID FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST
 {
-	D3DXVECTOR3 SrcVector;
-	if( pSrcDirection == pDestDirection )
-	{
-		SrcVector = *pSrcDirection;
-		pSrcDirection = &SrcVector;
-	}
+    D3DXVECTOR3 SrcVector;
+    if( pSrcDirection == pDestDirection )
+    {
+        SrcVector = *pSrcDirection;
+        pSrcDirection = &SrcVector;
+    }
 
     if( m_bMaxConversion )
     {
@@ -126,7 +133,7 @@ VOID FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DX
 
 FLOAT FBXTransformer::TransformLength( FLOAT fInputLength ) CONST
 {
-	return fInputLength * m_fUnitScale;
+    return fInputLength * m_fUnitScale;
 }
 
 
@@ -134,16 +141,22 @@ HRESULT FBXImport::Initialize()
 {
     if( g_pSDKManager == NULL )
     {
-        g_pSDKManager = KFbxSdkManager::Create();
+        g_pSDKManager = FbxManager::Create();
         if( g_pSDKManager == NULL )
             return E_FAIL;
+
+        auto ios = FbxIOSettings::Create( g_pSDKManager, IOSROOT );
+        if( !ios )
+            return E_FAIL;
+
+        g_pSDKManager->SetIOSettings(ios);
     }
 
     if( g_pImporter == NULL )
     {
-        g_pImporter = KFbxImporter::Create( g_pSDKManager, "" );
+        g_pImporter = FbxImporter::Create( g_pSDKManager, "" );
     }
-    g_pFBXScene = KFbxScene::Create( g_pSDKManager, "" );
+    g_pFBXScene = FbxScene::Create( g_pSDKManager, "" );
 
     return S_OK;
 }
@@ -155,48 +168,48 @@ VOID FBXImport::ClearScene()
 
 VOID SetBindPose()
 {
-	assert( g_pFBXScene != NULL );
+    assert( g_pFBXScene != NULL );
 
     g_BindPoses.clear();
-	INT iPoseCount = g_pFBXScene->GetPoseCount();
-	for( INT i = 0; i < iPoseCount; ++i )
-	{
-		KFbxPose* pPose = g_pFBXScene->GetPose( i );
+    INT iPoseCount = g_pFBXScene->GetPoseCount();
+    for( INT i = 0; i < iPoseCount; ++i )
+    {
+        auto pPose = g_pFBXScene->GetPose( i );
         INT iNodeCount = pPose->GetCount();
         ExportLog::LogMsg( 4, "Found %spose: \"%s\" with %d nodes", pPose->IsBindPose() ? "bind " : "", pPose->GetName(), iNodeCount );
         for( INT j = 0; j < iNodeCount; ++j )
         {
-            KFbxNode* pPoseNode = pPose->GetNode( j );
+            auto pPoseNode = pPose->GetNode( j );
             ExportLog::LogMsg( 5, "Pose node %d: %s", j, pPoseNode->GetName() );
         }
-		if( pPose->IsBindPose() )
-		{
+        if( pPose->IsBindPose() )
+        {
             g_BindPoses.push_back( pPose );
-		}
-	}
-	if( g_BindPoses.empty() )
-	{
+        }
+    }
+    if( g_BindPoses.empty() )
+    {
         if( g_pScene->Settings().bExportAnimations )
         {
             ExportLog::LogWarning( "No valid bind pose found; will export scene using the default pose." );
         }
         return;
-	}
+    }
 
     DWORD dwPoseCount = (DWORD)g_BindPoses.size();
     for( DWORD i = 0; i < dwPoseCount; ++i )
     {
-        KFbxPose* pPose = g_BindPoses[i];
+        FbxPose* pPose = g_BindPoses[i];
         INT iNodeCount = pPose->GetCount();
         for( INT j = 0; j < iNodeCount; ++j )
         {
-            KFbxNode* pNode = pPose->GetNode( j );
-            KFbxMatrix matNode = pPose->GetMatrix( j );
+            auto pNode = pPose->GetNode( j );
+            auto matNode = pPose->GetMatrix( j );
 
             PoseMap::iterator iter = g_BindPoseMap.find( pNode );
             if( iter != g_BindPoseMap.end() )
             {
-                KFbxMatrix matExisting = iter->second;
+                FbxMatrix matExisting = iter->second;
                 if( matExisting != matNode )
                 {
                     ExportLog::LogWarning( "Node \"%s\" found in more than one bind pose, with conflicting transforms.", pNode->GetName() );
@@ -256,23 +269,13 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
     FBXTransformer* pTransformer = (FBXTransformer*)g_pScene->GetDCCTransformer();
     pTransformer->Initialize( g_pFBXScene );
 
-	SetBindPose();
+    SetBindPose();
     g_bBindPoseFixupRequired = FALSE;
 
     assert( g_pFBXScene->GetRootNode() != NULL );
-	D3DXMATRIX matIdentity;
-	D3DXMatrixIdentity( &matIdentity );
+    D3DXMATRIX matIdentity;
+    D3DXMatrixIdentity( &matIdentity );
     ParseNode( g_pFBXScene->GetRootNode(), g_pScene, matIdentity );
-
-    ExportFrame* pRootFrame = g_pScene->GetChildByIndex(0);
-    assert( pRootFrame != NULL );
-
-    KFbxGlobalCameraSettings* pCameraSettings = &g_pFBXScene->GetGlobalCameraSettings();
-    //ParseCamera( &pCameraSettings->GetCameraProducerPerspective(), g_pScene );
-	if( pCameraSettings->GetCameraProducerPerspective() != NULL )
-	{
-		ParseNode( pCameraSettings->GetCameraProducerPerspective()->GetNode(), pRootFrame, matIdentity );
-	}
 
     if( g_bBindPoseFixupRequired )
     {
@@ -285,7 +288,7 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
         ParseAnimation( g_pFBXScene );
         if( g_pScene->Settings().bRenameAnimationsToFileName )
         {
-            ExportPath AnimName = g_CurrentOutputFileName.GetFileNameWithoutExtension();
+            auto AnimName = g_CurrentOutputFileName.GetFileNameWithoutExtension();
 
             DWORD dwAnimCount = g_pScene->GetAnimationCount();
             for( DWORD i = 0; i < dwAnimCount; ++i )

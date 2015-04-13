@@ -1,8 +1,15 @@
 //-------------------------------------------------------------------------------------
-//  ExportDialogs.cpp
+// ExportDialogs.cpp
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "stdafx.h"
@@ -31,7 +38,7 @@ namespace ATG
     UINT WINAPI ExportSettingsDialog::ThreadEntry( VOID* pData )
     {
         ExportSettingsDialog* pDlg = (ExportSettingsDialog*)pData;
-		pDlg->DoModal( g_hInstance, g_hParentWindow );
+        pDlg->DoModal( g_hInstance, g_hParentWindow );
         return 0;
     }
 
@@ -42,11 +49,11 @@ namespace ATG
         g_hParentWindow = hParentWindow;
 
         // Pull in common and rich edit controls
-		INITCOMMONCONTROLSEX ICEX;
-		ICEX.dwSize = sizeof( INITCOMMONCONTROLSEX );
-		ICEX.dwICC = ICC_WIN95_CLASSES | ICC_COOL_CLASSES | ICC_USEREX_CLASSES;
-		InitCommonControlsEx( &ICEX );
-		InitCommonControls();
+        INITCOMMONCONTROLSEX ICEX;
+        ICEX.dwSize = sizeof( INITCOMMONCONTROLSEX );
+        ICEX.dwICC = ICC_WIN95_CLASSES | ICC_COOL_CLASSES | ICC_USEREX_CLASSES;
+        InitCommonControlsEx( &ICEX );
+        InitCommonControls();
         HMODULE g_hRichEdit = LoadLibrary( TEXT( "Riched32.dll" ) );
         assert( g_hRichEdit != NULL );
         UNREFERENCED_PARAMETER(g_hRichEdit);

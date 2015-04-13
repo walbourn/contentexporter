@@ -1,8 +1,15 @@
 //-------------------------------------------------------------------------------------
-//  ExportPath.cpp
+// ExportPath.cpp
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "stdafx.h"
@@ -29,8 +36,8 @@ ExportPath::ExportPath( const ExportPath& OtherPath )
 
 ExportPath& ExportPath::operator=( const ExportPath& OtherPath )
 {
-	Initialize( (const CHAR*)OtherPath );
-	return *this;
+    Initialize( (const CHAR*)OtherPath );
+    return *this;
 }
 
 VOID ExportPath::SetPathAndFileName( const CHAR* strPath )
@@ -164,26 +171,26 @@ VOID ExportPath::ChangeFileName( const ExportPath& OtherPath )
 
 VOID ExportPath::ChangeFileNameWithExtension( const CHAR* strFileName )
 {
-	// Ensure that incoming filename has no separators
-	const CHAR* strSep = strchr( strFileName, g_DirectorySeparator );
-	assert( strSep == NULL );
-	strSep = strchr( strFileName, g_AltDirectorySeparator );
-	assert( strSep == NULL );
+    // Ensure that incoming filename has no separators
+    const CHAR* strSep = strchr( strFileName, g_DirectorySeparator );
+    assert( strSep == NULL );
+    strSep = strchr( strFileName, g_AltDirectorySeparator );
+    assert( strSep == NULL );
 
-	// trim off current file name
-	assert( m_strFileName != NULL );
-	*m_strFileName = '\0';
+    // trim off current file name
+    assert( m_strFileName != NULL );
+    *m_strFileName = '\0';
 
-	// concatenate filename onto path
-	strcat_s( m_strPath, strFileName );
+    // concatenate filename onto path
+    strcat_s( m_strPath, strFileName );
 
-	// re-initialize all of our pointers
-	Initialize( NULL );
+    // re-initialize all of our pointers
+    Initialize( NULL );
 }
 
 VOID ExportPath::ChangeFileNameWithExtension( const ExportPath& OtherPath )
 {
-	ChangeFileNameWithExtension( (const CHAR*)OtherPath.GetFileName() );
+    ChangeFileNameWithExtension( (const CHAR*)OtherPath.GetFileName() );
 }
 
 ExportPath ExportPath::GetFileName() const
@@ -340,6 +347,6 @@ ExportPath ExportPath::GetCurrentPath()
 {
     CHAR strPath[MAX_PATH];
     ::GetCurrentDirectoryA( MAX_PATH, strPath );
-	strcat_s( strPath, "\\" );
+    strcat_s( strPath, "\\" );
     return ExportPath( strPath );
 }

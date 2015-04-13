@@ -1,15 +1,21 @@
 //-------------------------------------------------------------------------------------
-//  ExportProgress.h
+// ExportProgress.h
 //
-//  A DCC-agnostic system for reporting progress of the export operation.
-//  The export front-end implements a subclass of ExportProgress that manipulates the
-//  DCC user interface, and sets up the g_pProgress global pointer so the DCC-agnostic
-//  code can report progress updates.
+// A DCC-agnostic system for reporting progress of the export operation.
+// The export front-end implements a subclass of ExportProgress that manipulates the
+// DCC user interface, and sets up the g_pProgress global pointer so the DCC-agnostic
+// code can report progress updates.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 namespace ATG

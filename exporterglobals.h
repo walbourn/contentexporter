@@ -1,25 +1,31 @@
 //-------------------------------------------------------------------------------------
-//  ExporterGlobals.h
+// ExporterGlobals.h
 //  
-//  Common includes for the samples content exporter.
-//  Version number, display name, and vendor are stored here, and each exporter
-//  front-end project uses these defines in their builds.
+// Common includes for the samples content exporter.
+// Version number, display name, and vendor are stored here, and each exporter
+// front-end project uses these defines in their builds.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 #define CONTENT_EXPORTER_MAJOR_VERSION 2
-#define CONTENT_EXPORTER_MINOR_VERSION 5
-#define CONTENT_EXPORTER_REVISION 9
+#define CONTENT_EXPORTER_MINOR_VERSION 6
+#define CONTENT_EXPORTER_REVISION 1
 #define MAKEVERSION(major, minor, rev) "" #major "." #minor "." #rev
 #define CONTENT_EXPORTER_VERSION MAKEVERSION( CONTENT_EXPORTER_MAJOR_VERSION, CONTENT_EXPORTER_MINOR_VERSION, CONTENT_EXPORTER_REVISION )
 
 #define CONTENT_EXPORTER_GLOBAL_TITLE "Samples Content Exporter"
 #define CONTENT_EXPORTER_SETTINGS_TOKEN "SamplesContentExporter"
-#define CONTENT_EXPORTER_VENDOR "Microsoft Advanced Technology Group (gameds@microsoft.com)"
+#define CONTENT_EXPORTER_VENDOR "Microsoft Advanced Technology Group"
 #define CONTENT_EXPORTER_COPYRIGHT "Copyright (c) Microsoft Corporation.  All Rights Reserved."
 #define CONTENT_EXPORTER_FILE_EXTENSION "xatg"
 #define CONTENT_EXPORTER_FILE_FILTER "*." CONTENT_EXPORTER_FILE_EXTENSION

@@ -1,12 +1,18 @@
 //-------------------------------------------------------------------------------------
-//  ExportScene.h
+// ExportScene.h
 //
-//  The root class of the scene hierarchy.  Exporter settings are also contained here.
+// The root class of the scene hierarchy.  Exporter settings are also contained here.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 #include "ExportSettings.h"

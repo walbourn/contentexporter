@@ -1,11 +1,18 @@
 //-------------------------------------------------------------------------------------
-//  ConsoleMain.cpp
+// ConsoleMain.cpp
 //
-//  Entry point for the content exporter application.  Also contains all of the command
-//  line parsing code.
+// Entry point for the content exporter application.  Also contains all of the command
+// line parsing code.
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "stdafx.h"
@@ -163,6 +170,7 @@ BOOL MacroWindowsD3D9( const CHAR* strArgument )
     g_XATGSettings.bUseExistingBundle = FALSE;
     g_pScene->Settings().bCompressVertexData = FALSE;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
+    g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return FALSE;
 }
 
@@ -171,8 +179,19 @@ BOOL MacroWindowsD3D10( const CHAR* strArgument )
     g_pScene->Settings().bLittleEndian = TRUE;
     g_XATGSettings.bBundleTextures = FALSE;
     g_XATGSettings.bUseExistingBundle = FALSE;
-    g_pScene->Settings().bCompressVertexData = TRUE;
-    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
+    g_pScene->Settings().bCompressVertexData = FALSE;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_ExportFileFormat = FILEFORMAT_SDKMESH;
+    return FALSE;
+}
+
+BOOL MacroWindowsD3D11( const CHAR* strArgument )
+{
+    g_pScene->Settings().bLittleEndian = TRUE;
+    g_XATGSettings.bBundleTextures = FALSE;
+    g_XATGSettings.bUseExistingBundle = FALSE;
+    g_pScene->Settings().bCompressVertexData = FALSE;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return FALSE;
 }
@@ -203,7 +222,7 @@ BOOL MacroXATG( const CHAR* strArgument )
 
 BOOL MacroSubD11( const CHAR* strArgument )
 {
-    MacroWindowsD3D10( NULL );
+    MacroWindowsD3D11( NULL );
     MacroSDKMesh( NULL );
     g_pScene->Settings().bCompressVertexData = FALSE;
     g_pScene->Settings().bConvertMeshesToSubD = TRUE;
@@ -242,8 +261,8 @@ BOOL MacroSetVerbose( const CHAR* strArgument )
 BOOL MacroAttach( const CHAR* strArgument )
 {
 #ifdef _DEBUG
-	ExportLog::LogMsg( 0, "!!! Attach debugger NOW and then press any key..." );
-	_getch();
+    ExportLog::LogMsg( 0, "!!! Attach debugger NOW and then press any key..." );
+    _getch();
 #endif
     return FALSE;
 }
@@ -310,7 +329,7 @@ BOOL MacroLoadFileList( const CHAR* strArgument )
 
 MacroCommand g_MacroCommands[] = {
 #ifdef _DEBUG
-	{ "attach", "", "Wait for debugger attach", MacroAttach },
+    { "attach", "", "Wait for debugger attach", MacroAttach },
 #endif
     { "help", "", "Display help", MacroDisplayHelp },
     { "?", "", "Display help", MacroDisplayHelp },
@@ -320,7 +339,8 @@ MacroCommand g_MacroCommands[] = {
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
-    { "windowsd3d10", "", "Sets export options for a Windows Direct3D 10/11 target", MacroWindowsD3D10 },
+    { "windowsd3d10", "", "Sets export options for a Windows Direct3D 10 target", MacroWindowsD3D10 },
+    { "windowsd3d11", "", "Sets export options for a Windows Direct3D 10 target", MacroWindowsD3D11 },
     { "collisionmesh", "", "Sets export options for collision mesh export", MacroCollisionMesh },
     { "animation", "", "Sets export options for animation track export", MacroAnimation },
     { "character", "", "Sets export options for character (mesh & skeleton) export", MacroCharacter },
@@ -359,7 +379,7 @@ ExportSettingsEntry* FindCommand( const CHAR* strCommand )
     DWORD dwCount = g_SettingsManager.GetRootCategoryCount();
     for( DWORD i = 0; i < dwCount; ++i )
     {
-        ExportSettingsEntry* pEntry = g_SettingsManager.GetRootCategory( i );
+        auto pEntry = g_SettingsManager.GetRootCategory( i );
         pResult = FindCommandHelper( pEntry, strCommand );
         if( pResult != NULL )
             return pResult;
@@ -563,7 +583,7 @@ VOID PrintHelp()
     DWORD dwRootCategoryCount = g_SettingsManager.GetRootCategoryCount();
     for( DWORD i = 0; i < dwRootCategoryCount; ++i )
     {
-        ExportSettingsEntry* pCategory = g_SettingsManager.GetRootCategory( i );
+        auto pCategory = g_SettingsManager.GetRootCategory( i );
         PrintEntryHelp( pCategory );
     }
     ExportLog::LogMsg( 0, "" );
@@ -571,17 +591,17 @@ VOID PrintHelp()
 
 VOID ParseInputFileName( const CHAR* strFileName )
 {
-	ExportPath InputFileName( strFileName );
-	if( !InputFileName.IsAbsolutePath() )
-	{
-		InputFileName = g_WorkingPath;
-		InputFileName.Append( strFileName );
-	}
+    ExportPath InputFileName( strFileName );
+    if( !InputFileName.IsAbsolutePath() )
+    {
+        InputFileName = g_WorkingPath;
+        InputFileName.Append( strFileName );
+    }
 
     g_InputFileNames.push_back( InputFileName );
 }
 
-std::vector<const CHAR*> g_CommandStrings;
+std::vector<CHAR*> g_CommandStrings;
 
 VOID ParseCommandLine( INT argc, CHAR* argv[] )
 {
@@ -589,7 +609,7 @@ VOID ParseCommandLine( INT argc, CHAR* argv[] )
 
     for( INT i = 1; i < argc; ++i )
     {
-        const CHAR* strToken = argv[i];
+        CHAR* strToken = argv[i];
         g_CommandStrings.push_back( strToken );
     }
 
@@ -619,31 +639,31 @@ VOID ParseCommandLine( INT argc, CHAR* argv[] )
 
 VOID BuildOutputFileName( const ExportPath& InputFileName )
 {
-	if( !g_OutputFilePath.IsEmpty() )
-	{
-		g_CurrentOutputFileName = g_OutputFilePath;
-	}
-	else
-	{
-		g_CurrentOutputFileName = InputFileName;
-		g_CurrentOutputFileName.TrimOffFileName();
-	}
+    if( !g_OutputFilePath.IsEmpty() )
+    {
+        g_CurrentOutputFileName = g_OutputFilePath;
+    }
+    else
+    {
+        g_CurrentOutputFileName = InputFileName;
+        g_CurrentOutputFileName.TrimOffFileName();
+    }
 
-	g_CurrentOutputFileName.ChangeFileName( InputFileName );
+    g_CurrentOutputFileName.ChangeFileName( InputFileName );
 
     if( g_ExportFileFormat == FILEFORMAT_SDKMESH )
-	{
-		g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_BINARYFILE_EXTENSION );
-	}
-	else
-	{
-		g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_FILE_EXTENSION );
-	}
+    {
+        g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_BINARYFILE_EXTENSION );
+    }
+    else
+    {
+        g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_FILE_EXTENSION );
+    }
 }
 
 INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 {
-	g_WorkingPath = ExportPath::GetCurrentPath();
+    g_WorkingPath = ExportPath::GetCurrentPath();
 
     ExportLog::AddListener( &g_ConsoleOutListener );
 #if _MSC_VER >= 1500
@@ -696,6 +716,16 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
     FBXImport::Initialize();
     ExportLog::LogMsg( 4, "FBX has been initialized." );
 
+    // Initialize COM (needed for WIC)
+    HRESULT hr;
+    if( FAILED( hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED) ) )
+    {
+        ExportLog::LogError( "Failed to initialize COM (%08X)\n", hr );
+        return 1;
+    }
+
+    ExportLog::LogMsg( 4, "COM has been initialized." );
+
     if( dwInputFileCount == 0 )
     {
         ExportLog::LogError( "No input filenames were specified." );
@@ -707,7 +737,7 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
     for( DWORD i = 0; i < dwInputFileCount; ++i )
     {
         ExportPath InputFileName = g_InputFileNames[i];
-		g_CurrentInputFileName = InputFileName;
+        g_CurrentInputFileName = InputFileName;
 
         BuildOutputFileName( InputFileName );
         if( g_CurrentOutputFileName.IsEmpty() )
@@ -718,7 +748,7 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
         g_pScene->Statistics().StartExport();
         g_pScene->Statistics().StartSceneParse();
 
-        HRESULT hr = FBXImport::ImportFile( InputFileName );
+        hr = FBXImport::ImportFile( InputFileName );
         if( FAILED(hr) )
         {
             ExportLog::LogError( "Could not load file \"%s\".", (const CHAR*)InputFileName );
@@ -771,6 +801,6 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 
     ExportMaterial::ReleaseDirect3DDevice();
 
-	return 0;
+    return 0;
 }
 

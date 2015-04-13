@@ -1,8 +1,15 @@
 //-------------------------------------------------------------------------------------
-//  ParseMaterial.cpp
+// ParseMaterial.cpp
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "StdAfx.h"
@@ -42,7 +49,7 @@ VOID FixupGenericMaterial( ExportMaterial* pMaterial )
         pMaterial->AddParameter( OutputParam );
     }
 
-    MaterialParameterList* pParamList = pMaterial->GetParameterList();
+    auto pParamList = pMaterial->GetParameterList();
     //std::reverse( pParamList->begin(), pParamList->end() );
     std::stable_sort( pParamList->begin(), pParamList->end(), MaterialParameterSort );
 }
@@ -81,20 +88,20 @@ VOID AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, D
     pMaterial->AddParameter( OutputParam );
 }
 
-BOOL ExtractTextures( KFbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
+BOOL ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
 {
     BOOL bResult = FALSE;
-    DWORD dwLayeredTextureCount = Property.GetSrcObjectCount( KFbxLayeredTexture::ClassId );
+    DWORD dwLayeredTextureCount = Property.GetSrcObjectCount( FbxLayeredTexture::ClassId );
     if( dwLayeredTextureCount > 0 )
     {
         DWORD dwTextureIndex = 0;
         for( DWORD i = 0; i < dwLayeredTextureCount; ++i )
         {
-            KFbxLayeredTexture* pFbxLayeredTexture = KFbxCast<KFbxLayeredTexture>( Property.GetSrcObject( KFbxLayeredTexture::ClassId, i ) );
-            DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount( KFbxTexture::ClassId );
+            auto pFbxLayeredTexture = FbxCast<FbxLayeredTexture>( Property.GetSrcObject( FbxLayeredTexture::ClassId, i ) );
+            DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount( FbxFileTexture::ClassId );
             for( DWORD j = 0; j < dwTextureCount; ++j )
             {
-                KFbxTexture* pFbxTexture = KFbxCast<KFbxTexture>( pFbxLayeredTexture->GetSrcObject( KFbxTexture::ClassId, j ) );
+                auto pFbxTexture = FbxCast<FbxFileTexture>( pFbxLayeredTexture->GetSrcObject( FbxFileTexture::ClassId, j ) );
                 if( pFbxTexture == NULL )
                     continue;
 
@@ -106,10 +113,10 @@ BOOL ExtractTextures( KFbxProperty Property, const CHAR* strParameterName, Expor
     }
     else
     {
-        DWORD dwTextureCount = Property.GetSrcObjectCount( KFbxTexture::ClassId );
+        DWORD dwTextureCount = Property.GetSrcObjectCount( FbxFileTexture::ClassId );
         for( DWORD i = 0; i < dwTextureCount; ++i )
         {
-            KFbxTexture* pFbxTexture = KFbxCast<KFbxTexture>( Property.GetSrcObject( KFbxTexture::ClassId, i ) );
+            auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject( FbxFileTexture::ClassId, i ) );
             if( pFbxTexture == NULL )
                 continue;
 
@@ -120,16 +127,12 @@ BOOL ExtractTextures( KFbxProperty Property, const CHAR* strParameterName, Expor
     return bResult;
 }
 
-ExportMaterial* ParseMaterialInLayer( KFbxMesh* pMesh, KFbxLayer* pLayer, DWORD dwMaterialIndex )
+ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 {
-    KFbxLayerElementMaterial* pMaterials = pLayer->GetMaterials();
-    assert( dwMaterialIndex < (DWORD)pMaterials->GetDirectArray().GetCount() );
-    UNUSED( pMaterials );
+    if ( !pFbxMaterial )
+        return nullptr;
 
-    KFbxSurfaceMaterial* pFbxMaterial = pMesh->GetNode()->GetMaterial( (INT) dwMaterialIndex );
-    assert( pFbxMaterial != NULL );
-
-    ExportMaterial* pExistingMaterial = g_pScene->FindMaterial( pFbxMaterial );
+    auto pExistingMaterial = g_pScene->FindMaterial( pFbxMaterial );
     if( pExistingMaterial != NULL )
     {
         ExportLog::LogMsg( 4, "Found existing material \"%s\".", pFbxMaterial->GetName() );
@@ -179,20 +182,20 @@ ExportMaterial* ParseMaterialInLayer( KFbxMesh* pMesh, KFbxLayer* pLayer, DWORD 
 
     TextureParameterExtraction ExtractionList[] =
     {
-        { KFbxSurfaceMaterial::sTransparentColor,   "AlphaTexture",                 PPO_TransparentMaterial,    ExportMaterialParameter::EMPF_ALPHACHANNEL },
-        { KFbxSurfaceMaterial::sDiffuse,            "DiffuseTexture",               PPO_Nothing,                ExportMaterialParameter::EMPF_DIFFUSEMAP },
-        { KFbxSurfaceMaterial::sAmbient,            "AOTexture",	                PPO_Nothing,                ExportMaterialParameter::EMPF_AOMAP },
-        { KFbxSurfaceMaterial::sBump,               "NormalMapTexture",             PPO_Nothing,                0 /*ExportMaterialParameter::EMPF_BUMPMAP*/ },
-        { KFbxSurfaceMaterial::sNormalMap,          "NormalMapTexture",             PPO_Nothing,                ExportMaterialParameter::EMPF_NORMALMAP },
-        { KFbxSurfaceMaterial::sSpecular,           "SpecularMapTexture",           PPO_Nothing,                ExportMaterialParameter::EMPF_SPECULARMAP },
-        { KFbxSurfaceMaterial::sEmissive,           "EmissiveMapTexture",           PPO_Nothing,                0 },
+        { FbxSurfaceMaterial::sTransparentColor,   "AlphaTexture",                 PPO_TransparentMaterial,    ExportMaterialParameter::EMPF_ALPHACHANNEL },
+        { FbxSurfaceMaterial::sDiffuse,            "DiffuseTexture",               PPO_Nothing,                ExportMaterialParameter::EMPF_DIFFUSEMAP },
+        { FbxSurfaceMaterial::sAmbient,            "AOTexture",	                   PPO_Nothing,                ExportMaterialParameter::EMPF_AOMAP },
+        { FbxSurfaceMaterial::sBump,               "NormalMapTexture",             PPO_Nothing,                0 /*ExportMaterialParameter::EMPF_BUMPMAP*/ },
+        { FbxSurfaceMaterial::sNormalMap,          "NormalMapTexture",             PPO_Nothing,                ExportMaterialParameter::EMPF_NORMALMAP },
+        { FbxSurfaceMaterial::sSpecular,           "SpecularMapTexture",           PPO_Nothing,                ExportMaterialParameter::EMPF_SPECULARMAP },
+        { FbxSurfaceMaterial::sEmissive,           "EmissiveMapTexture",           PPO_Nothing,                0 },
     };
 
     for( DWORD dwExtractionIndex = 0; dwExtractionIndex < ARRAYSIZE(ExtractionList); ++dwExtractionIndex )
     {
         const TextureParameterExtraction& tpe = ExtractionList[dwExtractionIndex];
 
-        KFbxProperty Property = pFbxMaterial->FindProperty( tpe.strFbxPropertyName );
+        auto Property = pFbxMaterial->FindProperty( tpe.strFbxPropertyName );
         if( !Property.IsValid() )
             continue;
 

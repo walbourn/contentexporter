@@ -1,8 +1,15 @@
 //-------------------------------------------------------------------------------------
-//  ParseMesh.cpp
+// ParseMesh.cpp
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "StdAfx.h"
@@ -15,7 +22,7 @@ extern ATG::ExportScene* g_pScene;
 class SkinData
 {
 public:
-    vector<KFbxNode*> InfluenceNodes;
+    vector<FbxNode*> InfluenceNodes;
     DWORD dwVertexCount;
     DWORD dwVertexStride;
     BYTE* pBoneIndices;
@@ -85,12 +92,12 @@ public:
     }
 };
 
-VOID CaptureBindPoseMatrix( KFbxNode* pNode, const KFbxMatrix& matBindPose )
+VOID CaptureBindPoseMatrix( FbxNode* pNode, const FbxMatrix& matBindPose )
 {
     PoseMap::iterator iter = g_BindPoseMap.find( pNode );
     if( iter != g_BindPoseMap.end() )
     {
-        KFbxMatrix matExisting = iter->second;
+        FbxMatrix matExisting = iter->second;
         if( matExisting != matBindPose )
         {
             // found the bind pose matrix, but it is different than what we prevoiusly encountered
@@ -108,9 +115,9 @@ VOID CaptureBindPoseMatrix( KFbxNode* pNode, const KFbxMatrix& matBindPose )
     }
 }
 
-BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
+BOOL ParseMeshSkinning( FbxMesh* pMesh, SkinData* pSkinData )
 {
-    DWORD dwDeformerCount = pMesh->GetDeformerCount( KFbxDeformer::eSKIN );
+    DWORD dwDeformerCount = pMesh->GetDeformerCount( FbxDeformer::eSkin );
     if( dwDeformerCount == 0 )
         return FALSE;
 
@@ -122,28 +129,28 @@ BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
 
     for( DWORD dwDeformerIndex = 0; dwDeformerIndex < dwDeformerCount; ++dwDeformerIndex )
     {
-        KFbxSkin* pSkin = (KFbxSkin*)pMesh->GetDeformer( dwDeformerIndex, KFbxDeformer::eSKIN );
+        auto pSkin = reinterpret_cast<FbxSkin*>( pMesh->GetDeformer( dwDeformerIndex, FbxDeformer::eSkin ) );
         DWORD dwClusterCount = pSkin->GetClusterCount();
 
         for( DWORD dwClusterIndex = 0; dwClusterIndex < dwClusterCount; ++dwClusterIndex )
         {
-            KFbxCluster* pCluster = pSkin->GetCluster( dwClusterIndex );
+            auto pCluster = pSkin->GetCluster( dwClusterIndex );
             DWORD dwClusterSize = pCluster->GetControlPointIndicesCount();
             if( dwClusterSize == 0 )
                 continue;
 
-            KFbxNode* pLink = pCluster->GetLink();
+            auto pLink = pCluster->GetLink();
 
             DWORD dwBoneIndex = pSkinData->GetBoneCount();
             pSkinData->InfluenceNodes.push_back( pLink );
             ExportLog::LogMsg( 4, "Influence %d: %s", dwBoneIndex, pLink->GetName() );
             
-            KFbxXMatrix matXBindPose;
+            FbxAMatrix matXBindPose;
             pCluster->GetTransformLinkMatrix( matXBindPose );
-            KFbxXMatrix matReferenceGlobalInitPosition;
+            FbxAMatrix matReferenceGlobalInitPosition;
             pCluster->GetTransformMatrix(matReferenceGlobalInitPosition);
  
-            KFbxMatrix matBindPose = matReferenceGlobalInitPosition.Inverse() * matXBindPose;
+            FbxMatrix matBindPose = matReferenceGlobalInitPosition.Inverse() * matXBindPose;
 
             CaptureBindPoseMatrix( pLink, matBindPose );
 
@@ -160,31 +167,31 @@ BOOL ParseMeshSkinning( KFbxMesh* pMesh, SkinData* pSkinData )
     return TRUE;
 }
 
-VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess, const CHAR* strSuffix )
+VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess, const CHAR* strSuffix )
 {
     if( !g_pScene->Settings().bExportMeshes )
         return;
 
-    if( pFbxMesh == NULL )
+    if( !pNode || !pFbxMesh )
         return;
 
-	const CHAR* strName = pFbxMesh->GetName();
-	if( strName == NULL || strName[0] == '\0' )
-		strName = pParentFrame->GetName().SafeString();
+    const CHAR* strName = pFbxMesh->GetName();
+    if( strName == NULL || strName[0] == '\0' )
+        strName = pParentFrame->GetName().SafeString();
 
     if( strSuffix == NULL )
     {
         strSuffix = "";
     }
-	CHAR strDecoratedName[512];
-	sprintf_s( strDecoratedName, "%s_%s%s", g_pScene->Settings().strMeshNameDecoration, strName, strSuffix );
-	ExportMesh* pMesh = new ExportMesh( strDecoratedName );
-	pMesh->SetDCCObject( pFbxMesh );
+    CHAR strDecoratedName[512];
+    sprintf_s( strDecoratedName, "%s_%s%s", g_pScene->Settings().strMeshNameDecoration, strName, strSuffix );
+    ExportMesh* pMesh = new ExportMesh( strDecoratedName );
+    pMesh->SetDCCObject( pFbxMesh );
 
     BOOL bSmoothMesh = FALSE;
 
-    KFbxMesh::EMeshSmoothness Smoothness = pFbxMesh->GetMeshSmoothness();
-    if( Smoothness != KFbxMesh::eHULL && g_pScene->Settings().bConvertMeshesToSubD )
+    auto Smoothness = pFbxMesh->GetMeshSmoothness();
+    if( Smoothness != FbxMesh::eHull && g_pScene->Settings().bConvertMeshesToSubD )
     {
         bSubDProcess = TRUE;
         bSmoothMesh = TRUE;
@@ -205,7 +212,7 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
 
     pMesh->SetVertexColorCount( 0 );
 
-    KFbxLayerElementArrayTemplate<KFbxVector4> *pNormals = NULL;
+    FbxLayerElementArrayTemplate<FbxVector4> *pNormals = NULL;
     pFbxMesh->GetNormals( &pNormals );
     if( pNormals == NULL )
     {
@@ -233,11 +240,10 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
     ExportLog::LogMsg( 4, "%d layers in FBX mesh", dwLayerCount );
 
     DWORD dwVertexColorCount = 0;
-    KFbxLayerElementVertexColor* pVertexColorSet = NULL;
+    FbxLayerElementVertexColor* pVertexColorSet = NULL;
     DWORD dwUVSetCount = 0;
-    std::vector<KFbxLayerElementUV*> VertexUVSets;
-    KFbxLayerElementMaterial* pMaterialSet = NULL;
-    std::vector<ExportMaterial*> MaterialList;
+    FbxLayerElementMaterial* pMaterialSet = NULL;
+    std::vector<FbxLayerElementUV*> VertexUVSets;
     for( DWORD dwLayerIndex = 0; dwLayerIndex < dwLayerCount; ++dwLayerIndex )
     {
         if( pFbxMesh->GetLayer(dwLayerIndex)->GetVertexColors() != NULL )
@@ -264,13 +270,18 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
                 ExportLog::LogWarning( "Multiple material layers detected on mesh %s.  Some will be ignored.", pMesh->GetName().SafeString() );
             }
             pMaterialSet = pFbxMesh->GetLayer(dwLayerIndex)->GetMaterials();
-            DWORD dwMaterialCount = pMaterialSet->GetDirectArray().GetCount();
-            for( DWORD i = 0; i < dwMaterialCount; ++i )
-            {
-                ExportMaterial* pMaterial = ParseMaterialInLayer( pFbxMesh, pFbxMesh->GetLayer( dwLayerIndex ), i );
-                MaterialList.push_back( pMaterial );
-            }
         }
+    }
+
+    std::vector<ExportMaterial*> MaterialList;
+    for( int dwMaterial = 0; dwMaterial < pNode->GetMaterialCount(); ++dwMaterial )
+    {
+        auto pMat = pNode->GetMaterial( dwMaterial );
+        if ( !pMat )
+            continue;
+
+        auto pMaterial = ParseMaterial( pMat );
+        MaterialList.push_back( pMaterial );
     }
 
     ExportLog::LogMsg( 4, "Found %d UV sets", dwUVSetCount );
@@ -291,7 +302,7 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
     g_MeshTriangleAllocator.SetSizeHint( dwPolyCount * 2 );
 
     DWORD dwVertexCount = pFbxMesh->GetControlPointsCount();
-    KFbxVector4* pVertexPositions = pFbxMesh->GetControlPoints();
+    auto pVertexPositions = pFbxMesh->GetControlPoints();
 
     if( bSkinnedMesh )
     {
@@ -321,18 +332,18 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
         {
             switch( pMaterialSet->GetMappingMode() )
             {
-            case KFbxLayerElement::eBY_POLYGON:
+            case FbxLayerElement::eByPolygon:
                 switch( pMaterialSet->GetReferenceMode() )
                 {
-                case KFbxLayerElement::eDIRECT:
+                case FbxLayerElement::eDirect:
                     dwMaterialIndex = dwPolyIndex;
                     break;
-                case KFbxLayerElement::eINDEX:
-                case KFbxLayerElement::eINDEX_TO_DIRECT:
+                case FbxLayerElement::eIndex:
+                case FbxLayerElement::eIndexToDirect:
                     dwMaterialIndex = pMaterialSet->GetIndexArray().GetAt( dwPolyIndex );
                     break;
                 }
-            case KFbxLayerElement::eALL_SAME:
+            case FbxLayerElement::eAllSame:
                 break;
             }
         }
@@ -349,8 +360,8 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
 
             //ExportLog::LogMsg( 4, "Poly %d Triangle %d: %d %d %d", dwPolyIndex, dwTriangleIndex, dwCornerIndices[0], dwCornerIndices[1], dwCornerIndices[2] );
 
-            KFbxVector4 vNormals[3];
-            ZeroMemory( vNormals, 3 * sizeof(KFbxVector4) );
+            FbxVector4 vNormals[3];
+            ZeroMemory( vNormals, 3 * sizeof(FbxVector4) );
             INT iPolyIndex = (INT)dwPolyIndex;
             INT iVertIndex[3] = { 0, (INT)dwTriangleIndex + 1, (INT)dwTriangleIndex + 2 };
             //INT iVertIndexUV[3] = { (INT)dwTriangleIndex, (INT)dwTriangleIndex + 1, (INT)dwTriangleIndex + 2 };
@@ -359,7 +370,7 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
             pFbxMesh->GetPolygonVertexNormal( iPolyIndex, iVertIndex[2], vNormals[2] );
 
             // Build the raw triangle.
-            ExportMeshTriangle* pTriangle = g_MeshTriangleAllocator.GetNewTriangle();
+            auto pTriangle = g_MeshTriangleAllocator.GetNewTriangle();
 
             // Store polygon index
             pTriangle->PolygonIndex = (INT)dwPolyIndex;
@@ -387,15 +398,15 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
                 for( DWORD dwUVIndex = 0; dwUVIndex < dwUVSetCount; ++dwUVIndex )
                 {
                     // Crack apart the FBX dereferencing system for UV coordinates
-                    KFbxLayerElementUV* pUVSet = VertexUVSets[dwUVIndex];
-                    KFbxVector2 Value( 0, 0 );
+                    FbxLayerElementUV* pUVSet = VertexUVSets[dwUVIndex];
+                    FbxVector2 Value( 0, 0 );
                     INT iUVIndex = 0;
                     switch( pUVSet->GetMappingMode() )
                     {
-                    case KFbxLayerElement::eBY_CONTROL_POINT:
+                    case FbxLayerElement::eByControlPoint:
                         iUVIndex = pFbxMesh->GetPolygonVertex( iPolyIndex, iVertIndex[dwCornerIndex] );
                         break;
-                    case KFbxLayerElement::eBY_POLYGON_VERTEX:
+                    case FbxLayerElement::eByPolygonVertex:
                         iUVIndex = pFbxMesh->GetTextureUVIndex( iPolyIndex, iVertIndex[dwCornerIndex] );
                         break;
                     }
@@ -417,27 +428,27 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
                 if( dwVertexColorCount > 0 && pVertexColorSet != NULL )
                 {
                     // Crack apart the FBX dereferencing system for Color coordinates
-                    KFbxColor Value( 0, 0, 0, 1 );
+                    FbxColor Value( 0, 0, 0, 1 );
                     switch( pVertexColorSet->GetMappingMode() )
                     {
-                    case KFbxLayerElement::eBY_CONTROL_POINT:
+                    case FbxLayerElement::eByControlPoint:
                         switch( pVertexColorSet->GetReferenceMode() )
                         {
-                        case KFbxLayerElement::eDIRECT:
+                        case FbxLayerElement::eDirect:
                             Value = pVertexColorSet->GetDirectArray().GetAt( dwDCCIndex );
                             break;
-                        case KFbxLayerElement::eINDEX_TO_DIRECT:
+                        case FbxLayerElement::eIndexToDirect:
                             Value = pVertexColorSet->GetDirectArray().GetAt( pVertexColorSet->GetIndexArray().GetAt( dwDCCIndex ) );
                             break;
                         }
                         break;
-                    case KFbxLayerElement::eBY_POLYGON_VERTEX:
+                    case FbxLayerElement::eByPolygonVertex:
                         switch( pVertexColorSet->GetReferenceMode() )
                         {
-                        case KFbxLayerElement::eDIRECT:
+                        case FbxLayerElement::eDirect:
                             Value = pVertexColorSet->GetDirectArray().GetAt( iVertIndex[dwCornerIndex] );
                             break;
-                        case KFbxLayerElement::eINDEX_TO_DIRECT:
+                        case FbxLayerElement::eIndexToDirect:
                             Value = pVertexColorSet->GetDirectArray().GetAt( pVertexColorSet->GetIndexArray().GetAt( iVertIndex[dwCornerIndex] ) );
                             break;
                         }
@@ -477,8 +488,8 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
     {
         for( DWORD dwSubset = 0; dwSubset < dwMaterialCount; ++dwSubset )
         {
-            ExportMaterial* pMaterial = MaterialList[dwSubset];
-            ExportIBSubset* pSubset = pMesh->GetSubset( dwSubset );
+            auto pMaterial = MaterialList[dwSubset];
+            auto pSubset = pMesh->GetSubset( dwSubset );
             CHAR strUniqueSubsetName[100];
             sprintf_s( strUniqueSubsetName, "subset%d_%s", dwSubset, pMaterial->GetName().SafeString() );
             pSubset->SetName( strUniqueSubsetName );
@@ -487,14 +498,14 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
     }
     else
     {
-        ExportSubDProcessMesh* pSubDMesh = pMesh->GetSubDMesh();
+        auto pSubDMesh = pMesh->GetSubDMesh();
         DWORD dwSubsetCount = pSubDMesh->GetSubsetCount();
         for( DWORD dwSubset = 0; dwSubset < dwSubsetCount; ++dwSubset )
         {
-            ExportSubDPatchSubset* pSubset = pSubDMesh->GetSubset( dwSubset );
+            auto pSubset = pSubDMesh->GetSubset( dwSubset );
             assert( pSubset != NULL );
             assert( pSubset->iOriginalMeshSubset < (INT)dwMaterialCount );
-            ExportMaterial* pMaterial = MaterialList[pSubset->iOriginalMeshSubset];
+            auto pMaterial = MaterialList[pSubset->iOriginalMeshSubset];
             CHAR strUniqueSubsetName[100];
             sprintf_s( strUniqueSubsetName, "subset%d_%s", dwSubset, pMaterial->GetName().SafeString() );
             pSubset->Name = strUniqueSubsetName;
@@ -525,7 +536,7 @@ VOID ParseMesh( KFbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess
     g_pScene->AddMesh( pMesh );
 }
 
-VOID ParseSubDiv( KFbxSubdiv* pFbxSubD, ExportFrame* pParentFrame )
+VOID ParseSubDiv(FbxNode* pNode, FbxSubDiv* pFbxSubD, ExportFrame* pParentFrame )
 {
     if( !g_pScene->Settings().bExportMeshes )
         return;
@@ -547,7 +558,7 @@ VOID ParseSubDiv( KFbxSubdiv* pFbxSubD, ExportFrame* pParentFrame )
         return;
     }
 
-    KFbxMesh* pLevelMesh = NULL;
+    FbxMesh* pLevelMesh = NULL;
     DWORD dwCurrentLevel = dwLevelCount - 1;
     while( pLevelMesh == NULL && dwCurrentLevel > 0 )
     {
@@ -567,5 +578,5 @@ VOID ParseSubDiv( KFbxSubdiv* pFbxSubD, ExportFrame* pParentFrame )
     ExportLog::LogMsg( 3, "Parsing level %d", dwCurrentLevel );
     CHAR strSuffix[32];
     sprintf_s( strSuffix, "_level%d", dwCurrentLevel );
-    ParseMesh( pLevelMesh, pParentFrame, TRUE, strSuffix );
+    ParseMesh( pNode, pLevelMesh, pParentFrame, TRUE, strSuffix );
 }

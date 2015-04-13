@@ -1,12 +1,18 @@
 //-------------------------------------------------------------------------------------
-//  FBXImportMain.h
+// FBXImportMain.h
 //
-//  Entry points for FBX scene parsing.
+// Entry points for FBX scene parsing.
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 using namespace ATG;
@@ -14,11 +20,11 @@ using namespace ATG;
 class FBXTransformer : public IDCCTransformer
 {
 public:
-	FBXTransformer()
-		: m_fUnitScale( 1.0f )
-	{ }
+    FBXTransformer()
+        : m_fUnitScale( 1.0f )
+    { }
 
-    VOID Initialize( KFbxScene* pScene );
+    VOID Initialize( FbxScene* pScene );
 
     virtual VOID TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST;
     virtual VOID TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVECTOR3* pSrcPosition ) CONST;
@@ -32,7 +38,7 @@ public:
     }
 
 protected:
-	FLOAT m_fUnitScale;
+    FLOAT m_fUnitScale;
     BOOL  m_bMaxConversion;
 };
 

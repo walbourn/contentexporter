@@ -1,14 +1,20 @@
 //-------------------------------------------------------------------------------------
-//  ExportLog.h
+// ExportLog.h
 //
-//  Classes and interfaces for a DCC-independent pluggable message logging system.
-//  The system supports warnings, errors, and different levels of message logging.
-//  Two log listeners are implemented here - a debug spew listener and a file listener.
+// Classes and interfaces for a DCC-independent pluggable message logging system.
+// The system supports warnings, errors, and different levels of message logging.
+// Two log listeners are implemented here - a debug spew listener and a file listener.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 namespace ATG
@@ -17,7 +23,7 @@ namespace ATG
 class ILogListener
 {
 public:
-    virtual VOID LogMessage( const CHAR* strMessage ) = NULL;
+    virtual VOID LogMessage( const CHAR* strMessage ) = 0;
     virtual VOID LogWarning( const CHAR* strMessage ) { LogMessage( strMessage ); }
     virtual VOID LogError( const CHAR* strMessage ) { LogMessage( strMessage ); }
     virtual VOID LogCommand( DWORD dwCommand, VOID* pData ) { UNREFERENCED_PARAMETER( dwCommand ); UNREFERENCED_PARAMETER( pData ); }

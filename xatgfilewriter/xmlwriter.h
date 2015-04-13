@@ -1,12 +1,18 @@
 //-------------------------------------------------------------------------------------
-//  xmlwriter.h
+// xmlwriter.h
 //  
-//  A simple XML writer.
+// A simple XML writer.
 //  
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #pragma once
 
 #define XMLWRITER_NAME_STACK_SIZE 255
@@ -90,6 +96,6 @@ namespace ATG
     class IXMLSerializable
     {
     public:
-        virtual BOOL Serialize( XMLWriter* pXMLWriter ) = NULL;
+        virtual BOOL Serialize( XMLWriter* pXMLWriter ) = 0;
     };
 }

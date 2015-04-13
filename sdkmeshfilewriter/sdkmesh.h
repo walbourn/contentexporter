@@ -7,11 +7,16 @@
 //   applications should avoid this file format in favor of a destination format that 
 //   meets the specific needs of the application.
 //
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
 // Copyright (c) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //--------------------------------------------------------------------------------------
 #pragma once
-#ifndef _SDKMESH_
-#define _SDKMESH_
 
 //--------------------------------------------------------------------------------------
 // Hard Defines for the various structures
@@ -51,18 +56,6 @@ enum SDKMESH_PRIMITIVE_TYPE
     PT_TRIANGLE_PATCH_LIST,
 };
 
-enum SDKMESH_PARAMETER_TYPE
-{
-    PMT_STRING = 0,
-    PMT_BOOLEAN,
-    PMT_INTEGER,
-    PMT_FLOAT,
-    PMT_FLOAT2,
-    PMT_FLOAT3,
-    PMT_FLOAT4,
-    PMT_MATRIX4X4,
-};
-
 enum SDKMESH_INDEX_TYPE
 {
     IT_16BIT = 0,
@@ -78,6 +71,8 @@ enum FRAME_TRANSFORM_TYPE
 //--------------------------------------------------------------------------------------
 // Structures.  Unions with pointers are forced to 64bit.
 //--------------------------------------------------------------------------------------
+#pragma pack(push,8)
+
 struct SDKMESH_HEADER
 {
     //Basic Info and sizes
@@ -113,10 +108,6 @@ struct SDKMESH_VERTEX_BUFFER_HEADER
     union
     {
         UINT64					DataOffset;				//(This also forces the union to 64bits)
-        IDirect3DVertexBuffer9* pVB9;
-#ifdef D3D10_SDK_VERSION
-        ID3D10Buffer*			pVB10;
-#endif
     };
 };
 
@@ -128,10 +119,6 @@ struct SDKMESH_INDEX_BUFFER_HEADER
     union
     {
         UINT64					DataOffset;				//(This also forces the union to 64bits)
-        IDirect3DIndexBuffer9*  pIB9;
-#ifdef D3D10_SDK_VERSION
-        ID3D10Buffer*			pIB10;
-#endif
     };
 };
 
@@ -202,81 +189,29 @@ struct SDKMESH_MATERIAL
     union
     {
         UINT64						Force64_1;			//Force the union to 64bits
-        IDirect3DTexture9*		    pDiffuseTexture9;
-#ifdef D3D10_SDK_VERSION
-        ID3D10Texture2D*			pDiffuseTexture10;
-#endif
     };
     union
     {
         UINT64						Force64_2;			//Force the union to 64bits
-        IDirect3DTexture9*		    pNormalTexture9;
-#ifdef D3D10_SDK_VERSION
-        ID3D10Texture2D*			pNormalTexture10;
-#endif
     };
     union
     {
         UINT64						Force64_3;			//Force the union to 64bits
-        IDirect3DTexture9*		    pSpecularTexture9;
-#ifdef D3D10_SDK_VERSION
-        ID3D10Texture2D*			pSpecularTexture10;
-#endif
     };
 
     union
     {
         UINT64					    Force64_4;			//Force the union to 64bits
-#ifdef D3D10_SDK_VERSION
-        ID3D10ShaderResourceView*	pDiffuseRV10;
-#endif
     };
     union
     {
         UINT64						Force64_5;		    //Force the union to 64bits
-#ifdef D3D10_SDK_VERSION
-        ID3D10ShaderResourceView*	pNormalRV10;
-#endif
     };
     union
     {
         UINT64						Force64_6;			//Force the union to 64bits
-#ifdef D3D10_SDK_VERSION
-        ID3D10ShaderResourceView*	pSpecularRV10;
-#endif
     };
 
-};
-
-struct SDKMESH_PARAMETER
-{
-    SDKMESH_PARAMETER_TYPE  Type;
-    char                    Name[MAX_PARAMETER_NAME];
-    union
-    {
-        char                StringValue[MAX_PARAMETER_STRING];
-        BOOL                BooleanValue;
-        INT                 IntegerValue;
-        FLOAT               FloatValue;
-        FLOAT               VectorValue[16];
-        FLOAT               MatrixValue[4][4];
-    };
-};
-
-struct SDKMESH_PARAMETERMATERIAL
-{
-    char		Name[MAX_MATERIAL_NAME];
-
-    // Use MaterialInstancePath
-    char		MaterialInstancePath[MAX_MATERIAL_PATH];
-
-    UINT        NumParameters;
-    union
-    {
-
-        UINT64              ParametersOffset;
-        SDKMESH_PARAMETER*  pParameters;
-    };
 };
 
 struct SDKANIMATION_FILE_HEADER
@@ -308,138 +243,16 @@ struct SDKANIMATION_FRAME_DATA
     };
 };
 
-#ifndef _CONVERTER_APP_
-//--------------------------------------------------------------------------------------
-// CDXUTSDKMesh class.  This class reads the sdkmesh file format for use by the samples
-//--------------------------------------------------------------------------------------
-class CDXUTSDKMesh
-{
-protected:
-    //These are the pointers to the two chunks of data loaded in from the mesh file
-    BYTE*							m_pStaticMeshData;
-    BYTE*						    m_pAnimationData;
+#pragma pack(pop)
 
-    //Keep track of the path
-    WCHAR							m_strPath[MAX_PATH];
-
-    //General mesh info
-    SDKMESH_HEADER*					m_pMeshHeader;
-    SDKMESH_VERTEX_BUFFER_HEADER*	m_pVertexBufferArray;
-    SDKMESH_INDEX_BUFFER_HEADER*	m_pIndexBufferArray;
-    SDKMESH_MESH*					m_pMeshArray;
-    SDKMESH_SUBSET*					m_pSubsetArray;
-    SDKMESH_FRAME*					m_pFrameArray;
-    SDKMESH_MATERIAL*				m_pMaterialArray;
-
-    // Adjacency information (not part of the m_pStaticMeshData, so it must be created and destroyed separately )
-    SDKMESH_INDEX_BUFFER_HEADER*	m_pAdjacencyIndexBufferArray;
-
-    //Animation (TODO: Add ability to load/track multiple animation sets)
-    SDKANIMATION_FILE_HEADER*		m_pAnimationHeader;
-    SDKANIMATION_FRAME_DATA*		m_pAnimationFrameData;
-    D3DXMATRIX*						m_pBindPoseFrameMatrices;
-    D3DXMATRIX*					    m_pTransformedFrameMatrices;
-
-protected:
-    void LoadMaterials( ID3D10Device* pd3dDevice, SDKMESH_MATERIAL* pMaterials, UINT NumMaterials );
-    void LoadMaterials( IDirect3DDevice9* pd3dDevice, SDKMESH_MATERIAL* pMaterials, UINT NumMaterials );
-    HRESULT CreateVertexBuffer( ID3D10Device* pd3dDevice, SDKMESH_VERTEX_BUFFER_HEADER* pHeader, void* pVertices );
-    HRESULT CreateVertexBuffer( IDirect3DDevice9* pd3dDevice, SDKMESH_VERTEX_BUFFER_HEADER* pHeader, void* pVertices );
-    HRESULT CreateIndexBuffer( ID3D10Device* pd3dDevice, SDKMESH_INDEX_BUFFER_HEADER* pHeader, void* pIndices );
-    HRESULT CreateIndexBuffer( IDirect3DDevice9* pd3dDevice, SDKMESH_INDEX_BUFFER_HEADER* pHeader, void* pIndices );
-    virtual HRESULT CreateFromFile( ID3D10Device *pDev10, IDirect3DDevice9* pDev9, LPCTSTR szFileName, bool bOptimize, bool bCreateAdjacencyIndices );
-
-    //frame manipulation
-    void TransformBindPoseFrame( UINT iFrame, D3DXMATRIX* pParentWorld );
-    void TransformFrame( UINT iFrame, D3DXMATRIX* pParentWorld, double fTime );
-    void TransformFrameAbsolute( UINT iFrame, double fTime );
-
-    //rendering helpers
-    void RenderMesh( UINT iMesh,
-                     bool bAdjacent,
-                     ID3D10Device* pd3dDevice, 
-                     ID3D10EffectTechnique* pTechnique, 
-                     ID3D10EffectShaderResourceVariable* ptxDiffuse,
-                     ID3D10EffectShaderResourceVariable* ptxNormal,
-                     ID3D10EffectShaderResourceVariable* ptxSpecular,
-                     ID3D10EffectVectorVariable* pvDiffuse, 
-                     ID3D10EffectVectorVariable* pvSpecular );
-    void RenderFrame( UINT iFrame,
-                      bool bAdjacent,
-                      ID3D10Device* pd3dDevice, 
-                      ID3D10EffectTechnique* pTechnique, 
-                      ID3D10EffectShaderResourceVariable* ptxDiffuse,
-                      ID3D10EffectShaderResourceVariable* ptxNormal,
-                      ID3D10EffectShaderResourceVariable* ptxSpecular,
-                      ID3D10EffectVectorVariable* pvDiffuse, 
-                      ID3D10EffectVectorVariable* pvSpecular );
-
-    // TODO: add 9 rendering helpers
-    
-public:
-    CDXUTSDKMesh();
-    virtual ~CDXUTSDKMesh();
-    virtual HRESULT Create( ID3D10Device *pDev10, LPCTSTR szFileName, bool bOptimize=true, bool bCreateAdjacencyIndices=false );
-    virtual HRESULT Create( IDirect3DDevice9* pDev9, LPCTSTR szFileName, bool bOptimize=true, bool bCreateAdjacencyIndices=false );
-    virtual HRESULT LoadAnimation( WCHAR* szFileName );
-    virtual void Destroy();
-
-    //Frame manipulation
-    void TransformBindPose( D3DXMATRIX* pWorld );
-    void TransformMesh( D3DXMATRIX* pWorld, double fTime );
-
-    //Adjacency
-    HRESULT CreateAdjacencyIndices( ID3D10Device *pd3dDevice, float fEpsilon, BYTE* pBufferData );
-
-    //Generic Rendering
-    virtual void Render( ID3D10Device *pd3dDevice, 
-                         ID3D10EffectTechnique* pTechnique, 
-                         ID3D10EffectShaderResourceVariable* ptxDiffuse = NULL,
-                         ID3D10EffectShaderResourceVariable* ptxNormal = NULL,
-                         ID3D10EffectShaderResourceVariable* ptxSpecular = NULL,
-                         ID3D10EffectVectorVariable* pvDiffuse = NULL, 
-                         ID3D10EffectVectorVariable* pvSpecular = NULL );
-    virtual void RenderAdjacent( ID3D10Device *pd3dDevice, 
-                         ID3D10EffectTechnique* pTechnique, 
-                         ID3D10EffectShaderResourceVariable* ptxDiffuse = NULL,
-                         ID3D10EffectShaderResourceVariable* ptxNormal = NULL,
-                         ID3D10EffectShaderResourceVariable* ptxSpecular = NULL,
-                         ID3D10EffectVectorVariable* pvDiffuse = NULL, 
-                         ID3D10EffectVectorVariable* pvSpecular = NULL );
-    // TODO: add 9 render function
-
-    //Helpers (D3D10 specific)
-    static D3D10_PRIMITIVE_TOPOLOGY GetPrimitiveType10( SDKMESH_PRIMITIVE_TYPE PrimType );
-    DXGI_FORMAT GetIBFormat10( UINT iMesh );
-    ID3D10Buffer* GetVB10( UINT iMesh, UINT iVB );
-    ID3D10Buffer* GetIB10( UINT iMesh );
-    ID3D10Buffer* GetAdjIB10( UINT iMesh );
-
-    //Helpers (D3D9 specific)
-    static D3DPRIMITIVETYPE GetPrimitiveType9( SDKMESH_PRIMITIVE_TYPE PrimType );
-    D3DFORMAT GetIBFormat9( UINT iMesh );
-    IDirect3DVertexBuffer9* GetVB9( UINT iMesh, UINT iVB );
-    IDirect3DIndexBuffer9* GetIB9( UINT iMesh );
-
-    //Helpers (general)
-    UINT GetNumMeshes();
-    SDKMESH_MATERIAL* GetMaterial( UINT iMaterial );
-    SDKMESH_MESH* GetMesh( UINT iMesh );
-    UINT GetNumSubsets( UINT iMesh );
-    SDKMESH_SUBSET* GetSubset( UINT iMesh, UINT iSubset );
-    UINT GetVertexStride( UINT iMesh, UINT iVB );
-    SDKMESH_FRAME* FindFrame( char* pszName );
-    UINT64 GetNumVertices( UINT iMesh, UINT iVB );
-    UINT64 GetNumIndices( UINT iMesh );
-    D3DXVECTOR3 GetMeshBBoxCenter( UINT iMesh );
-    D3DXVECTOR3 GetMeshBBoxExtents( UINT iMesh );
-
-    //Animation
-    UINT GetNumInfluences( UINT iMesh );
-    D3DXMATRIX* GetMeshInfluenceMatrix( UINT iMesh, UINT iInfluence );
-    UINT GetAnimationKeyFromTime( double fTime );
-};
-#endif
-
-#endif
-
+static_assert( sizeof(D3DVERTEXELEMENT9) == 8, "Direct3D9 Decl structure size incorrect" );
+static_assert( sizeof(SDKMESH_HEADER)== 104, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_VERTEX_BUFFER_HEADER) == 288, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_INDEX_BUFFER_HEADER) == 32, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_MESH) == 224, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_SUBSET) == 144, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_FRAME) == 184, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_MATERIAL) == 1256, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKANIMATION_FILE_HEADER) == 40, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKANIMATION_DATA) == 40, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKANIMATION_FRAME_DATA) == 112, "SDK Mesh structure size incorrect" );

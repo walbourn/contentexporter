@@ -1,8 +1,15 @@
 //-------------------------------------------------------------------------------------
-//  ParseAnimation.cpp
+// ParseAnimation.cpp
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 
 #include "StdAfx.h"
@@ -13,7 +20,7 @@ extern ATG::ExportScene* g_pScene;
 struct AnimationScanNode
 {
     INT iParentIndex;
-    KFbxNode* pNode;
+    FbxNode* pNode;
     ExportAnimationTrack* pTrack;
     DWORD dwFlags;
     D3DXMATRIX matGlobal;
@@ -21,7 +28,7 @@ struct AnimationScanNode
 
 typedef vector<AnimationScanNode> ScanList;
 
-VOID ParseNode( KFbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIndex, BOOL bIncludeNode )
+VOID ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIndex, BOOL bIncludeNode )
 {
     INT iCurrentIndex = iParentIndex;
 
@@ -53,7 +60,7 @@ VOID ParseNode( KFbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentI
     }
 }
 
-D3DXMATRIX ConvertMatrix( const KFbxXMatrix& matrix )
+static D3DXMATRIX ConvertMatrix( const FbxMatrix& matrix )
 {
     D3DXMATRIX matResult;
     FLOAT* fData = (FLOAT*)&matResult;
@@ -66,7 +73,7 @@ D3DXMATRIX ConvertMatrix( const KFbxXMatrix& matrix )
 }
 
 
-VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, KFbxXMatrix& matFBXGlobal, FLOAT fTime )
+VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatrix& matFBXGlobal, FLOAT fTime )
 {
     D3DXMATRIX matGlobal = ConvertMatrix( matFBXGlobal );
     asn.matGlobal = matGlobal;
@@ -91,7 +98,7 @@ VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, KFbxXMatr
     asn.pTrack->TransformTrack.AddKey( fTime, *(D3DXVECTOR3*)&vTranslation, *(D3DXQUATERNION*)&qRotation, *(D3DXVECTOR3*)&vScale );
 }
 
-VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, KFbxScene* pFbxScene )
+VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFbxScene )
 {
     const FLOAT fDeltaTime = pAnim->fSourceSamplingInterval;
     const FLOAT fStartTime = pAnim->fStartTime;
@@ -104,13 +111,13 @@ VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, KFbxScene* pF
 
     while( fCurrentTime <= fEndTime )
     {
-        KTime CurrentTime;
+        FbxTime CurrentTime;
         CurrentTime.SetSecondDouble( fCurrentTime );
         for( DWORD i = 0; i < dwNodeCount; ++i )
         {
             AnimationScanNode& asn = scanlist[i];
-            KFbxAnimEvaluator* pAnimEvaluator = pFbxScene->GetEvaluator();
-            KFbxXMatrix& matGlobal = pAnimEvaluator->GetNodeGlobalTransform( asn.pNode, CurrentTime );
+            auto pAnimEvaluator = pFbxScene->GetEvaluator();
+            auto matGlobal = pAnimEvaluator->GetNodeGlobalTransform( asn.pNode, CurrentTime );
             AnimationScanNode* pParent = NULL;
             if( asn.iParentIndex >= 0 )
                 pParent = &scanlist[asn.iParentIndex];
@@ -120,34 +127,33 @@ VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, KFbxScene* pF
     }
 }
 
-VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
+VOID ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
 {
-    if( strTakeName->Compare( KFBXTAKENODE_DEFAULT_NAME ) == 0 )
-    {
+    // TODO - Ignore "Default"? FBXSDK_TAKENODE_DEFAULT_NAME
+
+    auto curAnimStack = pFbxScene->FindMember<FbxAnimStack>( strAnimStackName->Buffer() );
+    if ( !curAnimStack )
         return;
-    }
 
-    pFbxScene->SetCurrentTake( strTakeName->Buffer() );
-    KFbxTakeInfo* pTakeInfo = pFbxScene->GetTakeInfo( *strTakeName );
+    pFbxScene->GetEvaluator()->SetContext( curAnimStack );
 
-    ExportLog::LogMsg( 2, "Parsing animation \"%s\"", strTakeName->Buffer() );
+    auto pTakeInfo = pFbxScene->GetTakeInfo( *strAnimStackName  );
 
-    ExportAnimation* pAnim = new ExportAnimation();
-    pAnim->SetName( strTakeName->Buffer() );
+    ExportLog::LogMsg( 2, "Parsing animation \"%s\"", strAnimStackName->Buffer() );
+
+    auto pAnim = new ExportAnimation();
+    pAnim->SetName( strAnimStackName->Buffer() );
     pAnim->SetDCCObject( pTakeInfo );
     g_pScene->AddAnimation( pAnim );
 
-    KTime FrameTime;
-    FrameTime.SetTime( 0, 0, 0, 1, 0, pFbxScene->GetGlobalTimeSettings().GetTimeMode() );
+    FbxTime FrameTime;
+    FrameTime.SetTime( 0, 0, 0, 1, 0, pFbxScene->GetGlobalSettings().GetTimeMode() );
 
-    //KTime::ETimeMode TimeMode = pFbxScene->GetGlobalTimeSettings().GetTimeMode();
-    FLOAT fStartTime = 0.0f;
-    FLOAT fEndTime = 1.0f;
-    //FLOAT fFrameTime = 1.0f / (FLOAT)KTime::GetFrameRate( TimeMode );
     FLOAT fFrameTime = (FLOAT)FrameTime.GetSecondDouble();
     FLOAT fSampleTime = fFrameTime / (FLOAT)g_pScene->Settings().iAnimSampleCountPerFrame;
     assert( fSampleTime > 0 );
 
+    float fStartTime, fEndTime;
     if( pTakeInfo != NULL )
     {
         fStartTime = (FLOAT)pTakeInfo->mLocalTimeSpan.GetStart().GetSecondDouble();
@@ -155,6 +161,12 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
     }
     else
     {
+        FbxTimeSpan tlTimeSpan;
+        pFbxScene->GetGlobalSettings().GetTimelineDefaultTimeSpan( tlTimeSpan );
+
+        fStartTime = (float)tlTimeSpan.GetStart().GetSecondDouble();
+        fEndTime = (float)tlTimeSpan.GetStop().GetSecondDouble();
+
         ExportLog::LogWarning( "Animation take \"%s\" has no takeinfo; using defaults.", pAnim->GetName().SafeString() );
     }
     pAnim->fStartTime = fStartTime;
@@ -176,7 +188,7 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
     {
         const CHAR* strTrackName = scanlist[i].pNode->GetName();
         ExportLog::LogMsg( 4, "Track: %s", strTrackName );
-        ExportAnimationTrack* pTrack = new ExportAnimationTrack();
+        auto pTrack = new ExportAnimationTrack();
         pTrack->SetName( strTrackName );
         pTrack->TransformTrack.pSourceFrame = g_pScene->FindFrameByDCCObject( scanlist[i].pNode );
         pAnim->AddTrack( pTrack );
@@ -188,19 +200,19 @@ VOID ParseTake( KFbxScene* pFbxScene, KString* strTakeName )
     pAnim->Optimize();
 }
 
-VOID ParseAnimation( KFbxScene* pFbxScene )
+VOID ParseAnimation( FbxScene* pFbxScene )
 {
     assert( pFbxScene != NULL );
 
     // set animation quality settings
     ExportAnimation::SetAnimationExportQuality( g_pScene->Settings().iAnimPositionExportQuality, g_pScene->Settings().iAnimOrientationExportQuality, 50 );
 
-    KArrayTemplate<KString*> TakeNameArray;
-    pFbxScene->FillTakeNameArray( TakeNameArray );
+    FbxArray<FbxString*> AnimStackNameArray;
+    pFbxScene->FillAnimStackNameArray( AnimStackNameArray );
 
-    DWORD dwTakeCount = (DWORD)TakeNameArray.GetCount();
-    for( DWORD i = 0; i < dwTakeCount; ++i )
+    DWORD dwAnimStackCount = (DWORD)AnimStackNameArray.GetCount();
+    for( DWORD i = 0; i < dwAnimStackCount; ++i )
     {
-        ParseTake( pFbxScene, TakeNameArray.GetAt(i) );
+        ParseAnimStack( pFbxScene, AnimStackNameArray.GetAt(i) );
     }
 }

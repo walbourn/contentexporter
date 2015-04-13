@@ -1,10 +1,16 @@
 //-------------------------------------------------------------------------------------
-//  SDKMeshFileWriter.cpp
+// SDKMeshFileWriter.cpp
 //
-//  Microsoft XNA Developer Connection
-//  Copyright © Microsoft Corporation. All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//  
+// Advanced Technology Group (ATG)
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//
+// http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-
 #include "stdafx.h"
 #include "SDKmesh.h"
 
@@ -12,14 +18,14 @@ extern ATG::ExportScene*     g_pScene;
 
 namespace ATG
 {
-    std::vector<const ExportFrame*>                 g_FrameArray;
+    std::vector<ExportFrame*>                       g_FrameArray;
     std::vector<SDKMESH_FRAME>                      g_FrameHeaderArray;
-    std::vector<const ExportModel*>                 g_ModelArray;
+    std::vector<ExportModel*>                       g_ModelArray;
     std::vector<SDKMESH_MESH>                       g_MeshHeaderArray;
-    std::vector<const ExportMeshBase*>              g_ModelMeshArray;
-    std::vector<const ExportVB*>                    g_VBArray;
+    std::vector<ExportMeshBase*>                    g_ModelMeshArray;
+    std::vector<ExportVB*>                          g_VBArray;
     std::vector<SDKMESH_VERTEX_BUFFER_HEADER>       g_VBHeaderArray;
-    std::vector<const ExportIB*>                    g_IBArray;
+    std::vector<ExportIB*>                          g_IBArray;
     std::vector<SDKMESH_INDEX_BUFFER_HEADER>        g_IBHeaderArray;
     std::vector<SDKMESH_SUBSET>                     g_SubsetArray;
     std::vector<UINT>                               g_SubsetIndexArray;
@@ -51,8 +57,8 @@ namespace ATG
         g_ExportMaterialToSDKMeshMaterialMap.clear();
     }
 
-	VOID ProcessTexture( CHAR* strDest, const DWORD dwDestLength, const CHAR* strSrc )
-	{
+    VOID ProcessTexture( CHAR* strDest, const DWORD dwDestLength, const CHAR* strSrc )
+    {
         DWORD dwLength = (DWORD)strlen( strSrc ) + 1;
         if( dwLength > dwDestLength )
         {
@@ -64,7 +70,7 @@ namespace ATG
         {
             strcpy_s( strDest, dwDestLength, strSrc );
         }
-	}
+    }
 
     DWORD CaptureMaterial( ExportMaterial* pMaterial )
     {
@@ -74,23 +80,24 @@ namespace ATG
             DWORD dwIndex = iter->second;
             return dwIndex;
         }
-		SDKMESH_MATERIAL Material;
+
+        SDKMESH_MATERIAL Material;
         ZeroMemory( &Material, sizeof(SDKMESH_MATERIAL) );
-		strcpy_s( Material.Name, pMaterial->GetName() );
+        strcpy_s( Material.Name, pMaterial->GetName() );
         ExportMaterialParameter* pDiffuse = pMaterial->FindParameter( "DiffuseTexture" );
         if( pDiffuse != NULL )
         {
-			ProcessTexture( Material.DiffuseTexture, MAX_MATERIAL_NAME, pDiffuse->ValueString.SafeString() );
+            ProcessTexture( Material.DiffuseTexture, MAX_MATERIAL_NAME, pDiffuse->ValueString.SafeString() );
         }
         ExportMaterialParameter* pNormal = pMaterial->FindParameter( "NormalMapTexture" );
         if( pNormal != NULL )
         {
-			ProcessTexture( Material.NormalTexture, MAX_MATERIAL_NAME, pNormal->ValueString.SafeString() );
+            ProcessTexture( Material.NormalTexture, MAX_MATERIAL_NAME, pNormal->ValueString.SafeString() );
         }
         ExportMaterialParameter* pSpecular = pMaterial->FindParameter( "SpecularMapTexture" );
         if( pSpecular != NULL )
         {
-			ProcessTexture( Material.SpecularTexture, MAX_MATERIAL_NAME, pSpecular->ValueString.SafeString() );
+            ProcessTexture( Material.SpecularTexture, MAX_MATERIAL_NAME, pSpecular->ValueString.SafeString() );
         }
         DWORD dwIndex = (DWORD)g_MaterialArray.size();
         g_MaterialArray.push_back( Material );
@@ -98,7 +105,7 @@ namespace ATG
         return dwIndex;
     }
 
-    VOID CaptureVertexBuffer( const ExportVB* pVB, const D3DVERTEXELEMENT9* pElements, DWORD dwElementCount )
+    VOID CaptureVertexBuffer( ExportVB* pVB, const D3DVERTEXELEMENT9* pElements, DWORD dwElementCount )
     {
         SDKMESH_VERTEX_BUFFER_HEADER VBHeader;
         ZeroMemory( &VBHeader, sizeof( SDKMESH_VERTEX_BUFFER_HEADER ) );
@@ -113,7 +120,7 @@ namespace ATG
         g_VBHeaderArray.push_back( VBHeader );
     }
 
-    VOID CaptureIndexBuffer( const ExportIB* pIB )
+    VOID CaptureIndexBuffer( ExportIB* pIB )
     {
         SDKMESH_INDEX_BUFFER_HEADER IBHeader;
         ZeroMemory( &IBHeader, sizeof( SDKMESH_INDEX_BUFFER_HEADER ) );
