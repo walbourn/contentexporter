@@ -19,7 +19,7 @@ namespace ATG
 {
 
 ExportFrame::ExportFrame()
-: ExportBase( NULL )
+: ExportBase( nullptr )
 {
     m_Transform.SetIdentity();
 }
@@ -30,47 +30,47 @@ ExportFrame::ExportFrame( ExportString name )
     m_Transform.SetIdentity();
 }
 
-ExportFrame::~ExportFrame(void)
+ExportFrame::~ExportFrame()
 {
-    for( UINT i = 0; i < m_vModels.size(); i++ )
+    for( size_t i = 0; i < m_vModels.size(); i++ )
     {
         delete m_vModels[i];
     }
     m_vModels.clear();
-    for( UINT i = 0; i < m_vLights.size(); i++ )
+    for( size_t i = 0; i < m_vLights.size(); i++ )
     {
         delete m_vLights[i];
     }
     m_vLights.clear();
-    for( UINT i = 0; i < m_vCameras.size(); i++ )
+    for( size_t i = 0; i < m_vCameras.size(); i++ )
     {
         delete m_vCameras[i];
     }
     m_vCameras.clear();
-    for( UINT i = 0; i < m_vChildren.size(); i++ )
+    for( size_t i = 0; i < m_vChildren.size(); i++ )
     {
         delete m_vChildren[i];
     }
     m_vChildren.clear();
 }
 
-ExportFrame* ExportFrame::FindFrameByDCCObject( VOID* pObject )
+ExportFrame* ExportFrame::FindFrameByDCCObject( void* pObject )
 {
-    if( pObject == NULL )
-        return NULL;
+    if( !pObject )
+        return nullptr;
     if( pObject == GetDCCObject() )
         return this;
 
-    for( UINT i = 0; i < m_vChildren.size(); i++ )
+    for( size_t i = 0; i < m_vChildren.size(); i++ )
     {
         ExportFrame* pFrame = m_vChildren[i]->FindFrameByDCCObject( pObject );
-        if( pFrame != NULL )
+        if( pFrame )
             return pFrame;
     }
-    return NULL;
+    return nullptr;
 }
 
-VOID ExportFrame::NormalizeTransform()
+void ExportFrame::NormalizeTransform()
 {
     m_Transform.Normalize();
 }

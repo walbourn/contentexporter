@@ -15,8 +15,9 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-#pragma warning( disable: 4100 4296 4505 4512 4996 )
+#pragma warning( disable : 4100 4296 4481 4505 4512 4996 )
 
+#define NOMINMAX
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
@@ -27,6 +28,7 @@
 #include <vector>
 #include <hash_map>
 #include <algorithm>
+#include <memory>
 #include <commctrl.h>
 #include <richedit.h>
 #include <process.h>
@@ -34,6 +36,11 @@
 #include <stdio.h>
 #include <time.h>
 #include <shellapi.h>
+
+#pragma warning(push)
+#pragma warning(disable : 4005 4668)
+#include <stdint.h>
+#pragma warning(pop)
 
 #include <xnamath.h>
 
@@ -44,7 +51,10 @@
 #include "..\ExportObjects\ExportMaterial.h"
 #include "..\ExportObjects\ExportObjects.h"
 
+#pragma warning(push)
+#pragma warning( disable : 4616 6011 )
 #include <fbxsdk.h>
+#pragma warning(pop)
 
 #include "..\XATGFileWriter\XATGFileWriter.h"
 #include "..\SDKMeshFileWriter\SDKMeshFileWriter.h"

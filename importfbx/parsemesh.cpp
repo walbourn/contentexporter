@@ -17,63 +17,62 @@
 #include "ParseMaterial.h"
 #include "ParseMisc.h"
 
+using namespace ATG;
+
 extern ATG::ExportScene* g_pScene;
 
 class SkinData
 {
 public:
-    vector<FbxNode*> InfluenceNodes;
-    DWORD dwVertexCount;
+    std::vector<FbxNode*> InfluenceNodes;
+    size_t dwVertexCount;
     DWORD dwVertexStride;
-    BYTE* pBoneIndices;
-    FLOAT* pBoneWeights;
+    std::unique_ptr<BYTE[]> pBoneIndices;
+    std::unique_ptr<float[]> pBoneWeights;
 
     SkinData()
-        : pBoneWeights( NULL ),
-          pBoneIndices( NULL ),
-          dwVertexCount( 0 ),
+        : dwVertexCount( 0 ),
           dwVertexStride( 0 )
     {
     }
 
     ~SkinData()
     {
-        if( pBoneIndices != NULL ) delete[] pBoneIndices;
-        if( pBoneWeights != NULL ) delete[] pBoneWeights;
     }
 
-    VOID Alloc( DWORD dwCount, DWORD dwStride )
+    void Alloc( size_t dwCount, DWORD dwStride )
     {
         dwVertexCount = dwCount;
         dwVertexStride = dwStride;
 
-        DWORD dwBufferSize = dwVertexCount * dwVertexStride;
-        pBoneIndices = new BYTE[ dwBufferSize ];
-        ZeroMemory( pBoneIndices, sizeof(BYTE) * dwBufferSize );
-        pBoneWeights = new FLOAT[ dwBufferSize ];
-        ZeroMemory( pBoneWeights, sizeof(FLOAT) * dwBufferSize );
+        size_t dwBufferSize = dwVertexCount * dwVertexStride;
+        pBoneIndices.reset( new BYTE[ dwBufferSize ] );
+        ZeroMemory( pBoneIndices.get(), sizeof(BYTE) * dwBufferSize );
+
+        pBoneWeights.reset( new float[ dwBufferSize ] );
+        ZeroMemory( pBoneWeights.get(), sizeof(float) * dwBufferSize );
     }
 
 
-    BYTE* GetIndices( DWORD dwIndex ) 
+    BYTE* GetIndices( size_t dwIndex ) 
     { 
         assert( dwIndex < dwVertexCount ); 
-        return pBoneIndices + ( dwIndex * dwVertexStride ); 
+        return pBoneIndices.get() + ( dwIndex * dwVertexStride ); 
     }
-    FLOAT* GetWeights( DWORD dwIndex ) 
+    float* GetWeights( size_t dwIndex ) 
     { 
         assert( dwIndex < dwVertexCount ); 
-        return pBoneWeights + ( dwIndex * dwVertexStride ); 
+        return pBoneWeights.get() + ( dwIndex * dwVertexStride ); 
     }
 
-    DWORD GetBoneCount() const { return (DWORD)InfluenceNodes.size(); }
+    DWORD GetBoneCount() const { return static_cast<DWORD>( InfluenceNodes.size() ); }
 
-    VOID InsertWeight( DWORD dwIndex, DWORD dwBoneIndex, FLOAT fBoneWeight )
+    void InsertWeight( size_t dwIndex, DWORD dwBoneIndex, float fBoneWeight )
     {
         assert( dwBoneIndex < 256 );
 
-        BYTE* pIndices = GetIndices( dwIndex );
-        FLOAT* pWeights = GetWeights( dwIndex );
+        auto pIndices = GetIndices( dwIndex );
+        auto pWeights = GetWeights( dwIndex );
 
         for( DWORD i = 0; i < dwVertexStride; ++i )
         {
@@ -84,7 +83,7 @@ public:
                     pIndices[j] = pIndices[j - 1];
                     pWeights[j] = pWeights[j - 1];
                 }
-                pIndices[i] = (BYTE)dwBoneIndex;
+                pIndices[i] = static_cast<BYTE>( dwBoneIndex );
                 pWeights[i] = fBoneWeight;
                 break;
             }
@@ -92,7 +91,7 @@ public:
     }
 };
 
-VOID CaptureBindPoseMatrix( FbxNode* pNode, const FbxMatrix& matBindPose )
+void CaptureBindPoseMatrix( FbxNode* pNode, const FbxMatrix& matBindPose )
 {
     PoseMap::iterator iter = g_BindPoseMap.find( pNode );
     if( iter != g_BindPoseMap.end() )
@@ -102,7 +101,7 @@ VOID CaptureBindPoseMatrix( FbxNode* pNode, const FbxMatrix& matBindPose )
         {
             // found the bind pose matrix, but it is different than what we prevoiusly encountered
             g_BindPoseMap[pNode] = matBindPose;
-            g_bBindPoseFixupRequired = TRUE;
+            g_bBindPoseFixupRequired = true;
             ExportLog::LogMsg( 4, "Updating bind pose matrix for frame \"%s\"", pNode->GetName() );
         }
     }
@@ -110,16 +109,16 @@ VOID CaptureBindPoseMatrix( FbxNode* pNode, const FbxMatrix& matBindPose )
     {
         // have not encountered this frame in the bind pose yet
         g_BindPoseMap[pNode] = matBindPose;
-        g_bBindPoseFixupRequired = TRUE;
+        g_bBindPoseFixupRequired = true;
         ExportLog::LogMsg( 4, "Adding bind pose matrix for frame \"%s\"", pNode->GetName() );
     }
 }
 
-BOOL ParseMeshSkinning( FbxMesh* pMesh, SkinData* pSkinData )
+bool ParseMeshSkinning( FbxMesh* pMesh, SkinData* pSkinData )
 {
     DWORD dwDeformerCount = pMesh->GetDeformerCount( FbxDeformer::eSkin );
     if( dwDeformerCount == 0 )
-        return FALSE;
+        return false;
 
     ExportLog::LogMsg( 4, "Parsing skin weights on mesh %s", pMesh->GetName() );
 
@@ -143,7 +142,7 @@ BOOL ParseMeshSkinning( FbxMesh* pMesh, SkinData* pSkinData )
 
             DWORD dwBoneIndex = pSkinData->GetBoneCount();
             pSkinData->InfluenceNodes.push_back( pLink );
-            ExportLog::LogMsg( 4, "Influence %d: %s", dwBoneIndex, pLink->GetName() );
+            ExportLog::LogMsg( 4, "Influence %u: %s", dwBoneIndex, pLink->GetName() );
             
             FbxAMatrix matXBindPose;
             pCluster->GetTransformLinkMatrix( matXBindPose );
@@ -159,15 +158,15 @@ BOOL ParseMeshSkinning( FbxMesh* pMesh, SkinData* pSkinData )
 
             for( DWORD i = 0; i < dwClusterSize; ++i )
             {
-                pSkinData->InsertWeight( pIndices[i], dwBoneIndex, (FLOAT)pWeights[i] );
+                pSkinData->InsertWeight( pIndices[i], dwBoneIndex, (float)pWeights[i] );
             }
         }
     }
 
-    return TRUE;
+    return true;
 }
 
-VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess, const CHAR* strSuffix )
+void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bool bSubDProcess, const CHAR* strSuffix )
 {
     if( !g_pScene->Settings().bExportMeshes )
         return;
@@ -176,10 +175,10 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
         return;
 
     const CHAR* strName = pFbxMesh->GetName();
-    if( strName == NULL || strName[0] == '\0' )
+    if( !strName || strName[0] == '\0' )
         strName = pParentFrame->GetName().SafeString();
 
-    if( strSuffix == NULL )
+    if( !strSuffix )
     {
         strSuffix = "";
     }
@@ -188,19 +187,19 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
     ExportMesh* pMesh = new ExportMesh( strDecoratedName );
     pMesh->SetDCCObject( pFbxMesh );
 
-    BOOL bSmoothMesh = FALSE;
+    bool bSmoothMesh = false;
 
     auto Smoothness = pFbxMesh->GetMeshSmoothness();
     if( Smoothness != FbxMesh::eHull && g_pScene->Settings().bConvertMeshesToSubD )
     {
-        bSubDProcess = TRUE;
-        bSmoothMesh = TRUE;
+        bSubDProcess = true;
+        bSmoothMesh = true;
     }
 
     ExportLog::LogMsg( 2, "Parsing %s mesh \"%s\", renamed to \"%s\"", bSmoothMesh ? "smooth" : "poly", strName, strDecoratedName );
 
     SkinData skindata;
-    BOOL bSkinnedMesh = ParseMeshSkinning( pFbxMesh, &skindata );
+    bool bSkinnedMesh = ParseMeshSkinning( pFbxMesh, &skindata );
     if( bSkinnedMesh )
     {
         DWORD dwBoneCount = skindata.GetBoneCount();
@@ -212,9 +211,9 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
 
     pMesh->SetVertexColorCount( 0 );
 
-    FbxLayerElementArrayTemplate<FbxVector4> *pNormals = NULL;
+    FbxLayerElementArrayTemplate<FbxVector4> *pNormals = nullptr;
     pFbxMesh->GetNormals( &pNormals );
-    if( pNormals == NULL )
+    if( !pNormals )
     {
         pFbxMesh->InitNormals();
         pFbxMesh->ComputeVertexNormals();
@@ -237,16 +236,16 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
     }
 
     DWORD dwLayerCount = pFbxMesh->GetLayerCount();
-    ExportLog::LogMsg( 4, "%d layers in FBX mesh", dwLayerCount );
+    ExportLog::LogMsg( 4, "%u layers in FBX mesh", dwLayerCount );
 
     DWORD dwVertexColorCount = 0;
-    FbxLayerElementVertexColor* pVertexColorSet = NULL;
+    FbxLayerElementVertexColor* pVertexColorSet = nullptr;
     DWORD dwUVSetCount = 0;
-    FbxLayerElementMaterial* pMaterialSet = NULL;
+    FbxLayerElementMaterial* pMaterialSet = nullptr;
     std::vector<FbxLayerElementUV*> VertexUVSets;
     for( DWORD dwLayerIndex = 0; dwLayerIndex < dwLayerCount; ++dwLayerIndex )
     {
-        if( pFbxMesh->GetLayer(dwLayerIndex)->GetVertexColors() != NULL )
+        if( pFbxMesh->GetLayer(dwLayerIndex)->GetVertexColors() )
         {
             if( dwVertexColorCount == 0 )
             {
@@ -258,14 +257,14 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
                 ExportLog::LogWarning( "Only one vertex color set is allowed; ignoring additional vertex color sets." );
             }
         }
-        if( pFbxMesh->GetLayer(dwLayerIndex)->GetUVs() != NULL )
+        if( pFbxMesh->GetLayer(dwLayerIndex)->GetUVs() )
         {
             dwUVSetCount++;
             VertexUVSets.push_back( pFbxMesh->GetLayer(dwLayerIndex)->GetUVs() );
         }
-        if( pFbxMesh->GetLayer(dwLayerIndex)->GetMaterials() != NULL )
+        if( pFbxMesh->GetLayer(dwLayerIndex)->GetMaterials() )
         {
-            if( pMaterialSet != NULL )
+            if( pMaterialSet )
             {
                 ExportLog::LogWarning( "Multiple material layers detected on mesh %s.  Some will be ignored.", pMesh->GetName().SafeString() );
             }
@@ -284,9 +283,9 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
         MaterialList.push_back( pMaterial );
     }
 
-    ExportLog::LogMsg( 4, "Found %d UV sets", dwUVSetCount );
-    dwUVSetCount = min( dwUVSetCount, (DWORD)g_pScene->Settings().iMaxUVSetCount );
-    ExportLog::LogMsg( 4, "Using %d UV sets", dwUVSetCount );
+    ExportLog::LogMsg( 4, "Found %u UV sets", dwUVSetCount );
+    dwUVSetCount = std::min<DWORD>( dwUVSetCount, g_pScene->Settings().iMaxUVSetCount );
+    ExportLog::LogMsg( 4, "Using %u UV sets", dwUVSetCount );
 
     pMesh->SetVertexColorCount( dwVertexColorCount );
     pMesh->SetVertexUVCount( dwUVSetCount );
@@ -309,7 +308,7 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
         assert( skindata.dwVertexCount == dwVertexCount );
     }
     
-    ExportLog::LogMsg( 4, "%d vertices, %d polygons", dwVertexCount, dwPolyCount );
+    ExportLog::LogMsg( 4, "%u vertices, %u polygons", dwVertexCount, dwPolyCount );
 
     DWORD dwNonConformingSubDPolys = 0;
 
@@ -328,7 +327,7 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
         }
 
         DWORD dwMaterialIndex = 0;
-        if( pMaterialSet != NULL )
+        if( pMaterialSet )
         {
             switch( pMaterialSet->GetMappingMode() )
             {
@@ -348,7 +347,7 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
             }
         }
 
-        const BOOL bInvertTexVCoord = g_pScene->Settings().bInvertTexVCoord;
+        const bool bInvertTexVCoord = g_pScene->Settings().bInvertTexVCoord;
 
         DWORD dwCornerIndices[3];
         // Loop over triangles in the polygon.
@@ -362,9 +361,8 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
 
             FbxVector4 vNormals[3];
             ZeroMemory( vNormals, 3 * sizeof(FbxVector4) );
-            INT iPolyIndex = (INT)dwPolyIndex;
-            INT iVertIndex[3] = { 0, (INT)dwTriangleIndex + 1, (INT)dwTriangleIndex + 2 };
-            //INT iVertIndexUV[3] = { (INT)dwTriangleIndex, (INT)dwTriangleIndex + 1, (INT)dwTriangleIndex + 2 };
+            INT iPolyIndex = static_cast<INT>( dwPolyIndex );
+            INT iVertIndex[3] = { 0, static_cast<INT>( dwTriangleIndex + 1 ), static_cast<INT>( dwTriangleIndex + 2 ) };
             pFbxMesh->GetPolygonVertexNormal( iPolyIndex, iVertIndex[0], vNormals[0] );
             pFbxMesh->GetPolygonVertexNormal( iPolyIndex, iVertIndex[1], vNormals[1] );
             pFbxMesh->GetPolygonVertexNormal( iPolyIndex, iVertIndex[2], vNormals[2] );
@@ -373,7 +371,7 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
             auto pTriangle = g_MeshTriangleAllocator.GetNewTriangle();
 
             // Store polygon index
-            pTriangle->PolygonIndex = (INT)dwPolyIndex;
+            pTriangle->PolygonIndex = static_cast<INT>( dwPolyIndex );
 
             // Store material subset index
             pTriangle->SubsetIndex = dwMaterialIndex;
@@ -385,14 +383,14 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
                 pTriangle->Vertex[dwCornerIndex].DCCVertexIndex = dwDCCIndex;
 
                 // Store vertex position
-                pTriangle->Vertex[dwCornerIndex].Position.x = (FLOAT)pVertexPositions[dwDCCIndex].mData[0];
-                pTriangle->Vertex[dwCornerIndex].Position.y = (FLOAT)pVertexPositions[dwDCCIndex].mData[1];
-                pTriangle->Vertex[dwCornerIndex].Position.z = (FLOAT)pVertexPositions[dwDCCIndex].mData[2];
+                pTriangle->Vertex[dwCornerIndex].Position.x = (float)pVertexPositions[dwDCCIndex].mData[0];
+                pTriangle->Vertex[dwCornerIndex].Position.y = (float)pVertexPositions[dwDCCIndex].mData[1];
+                pTriangle->Vertex[dwCornerIndex].Position.z = (float)pVertexPositions[dwDCCIndex].mData[2];
 
                 // Store vertex normal
-                pTriangle->Vertex[dwCornerIndex].Normal.x = (FLOAT)vNormals[dwCornerIndex].mData[0];
-                pTriangle->Vertex[dwCornerIndex].Normal.y = (FLOAT)vNormals[dwCornerIndex].mData[1];
-                pTriangle->Vertex[dwCornerIndex].Normal.z = (FLOAT)vNormals[dwCornerIndex].mData[2];
+                pTriangle->Vertex[dwCornerIndex].Normal.x = (float)vNormals[dwCornerIndex].mData[0];
+                pTriangle->Vertex[dwCornerIndex].Normal.y = (float)vNormals[dwCornerIndex].mData[1];
+                pTriangle->Vertex[dwCornerIndex].Normal.z = (float)vNormals[dwCornerIndex].mData[2];
 
                 // Store UV sets
                 for( DWORD dwUVIndex = 0; dwUVIndex < dwUVSetCount; ++dwUVIndex )
@@ -413,19 +411,19 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
                     Value = pUVSet->GetDirectArray().GetAt( iUVIndex );
 
                     // Store a single UV set
-                    pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].x = (FLOAT)Value.mData[0];
+                    pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].x = (float)Value.mData[0];
                     if( bInvertTexVCoord )
                     {
-                        pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = 1.0f - (FLOAT)Value.mData[1];
+                        pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = 1.0f - (float)Value.mData[1];
                     }
                     else
                     {
-                        pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = (FLOAT)Value.mData[1];
+                        pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = (float)Value.mData[1];
                     }
                 }
 
                 // Store vertex color set
-                if( dwVertexColorCount > 0 && pVertexColorSet != NULL )
+                if( dwVertexColorCount > 0 && pVertexColorSet )
                 {
                     // Crack apart the FBX dereferencing system for Color coordinates
                     FbxColor Value( 0, 0, 0, 1 );
@@ -456,10 +454,10 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
                     }
 
                     // Store a single vertex color set
-                    pTriangle->Vertex[dwCornerIndex].Color.x = (FLOAT)Value.mRed;
-                    pTriangle->Vertex[dwCornerIndex].Color.y = (FLOAT)Value.mGreen;
-                    pTriangle->Vertex[dwCornerIndex].Color.z = (FLOAT)Value.mBlue;
-                    pTriangle->Vertex[dwCornerIndex].Color.w = (FLOAT)Value.mAlpha;
+                    pTriangle->Vertex[dwCornerIndex].Color.x = (float)Value.mRed;
+                    pTriangle->Vertex[dwCornerIndex].Color.y = (float)Value.mGreen;
+                    pTriangle->Vertex[dwCornerIndex].Color.z = (float)Value.mBlue;
+                    pTriangle->Vertex[dwCornerIndex].Color.w = (float)Value.mAlpha;
                 }
 
                 // Store skin weights
@@ -483,15 +481,15 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
     pMesh->Optimize( dwMeshOptimizationFlags );
 
     ExportModel* pModel = new ExportModel( pMesh );
-    DWORD dwMaterialCount = (DWORD)MaterialList.size();
-    if( pMesh->GetSubDMesh() == NULL )
+    size_t dwMaterialCount = MaterialList.size();
+    if( !pMesh->GetSubDMesh() )
     {
-        for( DWORD dwSubset = 0; dwSubset < dwMaterialCount; ++dwSubset )
+        for( size_t dwSubset = 0; dwSubset < dwMaterialCount; ++dwSubset )
         {
             auto pMaterial = MaterialList[dwSubset];
             auto pSubset = pMesh->GetSubset( dwSubset );
             CHAR strUniqueSubsetName[100];
-            sprintf_s( strUniqueSubsetName, "subset%d_%s", dwSubset, pMaterial->GetName().SafeString() );
+            sprintf_s( strUniqueSubsetName, "subset%Iu_%s", dwSubset, pMaterial->GetName().SafeString() );
             pSubset->SetName( strUniqueSubsetName );
             pModel->SetSubsetBinding( pSubset->GetName(), pMaterial );
         }
@@ -499,27 +497,27 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
     else
     {
         auto pSubDMesh = pMesh->GetSubDMesh();
-        DWORD dwSubsetCount = pSubDMesh->GetSubsetCount();
-        for( DWORD dwSubset = 0; dwSubset < dwSubsetCount; ++dwSubset )
+        size_t dwSubsetCount = pSubDMesh->GetSubsetCount();
+        for( size_t dwSubset = 0; dwSubset < dwSubsetCount; ++dwSubset )
         {
             auto pSubset = pSubDMesh->GetSubset( dwSubset );
-            assert( pSubset != NULL );
-            assert( pSubset->iOriginalMeshSubset < (INT)dwMaterialCount );
+            assert( pSubset != nullptr );
+            assert( pSubset->iOriginalMeshSubset < static_cast<INT>( dwMaterialCount ) );
             auto pMaterial = MaterialList[pSubset->iOriginalMeshSubset];
             CHAR strUniqueSubsetName[100];
-            sprintf_s( strUniqueSubsetName, "subset%d_%s", dwSubset, pMaterial->GetName().SafeString() );
+            sprintf_s( strUniqueSubsetName, "subset%Iu_%s", dwSubset, pMaterial->GetName().SafeString() );
             pSubset->Name = strUniqueSubsetName;
-            pModel->SetSubsetBinding( pSubset->Name, pMaterial, TRUE );
+            pModel->SetSubsetBinding( pSubset->Name, pMaterial, true );
         }
     }
 
     if( bSubDProcess && ( dwNonConformingSubDPolys > 0 ) )
     {
-        ExportLog::LogWarning( "Encountered %d polygons with 5 or more sides in mesh \"%s\", which were subdivided into quad and triangle patches.  Mesh appearance may have been affected.", dwNonConformingSubDPolys, pMesh->GetName().SafeString() );
+        ExportLog::LogWarning( "Encountered %u polygons with 5 or more sides in mesh \"%s\", which were subdivided into quad and triangle patches.  Mesh appearance may have been affected.", dwNonConformingSubDPolys, pMesh->GetName().SafeString() );
     }
 
     // update statistics
-    if( pMesh->GetSubDMesh() != NULL )
+    if( pMesh->GetSubDMesh() )
     {
         g_pScene->Statistics().SubDMeshesProcessed++;
         g_pScene->Statistics().SubDQuadsProcessed += pMesh->GetSubDMesh()->GetQuadPatchCount();
@@ -536,47 +534,47 @@ VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BO
     g_pScene->AddMesh( pMesh );
 }
 
-VOID ParseSubDiv(FbxNode* pNode, FbxSubDiv* pFbxSubD, ExportFrame* pParentFrame )
+void ParseSubDiv( FbxNode* pNode, FbxSubDiv* pFbxSubD, ExportFrame* pParentFrame )
 {
     if( !g_pScene->Settings().bExportMeshes )
         return;
 
-    if( pFbxSubD == NULL )
+    if( !pFbxSubD )
     {
         return;
     }
 
     const CHAR* strName = pFbxSubD->GetName();
-    if( strName == NULL || strName[0] == '\0' )
+    if( !strName || strName[0] == '\0' )
         strName = pParentFrame->GetName().SafeString();
 
-    DWORD dwLevelCount = (DWORD)pFbxSubD->GetLevelCount();
-    ExportLog::LogMsg( 2, "Parsing subdivision surface \"%s\" with %d levels", strName, dwLevelCount );
+    DWORD dwLevelCount = static_cast<DWORD>( pFbxSubD->GetLevelCount() );
+    ExportLog::LogMsg( 2, "Parsing subdivision surface \"%s\" with %u levels", strName, dwLevelCount );
     if( dwLevelCount == 0 )
     {
         ExportLog::LogWarning( "Subdivision surface \"%s\" has no levels.", strName );
         return;
     }
 
-    FbxMesh* pLevelMesh = NULL;
+    FbxMesh* pLevelMesh = nullptr;
     DWORD dwCurrentLevel = dwLevelCount - 1;
-    while( pLevelMesh == NULL && dwCurrentLevel > 0 )
+    while( !pLevelMesh && dwCurrentLevel > 0 )
     {
         pLevelMesh = pFbxSubD->GetMesh( dwCurrentLevel );
-        if( pLevelMesh == NULL )
+        if( !pLevelMesh )
         {
             --dwCurrentLevel;
         }
     }
-    if( pLevelMesh == NULL )
+    if( !pLevelMesh )
     {
         pLevelMesh = pFbxSubD->GetBaseMesh();
     }
 
-    assert( pLevelMesh != NULL );
+    assert( pLevelMesh != nullptr );
 
-    ExportLog::LogMsg( 3, "Parsing level %d", dwCurrentLevel );
+    ExportLog::LogMsg( 3, "Parsing level %u", dwCurrentLevel );
     CHAR strSuffix[32];
-    sprintf_s( strSuffix, "_level%d", dwCurrentLevel );
-    ParseMesh( pNode, pLevelMesh, pParentFrame, TRUE, strSuffix );
+    sprintf_s( strSuffix, "_level%u", dwCurrentLevel );
+    ParseMesh( pNode, pLevelMesh, pParentFrame, true, strSuffix );
 }

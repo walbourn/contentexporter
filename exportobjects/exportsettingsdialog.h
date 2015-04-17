@@ -31,22 +31,22 @@ namespace ATG
         };
         ExportSettingsDialog();
 
-        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ); 
-        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl );
-        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam );
-        virtual LRESULT OnNotify( INT idCtrl, LPNMHDR pnmh );
+        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override; 
+        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
+        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
+        virtual LRESULT OnNotify( INT idCtrl, LPNMHDR pnmh ) override;
 
-        static UINT WINAPI ThreadEntry( VOID* pData );
+        static UINT WINAPI ThreadEntry( void* pData );
         static LRESULT CALLBACK ScrollPaneWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 
-        virtual VOID Show();
+        virtual void Show() override;
         DialogState GetDialogState() const { return m_DialogState; }
 
     protected:
-        VOID PopulateCategories( const ExportSettingsEntry* pEntry = NULL, VOID* hParentItem = NULL );
-        VOID PopulateControls();
-        VOID UpdateVScroll();
-        VOID SynchronizeControlUI( HWND hwndControl );
+        void PopulateCategories( const ExportSettingsEntry* pEntry = nullptr, void* hParentItem = nullptr );
+        void PopulateControls();
+        void UpdateVScroll();
+        void SynchronizeControlUI( HWND hwndControl );
 
     public:
         WNDPROC     m_pStaticWndProc;
@@ -61,6 +61,6 @@ namespace ATG
         DWORD   m_dwControlsHeight;
         ExportSettingsEntry*    m_pCurrentCategory;
         DialogState   m_DialogState;
-        BOOL    m_bControlDataUpdate;
+        bool    m_bControlDataUpdate;
     };
 }

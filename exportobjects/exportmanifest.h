@@ -51,15 +51,15 @@ namespace ATG
     class ExportManifest
     {
     public:
-        VOID Clear() { m_Files.clear(); }
-        VOID ClearFilesOfType( ExportFileType FileType );
-        DWORD AddFile( const ExportFileRecord& File );
-        DWORD AddFile( ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType = EFT_TEXTURE2D );
-        DWORD GetFileCount() const { return (DWORD)m_Files.size(); }
-        ExportFileRecord& GetFile( DWORD dwIndex ) { return m_Files[dwIndex]; }
-        DWORD FindFile( ExportString strFileName ) const;
+        void Clear() { m_Files.clear(); }
+        void ClearFilesOfType( ExportFileType FileType );
+        size_t AddFile( const ExportFileRecord& File );
+        size_t AddFile( ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType = EFT_TEXTURE2D );
+        size_t GetFileCount() const { return m_Files.size(); }
+        ExportFileRecord& GetFile( size_t dwIndex ) { return m_Files[dwIndex]; }
+        size_t FindFile( ExportString strFileName ) const;
 
-        static BOOL FileExists( const ExportPath& Path );
+        static bool FileExists( const ExportPath& Path );
 
     protected:
         ExportFileRecordVector  m_Files;
@@ -72,11 +72,11 @@ namespace ATG
     class ExportTextureConverter
     {
     public:
-        static VOID ProcessScene( ExportScene* pScene, ExportManifest* pManifest, const ExportPath& TextureSubPath, BOOL bIntermediateDDSFormat );
-        static VOID PerformTextureFileOperations( ExportManifest* pManifest );
+        static void ProcessScene( ExportScene* pScene, ExportManifest* pManifest, const ExportPath& TextureSubPath, bool bIntermediateDDSFormat );
+        static void PerformTextureFileOperations( ExportManifest* pManifest );
 
     protected:
-        static VOID ProcessMaterial( ExportMaterial* pMaterial, ExportManifest* pManifest );
-        static VOID ProcessTextureParameter( ExportMaterialParameter* pParameter, ExportManifest* pManifest );
+        static void ProcessMaterial( ExportMaterial* pMaterial, ExportManifest* pManifest );
+        static void ProcessTextureParameter( ExportMaterialParameter* pParameter, ExportManifest* pManifest );
     };
 }

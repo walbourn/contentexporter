@@ -15,9 +15,10 @@
 #include "stdafx.h"
 #include "exportmesh.h"
 
-#define SAFE_RELEASE(x) { if( (x) != NULL ) { (x)->Release(); (x) = NULL; } }
+#define SAFE_RELEASE(x) { if( (x) != nullptr ) { (x)->Release(); (x) = nullptr; } }
 
 extern ATG::ExportScene* g_pScene;
+
 namespace ATG
 {
 
@@ -36,35 +37,35 @@ ExportMeshBase::~ExportMeshBase()
 
 ExportIBSubset* ExportMeshBase::FindSubset( const ExportString Name )
 {
-    DWORD dwSubsetCount = GetSubsetCount();
-    for( DWORD i = 0; i < dwSubsetCount; ++i )
+    size_t dwSubsetCount = GetSubsetCount();
+    for( size_t i = 0; i < dwSubsetCount; ++i )
     {
         ExportIBSubset* pSubset = GetSubset( i );
         if( pSubset->GetName() == Name )
             return pSubset;
     }
-    return NULL;
+    return nullptr;
 }
 
 ExportMesh::ExportMesh( ExportString name )
 : ExportMeshBase( name ),
-  m_pVB( NULL ),
-  m_pIB( NULL ),
+  m_pVB( nullptr ),
+  m_pIB( nullptr ),
   m_uDCCVertexCount( 0 ),
-  m_pSubDMesh( NULL )
+  m_pSubDMesh( nullptr )
 {
     m_BoundingSphere.Center = XMFLOAT3( 0, 0, 0 );
     m_BoundingSphere.Radius = 0;
 }
 
-ExportMesh::~ExportMesh(void)
+ExportMesh::~ExportMesh()
 {
     delete m_pVB;
     delete m_pIB;
     ClearRawTriangles();
 }
 
-VOID ExportMesh::ClearRawTriangles()
+void ExportMesh::ClearRawTriangles()
 {
     if( m_RawTriangles.size() > 0 )
     {
@@ -73,44 +74,51 @@ VOID ExportMesh::ClearRawTriangles()
     }
 }
 
-VOID ExportMesh::ByteSwap()
+void ExportMesh::ByteSwap()
 {
-    if( m_pIB != NULL )
+    if( m_pIB )
         m_pIB->ByteSwap();
-    if( m_pVB != NULL && m_VertexElements.size() > 0 )
+    if( m_pVB && m_VertexElements.size() > 0 )
         m_pVB->ByteSwap( &m_VertexElements[0], GetVertexDeclElementCount() );
-    if( m_pSubDMesh != NULL )
+    if( m_pSubDMesh )
     {
         m_pSubDMesh->ByteSwap();
     }
 }
 
-VOID ExportVB::Allocate()
+void ExportVB::Allocate()
 {
-    if( m_pVertexData != NULL )
-        delete[] m_pVertexData;
-    UINT uSize = GetVertexDataSize();
-    m_pVertexData = new BYTE[ uSize ];
-    ZeroMemory( m_pVertexData, uSize );
+    size_t uSize = GetVertexDataSize();
+    m_pVertexData.reset( new uint8_t[ uSize ] );
+    ZeroMemory( m_pVertexData.get(), uSize );
 }
 
-BYTE* ExportVB::GetVertex( UINT uIndex )
+uint8_t* ExportVB::GetVertex( size_t uIndex )
 {
-    if( m_pVertexData == NULL )
-        return NULL;
+    if( !m_pVertexData )
+        return nullptr;
     if( uIndex >= m_uVertexCount )
-        return NULL;
-    return m_pVertexData + ( uIndex * m_uVertexSizeBytes );
+        return nullptr;
+    return m_pVertexData.get() + ( uIndex * m_uVertexSizeBytes );
 }
 
-VOID ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD dwVertexElementCount )
+const uint8_t* ExportVB::GetVertex( size_t uIndex ) const
 {
-    for( DWORD dwVertexIndex = 0; dwVertexIndex < m_uVertexCount; dwVertexIndex++ )
+    if( !m_pVertexData )
+        return nullptr;
+    if( uIndex >= m_uVertexCount )
+        return nullptr;
+    return m_pVertexData.get() + ( uIndex * m_uVertexSizeBytes );
+}
+
+void ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const size_t dwVertexElementCount )
+{
+    for( size_t dwVertexIndex = 0; dwVertexIndex < m_uVertexCount; dwVertexIndex++ )
     {
-        BYTE* pVB = GetVertex( dwVertexIndex );
-        for( DWORD i = 0; i < dwVertexElementCount; i++ )
+        auto pVB = GetVertex( dwVertexIndex );
+        for( size_t i = 0; i < dwVertexElementCount; i++ )
         {
-            DWORD* pElement = (DWORD*)( pVB + pVertexElements[i].Offset );
+            auto pElement = reinterpret_cast<DWORD*>( pVB + pVertexElements[i].Offset );
             switch( pVertexElements[i].Type )
             {
             case D3DDECLTYPE_FLOAT4:
@@ -135,7 +143,7 @@ VOID ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD d
             case D3DDECLTYPE_USHORT4N:
             case D3DDECLTYPE_FLOAT16_4:
                 {
-                    WORD* pWord = (WORD*)pElement;
+                    auto pWord = reinterpret_cast<WORD*>( pElement );
                     *pWord = _byteswap_ushort( *pWord );
                     pWord++;
                     *pWord = _byteswap_ushort( *pWord );
@@ -146,7 +154,7 @@ VOID ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD d
             case D3DDECLTYPE_USHORT2N:
             case D3DDECLTYPE_FLOAT16_2:
                 {
-                    WORD* pWord = (WORD*)pElement;
+                    auto pWord = reinterpret_cast<WORD*>( pElement );
                     *pWord = _byteswap_ushort( *pWord );
                     pWord++;
                     *pWord = _byteswap_ushort( *pWord );
@@ -158,43 +166,43 @@ VOID ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD d
     }
 }
 
-VOID ExportIB::ByteSwap()
+void ExportIB::ByteSwap()
 {
     if( m_dwIndexSize == 2 )
     {
-        for( DWORD i = 0; i < m_uIndexCount; i++ )
+        auto pIndexData16 = reinterpret_cast<WORD*>( m_pIndexData.get() );
+        for( size_t i = 0; i < m_uIndexCount; i++ )
         {
-            WORD wIndex = _byteswap_ushort( m_pIndexData16[ i ] );
-            m_pIndexData16[ i ] = wIndex;
+            WORD wIndex = _byteswap_ushort( pIndexData16[ i ] );
+            pIndexData16[ i ] = wIndex;
         }
     }
     else
     {
-        for( DWORD i = 0; i < m_uIndexCount; i++ )
+        auto pIndexData32 = reinterpret_cast<DWORD*>( m_pIndexData.get() );
+        for( size_t i = 0; i < m_uIndexCount; i++ )
         {
-            DWORD dwIndex = _byteswap_ulong( m_pIndexData32[ i ] );
-            m_pIndexData32[ i ] = dwIndex;
+            DWORD dwIndex = _byteswap_ulong( pIndexData32[ i ] );
+            pIndexData32[ i ] = dwIndex;
         }
     }
 }
 
-VOID ExportIB::Allocate()
+void ExportIB::Allocate()
 {
-    if( m_pIndexData16 != NULL )
-        delete[] m_pIndexData16;
     if( m_dwIndexSize == 2 )
     {
-        m_pIndexData16 = new WORD[ m_uIndexCount ];
-        ZeroMemory( m_pIndexData16, m_uIndexCount * sizeof( WORD ) );
+        m_pIndexData.reset( reinterpret_cast<uint8_t*>( new WORD[ m_uIndexCount ] ) );
+        ZeroMemory( m_pIndexData.get(), m_uIndexCount * sizeof( WORD ) );
     }
     else
     {
-        m_pIndexData32 = new DWORD[ m_uIndexCount ];
-        ZeroMemory( m_pIndexData32, m_uIndexCount * sizeof( DWORD ) );
+        m_pIndexData.reset( reinterpret_cast<uint8_t*>( new DWORD[ m_uIndexCount ] ) );
+        ZeroMemory( m_pIndexData.get(), m_uIndexCount * sizeof( DWORD ) );
     }
 }
 
-VOID ExportMeshTriangleAllocator::Terminate()
+void ExportMeshTriangleAllocator::Terminate()
 {
     AllocationBlockList::iterator iter = m_AllocationBlocks.begin();
     AllocationBlockList::iterator end = m_AllocationBlocks.end();
@@ -209,11 +217,11 @@ VOID ExportMeshTriangleAllocator::Terminate()
     m_uAllocatedCount = 0;
 }
 
-VOID ExportMeshTriangleAllocator::SetSizeHint( UINT uAnticipatedSize )
+void ExportMeshTriangleAllocator::SetSizeHint( UINT uAnticipatedSize )
 {
     if( uAnticipatedSize <= m_uTotalCount )
         return;
-    UINT uNewCount = max( uAnticipatedSize - m_uTotalCount, 10000 );
+    UINT uNewCount = std::max<UINT>( uAnticipatedSize - m_uTotalCount, 10000 );
     AllocationBlock NewBlock;
     NewBlock.m_uTriangleCount = uNewCount;
     NewBlock.pTriangleArray = new ExportMeshTriangle[ uNewCount ];
@@ -241,50 +249,50 @@ ExportMeshTriangle* ExportMeshTriangleAllocator::GetNewTriangle()
         uIndex -= block.m_uTriangleCount;
         ++iter;
     }
-    assert( FALSE );
-    return NULL;
+    assert( false );
+    return nullptr;
 }
 
-VOID ExportMeshTriangleAllocator::ClearAllTriangles()
+void ExportMeshTriangleAllocator::ClearAllTriangles()
 {
     m_uAllocatedCount = 0;
 }
 
-BOOL ExportMeshVertex::Equals( const ExportMeshVertex* pOtherVertex ) const
+bool ExportMeshVertex::Equals( const ExportMeshVertex* pOtherVertex ) const
 {
     if( pOtherVertex == this )
-        return TRUE;
+        return true;
     if( pOtherVertex->Position != Position )
-        return FALSE;
+        return false;
     if( pOtherVertex->Normal != Normal )
-        return FALSE;
+        return false;
     for( UINT i = 0; i < 8; i++ )
         if( pOtherVertex->TexCoords[i] != TexCoords[i] )
-            return FALSE;
+            return false;
     if( pOtherVertex->Color != Color )
-        return FALSE;
-    return TRUE;
+        return false;
+    return true;
 }
 
 UINT FindOrAddVertex( ExportMeshVertexArray& ExistingVertexArray, ExportMeshVertex* pTestVertex )
 {
-    for( UINT i = 0; i < ExistingVertexArray.size(); i++ )
+    for( size_t i = 0; i < ExistingVertexArray.size(); i++ )
     {
         ExportMeshVertex* pVertex = ExistingVertexArray[i];
         if( pVertex->Equals( pTestVertex ) )
-            return i;
+            return static_cast<UINT>( i );
     }
-    UINT index = (UINT)ExistingVertexArray.size();
+    UINT index = static_cast<UINT>( ExistingVertexArray.size() );
     ExistingVertexArray.push_back( pTestVertex );
     return index;
 }
 
-VOID ExportMesh::AddRawTriangle( ExportMeshTriangle* pTriangle )
+void ExportMesh::AddRawTriangle( ExportMeshTriangle* pTriangle )
 {
     m_RawTriangles.push_back( pTriangle );
-    m_uDCCVertexCount = max( m_uDCCVertexCount, (UINT)pTriangle->Vertex[0].DCCVertexIndex + 1 );
-    m_uDCCVertexCount = max( m_uDCCVertexCount, (UINT)pTriangle->Vertex[1].DCCVertexIndex + 1 );
-    m_uDCCVertexCount = max( m_uDCCVertexCount, (UINT)pTriangle->Vertex[2].DCCVertexIndex + 1 );
+    m_uDCCVertexCount = std::max<UINT>( m_uDCCVertexCount, pTriangle->Vertex[0].DCCVertexIndex + 1 );
+    m_uDCCVertexCount = std::max<UINT>( m_uDCCVertexCount, pTriangle->Vertex[1].DCCVertexIndex + 1 );
+    m_uDCCVertexCount = std::max<UINT>( m_uDCCVertexCount, pTriangle->Vertex[2].DCCVertexIndex + 1 );
 }
 
 UINT FindOrAddVertexFast( ExportMeshVertexArray& ExistingVertexArray, ExportMeshVertex* pTestVertex )
@@ -292,10 +300,10 @@ UINT FindOrAddVertexFast( ExportMeshVertexArray& ExistingVertexArray, ExportMesh
     UINT uIndex = pTestVertex->DCCVertexIndex;
     assert( uIndex < ExistingVertexArray.size() );
     ExportMeshVertex* pVertex = ExistingVertexArray[ uIndex ];
-    if( pVertex != NULL )
+    if( pVertex )
     {
-        ExportMeshVertex* pLastVertex = NULL;
-        while( pVertex != NULL )
+        ExportMeshVertex* pLastVertex = nullptr;
+        while( pVertex )
         {
             uIndex = pVertex->DCCVertexIndex;
             if( pVertex->Equals( pTestVertex ) )
@@ -303,11 +311,11 @@ UINT FindOrAddVertexFast( ExportMeshVertexArray& ExistingVertexArray, ExportMesh
             pLastVertex = pVertex;
             pVertex = pVertex->pNextDuplicateVertex;
         }
-        assert( pVertex == NULL );
-        uIndex = (UINT)ExistingVertexArray.size();
+        assert( pVertex == nullptr );
+        uIndex = static_cast<UINT>( ExistingVertexArray.size() );
         ExistingVertexArray.push_back( pTestVertex );
         pTestVertex->DCCVertexIndex = uIndex;
-        if( pLastVertex != NULL )
+        if( pLastVertex )
         {
             pLastVertex->pNextDuplicateVertex = pTestVertex;
         }
@@ -319,51 +327,52 @@ UINT FindOrAddVertexFast( ExportMeshVertexArray& ExistingVertexArray, ExportMesh
     return uIndex;
 }
 
-VOID ExportMesh::SetVertexNormalCount( UINT uCount )
+void ExportMesh::SetVertexNormalCount( UINT uCount )
 {
     m_VertexFormat.m_bNormal = ( uCount > 0 );
     m_VertexFormat.m_bTangent = ( uCount > 1 );
     m_VertexFormat.m_bBinormal = ( uCount > 2 );
 }
 
-BOOL SubsetLess( ExportMeshTriangle* pA, ExportMeshTriangle* pB )
+bool SubsetLess( ExportMeshTriangle* pA, ExportMeshTriangle* pB )
 {
     return pA->SubsetIndex < pB->SubsetIndex;
 }
 
-VOID ExportMesh::SortRawTrianglesBySubsetIndex()
+void ExportMesh::SortRawTrianglesBySubsetIndex()
 {
-    if( m_RawTriangles.size() == 0 )
+    if( m_RawTriangles.empty() )
         return;
 
     std::stable_sort( m_RawTriangles.begin(), m_RawTriangles.end(), SubsetLess );
 }
 
-VOID ExportMesh::Optimize( DWORD dwFlags )
+void ExportMesh::Optimize( DWORD dwFlags )
 {
-    if( m_RawTriangles.size() == 0 )
+    if( m_RawTriangles.empty() )
         return;
-    ExportLog::LogMsg( 4, "Optimizing mesh \"%s\" with %d triangles.", GetName().SafeString(), m_RawTriangles.size() );
+
+    ExportLog::LogMsg( 4, "Optimizing mesh \"%s\" with %Iu triangles.", GetName().SafeString(), m_RawTriangles.size() );
     
     SortRawTrianglesBySubsetIndex();
 
-    ExportIBSubset* pCurrentIBSubset = NULL;
+    ExportIBSubset* pCurrentIBSubset = nullptr;
     INT iCurrentSubsetIndex = -1;
     std::vector<UINT> IndexData;
     IndexData.reserve( m_RawTriangles.size() * 3 );
     ExportMeshVertexArray VertexData;
-    VertexData.resize( m_uDCCVertexCount, (ExportMeshVertex*)NULL );
+    VertexData.resize( m_uDCCVertexCount, nullptr );
 
-    BOOL bFlipTriangles = g_pScene->Settings().bFlipTriangles;
+    bool bFlipTriangles = g_pScene->Settings().bFlipTriangles;
     if( dwFlags & FLIP_TRIANGLES )
         bFlipTriangles = !bFlipTriangles;
 
     // loop through raw triangles
-    const DWORD dwTriangleCount = (DWORD)m_RawTriangles.size();
+    const size_t dwTriangleCount = m_RawTriangles.size();
     m_TriangleToPolygonMapping.clear();
     m_TriangleToPolygonMapping.reserve( dwTriangleCount );
 
-    for( UINT i = 0; i < dwTriangleCount; i++ )
+    for( size_t i = 0; i < dwTriangleCount; i++ )
     {
         ExportMeshTriangle* pTriangle = m_RawTriangles[i];
         // create a new subset if one is encountered
@@ -373,7 +382,7 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
         {
             pCurrentIBSubset = new ExportIBSubset();
             pCurrentIBSubset->SetName( "Default" );
-            pCurrentIBSubset->SetStartIndex( (UINT)IndexData.size() );
+            pCurrentIBSubset->SetStartIndex( static_cast<UINT>( IndexData.size() ) );
             m_vSubsets.push_back( pCurrentIBSubset );
             iCurrentSubsetIndex = pTriangle->SubsetIndex;
         }
@@ -397,7 +406,7 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
         m_TriangleToPolygonMapping.push_back( pTriangle->PolygonIndex );
         pCurrentIBSubset->IncrementIndexCount( 3 );
     }
-    ExportLog::LogMsg( 3, "Triangle list mesh: %d verts, %d indices, %d subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
+    ExportLog::LogMsg( 3, "Triangle list mesh: %Iu verts, %Iu indices, %Iu subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
     if( VertexData.size() > 16777215 )
     {
         ExportLog::LogError( "Mesh \"%s\" has more than 16777215 vertices.  Index buffer is invalid.", GetName().SafeString() );
@@ -405,7 +414,7 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
 
     // Create real index buffer from index list
     m_pIB = new ExportIB();
-    m_pIB->SetIndexCount( (UINT)IndexData.size() );
+    m_pIB->SetIndexCount( IndexData.size() );
     if( VertexData.size() > 65535 || g_pScene->Settings().bForceIndex32Format )
     {
         m_pIB->SetIndexSize( 4 );
@@ -415,23 +424,23 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
         m_pIB->SetIndexSize( 2 );
     }
     m_pIB->Allocate();
-    for( UINT i = 0; i < IndexData.size(); i++ )
+    for( size_t i = 0; i < IndexData.size(); i++ )
     {
         m_pIB->SetIndex( i, IndexData[i] );
     }
 
     INT iUVAtlasTexCoordIndex = g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
-    BOOL bComputeUVAtlas = ( iUVAtlasTexCoordIndex >= 0 );
+    bool bComputeUVAtlas = ( iUVAtlasTexCoordIndex >= 0 );
     if( bComputeUVAtlas )
     {
-        if( iUVAtlasTexCoordIndex < (INT)m_VertexFormat.m_uUVSetCount )
+        if( iUVAtlasTexCoordIndex < static_cast<INT>( m_VertexFormat.m_uUVSetCount ) )
         {
             ExportLog::LogWarning( "UV atlas being generated in existing texture coordinate set %d, which will overwrite its contents.", iUVAtlasTexCoordIndex );
         }
         else
         {
             // Save the index of a new UV set
-            iUVAtlasTexCoordIndex = (INT)m_VertexFormat.m_uUVSetCount;
+            iUVAtlasTexCoordIndex = static_cast<INT>( m_VertexFormat.m_uUVSetCount );
             // add another UV set, it will be empty
             ++m_VertexFormat.m_uUVSetCount;
             ExportLog::LogMsg( 4, "Adding a new texture coordinate set for the UV atlas." );
@@ -445,29 +454,29 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
     if( bComputeUVAtlas && ( iUVAtlasTexCoordIndex != g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex ) )
     {
         // Scan the decl elements
-        for( DWORD i = 0; i < m_VertexElements.size(); ++i )
+        for( size_t i = 0; i < m_VertexElements.size(); ++i )
         {
             if( m_VertexElements[i].Usage == D3DDECLUSAGE_TEXCOORD && m_VertexElements[i].UsageIndex == iUVAtlasTexCoordIndex )
             {
                 // Change the decl usage index to the desired usage index
-                m_VertexElements[i].UsageIndex = (BYTE)g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
+                m_VertexElements[i].UsageIndex = static_cast<BYTE>( g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex );
                 iUVAtlasTexCoordIndex = g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
             }
         }
     }
 
-    BOOL bComputeTangentSpace = FALSE;
+    bool bComputeTangentSpace = false;
 
     // Compute vertex tangent space data
     if( m_VertexFormat.m_bTangent || m_VertexFormat.m_bBinormal )
     {
-        bComputeTangentSpace = TRUE;
+        bComputeTangentSpace = true;
     }
 
     if( bComputeTangentSpace || bComputeUVAtlas )
     {
         ID3DXMesh* pMesh = CreateD3DXMesh();
-        if( pMesh != NULL )
+        if( pMesh )
         {
             if( bComputeTangentSpace )
             {
@@ -485,11 +494,11 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
     ClearRawTriangles();
     ComputeBounds();
 
-    ExportLog::LogMsg( 3, "Vertex size: %d bytes; VB size: %d bytes", m_pVB->GetVertexSize(), m_pVB->GetVertexDataSize() );
+    ExportLog::LogMsg( 3, "Vertex size: %u bytes; VB size: %Iu bytes", m_pVB->GetVertexSize(), m_pVB->GetVertexDataSize() );
 
     if( ExportLog::GetLogLevel() >= 4 )
     {
-        DWORD dwDeclSize = GetVertexDeclElementCount();
+        size_t dwDeclSize = GetVertexDeclElementCount();
         
         static const CHAR* strDeclUsages[] = { "Position", "BlendWeight", "BlendIndices", "Normal", "PSize", "TexCoord", "Tangent", "Binormal", "TessFactor", "PositionT", "Color", "Fog", "Depth", "Sample" };
         C_ASSERT( ARRAYSIZE(strDeclUsages) == ( MAXD3DDECLUSAGE + 1 ) );
@@ -497,15 +506,15 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
         static const CHAR* strDeclTypes[] = { "Float1", "Float2", "Float3", "Float4", "D3DColor", "UByte", "Short2", "Short4", "UByte4N", "Short2N", "Short4N", "UShort2N", "UShort4N", "UDec3", "Dec3N", "Float16_2", "Float16_4", "Unused" };
         C_ASSERT( ARRAYSIZE(strDeclTypes) == ( MAXD3DDECLTYPE + 1 ) );
 
-        for( DWORD i = 0; i < dwDeclSize; ++i )
+        for( size_t i = 0; i < dwDeclSize; ++i )
         {
             const D3DVERTEXELEMENT9& Element = GetVertexDeclElement( i );
 
-            ExportLog::LogMsg( 4, "Element %2d Stream %2d Offset %2d: %12s.%-2d Type %s (%d bytes)", i, Element.Stream, Element.Offset, strDeclUsages[Element.Usage], Element.UsageIndex, strDeclTypes[Element.Type], GetElementSizeFromDeclType( Element.Type ) );
+            ExportLog::LogMsg( 4, "Element %2Iu Stream %2u Offset %2u: %12s.%-2u Type %s (%d bytes)", i, Element.Stream, Element.Offset, strDeclUsages[Element.Usage], Element.UsageIndex, strDeclTypes[Element.Type], GetElementSizeFromDeclType( Element.Type ) );
         }
     }
 
-    ExportLog::LogMsg( 4, "DCC stored %d verts; final vertex count is %d due to duplication.", m_uDCCVertexCount, m_pVB->GetVertexCount() );
+    ExportLog::LogMsg( 4, "DCC stored %u verts; final vertex count is %Iu due to duplication.", m_uDCCVertexCount, m_pVB->GetVertexCount() );
 
     if( dwFlags & FORCE_SUBD_CONVERSION )
     {
@@ -519,52 +528,52 @@ VOID ExportMesh::Optimize( DWORD dwFlags )
 ID3DXMesh* ExportMesh::CreateD3DXMesh()
 {
     // D3DXMesh requires a valid D3D device...
-    assert( g_pd3dDevice != NULL );
+    assert( g_pd3dDevice != nullptr );
 
-    D3DXDebugMute( FALSE );
+    D3DXDebugMute( false );
 
-    DWORD dwFaceCount = m_pIB->GetIndexCount() / 3;
+    DWORD dwFaceCount = static_cast<DWORD>( m_pIB->GetIndexCount() / 3 );
 
     // D3DXMesh requires 32-bit index buffers if the face count is over 65534.
-    BOOL bD3DXWorkaround = ( m_pIB->GetIndexSize() == 2 ) && ( dwFaceCount > 65534 );
+    bool bD3DXWorkaround = ( m_pIB->GetIndexSize() == 2 ) && ( dwFaceCount > 65534 );
 
     DWORD dwMeshOptions = D3DXMESH_SYSTEMMEM;
     if( bD3DXWorkaround || m_pIB->GetIndexSize() == 4 )
         dwMeshOptions |= D3DXMESH_32BIT;
 
     // Create a decl element list with D3DDECL_END at the end
-    vector< D3DVERTEXELEMENT9 > DeclElements = m_VertexElements;
+    std::vector< D3DVERTEXELEMENT9 > DeclElements = m_VertexElements;
     D3DVERTEXELEMENT9 DeclEnd = D3DDECL_END();
     DeclElements.push_back( DeclEnd );
 
-    D3DVERTEXELEMENT9* pElements = (D3DVERTEXELEMENT9*)&DeclElements.front();
+    auto pElements = reinterpret_cast<D3DVERTEXELEMENT9*>( &DeclElements.front() );
 
     // Create D3DXMesh
-    ID3DXMesh* pInputD3DXMesh = NULL;
-    HRESULT hr = D3DXCreateMesh( dwFaceCount, m_pVB->GetVertexCount(), dwMeshOptions, pElements, g_pd3dDevice, &pInputD3DXMesh );
+    ID3DXMesh* pInputD3DXMesh = nullptr;
+    HRESULT hr = D3DXCreateMesh( dwFaceCount, static_cast<DWORD>( m_pVB->GetVertexCount() ), dwMeshOptions, pElements, g_pd3dDevice, &pInputD3DXMesh );
     if( FAILED( hr ) )
     {
-        ExportLog::LogError( "Could not create D3DX mesh for mesh \"%s\".", (const CHAR*)GetName() );
-        return NULL;
+        ExportLog::LogError( "Could not create D3DX mesh for mesh \"%s\".", GetName().SafeString() );
+        return nullptr;
     }
 
     // copy VB data into D3DXMesh
     {
-        BYTE* pVBData = NULL;
-        pInputD3DXMesh->LockVertexBuffer( 0, (VOID**)&pVBData );
+        BYTE* pVBData = nullptr;
+        pInputD3DXMesh->LockVertexBuffer( 0, reinterpret_cast<void**>( &pVBData ) );
         memcpy( pVBData, m_pVB->GetVertexData(), m_pVB->GetVertexDataSize() );
         pInputD3DXMesh->UnlockVertexBuffer();
     }
 
     // copy IB data into D3DXMesh
     {
-        BYTE* pIBData = NULL;
-        pInputD3DXMesh->LockIndexBuffer( 0, (VOID**)&pIBData );
+        BYTE* pIBData = nullptr;
+        pInputD3DXMesh->LockIndexBuffer( 0, reinterpret_cast<void**>( &pIBData ) );
         if( bD3DXWorkaround )
         {
-            DWORD dwIndexCount = m_pIB->GetIndexCount();
-            DWORD* pIBDataDW = (DWORD*)pIBData;
-            for( DWORD i = 0; i < dwIndexCount; ++i )
+            size_t dwIndexCount = m_pIB->GetIndexCount();
+            auto pIBDataDW = reinterpret_cast<DWORD*>( pIBData );
+            for( size_t i = 0; i < dwIndexCount; ++i )
             {
                 pIBDataDW[i] = m_pIB->GetIndex( i );
             }
@@ -578,26 +587,25 @@ ID3DXMesh* ExportMesh::CreateD3DXMesh()
 
     // copy subset data into D3DXMesh
     {
-        DWORD dwSubsetCount = GetSubsetCount();
-        D3DXATTRIBUTERANGE* pMeshAttributeRanges = new D3DXATTRIBUTERANGE[ dwSubsetCount ];
-        for( DWORD i = 0; i < dwSubsetCount; ++i )
+        size_t dwSubsetCount = GetSubsetCount();
+        std::unique_ptr<D3DXATTRIBUTERANGE[]> pMeshAttributeRanges( new D3DXATTRIBUTERANGE[ dwSubsetCount ] );
+        for( size_t i = 0; i < dwSubsetCount; ++i )
         {
-            pMeshAttributeRanges[i].AttribId = i;
+            pMeshAttributeRanges[i].AttribId = static_cast<DWORD>( i );
             const ExportIBSubset* pSubset = GetSubset( i );
             pMeshAttributeRanges[i].FaceStart = pSubset->GetStartIndex() / 3;
             pMeshAttributeRanges[i].FaceCount = pSubset->GetIndexCount() / 3;
             pMeshAttributeRanges[i].VertexStart = 0;
-            pMeshAttributeRanges[i].VertexCount = m_pVB->GetVertexCount();
+            pMeshAttributeRanges[i].VertexCount = static_cast<DWORD>( m_pVB->GetVertexCount() );
         }
-        pInputD3DXMesh->SetAttributeTable( pMeshAttributeRanges, dwSubsetCount );
-        delete[] pMeshAttributeRanges;
+        pInputD3DXMesh->SetAttributeTable( pMeshAttributeRanges.get(), static_cast<DWORD>( dwSubsetCount ) );
     }
 
     return pInputD3DXMesh;
 }
 
 
-VOID ExportMesh::CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh )
+void ExportMesh::CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh )
 {
     if( pMesh->GetNumVertices() != m_pVB->GetVertexCount() )
     {
@@ -608,15 +616,15 @@ VOID ExportMesh::CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh )
         pNewVB->SetVertexCount( pMesh->GetNumVertices() );
         pNewVB->SetVertexSize( pMesh->GetNumBytesPerVertex() );
         pNewVB->Allocate();
-        ExportLog::LogMsg( 4, "D3DX mesh operations increased vertex count from %d to %d.", m_pVB->GetVertexCount(), pNewVB->GetVertexCount() );
+        ExportLog::LogMsg( 4, "D3DX mesh operations increased vertex count from %Iu to %Iu.", m_pVB->GetVertexCount(), pNewVB->GetVertexCount() );
         delete m_pVB;
         m_pVB = pNewVB;
     }
 
     // copy D3DXMesh VB data back into m_pVB
     {
-        BYTE* pVBData = NULL;
-        pMesh->LockVertexBuffer( 0, (VOID**)&pVBData );
+        BYTE* pVBData = nullptr;
+        pMesh->LockVertexBuffer( 0, reinterpret_cast<void**>( &pVBData ) );
         memcpy( m_pVB->GetVertexData(), pVBData, m_pVB->GetVertexDataSize() );
         pMesh->UnlockVertexBuffer();
     }
@@ -626,7 +634,7 @@ VOID ExportMesh::CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh )
 
     // Sometimes the destination D3DXMesh will have exceeded 64K verts after computing
     // the tangent space.  In this case, we have to upgrade the index buffer to 32bit.
-    BOOL bNeed32BitIB = ( m_pVB->GetVertexCount() > 65535 ) && ( m_pIB->GetIndexSize() == 2 );
+    bool bNeed32BitIB = ( m_pVB->GetVertexCount() > 65535 ) && ( m_pIB->GetIndexSize() == 2 );
     if( bNeed32BitIB )
     {
         ExportIB* pNewIB = new ExportIB();
@@ -639,22 +647,22 @@ VOID ExportMesh::CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh )
 
     // copy D3DXMesh IB data back into m_pIB
     {
-        IDirect3DIndexBuffer9* pMeshIB = NULL;
+        IDirect3DIndexBuffer9* pMeshIB = nullptr;
         pMesh->GetIndexBuffer( &pMeshIB );
         D3DINDEXBUFFER_DESC IBDesc;
         pMeshIB->GetDesc( &IBDesc );
         pMeshIB->Release();
-        BOOL bConvert32To16 = FALSE;
+        bool bConvert32To16 = false;
         if( IBDesc.Format == D3DFMT_INDEX32 && m_pIB->GetIndexSize() == 2 )
-            bConvert32To16 = TRUE;
+            bConvert32To16 = true;
 
-        BYTE* pIBData = NULL;
-        pMesh->LockIndexBuffer( 0, (VOID**)&pIBData );
+        BYTE* pIBData = nullptr;
+        pMesh->LockIndexBuffer( 0, reinterpret_cast<void**>( &pIBData ) );
         if( bConvert32To16 )
         {
-            DWORD dwIndexCount = m_pIB->GetIndexCount();
-            DWORD* pIBDataDW = (DWORD*)pIBData;
-            for( DWORD i = 0; i < dwIndexCount; ++i )
+            size_t dwIndexCount = m_pIB->GetIndexCount();
+            auto pIBDataDW = reinterpret_cast<DWORD*>( pIBData );
+            for( size_t i = 0; i < dwIndexCount; ++i )
             {
                 m_pIB->SetIndex( i, pIBDataDW[i] );
             }
@@ -677,32 +685,32 @@ HRESULT ExportMesh::ComputeVertexTangentSpacesD3DX( ID3DXMesh** ppMesh )
 
     // Compute tangent space, results will be in pDestMesh
     DWORD dwTangentCreationOptions = 0;
-    ID3DXMesh* pDestMesh = NULL;
-    ID3DXBuffer* pMappingBuffer = NULL;
-    HRESULT hr = D3DXComputeTangentFrameEx( 
-        pSrcMesh, 
-        D3DDECLUSAGE_TEXCOORD, 
-        0,   
-        D3DDECLUSAGE_TANGENT, 
-        0, 
-        m_VertexFormat.m_bBinormal ? D3DDECLUSAGE_BINORMAL : D3DX_DEFAULT, 
-        0, 
-        D3DDECLUSAGE_NORMAL, 
-        0, 
+    ID3DXMesh* pDestMesh = nullptr;
+    ID3DXBuffer* pMappingBuffer = nullptr;
+    HRESULT hr = D3DXComputeTangentFrameEx(
+        pSrcMesh,
+        D3DDECLUSAGE_TEXCOORD,
+        0,
+        D3DDECLUSAGE_TANGENT,
+        0,
+        m_VertexFormat.m_bBinormal ? D3DDECLUSAGE_BINORMAL : D3DX_DEFAULT,
+        0,
+        D3DDECLUSAGE_NORMAL,
+        0,
         dwTangentCreationOptions,
-        NULL, 
-        0.01f, 0.25f, 0.01f, 
-        &pDestMesh, 
+        nullptr,
+        0.01f, 0.25f, 0.01f,
+        &pDestMesh,
         &pMappingBuffer);
 
     if( SUCCEEDED( hr ) )
     {
-        assert( pDestMesh != NULL );
+        assert( pDestMesh != nullptr );
         pSrcMesh->Release();
         pMappingBuffer->Release();
         *ppMesh = pDestMesh;
     }
-    else if( pDestMesh != NULL )
+    else if( pDestMesh )
     {
         pDestMesh->Release();
     }
@@ -714,21 +722,21 @@ HRESULT ExportMesh::ComputeVertexTangentSpacesD3DX( ID3DXMesh** ppMesh )
 HRESULT ExportMesh::ComputeUVAtlas( ID3DXMesh** ppMesh )
 {
     ID3DXMesh* pSrcMesh = *ppMesh;
-    assert( pSrcMesh != NULL );
+    assert( pSrcMesh != nullptr );
 
     ExportLog::LogMsg( 4, "Generating UV atlas..." );
 
     INT iDestUVIndex = g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
     assert( iDestUVIndex >= 0 && iDestUVIndex < 8 );
 
-    DWORD* pAdjacency = new DWORD[ 3 * pSrcMesh->GetNumFaces() ];
-    pSrcMesh->GenerateAdjacency( 0.001f, pAdjacency );
+    std::unique_ptr<DWORD[]> pAdjacency( new DWORD[ 3 * pSrcMesh->GetNumFaces() ] );
+    pSrcMesh->GenerateAdjacency( 0.001f, pAdjacency.get() );
 
-    ID3DXMesh* pDestMesh = NULL;
-    DWORD dwNumCharts = 0;
-    FLOAT fMaxStretch = 0;
-    ID3DXBuffer* pPartitioningBuffer = NULL;
-    ID3DXBuffer* pVertexRemapBuffer = NULL;
+    ID3DXMesh* pDestMesh = nullptr;
+    UINT dwNumCharts = 0;
+    float fMaxStretch = 0;
+    ID3DXBuffer* pPartitioningBuffer = nullptr;
+    ID3DXBuffer* pVertexRemapBuffer = nullptr;
 
     HRESULT hr = D3DXUVAtlasCreate(
         pSrcMesh,
@@ -738,32 +746,31 @@ HRESULT ExportMesh::ComputeUVAtlas( ID3DXMesh** ppMesh )
         g_pScene->Settings().iUVAtlasTextureSize,
         g_pScene->Settings().fUVAtlasGutter,
         iDestUVIndex,
-        pAdjacency,
-        NULL,
-        NULL,
-        NULL,
+        pAdjacency.get(),
+        nullptr,
+        nullptr,
+        nullptr,
         1.0f,
-        NULL,
+        nullptr,
         D3DXUVATLAS_DEFAULT,
         &pDestMesh,
         &pPartitioningBuffer,
         &pVertexRemapBuffer,
         &fMaxStretch,
-        (UINT*)&dwNumCharts );
+        &dwNumCharts );
 
-    delete[] pAdjacency;
     SAFE_RELEASE( pPartitioningBuffer );
     SAFE_RELEASE( pVertexRemapBuffer );
 
     if( SUCCEEDED( hr ) )
     {
-        ExportLog::LogMsg( 4, "Created UV atlas with %d charts in texcoord %d.", dwNumCharts, iDestUVIndex );
-        assert( pDestMesh != NULL );
+        ExportLog::LogMsg( 4, "Created UV atlas with %u charts in texcoord %d.", dwNumCharts, iDestUVIndex );
+        assert( pDestMesh != nullptr );
         pSrcMesh->Release();
         *ppMesh = pDestMesh;
         return S_OK;
     }
-    else if( pDestMesh != NULL )
+    else if( pDestMesh )
     {
         pDestMesh->Release();
     }
@@ -772,190 +779,6 @@ HRESULT ExportMesh::ComputeUVAtlas( ID3DXMesh** ppMesh )
 
     return hr;
 }
-
-
-/*
-VOID ExportMesh::ComputeVertexTangentSpacesD3DX()
-{
-    // D3DXMesh requires a valid D3D device...
-    assert( g_pd3dDevice != NULL );
-
-    // We must be at least computing a tangent vector here.  Binormal is optional.
-    assert( m_VertexFormat.m_bTangent );
-
-    DWORD dwFaceCount = m_pIB->GetIndexCount() / 3;
-
-    // D3DXMesh requires 32-bit index buffers if the face count is over 65534.
-    BOOL bD3DXWorkaround = ( m_pIB->GetIndexSize() == 2 ) && ( dwFaceCount > 65534 );
-
-    DWORD dwMeshOptions = D3DXMESH_SYSTEMMEM;
-    if( bD3DXWorkaround || m_pIB->GetIndexSize() == 4 )
-        dwMeshOptions |= D3DXMESH_32BIT;
-
-    // Create a decl element list with D3DDECL_END at the end
-    vector< D3DVERTEXELEMENT9 > DeclElements = m_VertexElements;
-    D3DVERTEXELEMENT9 DeclEnd = D3DDECL_END();
-    DeclElements.push_back( DeclEnd );
-
-    D3DVERTEXELEMENT9* pElements = (D3DVERTEXELEMENT9*)&DeclElements.front();
-
-    // Create D3DXMesh
-    ID3DXMesh* pInputD3DXMesh = NULL;
-    HRESULT hr = D3DXCreateMesh( dwFaceCount, m_pVB->GetVertexCount(), dwMeshOptions, pElements, g_pd3dDevice, &pInputD3DXMesh );
-    if( FAILED( hr ) )
-    {
-        ExportLog::LogError( "Could not create D3DX mesh for mesh \"%s\".", (const CHAR*)GetName() );
-        return;
-    }
-
-    // copy VB data into D3DXMesh
-    {
-        BYTE* pVBData = NULL;
-        pInputD3DXMesh->LockVertexBuffer( 0, (VOID**)&pVBData );
-        memcpy( pVBData, m_pVB->GetVertexData(), m_pVB->GetVertexDataSize() );
-        pInputD3DXMesh->UnlockVertexBuffer();
-    }
-
-    // copy IB data into D3DXMesh
-    {
-        BYTE* pIBData = NULL;
-        pInputD3DXMesh->LockIndexBuffer( 0, (VOID**)&pIBData );
-        if( bD3DXWorkaround )
-        {
-            DWORD dwIndexCount = m_pIB->GetIndexCount();
-            DWORD* pIBDataDW = (DWORD*)pIBData;
-            for( DWORD i = 0; i < dwIndexCount; ++i )
-            {
-                pIBDataDW[i] = m_pIB->GetIndex( i );
-            }
-        }
-        else
-        {
-            memcpy( pIBData, m_pIB->GetIndexData(), m_pIB->GetIndexDataSize() );
-        }
-        pInputD3DXMesh->UnlockIndexBuffer();
-    }
-
-    // copy subset data into D3DXMesh
-    {
-        DWORD dwSubsetCount = GetSubsetCount();
-        D3DXATTRIBUTERANGE* pMeshAttributeRanges = new D3DXATTRIBUTERANGE[ dwSubsetCount ];
-        for( DWORD i = 0; i < dwSubsetCount; ++i )
-        {
-            pMeshAttributeRanges[i].AttribId = i;
-            const ExportIBSubset* pSubset = GetSubset( i );
-            pMeshAttributeRanges[i].FaceStart = pSubset->GetStartIndex() / 3;
-            pMeshAttributeRanges[i].FaceCount = pSubset->GetIndexCount() / 3;
-            pMeshAttributeRanges[i].VertexStart = 0;
-            pMeshAttributeRanges[i].VertexCount = m_pVB->GetVertexCount();
-        }
-        pInputD3DXMesh->SetAttributeTable( pMeshAttributeRanges, dwSubsetCount );
-        delete[] pMeshAttributeRanges;
-    }
-
-    // Compute tangent space, results will be in pDestMesh
-    DWORD dwTangentCreationOptions = 0;
-    ID3DXMesh* pDestMesh = NULL;
-    ID3DXBuffer* pMappingBuffer = NULL;
-    hr = D3DXComputeTangentFrameEx( 
-        pInputD3DXMesh, 
-        D3DDECLUSAGE_TEXCOORD, 
-        0,   
-        D3DDECLUSAGE_TANGENT, 
-        0, 
-        m_VertexFormat.m_bBinormal ? D3DDECLUSAGE_BINORMAL : D3DX_DEFAULT, 
-        0, 
-        D3DDECLUSAGE_NORMAL, 
-        0, 
-        dwTangentCreationOptions,
-        NULL, 
-        0.01f, 0.25f, 0.01f, 
-        &pDestMesh, 
-        &pMappingBuffer);
-
-    if( FAILED( hr ) )
-    {
-        pInputD3DXMesh->Release();
-        if( pDestMesh != NULL )
-            pDestMesh->Release();
-        if( pMappingBuffer != NULL )
-            pMappingBuffer->Release();
-        ExportLog::LogError( "Could not create mesh tangent space for mesh \"%s\".", GetName() );
-        return;
-    }
-
-    if( pDestMesh->GetNumVertices() != m_pVB->GetVertexCount() )
-    {
-        // check that the D3DXMesh didn't resize the vertex struct
-        assert( pDestMesh->GetNumBytesPerVertex() == m_pVB->GetVertexSize() );
-        // resize vertex buffer
-        ExportVB* pNewVB = new ExportVB();
-        pNewVB->SetVertexCount( pDestMesh->GetNumVertices() );
-        pNewVB->SetVertexSize( pDestMesh->GetNumBytesPerVertex() );
-        pNewVB->Allocate();
-        ExportLog::LogMsg( 4, "Tangent space computation increased vertex count from %d to %d.", m_pVB->GetVertexCount(), pNewVB->GetVertexCount() );
-        delete m_pVB;
-        m_pVB = pNewVB;
-    }
-
-    // copy D3DXMesh VB data back into m_pVB
-    {
-        BYTE* pVBData = NULL;
-        pDestMesh->LockVertexBuffer( 0, (VOID**)&pVBData );
-        memcpy( m_pVB->GetVertexData(), pVBData, m_pVB->GetVertexDataSize() );
-        pDestMesh->UnlockVertexBuffer();
-    }
-
-    // D3DXComputeTangentSpaceEx should never change the index count (but the index data may change)
-    assert( pDestMesh->GetNumFaces() == ( m_pIB->GetIndexCount() / 3 ) );
-
-    // Sometimes the destination D3DXMesh will have exceeded 64K verts after computing
-    // the tangent space.  In this case, we have to upgrade the index buffer to 32bit.
-    BOOL bNeed32BitIB = ( m_pVB->GetVertexCount() > 65535 ) && ( m_pIB->GetIndexSize() == 2 );
-    if( bNeed32BitIB )
-    {
-        ExportIB* pNewIB = new ExportIB();
-        pNewIB->SetIndexCount( m_pIB->GetIndexCount() );
-        pNewIB->SetIndexSize( 4 );
-        pNewIB->Allocate();
-        delete m_pIB;
-        m_pIB = pNewIB;
-    }
-
-    // copy D3DXMesh IB data back into m_pIB
-    {
-        IDirect3DIndexBuffer9* pMeshIB = NULL;
-        pDestMesh->GetIndexBuffer( &pMeshIB );
-        D3DINDEXBUFFER_DESC IBDesc;
-        pMeshIB->GetDesc( &IBDesc );
-        pMeshIB->Release();
-        BOOL bConvert32To16 = FALSE;
-        if( IBDesc.Format == D3DFMT_INDEX32 && m_pIB->GetIndexSize() == 2 )
-            bConvert32To16 = TRUE;
-
-        BYTE* pIBData = NULL;
-        pDestMesh->LockIndexBuffer( 0, (VOID**)&pIBData );
-        if( bConvert32To16 )
-        {
-            DWORD dwIndexCount = m_pIB->GetIndexCount();
-            DWORD* pIBDataDW = (DWORD*)pIBData;
-            for( DWORD i = 0; i < dwIndexCount; ++i )
-            {
-                m_pIB->SetIndex( i, pIBDataDW[i] );
-            }
-        }
-        else
-        {
-            memcpy( m_pIB->GetIndexData(), pIBData, m_pIB->GetIndexDataSize() );
-        }
-        pDestMesh->UnlockIndexBuffer();
-    }
-
-    pInputD3DXMesh->Release();
-    pDestMesh->Release();
-    pMappingBuffer->Release();
-}
-*/
 
 
 DWORD MakeCompressedVector( const D3DXVECTOR3& Vec3 )
@@ -974,18 +797,18 @@ DWORD MakeCompressedVectorUByte4N( const D3DXVECTOR3& Vec3 )
 }
 
 
-VOID NormalizeBoneWeights( BYTE* pWeights )
+void NormalizeBoneWeights( BYTE* pWeights )
 {
-    DWORD dwSum = (DWORD)pWeights[0] + (DWORD)pWeights[1] + (DWORD)pWeights[2] + (DWORD)pWeights[3];
+    DWORD dwSum = static_cast<DWORD>( pWeights[0] ) + static_cast<DWORD>( pWeights[1] ) + static_cast<DWORD>( pWeights[2] ) + static_cast<DWORD>( pWeights[3] );
     if( dwSum == 255 )
         return;
 
-    INT iDifference = 255 - (INT)dwSum;
+    INT iDifference = 255 - static_cast<INT>( dwSum );
     for( DWORD i = 0; i < 4; ++i )
     {
         if( pWeights[i] == 0 )
             continue;
-        INT iValue = (INT)pWeights[i];
+        INT iValue = static_cast<INT>( pWeights[i] );
         if( iValue + iDifference > 255 )
         {
             iDifference -= ( 255 - iValue );
@@ -996,10 +819,10 @@ VOID NormalizeBoneWeights( BYTE* pWeights )
             iValue += iDifference;
             iDifference = 0;
         }
-        pWeights[i] = (BYTE)iValue;
+        pWeights[i] = static_cast<BYTE>( iValue );
     }
 
-    dwSum = (DWORD)pWeights[0] + (DWORD)pWeights[1] + (DWORD)pWeights[2] + (DWORD)pWeights[3];
+    dwSum = static_cast<DWORD>( pWeights[0] ) + static_cast<DWORD>( pWeights[1] ) + static_cast<DWORD>( pWeights[2] ) + static_cast<DWORD>( pWeights[3] );
     assert( dwSum == 255 );
 }
 
@@ -1051,7 +874,7 @@ __inline INT GetElementSizeFromDeclType(DWORD Type)
 }
 
 
-VOID TransformAndWriteVector( BYTE* pDest, const D3DXVECTOR3& Src, DWORD dwDestFormat )
+void TransformAndWriteVector( BYTE* pDest, const D3DXVECTOR3& Src, DWORD dwDestFormat )
 {
     D3DXVECTOR3 SrcTransformed;
     g_pScene->GetDCCTransformer()->TransformDirection( &SrcTransformed, &Src );
@@ -1059,34 +882,34 @@ VOID TransformAndWriteVector( BYTE* pDest, const D3DXVECTOR3& Src, DWORD dwDestF
     {
     case D3DDECLTYPE_FLOAT3:
         {
-            *(D3DXVECTOR3*)pDest = SrcTransformed;
+            *reinterpret_cast<D3DXVECTOR3*>(pDest) = SrcTransformed;
             break;
         }
     case D3DDECLTYPE_DEC3N:
         {
-            *(DWORD*)pDest = MakeCompressedVector( SrcTransformed );
+            *reinterpret_cast<DWORD*>(pDest) = MakeCompressedVector( SrcTransformed );
             break;
         }
     case D3DDECLTYPE_UBYTE4N:
         {
-            *(DWORD*)pDest = MakeCompressedVectorUByte4N( SrcTransformed );
+            *reinterpret_cast<DWORD*>(pDest) = MakeCompressedVectorUByte4N( SrcTransformed );
             break;
         }
     case D3DDECLTYPE_SHORT4N:
         {
-            *(XMSHORTN4*)pDest = XMSHORTN4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
+            *reinterpret_cast<XMSHORTN4*>(pDest) = XMSHORTN4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
             break;
         }
     case D3DDECLTYPE_FLOAT16_4:
         {
-            *(XMHALF4*)pDest = XMHALF4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
+            *reinterpret_cast<XMHALF4*>(pDest) = XMHALF4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
             break;
         }
     }
 }
 
 
-VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags )
+void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags )
 {
     UINT uVertexSize = 0;
     INT iCurrentVertexOffset = 0;
@@ -1103,7 +926,7 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     ZeroMemory( &VertexElement, sizeof( D3DVERTEXELEMENT9 ) );
     VertexElement.Method = D3DDECLMETHOD_DEFAULT;
 
-    BOOL bCompressVertexData = ( dwFlags & COMPRESS_VERTEX_DATA );
+    bool bCompressVertexData = ( dwFlags & COMPRESS_VERTEX_DATA );
 
     DWORD dwNormalType = D3DDECLTYPE_FLOAT3;
     if( bCompressVertexData )
@@ -1117,7 +940,7 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     if( m_VertexFormat.m_bPosition )
     {
         iPositionOffset = iCurrentVertexOffset;
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_POSITION;
         VertexElement.Type = D3DDECLTYPE_FLOAT3;
         m_VertexElements.push_back( VertexElement );
@@ -1126,12 +949,12 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     if( ( m_VertexFormat.m_bSkinData && g_pScene->Settings().bExportSkinWeights ) || g_pScene->Settings().bForceExportSkinWeights )
     {
         iSkinDataOffset = iCurrentVertexOffset;
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_BLENDWEIGHT;
         VertexElement.Type = D3DDECLTYPE_UBYTE4N;
         m_VertexElements.push_back( VertexElement );
         iCurrentVertexOffset += GetElementSizeFromDeclType( VertexElement.Type );
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_BLENDINDICES;
         VertexElement.Type = D3DDECLTYPE_UBYTE4;
         m_VertexElements.push_back( VertexElement );
@@ -1140,16 +963,16 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     if( m_VertexFormat.m_bNormal )
     {
         iNormalOffset = iCurrentVertexOffset;
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_NORMAL;
-        VertexElement.Type = (BYTE)dwNormalType;
+        VertexElement.Type = static_cast<BYTE>( dwNormalType );
         m_VertexElements.push_back( VertexElement );
         iCurrentVertexOffset += GetElementSizeFromDeclType( VertexElement.Type );
     }
     if( m_VertexFormat.m_bVertexColor )
     {
         iColorOffset = iCurrentVertexOffset;
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_COLOR;
         VertexElement.Type = D3DDECLTYPE_D3DCOLOR;
         m_VertexElements.push_back( VertexElement );
@@ -1160,7 +983,7 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
         iUVOffset = iCurrentVertexOffset;
         for( UINT t = 0; t < m_VertexFormat.m_uUVSetCount; t++ )
         {
-            VertexElement.Offset = (WORD)iCurrentVertexOffset;
+            VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
             VertexElement.Usage = D3DDECLUSAGE_TEXCOORD;
             switch( m_VertexFormat.m_uUVSetSize )
             {
@@ -1199,7 +1022,7 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
             default:
                 continue;
             }
-            VertexElement.UsageIndex = (BYTE)t;
+            VertexElement.UsageIndex = static_cast<BYTE>( t );
             m_VertexElements.push_back( VertexElement );
             iCurrentVertexOffset += GetElementSizeFromDeclType( VertexElement.Type );
         }
@@ -1208,18 +1031,18 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     if( m_VertexFormat.m_bTangent )
     {
         iTangentOffset = iCurrentVertexOffset;
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_TANGENT;
-        VertexElement.Type = (BYTE)dwNormalType;
+        VertexElement.Type = static_cast<BYTE>( dwNormalType );
         m_VertexElements.push_back( VertexElement );
         iCurrentVertexOffset += GetElementSizeFromDeclType( VertexElement.Type );
     }
     if( m_VertexFormat.m_bBinormal )
     {
         iBinormalOffset = iCurrentVertexOffset;
-        VertexElement.Offset = (WORD)iCurrentVertexOffset;
+        VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_BINORMAL;
-        VertexElement.Type = (BYTE)dwNormalType;
+        VertexElement.Type = static_cast<BYTE>( dwNormalType );
         m_VertexElements.push_back( VertexElement );
         iCurrentVertexOffset += GetElementSizeFromDeclType( VertexElement.Type );
     }
@@ -1231,23 +1054,23 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
     // create vertex buffer and allocate storage
     m_pVB = new ExportVB();
-    m_pVB->SetVertexCount( (UINT)VertexArray.size() );
-    m_pVB->SetVertexSize( (UINT)uVertexSize );
+    m_pVB->SetVertexCount( VertexArray.size() );
+    m_pVB->SetVertexSize( uVertexSize );
     m_pVB->Allocate();
 
     // copy raw vertex data into the packed vertex buffer
-    for( UINT i = 0; i < VertexArray.size(); i++ )
+    for( size_t i = 0; i < VertexArray.size(); i++ )
     {
-        BYTE* pDestVertex = m_pVB->GetVertex( i );
+        auto pDestVertex = m_pVB->GetVertex( i );
         ExportMeshVertex* pSrcVertex = VertexArray[i];
-        if( pSrcVertex == NULL )
+        if( !pSrcVertex )
         {
             continue;
         }
 
         if( iPositionOffset != -1 )
         {
-            D3DXVECTOR3* pDest = (D3DXVECTOR3*)( pDestVertex + iPositionOffset );
+            auto pDest = reinterpret_cast<D3DXVECTOR3*>( pDestVertex + iPositionOffset );
             g_pScene->GetDCCTransformer()->TransformPosition( pDest, &pSrcVertex->Position );
         }
         if( iNormalOffset != -1 )
@@ -1258,10 +1081,10 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
         {
             BYTE* pDest = pDestVertex + iSkinDataOffset;
             BYTE* pBoneWeights = pDest;
-            *pDest++ = (BYTE)( pSrcVertex->BoneWeights.x * 255.0f );
-            *pDest++ = (BYTE)( pSrcVertex->BoneWeights.y * 255.0f );
-            *pDest++ = (BYTE)( pSrcVertex->BoneWeights.z * 255.0f );
-            *pDest++ = (BYTE)( pSrcVertex->BoneWeights.w * 255.0f );
+            *pDest++ = static_cast<BYTE>( pSrcVertex->BoneWeights.x * 255.0f );
+            *pDest++ = static_cast<BYTE>( pSrcVertex->BoneWeights.y * 255.0f );
+            *pDest++ = static_cast<BYTE>( pSrcVertex->BoneWeights.z * 255.0f );
+            *pDest++ = static_cast<BYTE>( pSrcVertex->BoneWeights.w * 255.0f );
             NormalizeBoneWeights( pBoneWeights );
             *pDest++ = pSrcVertex->BoneIndices.x;
             *pDest++ = pSrcVertex->BoneIndices.y;
@@ -1279,18 +1102,18 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
         if( iColorOffset != -1 )
         {
             UINT uColor = 0;
-            uColor |= ( (BYTE)( pSrcVertex->Color.w * 255.0f ) ) << 24;
-            uColor |= ( (BYTE)( pSrcVertex->Color.x * 255.0f ) ) << 16;
-            uColor |= ( (BYTE)( pSrcVertex->Color.y * 255.0f ) ) << 8;
-            uColor |= ( (BYTE)( pSrcVertex->Color.z * 255.0f ) );
+            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.w * 255.0f ) ) << 24;
+            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.x * 255.0f ) ) << 16;
+            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.y * 255.0f ) ) << 8;
+            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.z * 255.0f ) );
             memcpy( pDestVertex + iColorOffset, &uColor, 4 );
         }
         if( iUVOffset != -1 )
         {
             if( bCompressVertexData )
             {
-                DWORD* pDest = (DWORD*)( pDestVertex + iUVOffset ); 
-                for( DWORD t = 0; t < m_VertexFormat.m_uUVSetCount; t++ )
+                auto pDest = reinterpret_cast<DWORD*>( pDestVertex + iUVOffset ); 
+                for( size_t t = 0; t < m_VertexFormat.m_uUVSetCount; t++ )
                 {
                     switch( m_VertexFormat.m_uUVSetSize )
                     {
@@ -1302,35 +1125,35 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
                         }
                     case 2:
                         {
-                            D3DXFLOAT16* pFloat16 = (D3DXFLOAT16*)pDest;
-                            D3DXFloat32To16Array( pFloat16, (FLOAT*)&pSrcVertex->TexCoords[t], 2 );
+                            auto pFloat16 = reinterpret_cast<D3DXFLOAT16*>( pDest );
+                            D3DXFloat32To16Array( pFloat16, (float*)&pSrcVertex->TexCoords[t], 2 );
                             pDest++;
                             break;
                         }
                     case 3:
                         {
                             pDest[1] = 0;
-                            D3DXFLOAT16* pFloat16 = (D3DXFLOAT16*)pDest;
-                            D3DXFloat32To16Array( pFloat16, (FLOAT*)&pSrcVertex->TexCoords[t], 3 );
+                            auto pFloat16 = reinterpret_cast<D3DXFLOAT16*>( pDest );
+                            D3DXFloat32To16Array( pFloat16, (float*)&pSrcVertex->TexCoords[t], 3 );
                             pDest += 2;
                             break;
                         }
                     case 4:
                         {
-                            D3DXFLOAT16* pFloat16 = (D3DXFLOAT16*)pDest;
-                            D3DXFloat32To16Array( pFloat16, (FLOAT*)&pSrcVertex->TexCoords[t], 4 );
+                            auto pFloat16 = reinterpret_cast<D3DXFLOAT16*>( pDest );
+                            D3DXFloat32To16Array( pFloat16, (float*)&pSrcVertex->TexCoords[t], 4 );
                             pDest += 2;
                             break;
                         }
                     default:
-                        assert( FALSE );
+                        assert( false );
                         break;
                     }
                 }
             }
             else
             {
-                UINT uStride = m_VertexFormat.m_uUVSetSize * sizeof( FLOAT );
+                size_t uStride = m_VertexFormat.m_uUVSetSize * sizeof( float );
                 BYTE* pDest = pDestVertex + iUVOffset;
                 for( UINT t = 0; t < m_VertexFormat.m_uUVSetCount; t++ )
                 {
@@ -1342,34 +1165,34 @@ VOID ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     }
 }
 
-VOID ExportMesh::ComputeBounds()
+void ExportMesh::ComputeBounds()
 {
-    if( m_pVB == NULL )
+    if( !m_pVB )
         return;
 
-    ComputeBoundingSphereFromPoints( &m_BoundingSphere, m_pVB->GetVertexCount(), 
-        (XMFLOAT3*)m_pVB->GetVertexData(), m_pVB->GetVertexSize() );
+    ComputeBoundingSphereFromPoints( &m_BoundingSphere, static_cast<UINT>( m_pVB->GetVertexCount() ), 
+        reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
 
     ComputeBoundingAxisAlignedBoxFromPoints( &m_BoundingAABB,
-                                             m_pVB->GetVertexCount(),
-                                             (XMFLOAT3*)m_pVB->GetVertexData(),
+                                             static_cast<UINT>( m_pVB->GetVertexCount() ),
+                                             reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ),
                                              m_pVB->GetVertexSize() );
 
     ComputeBoundingOrientedBoxFromPoints( &m_BoundingOBB,
-                                           m_pVB->GetVertexCount(),
-                                           (XMFLOAT3*)m_pVB->GetVertexData(),
-                                           m_pVB->GetVertexSize() );
+                                          static_cast<UINT>( m_pVB->GetVertexCount() ),
+                                          reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ),
+                                          m_pVB->GetVertexSize() );
 
-    FLOAT fVolumeSphere = XM_PI * ( 4.0f / 3.0f ) * 
+    float fVolumeSphere = XM_PI * ( 4.0f / 3.0f ) * 
                           m_BoundingSphere.Radius * 
                           m_BoundingSphere.Radius * 
                           m_BoundingSphere.Radius;
 
-    FLOAT fVolumeAABB = m_BoundingAABB.Extents.x * 
+    float fVolumeAABB = m_BoundingAABB.Extents.x * 
                         m_BoundingAABB.Extents.y * 
                         m_BoundingAABB.Extents.z * 8.0f;
 
-    FLOAT fVolumeOBB = m_BoundingOBB.Extents.x *
+    float fVolumeOBB = m_BoundingOBB.Extents.x *
                        m_BoundingOBB.Extents.y *
                        m_BoundingOBB.Extents.z * 8.0f;
 
@@ -1381,35 +1204,35 @@ VOID ExportMesh::ComputeBounds()
         m_SmallestBound = SphereBound;
 }
 
-BOOL ExportModel::SetSubsetBinding( ExportString SubsetName, ExportMaterial* pMaterial, BOOL bSkipValidation )
+bool ExportModel::SetSubsetBinding( ExportString SubsetName, ExportMaterial* pMaterial, bool bSkipValidation )
 {
-    assert( m_pMesh != NULL );
+    assert( m_pMesh != nullptr );
     if( !bSkipValidation )
     {
-        BOOL bResult = FALSE;
+        bool bResult = false;
         for( UINT i = 0; i < m_pMesh->GetSubsetCount(); i++ )
         {
             ExportIBSubset* pSubset = m_pMesh->GetSubset( i );
             if( pSubset->GetName() == SubsetName )
-                bResult = TRUE;
+                bResult = true;
         }
         if( !bResult )
-            return FALSE;
+            return false;
     }
-    for( UINT i = 0; i < (UINT)m_vBindings.size(); i++ )
+    for( size_t i = 0; i < m_vBindings.size(); i++ )
     {
         ExportMaterialSubsetBinding* pBinding = m_vBindings[i];
         if( pBinding->SubsetName == SubsetName )
         {
             pBinding->pMaterial = pMaterial;
-            return TRUE;
+            return true;
         }
     }
     ExportMaterialSubsetBinding* pBinding = new ExportMaterialSubsetBinding();
     pBinding->SubsetName = SubsetName;
     pBinding->pMaterial = pMaterial;
     m_vBindings.push_back( pBinding );
-    return TRUE;
+    return true;
 }
 
 ExportModel::~ExportModel()
@@ -1419,7 +1242,7 @@ ExportModel::~ExportModel()
         delete m_vBindings[i];
     }
     m_vBindings.clear();
-    m_pMesh = NULL;
+    m_pMesh = nullptr;
 }
 
 };

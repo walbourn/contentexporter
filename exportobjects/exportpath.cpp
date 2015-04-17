@@ -40,19 +40,19 @@ ExportPath& ExportPath::operator=( const ExportPath& OtherPath )
     return *this;
 }
 
-VOID ExportPath::SetPathAndFileName( const CHAR* strPath )
+void ExportPath::SetPathAndFileName( const CHAR* strPath )
 {
     Initialize( strPath );
 }
 
-VOID ExportPath::SetPathOnly( const CHAR* strPath )
+void ExportPath::SetPathOnly( const CHAR* strPath )
 {
     const CHAR* strLastSlash = strrchr( strPath, g_DirectorySeparator );
-    if( strLastSlash == NULL )
+    if( !strLastSlash )
     {
         strLastSlash = strrchr( strPath, g_AltDirectorySeparator );
     }
-    if( strLastSlash == NULL || strLastSlash[1] != '\0' )
+    if( !strLastSlash || strLastSlash[1] != '\0' )
     {
         CHAR strModifiedPath[MAX_PATH];
         strcpy_s( strModifiedPath, strPath );
@@ -65,10 +65,10 @@ VOID ExportPath::SetPathOnly( const CHAR* strPath )
     }
 }
 
-VOID ExportPath::Initialize( const CHAR* strPath )
+void ExportPath::Initialize( const CHAR* strPath )
 {
     // Copy in our new path if one is provided
-    if( strPath != NULL )
+    if( strPath )
     {
         strcpy_s( m_strPath, strPath );
     }
@@ -89,7 +89,7 @@ VOID ExportPath::Initialize( const CHAR* strPath )
 
     // Look for the file name
     m_strFileName = strrchr( m_strPath, g_DirectorySeparator );
-    if( m_strFileName != NULL )
+    if( m_strFileName )
     {
         ++m_strFileName;
     }
@@ -99,10 +99,10 @@ VOID ExportPath::Initialize( const CHAR* strPath )
     }
 }
 
-VOID ExportPath::ChangeExtension( const CHAR* strExtension )
+void ExportPath::ChangeExtension( const CHAR* strExtension )
 {
-    // NULL extension means empty string
-    if( strExtension == NULL )
+    // nullptr extension means empty string
+    if( !strExtension )
     {
         strExtension = "";
     }
@@ -114,9 +114,9 @@ VOID ExportPath::ChangeExtension( const CHAR* strExtension )
     }
 
     // make sure we have a valid filename
-    assert( m_strFileName != NULL );
+    assert( m_strFileName != nullptr );
 
-    if( m_strExtension == NULL )
+    if( !m_strExtension )
     {
         // append a trailing period on the path
         strcat_s( m_strPath, "." );
@@ -132,26 +132,26 @@ VOID ExportPath::ChangeExtension( const CHAR* strExtension )
     strcat_s( m_strPath, strExtension );
 
     // re-initialize all of our pointers
-    Initialize( NULL );
+    Initialize( nullptr );
 }
 
-VOID ExportPath::ChangeFileName( const CHAR* strFileName )
+void ExportPath::ChangeFileName( const CHAR* strFileName )
 {
     // Ensure that incoming filename has no separators
     const CHAR* strSep = strchr( strFileName, g_DirectorySeparator );
-    assert( strSep == NULL );
+    assert( strSep == nullptr );
     strSep = strchr( strFileName, g_AltDirectorySeparator );
-    assert( strSep == NULL );
+    assert( strSep == nullptr );
 
     // save current extension
     CHAR strExtension[MAX_PATH] = "";
-    if( m_strExtension != NULL )
+    if( m_strExtension )
     {
         strcpy_s( strExtension, m_strExtension );
     }
 
     // trim off current file name
-    assert( m_strFileName != NULL );
+    assert( m_strFileName != nullptr );
     *m_strFileName = '\0';
 
     // concatenate filename onto path
@@ -161,34 +161,34 @@ VOID ExportPath::ChangeFileName( const CHAR* strFileName )
     strcat_s( m_strPath, strExtension );
 
     // re-initialize all of our pointers
-    Initialize( NULL );
+    Initialize( nullptr );
 }
 
-VOID ExportPath::ChangeFileName( const ExportPath& OtherPath )
+void ExportPath::ChangeFileName( const ExportPath& OtherPath )
 {
     ChangeFileName( (const CHAR*)OtherPath.GetFileNameWithoutExtension() );
 }
 
-VOID ExportPath::ChangeFileNameWithExtension( const CHAR* strFileName )
+void ExportPath::ChangeFileNameWithExtension( const CHAR* strFileName )
 {
     // Ensure that incoming filename has no separators
     const CHAR* strSep = strchr( strFileName, g_DirectorySeparator );
-    assert( strSep == NULL );
+    assert( strSep == nullptr );
     strSep = strchr( strFileName, g_AltDirectorySeparator );
-    assert( strSep == NULL );
+    assert( strSep == nullptr );
 
     // trim off current file name
-    assert( m_strFileName != NULL );
+    assert( m_strFileName != nullptr );
     *m_strFileName = '\0';
 
     // concatenate filename onto path
     strcat_s( m_strPath, strFileName );
 
     // re-initialize all of our pointers
-    Initialize( NULL );
+    Initialize( nullptr );
 }
 
-VOID ExportPath::ChangeFileNameWithExtension( const ExportPath& OtherPath )
+void ExportPath::ChangeFileNameWithExtension( const ExportPath& OtherPath )
 {
     ChangeFileNameWithExtension( (const CHAR*)OtherPath.GetFileName() );
 }
@@ -198,7 +198,7 @@ ExportPath ExportPath::GetFileName() const
     return ExportPath( m_strFileName );
 }
 
-BOOL ExportPath::HasFileName() const
+bool ExportPath::HasFileName() const
 {
     // If there is no filename, the filename pointer will point to the end of the string
     return ( *m_strFileName != '\0' );
@@ -207,7 +207,7 @@ BOOL ExportPath::HasFileName() const
 ExportPath ExportPath::GetFileNameWithoutExtension() const
 {
     // if we have no extension, just return the whole filename
-    if( m_strExtension == NULL )
+    if( !m_strExtension )
     {
         return GetFileName();
     }
@@ -215,7 +215,7 @@ ExportPath ExportPath::GetFileNameWithoutExtension() const
     CHAR strFileName[MAX_PATH];
 
     // copy only the chars between the filename and the extension period
-    DWORD dwCount = (DWORD)( m_strExtension - m_strFileName );
+    size_t dwCount = ( m_strExtension - m_strFileName );
     assert( dwCount < MAX_PATH );
     strncpy_s( strFileName, m_strFileName, dwCount );
     strFileName[dwCount] = '\0';
@@ -228,7 +228,7 @@ ExportPath ExportPath::GetDirectory() const
     CHAR strDirectory[MAX_PATH];
 
     // copy only the chars between the path and the start of the filename
-    DWORD dwCount = (DWORD)( m_strFileName - m_strPath );
+    size_t dwCount = ( m_strFileName - m_strPath );
     assert( dwCount < MAX_PATH );
     strncpy_s( strDirectory, m_strPath, dwCount );
     strDirectory[dwCount] = '\0';
@@ -238,27 +238,27 @@ ExportPath ExportPath::GetDirectory() const
 
 const CHAR* ExportPath::GetExtension() const
 {
-    if( m_strExtension == NULL )
-        return NULL;
+    if( !m_strExtension )
+        return nullptr;
 
     // return the extension without the period
     return m_strExtension + 1;
 }
 
-BOOL ExportPath::IsAbsolutePath() const
+bool ExportPath::IsAbsolutePath() const
 {
     // look for volume separator in the path
     const CHAR* strVolumeSep = strchr( m_strPath, g_VolumeSeparator );
-    if( strVolumeSep != NULL )
+    if( strVolumeSep )
     {
-        return TRUE;
+        return true;
     }
 
     // look for two leading slashes
     return ( m_strPath[0] == g_DirectorySeparator && m_strPath[1] == g_DirectorySeparator );
 }
 
-VOID ExportPath::Append( const ExportPath& OtherPath )
+void ExportPath::Append( const ExportPath& OtherPath )
 {
     // the other path can't be an absolute path
     assert( !OtherPath.IsAbsolutePath() );
@@ -268,7 +268,7 @@ VOID ExportPath::Append( const ExportPath& OtherPath )
     {
         strcat_s( m_strPath, (const CHAR*)OtherPath );
 
-        Initialize( NULL );
+        Initialize( nullptr );
         return;
     }
 
@@ -286,7 +286,7 @@ VOID ExportPath::Append( const ExportPath& OtherPath )
     // if the other path has a filename, we'll use that
     if( OtherPath.HasFileName() )
     {
-        Initialize( NULL );
+        Initialize( nullptr );
         return;
     }
 
@@ -294,24 +294,24 @@ VOID ExportPath::Append( const ExportPath& OtherPath )
     strcat_s( m_strPath, strFileName );
 
     // re-initialize all of our pointers
-    Initialize( NULL );
+    Initialize( nullptr );
 }
 
-VOID ExportPath::AppendToFileName( const CHAR* strText )
+void ExportPath::AppendToFileName( const CHAR* strText )
 {
-    if( strText == NULL )
+    if( !strText )
         return;
 
     if( !HasFileName() )
     {
         strcat_s( m_strPath, strText );
-        Initialize( NULL );
+        Initialize( nullptr );
         return;
     }
 
     // save current extension and then trim it off
     CHAR strExtension[MAX_PATH] = "";
-    if( m_strExtension != NULL )
+    if( m_strExtension )
     {
         strcpy_s( strExtension, m_strExtension );
         *m_strExtension = '\0';
@@ -324,16 +324,16 @@ VOID ExportPath::AppendToFileName( const CHAR* strText )
     strcat_s( m_strPath, strExtension );
 
     // re-initialize all of our pointers
-    Initialize( NULL );
+    Initialize( nullptr );
 }
 
-VOID ExportPath::TrimOffFileName()
+void ExportPath::TrimOffFileName()
 {
     // trim off the filename
     *m_strFileName = '\0';
 
     // re-initialize all of our pointers
-    Initialize( NULL );
+    Initialize( nullptr );
 }
 
 ExportPath ExportPath::GetTempPath()

@@ -19,8 +19,6 @@
 namespace ATG
 {
 
-using namespace std;
-
 class ExportModel;
 class ExportLight;
 class ExportCamera;
@@ -33,34 +31,34 @@ public:
     ExportFrame( ExportString name );
     virtual ~ExportFrame();
 
-    VOID AddChild( ExportFrame* pFrame ) { m_vChildren.push_back( pFrame ); }
-    VOID RemoveChild( ExportFrame* pFrame );
-    UINT GetChildCount() CONST { return (UINT)m_vChildren.size(); }
-    ExportFrame* GetChildByIndex( UINT uIndex ) { return m_vChildren[ uIndex ]; }
+    void AddChild( ExportFrame* pFrame ) { m_vChildren.push_back( pFrame ); }
+    void RemoveChild( ExportFrame* pFrame );
+    size_t GetChildCount() const { return m_vChildren.size(); }
+    ExportFrame* GetChildByIndex( size_t uIndex ) { return m_vChildren[ uIndex ]; }
 
-    UINT GetModelCount() CONST { return (UINT)m_vModels.size(); }
-    VOID AddModel( ExportModel* pModel ) { m_vModels.push_back( pModel ); }
-    ExportModel* GetModelByIndex( UINT uIndex ) { return m_vModels[ uIndex ]; }
+    size_t GetModelCount() const { return m_vModels.size(); }
+    void AddModel( ExportModel* pModel ) { m_vModels.push_back( pModel ); }
+    ExportModel* GetModelByIndex( size_t uIndex ) { return m_vModels[ uIndex ]; }
 
-    UINT GetLightCount() CONST { return (UINT)m_vLights.size(); }
-    VOID AddLight( ExportLight* pLight ) { m_vLights.push_back( pLight ); }
-    ExportLight* GetLightByIndex( UINT uIndex ) { return m_vLights[ uIndex ]; }
+    size_t GetLightCount() const { return m_vLights.size(); }
+    void AddLight( ExportLight* pLight ) { m_vLights.push_back( pLight ); }
+    ExportLight* GetLightByIndex( size_t uIndex ) { return m_vLights[ uIndex ]; }
 
-    UINT GetCameraCount() CONST { return (UINT)m_vCameras.size(); }
-    VOID AddCamera( ExportCamera* pCamera ) { m_vCameras.push_back( pCamera ); }
-    ExportCamera* GetCameraByIndex( UINT uIndex ) { return m_vCameras[ uIndex ]; }
+    size_t GetCameraCount() const { return m_vCameras.size(); }
+    void AddCamera( ExportCamera* pCamera ) { m_vCameras.push_back( pCamera ); }
+    ExportCamera* GetCameraByIndex( size_t uIndex ) { return m_vCameras[ uIndex ]; }
 
     ExportFrame* FindFrameByName( ExportString name );
-    ExportFrame* FindFrameByDCCObject( VOID* pObject );
+    ExportFrame* FindFrameByDCCObject( void* pObject );
 
     ExportTransform& Transform() { return m_Transform; }
-    VOID NormalizeTransform();
+    void NormalizeTransform();
 protected:
-    ExportTransform             m_Transform;
-    vector< ExportFrame* >      m_vChildren;
-    vector< ExportModel* >      m_vModels;
-    vector< ExportLight* >      m_vLights;
-    vector< ExportCamera* >     m_vCameras;
+    ExportTransform                 m_Transform;
+    std::vector< ExportFrame* >     m_vChildren;
+    std::vector< ExportModel* >     m_vModels;
+    std::vector< ExportLight* >     m_vLights;
+    std::vector< ExportCamera* >    m_vCameras;
 };
 
 };

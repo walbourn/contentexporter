@@ -23,18 +23,20 @@ namespace ATG
 class ExportTransform
 {
 public:
-    VOID SetIdentity();
-    BOOL InitializeFromFloatsTransposed( FLOAT* pSixteenFloats );
-    BOOL InitializeFromFloats( FLOAT* pSixteenFloats );
-    CONST D3DXMATRIX& Matrix() CONST { return m_Matrix; }
+    void SetIdentity();
+    bool InitializeFromFloatsTransposed( float* pSixteenFloats );
+    bool InitializeFromFloats( float* pSixteenFloats );
+    const D3DXMATRIX& Matrix() const { return m_Matrix; }
     D3DXMATRIX& Matrix() { return m_Matrix; }
-    VOID Multiply( CONST D3DXMATRIX& Matrix );
-    VOID Normalize();
+    void Multiply( const D3DXMATRIX& Matrix );
+    void Normalize();
     const D3DXVECTOR3& Position() const { return m_Position; }
     const D3DXQUATERNION& Orientation() const { return m_Orientation; }
     const D3DXVECTOR3& Scale() const { return m_Scale; }
+
 protected:
-    BOOL DecomposeMatrix();
+    bool DecomposeMatrix();
+
 protected:
     D3DXMATRIX      m_Matrix;
     D3DXVECTOR3     m_Position;
@@ -42,54 +44,21 @@ protected:
     D3DXVECTOR3     m_Scale;
 };
 
-struct ExportAttribute
-{
-    enum AttributeType
-    {
-        AT_UNKNOWN = 0,
-        AT_STRING,
-        AT_INT,
-        AT_FLOAT,
-        AT_VEC4
-    };
-    ExportAttribute()
-    {
-        ZeroMemory( this, sizeof( ExportAttribute ) );
-    }
-    ExportString    Name;
-    AttributeType   Type;
-    ExportString    strValue;
-    INT             iValue;
-    FLOAT           fValue;
-    D3DXVECTOR4     vecValue;
-};
-
-typedef std::list< ExportAttribute* > ExportAttributeList;
-
-
 class ExportBase
 {
 public:
-    ExportBase() : m_pDCCObject(NULL) {}
-    ExportBase( ExportString name ) : m_Name( name ), m_pDCCObject(NULL) {}
+    ExportBase() : m_pDCCObject(nullptr) {}
+    ExportBase( ExportString name ) : m_Name( name ), m_pDCCObject(nullptr) {}
     virtual ~ExportBase();
 
-    ExportString GetName() CONST { return m_Name; }
-    VOID SetName( ExportString newName ) { m_Name = newName; }
+    ExportString GetName() const { return m_Name; }
+    void SetName( ExportString newName ) { m_Name = newName; }
 
-    VOID ClearAttributes();
-    virtual BOOL AddAttribute( ExportAttribute* pAttribute );
-    BOOL DeleteAttribute( CONST CHAR* strName );
-    UINT GetAttributeCount() CONST;
-    ExportAttribute* GetAttributeByIndex( UINT uIndex ) CONST;
-    ExportAttribute* GetAttribute( CONST CHAR* strName ) CONST;
-
-    VOID SetDCCObject( VOID* pDCCObject ) { m_pDCCObject = pDCCObject; }
-    VOID* GetDCCObject() CONST { return m_pDCCObject; }
+    void SetDCCObject( void* pDCCObject ) { m_pDCCObject = pDCCObject; }
+    void* GetDCCObject() const { return m_pDCCObject; }
 protected:
     ExportString        m_Name;
-    ExportAttributeList m_Attributes;
-    VOID*               m_pDCCObject;
+    void*               m_pDCCObject;
 };
 
 };

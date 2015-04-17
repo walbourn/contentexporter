@@ -166,12 +166,6 @@
     <ClInclude Include="XATGFileWriter.h" />
     <ClInclude Include="xmlwriter.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ExportObjects\ExportObjects2010.vcxproj">
-      <Project>{6afa24fb-37b3-49d3-9832-f7ea3de3ca2e}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

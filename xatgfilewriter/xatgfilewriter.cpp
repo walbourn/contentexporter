@@ -28,8 +28,8 @@ static const CHAR* g_strSceneOutputSubPath = "\\scenes";
 
 XATGExportSettings      g_XATGSettings;
 
-XMLWriter*              g_pXMLWriter = NULL;
-ExportManifest*         g_pManifest = NULL;
+XMLWriter*              g_pXMLWriter = nullptr;
+ExportManifest*         g_pManifest = nullptr;
 CHAR                    g_strFileName[MAX_PATH];
 CHAR                    g_strOutputFileBasePath[MAX_PATH];
 CHAR                    g_strOutputFileScenePath[MAX_PATH];
@@ -41,35 +41,35 @@ HANDLE                  g_hBinaryBlobFile = INVALID_HANDLE_VALUE;
 ExportManifest          g_DefaultManifest;
 ExportFileRecord        g_TextureBundledFile;
 
-VOID WriteAnimations();
-VOID WriteMaterials();
-VOID WriteMeshes();
-VOID WriteFrame( ExportFrame* pFrame );
-VOID WriteInformation();
-VOID PrepareDestination();
-VOID PrepareBinaryBlob();
-VOID PrepareBundledFile();
+void WriteAnimations();
+void WriteMaterials();
+void WriteMeshes();
+void WriteFrame( ExportFrame* pFrame );
+void WriteInformation();
+void PrepareDestination();
+void PrepareBinaryBlob();
+void PrepareBundledFile();
 DWORD GetBinaryBlobCurrentOffset();
-VOID WriteBinaryBlobData( BYTE* pData, DWORD dwDataSizeBytes );
+void WriteBinaryBlobData( BYTE* pData, size_t dwDataSizeBytes );
 
-VOID XATGInitializeSettings()
+void XATGInitializeSettings()
 {
     ExportSettingsEntry* pCategoryXATG = g_SettingsManager.AddRootCategory( "XATG File Export" );
-    g_SettingsManager.AddBool( pCategoryXATG, "Bundle Textures", "bundletextures", TRUE, &g_XATGSettings.bBundleTextures );
-    g_SettingsManager.AddBool( pCategoryXATG, "Use Existing Bundle", "useexistingbundle", FALSE, &g_XATGSettings.bUseExistingBundle );
-    g_SettingsManager.AddBool( pCategoryXATG, "Write .pmem Fast Load File", "packmeshdata", TRUE, &g_XATGSettings.bBinaryBlobExport );
-    pCategoryXATG->SetDefaultValue( TRUE, FALSE );
+    g_SettingsManager.AddBool( pCategoryXATG, "Bundle Textures", "bundletextures", true, &g_XATGSettings.bBundleTextures );
+    g_SettingsManager.AddBool( pCategoryXATG, "Use Existing Bundle", "useexistingbundle", false, &g_XATGSettings.bUseExistingBundle );
+    g_SettingsManager.AddBool( pCategoryXATG, "Write .pmem Fast Load File", "packmeshdata", true, &g_XATGSettings.bBinaryBlobExport );
+    pCategoryXATG->SetDefaultValue( true, false );
 }
 
-VOID UpdateProgress()
+void UpdateProgress()
 {
     if( g_iWorkSize <= 0 )
         return;
 
-    g_pProgress->SetProgress( (FLOAT)g_iCompletedWork / (FLOAT)g_iWorkSize );
+    g_pProgress->SetProgress( (float)g_iCompletedWork / (float)g_iWorkSize );
 }
 
-VOID ConvertSlashes( CHAR* strString )
+void ConvertSlashes( CHAR* strString )
 {
     CHAR* pChar = strString;
     while( *pChar != '\0' )
@@ -80,16 +80,16 @@ VOID ConvertSlashes( CHAR* strString )
     }
 }
 
-BOOL WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest )
+bool WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest )
 {
-    if( g_pScene == NULL || strFileName == NULL )
-        return FALSE;
+    if( !g_pScene || !strFileName )
+        return false;
 
-    if( g_pXMLWriter != NULL )
-        return FALSE;
+    if( g_pXMLWriter )
+        return false;
 
     g_pManifest = pManifest;
-    if( g_pManifest == NULL )
+    if( !g_pManifest )
     {
         g_pManifest = &g_DefaultManifest;
     }
@@ -99,22 +99,22 @@ BOOL WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest )
 
     PrepareDestination();
 
-    BOOL retValue = TRUE;
+    bool retValue = true;
 
     g_iWorkSize = 0;
     g_iCompletedWork = 0;
     if( g_pScene->Settings().bExportScene )
         g_iWorkSize += 50;
     if( g_pScene->Settings().bExportMeshes )
-        g_iWorkSize += (INT)g_pScene->GetMeshCount() * 10;
+        g_iWorkSize += static_cast<INT>( g_pScene->GetMeshCount() * 10 );
     if( g_pScene->Settings().bExportMaterials )
-        g_iWorkSize += (INT)g_pScene->GetMaterialCount() * 3;
+        g_iWorkSize += static_cast<INT>( g_pScene->GetMaterialCount() * 3 );
 
     g_pXMLWriter = new XMLWriter( g_strOutputFileScenePath );
     if( !g_pXMLWriter->IsValid() )
     {
         ExportLog::LogError( "Could not write to destination file \"%s\".  Verify that the path is valid and the file is not marked read-only.", g_strOutputFileScenePath );
-        return FALSE;
+        return false;
     }
 
     g_pXMLWriter->StartElement( "XFileATG" );
@@ -146,7 +146,7 @@ BOOL WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest )
     {
         g_pProgress->SetCaption( "Writing Scene..." );
         ExportFrame* pRootFrame = g_pScene->GetChildByIndex( 0 );
-        if( pRootFrame != NULL )
+        if( pRootFrame )
             WriteFrame( pRootFrame );
         g_iCompletedWork += 50;
         UpdateProgress();
@@ -156,7 +156,7 @@ BOOL WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest )
 
     g_pXMLWriter->Close();
     delete g_pXMLWriter;
-    g_pXMLWriter = NULL;
+    g_pXMLWriter = nullptr;
 
     if( g_hBinaryBlobFile != INVALID_HANDLE_VALUE )
     {
@@ -197,28 +197,28 @@ const CHAR* WriteQuaternion( const D3DXQUATERNION& quat )
     return g_strBuffer;
 }
 
-VOID WriteAnimations()
+void WriteAnimations()
 {
-    for( DWORD i = 0; i < g_pScene->GetAnimationCount(); i++ )
+    for( size_t i = 0; i < g_pScene->GetAnimationCount(); i++ )
     {
         ExportAnimation* pAnim = g_pScene->GetAnimation( i );
-        DWORD dwTrackCount = pAnim->GetTrackCount();
+        size_t dwTrackCount = pAnim->GetTrackCount();
         if( dwTrackCount == 0 )
             continue;
         g_pXMLWriter->StartElement( "Animation" );
         g_pXMLWriter->AddAttribute( "Name", pAnim->GetName() );
         g_pXMLWriter->AddAttribute( "Duration", pAnim->fEndTime - pAnim->fStartTime );
-        for( DWORD dwTrack = 0; dwTrack < dwTrackCount; dwTrack++ )
+        for( size_t dwTrack = 0; dwTrack < dwTrackCount; dwTrack++ )
         {
             ExportAnimationTrack* pTrack = pAnim->GetTrack( dwTrack );
             g_pXMLWriter->StartElement( "AnimationTrack" );
             g_pXMLWriter->AddAttribute( "Name", pTrack->GetName() );
             
             {
-                DWORD dwKeyCount = (DWORD)pTrack->TransformTrack.PositionKeys.size();
+                size_t dwKeyCount = pTrack->TransformTrack.PositionKeys.size();
                 g_pXMLWriter->StartElement( "PositionKeys" );
-                g_pXMLWriter->AddAttribute( "Count", (INT)dwKeyCount );
-                for( DWORD dwKey = 0; dwKey < dwKeyCount; dwKey++ )
+                g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwKeyCount ) );
+                for( size_t dwKey = 0; dwKey < dwKeyCount; dwKey++ )
                 {
                     ExportAnimationPositionKey& Key = pTrack->TransformTrack.PositionKeys[dwKey];
                     g_pXMLWriter->StartElement( "PositionKey" );
@@ -230,10 +230,10 @@ VOID WriteAnimations()
             }
 
             {
-                DWORD dwKeyCount = (DWORD)pTrack->TransformTrack.OrientationKeys.size();
+                size_t dwKeyCount = pTrack->TransformTrack.OrientationKeys.size();
                 g_pXMLWriter->StartElement( "OrientationKeys" );
-                g_pXMLWriter->AddAttribute( "Count", (INT)dwKeyCount );
-                for( DWORD dwKey = 0; dwKey < dwKeyCount; dwKey++ )
+                g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwKeyCount ) );
+                for( size_t dwKey = 0; dwKey < dwKeyCount; dwKey++ )
                 {
                     ExportAnimationOrientationKey& Key = pTrack->TransformTrack.OrientationKeys[dwKey];
                     g_pXMLWriter->StartElement( "OrientationKey" );
@@ -245,10 +245,10 @@ VOID WriteAnimations()
             }
 
             {
-                DWORD dwKeyCount = (DWORD)pTrack->TransformTrack.ScaleKeys.size();
+                size_t dwKeyCount = pTrack->TransformTrack.ScaleKeys.size();
                 g_pXMLWriter->StartElement( "ScaleKeys" );
-                g_pXMLWriter->AddAttribute( "Count", (INT)dwKeyCount );
-                for( DWORD dwKey = 0; dwKey < dwKeyCount; dwKey++ )
+                g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwKeyCount ) );
+                for( size_t dwKey = 0; dwKey < dwKeyCount; dwKey++ )
                 {
                     ExportAnimationScaleKey& Key = pTrack->TransformTrack.ScaleKeys[dwKey];
                     g_pXMLWriter->StartElement( "ScaleKey" );
@@ -268,57 +268,57 @@ VOID WriteAnimations()
     }
 }
 
-VOID WriteMaterialParameterString( const CHAR* strName, const CHAR* strValue, const CHAR* strTypeHint, BOOL bInstanceParam, const CHAR* strHint )
+void WriteMaterialParameterString( const CHAR* strName, const CHAR* strValue, const CHAR* strTypeHint, bool bInstanceParam, const CHAR* strHint )
 {
     g_pXMLWriter->StartElement( "ParamString" );
     g_pXMLWriter->AddAttribute( "Name", strName );
-    if( strTypeHint != NULL )
+    if( strTypeHint )
     {
         g_pXMLWriter->AddAttribute( "Type", strTypeHint );
     }
     if( bInstanceParam )
         g_pXMLWriter->AddAttribute( "InstanceParam", "TRUE" );
-    if( strHint != NULL && strlen( strHint ) > 0 )
+    if( strHint && strlen( strHint ) > 0 )
         g_pXMLWriter->AddAttribute( "Hint", strHint );
     g_pXMLWriter->WriteElement( "Value", strValue );
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteMaterialParameterFloatArray( const CHAR* strName, const FLOAT* pValues, DWORD dwCount, BOOL bInstanceParam, const CHAR* strHint )
+void WriteMaterialParameterFloatArray( const CHAR* strName, const float* pValues, size_t dwCount, bool bInstanceParam, const CHAR* strHint )
 {
     g_pXMLWriter->StartElement( "ParamFloat" );
     g_pXMLWriter->AddAttribute( "Name", strName );
-    g_pXMLWriter->AddAttribute( "Count", (INT)dwCount );
+    g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwCount ) );
     if( bInstanceParam )
         g_pXMLWriter->AddAttribute( "InstanceParam", "TRUE" );
-    if( strHint != NULL && strlen( strHint ) > 0 )
+    if( strHint && strlen( strHint ) > 0 )
         g_pXMLWriter->AddAttribute( "Hint", strHint );
-    for( DWORD i = 0; i < dwCount; ++i )
+    for( size_t i = 0; i < dwCount; ++i )
     {
         g_pXMLWriter->WriteElement( "Value", pValues[i] );
     }
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteMaterialParameterInteger( const CHAR* strName, const INT iValue, BOOL bInstanceParam, const CHAR* strHint )
+void WriteMaterialParameterInteger( const CHAR* strName, const INT iValue, bool bInstanceParam, const CHAR* strHint )
 {
     g_pXMLWriter->StartElement( "ParamInt" );
     g_pXMLWriter->AddAttribute( "Name", strName );
     if( bInstanceParam )
         g_pXMLWriter->AddAttribute( "InstanceParam", "TRUE" );
-    if( strHint != NULL && strlen( strHint ) > 0 )
+    if( strHint && strlen( strHint ) > 0 )
         g_pXMLWriter->AddAttribute( "Hint", strHint );
     g_pXMLWriter->WriteElement( "Value", iValue );
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteMaterialParameterBool( const CHAR* strName, const BOOL bValue, BOOL bInstanceParam, const CHAR* strHint )
+void WriteMaterialParameterBool( const CHAR* strName, const bool bValue, bool bInstanceParam, const CHAR* strHint )
 {
     g_pXMLWriter->StartElement( "ParamBool" );
     g_pXMLWriter->AddAttribute( "Name", strName );
     if( bInstanceParam )
         g_pXMLWriter->AddAttribute( "InstanceParam", "TRUE" );
-    if( strHint != NULL && strlen( strHint ) > 0 )
+    if( strHint && strlen( strHint ) > 0 )
         g_pXMLWriter->AddAttribute( "Hint", strHint );
     if( bValue )
         g_pXMLWriter->WriteElement( "Value", "TRUE" );
@@ -327,7 +327,7 @@ VOID WriteMaterialParameterBool( const CHAR* strName, const BOOL bValue, BOOL bI
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteMaterialParameter( const ExportMaterialParameter& ParamDesc )
+void WriteMaterialParameter( const ExportMaterialParameter& ParamDesc )
 {
     switch( ParamDesc.ParamType )
     {
@@ -353,28 +353,28 @@ VOID WriteMaterialParameter( const ExportMaterialParameter& ParamDesc )
         WriteMaterialParameterFloatArray( ParamDesc.Name, ParamDesc.ValueFloat, 4, ParamDesc.bInstanceParam, ParamDesc.Hint );
         break;
     case MPT_BOOL:
-        WriteMaterialParameterBool( ParamDesc.Name, ParamDesc.ValueInt, ParamDesc.bInstanceParam, ParamDesc.Hint );
+        WriteMaterialParameterBool( ParamDesc.Name, ParamDesc.ValueInt ? true : false, ParamDesc.bInstanceParam, ParamDesc.Hint );
         break;
     case MPT_INTEGER:
         WriteMaterialParameterInteger( ParamDesc.Name, ParamDesc.ValueInt, ParamDesc.bInstanceParam, ParamDesc.Hint );
         break;
     case MPT_STRING:
-        WriteMaterialParameterString( ParamDesc.Name, ParamDesc.ValueString, NULL, ParamDesc.bInstanceParam, ParamDesc.Hint );
+        WriteMaterialParameterString( ParamDesc.Name, ParamDesc.ValueString, nullptr, ParamDesc.bInstanceParam, ParamDesc.Hint );
         break;
     }
 }
 
-VOID WriteMaterials()
+void WriteMaterials()
 {
     const CHAR* strMaterialDBName = ExportMaterialDatabase::GetDatabaseFileName();
     if( strlen( strMaterialDBName ) != 0 )
     {
         g_pXMLWriter->StartElement( "MaterialDatabase" );
         g_pXMLWriter->AddAttribute( "FileName", strMaterialDBName );
-        g_pXMLWriter->AddAttribute( "MaterialCount", (INT)ExportMaterialDatabase::GetMaterialCount() );
+        g_pXMLWriter->AddAttribute( "MaterialCount", static_cast<INT>( ExportMaterialDatabase::GetMaterialCount() ) );
         g_pXMLWriter->EndElement();
     }
-    for( UINT i = 0; i < g_pScene->GetMaterialCount(); i++ )
+    for( size_t i = 0; i < g_pScene->GetMaterialCount(); i++ )
     {
         ExportMaterial* pMaterial = g_pScene->GetMaterial( i );
         g_pXMLWriter->StartElement( "MaterialInstance" );
@@ -384,7 +384,7 @@ VOID WriteMaterials()
         if( pMaterial->GetParameterCount() > 0 )
         {
             const CHAR* strMaterialName = pMaterial->GetDefaultMaterialName();
-            if( pMaterial->GetMaterialDefinition() != NULL )
+            if( pMaterial->GetMaterialDefinition() )
                 strMaterialName = pMaterial->GetMaterialDefinition()->strName.SafeString();
             g_pXMLWriter->AddAttribute( "MaterialName", strMaterialName );
             // serialize effect parameters
@@ -405,7 +405,7 @@ VOID WriteMaterials()
     }
 }
 
-VOID WriteVertexElement( const D3DVERTEXELEMENT9& Element )
+void WriteVertexElement( const D3DVERTEXELEMENT9& Element )
 {
     static const CHAR* s_strVertexDeclType[] = {
         "FLOAT1",
@@ -476,21 +476,21 @@ D3DXVECTOR3 CrackCompressedVector( DWORD dwCompressedVector )
 {
     XMXDECN4 DecN4( dwCompressedVector );
     D3DXVECTOR3 Vec3;
-    Vec3.x = (FLOAT)DecN4.x / 511.0f;
-    Vec3.y = (FLOAT)DecN4.y / 511.0f;
-    Vec3.z = (FLOAT)DecN4.z / 511.0f;
+    Vec3.x = (float)DecN4.x / 511.0f;
+    Vec3.y = (float)DecN4.y / 511.0f;
+    Vec3.z = (float)DecN4.z / 511.0f;
 
     return Vec3;
 }
 
 
-VOID WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexElements, DWORD dwVertexElementCount )
+void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexElements, size_t dwVertexElementCount )
 {
-    UINT uVertexCount = pVB->GetVertexCount();
+    size_t uVertexCount = pVB->GetVertexCount();
 
-    for( UINT i = 0; i < uVertexCount; i++ )
+    for( size_t i = 0; i < uVertexCount; i++ )
     {
-        BYTE* pVertex = pVB->GetVertex( i );
+        auto pVertex = pVB->GetVertex( i );
 
         g_pXMLWriter->StartElement( "E" );
         const CHAR* strComma = ", ";
@@ -498,82 +498,82 @@ VOID WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
         {
             if( d == dwVertexElementCount - 1 )
                 strComma = "";
-            BYTE* pVertexData = pVertex + pVertexElements[d].Offset;
+            uint8_t* pVertexData = pVertex + pVertexElements[d].Offset;
             switch( pVertexElements[d].Type )
             {
             case D3DDECLTYPE_FLOAT4:
                 g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", 
-                    *(FLOAT*)pVertexData,  
-                    *(FLOAT*)( pVertexData + 4 ),  
-                    *(FLOAT*)( pVertexData + 8 ),  
-                    *(FLOAT*)( pVertexData + 12 ),
+                    *reinterpret_cast<float*>( pVertexData ),
+                    *reinterpret_cast<float*>( pVertexData + 4 ),
+                    *reinterpret_cast<float*>( pVertexData + 8 ),
+                    *reinterpret_cast<float*>( pVertexData + 12 ),
                     strComma );
                 break;
             case D3DDECLTYPE_FLOAT3:
                 g_pXMLWriter->WriteStringFormat( "%f, %f, %f%s", 
-                    *(FLOAT*)pVertexData,  
-                    *(FLOAT*)( pVertexData + 4 ),  
-                    *(FLOAT*)( pVertexData + 8 ),  
+                    *reinterpret_cast<float*>( pVertexData ),
+                    *reinterpret_cast<float*>( pVertexData + 4 ),
+                    *reinterpret_cast<float*>( pVertexData + 8 ),
                     strComma );
                 break;
             case D3DDECLTYPE_FLOAT2:
                 g_pXMLWriter->WriteStringFormat( "%f, %f%s", 
-                    *(FLOAT*)pVertexData,  
-                    *(FLOAT*)( pVertexData + 4 ),  
+                    *reinterpret_cast<float*>( pVertexData ),
+                    *reinterpret_cast<float*>( pVertexData + 4 ),
                     strComma );
                 break;
             case D3DDECLTYPE_FLOAT1:
-                g_pXMLWriter->WriteStringFormat( "%f%s", *(FLOAT*)pVertexData, strComma );
+                g_pXMLWriter->WriteStringFormat( "%f%s", *reinterpret_cast<float*>( pVertexData ), strComma );
                 break;
             case D3DDECLTYPE_D3DCOLOR:
             case D3DDECLTYPE_UBYTE4:
             case D3DDECLTYPE_UBYTE4N:
-                g_pXMLWriter->WriteStringFormat( "0x%08x%s", *(DWORD*)pVertexData, strComma );
+                g_pXMLWriter->WriteStringFormat( "0x%08x%s", *reinterpret_cast<DWORD*>( pVertexData ), strComma );
                 break;
             case D3DDECLTYPE_DEC3N:
                 {
-                    D3DXVECTOR3 Vec3 = CrackCompressedVector( *(DWORD*)pVertexData );
+                    D3DXVECTOR3 Vec3 = CrackCompressedVector( *reinterpret_cast<DWORD*>( pVertexData ) );
                     g_pXMLWriter->WriteStringFormat( "%f, %f, %f%s", 
                         Vec3.x, Vec3.y, Vec3.z, strComma );
                     break;
                 }
             case D3DDECLTYPE_FLOAT16_2:
                 {
-                    FLOAT fData[2];
-                    D3DXFloat16To32Array( fData, (D3DXFLOAT16*)pVertexData, 2 );
+                    float fData[2];
+                    D3DXFloat16To32Array( fData, reinterpret_cast<D3DXFLOAT16*>( pVertexData ), 2 );
                     g_pXMLWriter->WriteStringFormat( "%f, %f%s", fData[0], fData[1], strComma );
                     break;
                 }
             case D3DDECLTYPE_FLOAT16_4:
                 {
-                    FLOAT fData[4];
-                    D3DXFloat16To32Array( fData, (D3DXFLOAT16*)pVertexData, 4 );
+                    float fData[4];
+                    D3DXFloat16To32Array( fData, reinterpret_cast<D3DXFLOAT16*>( pVertexData ), 4 );
                     g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", 
                         fData[0], fData[1], fData[2], fData[3], strComma );
                     break;
                 }
             case D3DDECLTYPE_SHORT2:
                 {
-                    WORD* pWords = (WORD*)pVertexData;
+                    auto pWords = reinterpret_cast<WORD*>( pVertexData );
                     g_pXMLWriter->WriteStringFormat( "%hd, %hd%s", pWords[0], pWords[1], strComma );
                     break;
                 }
             case D3DDECLTYPE_SHORT4:
                 {
-                    WORD* pWords = (WORD*)pVertexData;
+                    auto pWords = reinterpret_cast<WORD*>( pVertexData );
                     g_pXMLWriter->WriteStringFormat( "%hd, %hd, %hd, %hd%s", pWords[0], pWords[1], pWords[2], pWords[3], strComma );
                     break;
                 }
             case D3DDECLTYPE_SHORT2N:
                 {
-                    short* pWords = (short*)pVertexData;
-                    g_pXMLWriter->WriteStringFormat( "%f, %f%s", (FLOAT)pWords[0] / 32767.0f, (FLOAT)pWords[1] / 32767.0f, strComma );
+                    auto pWords = reinterpret_cast<short*>( pVertexData );
+                    g_pXMLWriter->WriteStringFormat( "%f, %f%s", (float)pWords[0] / 32767.0f, (float)pWords[1] / 32767.0f, strComma );
                     break;
                 }
             case D3DDECLTYPE_SHORT4N:
                 {
-                    short* pWords = (short*)pVertexData;
-                    g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", (FLOAT)pWords[0] / 32767.0f, (FLOAT)pWords[1] / 32767.0f, (FLOAT)pWords[2] / 32767.0f, (FLOAT)pWords[3] / 32767.0f, strComma );
+                    auto pWords = reinterpret_cast<short*>( pVertexData );
+                    g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", (float)pWords[0] / 32767.0f, (float)pWords[1] / 32767.0f, (float)pWords[2] / 32767.0f, (float)pWords[3] / 32767.0f, strComma );
                     break;
                 }
             default:
@@ -586,66 +586,66 @@ VOID WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
 
 }
 
-VOID WriteVertexData( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexElements, DWORD dwVertexElementCount )
+void WriteVertexData( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexElements, size_t dwVertexElementCount )
 {
-    DWORD dwVertexCount = pVB->GetVertexCount();
+    size_t dwVertexCount = pVB->GetVertexCount();
 
     if( g_XATGSettings.bBinaryBlobExport )
     {
         DWORD dwBlobLocation = GetBinaryBlobCurrentOffset();
         WriteBinaryBlobData( pVB->GetVertexData(), pVB->GetVertexDataSize() );
         g_pXMLWriter->StartElement( "PhysicalBinaryData" );
-        g_pXMLWriter->AddAttribute( "Offset", (INT)dwBlobLocation );
-        g_pXMLWriter->AddAttribute( "Size", (INT)pVB->GetVertexDataSize() );
-        g_pXMLWriter->AddAttribute( "Count", (INT)dwVertexCount );
+        g_pXMLWriter->AddAttribute( "Offset", static_cast<INT>( dwBlobLocation ) );
+        g_pXMLWriter->AddAttribute( "Size", static_cast<INT>( pVB->GetVertexDataSize() ) );
+        g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwVertexCount ) );
         g_pXMLWriter->EndElement();
         return;
     }
 
     g_pXMLWriter->StartElement( "Vertices" );
-    g_pXMLWriter->AddAttribute( "Count", (INT)dwVertexCount );
+    g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwVertexCount ) );
 
     WriteVertexBufferVerbose( pVB, pVertexElements, dwVertexElementCount );
 
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteSphereBound( const Sphere& sphere )
+void WriteSphereBound( const Sphere& sphere )
 {
     g_pXMLWriter->StartElement( "SphereBound" );
-    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *(D3DXVECTOR3*)&sphere.Center ) );
+    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &sphere.Center ) ) );
     g_pXMLWriter->AddAttribute( "Radius", sphere.Radius );
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteAxisAlignedBoxBound( const AxisAlignedBox& aabb )
+void WriteAxisAlignedBoxBound( const AxisAlignedBox& aabb )
 {
     g_pXMLWriter->StartElement( "AxisAlignedBoxBound" );
-    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *(D3DXVECTOR3*)&aabb.Center ) );
-    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( *(D3DXVECTOR3*)&aabb.Extents ) );
+    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &aabb.Center ) ) );
+    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &aabb.Extents ) ) );
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteOrientedBoxBound( const OrientedBox& obb )
+void WriteOrientedBoxBound( const OrientedBox& obb )
 {
     g_pXMLWriter->StartElement( "OrientedBoxBound" );
-    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *(D3DXVECTOR3*)&obb.Center ) );
-    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( *(D3DXVECTOR3*)&obb.Extents ) );
-    g_pXMLWriter->AddAttribute( "Orientation", WriteQuaternion( *(D3DXQUATERNION*)&obb.Orientation ) );
+    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &obb.Center ) ) );
+    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &obb.Extents ) ) );
+    g_pXMLWriter->AddAttribute( "Orientation", WriteQuaternion( *reinterpret_cast<const D3DXQUATERNION*>( &obb.Orientation ) ) );
     g_pXMLWriter->EndElement();
 }
 
 
-VOID WriteIndexBufferVerbose( ExportIB* pIB )
+void WriteIndexBufferVerbose( ExportIB* pIB )
 {
-    for( UINT uIndex = 0; uIndex < pIB->GetIndexCount(); uIndex++ )
+    for( size_t uIndex = 0; uIndex < pIB->GetIndexCount(); uIndex++ )
     {
-        g_pXMLWriter->WriteElement( "E", (INT)pIB->GetIndex( uIndex ) );
+        g_pXMLWriter->WriteElement( "E", static_cast<INT>( pIB->GetIndex( uIndex ) ) );
     }
 }
 
 
-VOID WriteIBSubset( ExportIBSubset* pSubset )
+void WriteIBSubset( ExportIBSubset* pSubset )
 {
     const CHAR* strPrimitiveTypes[] =
     {
@@ -655,7 +655,7 @@ VOID WriteIBSubset( ExportIBSubset* pSubset )
     };
     g_pXMLWriter->StartElement( "IBSubset" );
     g_pXMLWriter->AddAttribute( "Name", pSubset->GetName() );
-    assert( (DWORD)pSubset->GetPrimitiveType() < ARRAYSIZE( strPrimitiveTypes ) );
+    assert( static_cast<size_t>( pSubset->GetPrimitiveType() ) < ARRAYSIZE( strPrimitiveTypes ) );
     g_pXMLWriter->AddAttribute( "PrimitiveType", strPrimitiveTypes[ pSubset->GetPrimitiveType() ] );
     g_pXMLWriter->AddAttributeFormat( "StartIndex", "%d", pSubset->GetStartIndex() );
     g_pXMLWriter->AddAttributeFormat( "IndexCount", "%d", pSubset->GetIndexCount() );
@@ -663,7 +663,7 @@ VOID WriteIBSubset( ExportIBSubset* pSubset )
 }
 
 
-VOID WritePatchSubset( ExportSubDPatchSubset* pSubset )
+void WritePatchSubset( ExportSubDPatchSubset* pSubset )
 {
     const CHAR* strPrimitiveTypes[] =
     {
@@ -679,16 +679,16 @@ VOID WritePatchSubset( ExportSubDPatchSubset* pSubset )
 }
 
 
-VOID WriteVertexBuffer( ExportVB* pVB, DWORD dwStreamIndex, const D3DVERTEXELEMENT9* pElements, DWORD dwElementCount )
+void WriteVertexBuffer( ExportVB* pVB, DWORD dwStreamIndex, const D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
 {
     g_pXMLWriter->StartElement( "VertexBuffer" );
     g_pXMLWriter->AddAttribute( "Name", "Default" );
-    g_pXMLWriter->AddAttribute( "Stream", (INT)dwStreamIndex );
-    g_pXMLWriter->AddAttribute( "Stride", (INT)pVB->GetVertexSize() );
+    g_pXMLWriter->AddAttribute( "Stream", static_cast<INT>( dwStreamIndex ) );
+    g_pXMLWriter->AddAttribute( "Stride", static_cast<INT>( pVB->GetVertexSize() ) );
     {
         g_pXMLWriter->StartElement( "VertexDecls" );
-        g_pXMLWriter->AddAttribute( "Count", (INT)dwElementCount );
-        for( DWORD i = 0; i < dwElementCount; i++ )
+        g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( dwElementCount ) );
+        for( size_t i = 0; i < dwElementCount; i++ )
         {
             WriteVertexElement( pElements[i] );
         }
@@ -700,18 +700,18 @@ VOID WriteVertexBuffer( ExportVB* pVB, DWORD dwStreamIndex, const D3DVERTEXELEME
 }
 
 
-VOID WriteIndexBuffer( ExportIB* pIB )
+void WriteIndexBuffer( ExportIB* pIB )
 {
     g_pXMLWriter->StartElement( "IndexBuffer" );
-    g_pXMLWriter->AddAttribute( "IndexSize", (INT)pIB->GetIndexSize() * 8 );
+    g_pXMLWriter->AddAttribute( "IndexSize", static_cast<INT>( pIB->GetIndexSize() * 8 ) );
     if( g_XATGSettings.bBinaryBlobExport )
     {
         DWORD dwBlobLocation = GetBinaryBlobCurrentOffset();
         WriteBinaryBlobData( pIB->GetIndexData(), pIB->GetIndexDataSize() );
         g_pXMLWriter->StartElement( "PhysicalBinaryData" );
-        g_pXMLWriter->AddAttribute( "Offset", (INT)dwBlobLocation );
-        g_pXMLWriter->AddAttribute( "Size", (INT)pIB->GetIndexDataSize() );
-        g_pXMLWriter->AddAttribute( "Count", (INT)pIB->GetIndexCount() );
+        g_pXMLWriter->AddAttribute( "Offset", static_cast<INT>( dwBlobLocation ) );
+        g_pXMLWriter->AddAttribute( "Size", static_cast<INT>( pIB->GetIndexDataSize() ) );
+        g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( pIB->GetIndexCount() ) );
         g_pXMLWriter->EndElement();
     }
     else
@@ -725,7 +725,7 @@ VOID WriteIndexBuffer( ExportIB* pIB )
 }
 
 
-VOID WritePolyMesh( ExportMesh* pMesh )
+void WritePolyMesh( ExportMesh* pMesh )
 {
     ExportSubDProcessMesh* pSubDMesh = pMesh->GetSubDMesh();
 
@@ -743,7 +743,7 @@ VOID WritePolyMesh( ExportMesh* pMesh )
 
     g_pXMLWriter->StartElement( "MeshTopology" );
     INT iVBCount = 1;
-    if( pSubDMesh != NULL )
+    if( pSubDMesh )
     {
         iVBCount += 1;
         g_pXMLWriter->AddAttribute( "QuadPatches", L"TRUE" );
@@ -753,7 +753,7 @@ VOID WritePolyMesh( ExportMesh* pMesh )
     if( pMesh->GetInfluenceCount() > 0 )
     {
         g_pXMLWriter->StartElement( "InfluenceObjects" );
-        g_pXMLWriter->AddAttribute( "Count", (INT)pMesh->GetInfluenceCount() );
+        g_pXMLWriter->AddAttribute( "Count", static_cast<INT>( pMesh->GetInfluenceCount() ) );
         for( UINT j = 0; j < pMesh->GetInfluenceCount(); j++ )
         {
             g_pXMLWriter->WriteElement( "E", pMesh->GetInfluence( j ) );
@@ -761,12 +761,12 @@ VOID WritePolyMesh( ExportMesh* pMesh )
         g_pXMLWriter->EndElement();
     }
 
-    if( pSubDMesh == NULL )
+    if( !pSubDMesh )
     {
         WriteVertexBuffer( pMesh->GetVB(), 0, &pMesh->GetVertexDeclElement( 0 ), pMesh->GetVertexDeclElementCount() );
         WriteIndexBuffer( pMesh->GetIB() );
-        UINT uSubsetCount = pMesh->GetSubsetCount();
-        for( UINT i = 0; i < uSubsetCount; i++ )
+        size_t uSubsetCount = pMesh->GetSubsetCount();
+        for( size_t i = 0; i < uSubsetCount; i++ )
         {
             ExportIBSubset* pSubset = pMesh->GetSubset( i );
             WriteIBSubset( pSubset );
@@ -777,12 +777,12 @@ VOID WritePolyMesh( ExportMesh* pMesh )
         WriteVertexBuffer( pMesh->GetVB(), 0, &pMesh->GetVertexDeclElement( 0 ), pMesh->GetVertexDeclElementCount() );
         WriteVertexBuffer( pSubDMesh->GetQuadPatchDataVB(), 1, pSubDMesh->GetPatchDataDecl(), pSubDMesh->GetPatchDataDeclElementCount() );
         WriteIndexBuffer( pSubDMesh->GetQuadPatchIB() );
-        UINT uSubsetCount = pSubDMesh->GetSubsetCount();
-        for( UINT i = 0; i < uSubsetCount; i++ )
+        size_t uSubsetCount = pSubDMesh->GetSubsetCount();
+        for( size_t i = 0; i < uSubsetCount; i++ )
         {
             WritePatchSubset( pSubDMesh->GetSubset( i ) );
         }
-        if( pSubDMesh->GetTrianglePatchDataVB() != NULL )
+        if( pSubDMesh->GetTrianglePatchDataVB() )
         {
             ExportLog::LogWarning( "Subdivision surface mesh \"%s\" contains triangle patches, which are not currently written to XATG files.", pMesh->GetName().SafeString() );
         }
@@ -794,16 +794,16 @@ VOID WritePolyMesh( ExportMesh* pMesh )
 }
 
 
-VOID WriteMeshes()
+void WriteMeshes()
 {
-    UINT uMeshCount = g_pScene->GetMeshCount();
-    for( UINT i = 0; i < uMeshCount; i++ )
+    size_t uMeshCount = g_pScene->GetMeshCount();
+    for( size_t i = 0; i < uMeshCount; i++ )
     {
         ExportMeshBase* pMeshBase = g_pScene->GetMesh( i );
         switch( pMeshBase->GetMeshType() )
         {
         case ExportMeshBase::PolyMesh:
-            WritePolyMesh( (ExportMesh*)pMeshBase );
+            WritePolyMesh( reinterpret_cast<ExportMesh*>( pMeshBase ) );
             break;
         }
 
@@ -812,14 +812,14 @@ VOID WriteMeshes()
     }
 }
 
-VOID WriteModel( ExportModel* pModel )
+void WriteModel( ExportModel* pModel )
 {
     g_pXMLWriter->StartElement( "Model" );
     g_pXMLWriter->AddAttribute( "Mesh", pModel->GetMesh()->GetName().SafeString() );
 
-    if( pModel->IsShadowCaster() == FALSE )
+    if( !pModel->IsShadowCaster() )
         g_pXMLWriter->AddAttribute( "ShadowCaster", "FALSE" );
-    if( pModel->IsShadowReceiver() == FALSE )
+    if( !pModel->IsShadowReceiver() )
         g_pXMLWriter->AddAttribute( "ShadowReceiver", "FALSE" );
 
     switch( pModel->GetMesh()->GetSmallestBound() )
@@ -845,7 +845,7 @@ VOID WriteModel( ExportModel* pModel )
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteLight( ExportLight* pLight )
+void WriteLight( ExportLight* pLight )
 {
     static const CHAR* s_strFalloffNames[] = {
         "NONE",
@@ -893,7 +893,7 @@ VOID WriteLight( ExportLight* pLight )
     }
 }
 
-VOID WriteCamera( ExportCamera* pCamera )
+void WriteCamera( ExportCamera* pCamera )
 {
     g_pXMLWriter->StartElement( "PerspectiveCamera" );
     g_pXMLWriter->AddAttribute( "Name", pCamera->GetName() );
@@ -911,22 +911,22 @@ VOID WriteCamera( ExportCamera* pCamera )
     g_pXMLWriter->EndElement();
 }
 
-VOID WriteFrame( ExportFrame* pFrame )
+void WriteFrame( ExportFrame* pFrame )
 {
     g_pXMLWriter->StartElement( "Frame" );
     g_pXMLWriter->AddAttribute( "Name", pFrame->GetName() );
     g_pXMLWriter->AddAttribute( "Matrix", WriteMatrix( pFrame->Transform().Matrix() ) );
 
-    UINT uModelCount = pFrame->GetModelCount();
-    for( UINT i = 0; i < uModelCount; i++ )
+    size_t uModelCount = pFrame->GetModelCount();
+    for( size_t i = 0; i < uModelCount; i++ )
     {
         WriteModel( pFrame->GetModelByIndex( i ) );
     }
 
     if( g_pScene->Settings().bExportLights )
     {
-        UINT uLightCount = pFrame->GetLightCount();
-        for( UINT i = 0; i < uLightCount; i++ )
+        size_t uLightCount = pFrame->GetLightCount();
+        for( size_t i = 0; i < uLightCount; i++ )
         {
             WriteLight( pFrame->GetLightByIndex( i ) );
         }
@@ -934,15 +934,15 @@ VOID WriteFrame( ExportFrame* pFrame )
 
     if( g_pScene->Settings().bExportCameras )
     {
-        UINT uCameraCount = pFrame->GetCameraCount();
-        for( UINT i = 0; i < uCameraCount; i++ )
+        size_t uCameraCount = pFrame->GetCameraCount();
+        for( size_t i = 0; i < uCameraCount; i++ )
         {
             WriteCamera( pFrame->GetCameraByIndex( i ) );
         }
     }
 
-    UINT uChildCount = pFrame->GetChildCount();
-    for( UINT i = 0; i < uChildCount; i++ )
+    size_t uChildCount = pFrame->GetChildCount();
+    for( size_t i = 0; i < uChildCount; i++ )
     {
         WriteFrame( pFrame->GetChildByIndex( i ) );
     }
@@ -951,13 +951,13 @@ VOID WriteFrame( ExportFrame* pFrame )
 }
 
 
-DWORD GetFrameCount( ATG::ExportFrame* pFrame )
+size_t GetFrameCount( ATG::ExportFrame* pFrame )
 {
-    if( pFrame == NULL )
+    if( !pFrame )
         return 0;
-    DWORD dwCount = 1;
-    DWORD dwChildCount = pFrame->GetChildCount();
-    for( DWORD i = 0; i < dwChildCount; ++i )
+    size_t dwCount = 1;
+    size_t dwChildCount = pFrame->GetChildCount();
+    for( size_t i = 0; i < dwChildCount; ++i )
     {
         dwCount += GetFrameCount( pFrame->GetChildByIndex( i ) );
     }
@@ -965,13 +965,13 @@ DWORD GetFrameCount( ATG::ExportFrame* pFrame )
 }
 
 
-VOID WriteInformation()
+void WriteInformation()
 {
     g_pXMLWriter->StartComment();
-    CHAR strTime[200];
+    CHAR strTime[200] = {0};
     _ctime64_s( strTime, &g_pScene->Information().ExportTime );
     CHAR* pLF = strchr( strTime, '\n' );
-    if( pLF != NULL )
+    if( pLF )
         *pLF = '\0';
     g_pXMLWriter->WriteStringFormat( "Time: %s", strTime );
     g_pXMLWriter->EndComment();
@@ -993,8 +993,8 @@ VOID WriteInformation()
     g_pXMLWriter->EndComment();
     */
 
-    DWORD dwParseTime = g_pScene->Statistics().StartSaveTime - g_pScene->Statistics().StartExportTime;
-    FLOAT fParseTime = (FLOAT)dwParseTime * 0.001f;
+    ULONGLONG dwParseTime = g_pScene->Statistics().StartSaveTime - g_pScene->Statistics().StartExportTime;
+    float fParseTime = (float)dwParseTime * 0.001f;
     g_pXMLWriter->StartComment();
     g_pXMLWriter->WriteStringFormat( "Stats: %d vertices, %d triangles, %d materials, %0.3f seconds to parse scene.",
         g_pScene->Statistics().VertsExported,
@@ -1007,33 +1007,33 @@ VOID WriteInformation()
 
     if( g_pScene->Settings().bExportMeshes )
     {
-        g_pXMLWriter->AddAttribute( "MeshCount", (INT)g_pScene->GetMeshCount() );
+        g_pXMLWriter->AddAttribute( "MeshCount", static_cast<INT>( g_pScene->GetMeshCount() ) );
     }
 
     if( g_pScene->Settings().bExportMaterials )
     {
-        g_pXMLWriter->AddAttribute( "MaterialCount", (INT)g_pScene->GetMaterialCount() );
+        g_pXMLWriter->AddAttribute( "MaterialCount", static_cast<INT>( g_pScene->GetMaterialCount() ) );
     }
 
     if( g_pScene->Settings().bExportAnimations )
     {
-        g_pXMLWriter->AddAttribute( "AnimationCount", (INT)g_pScene->GetAnimationCount() );
+        g_pXMLWriter->AddAttribute( "AnimationCount", static_cast<INT>( g_pScene->GetAnimationCount() ) );
     }
 
     if( g_pScene->Settings().bExportScene && g_pScene->GetChildCount() > 0 )
     {
-        g_pXMLWriter->AddAttribute( "FrameCount", (INT)GetFrameCount( g_pScene->GetChildByIndex( 0 ) ) );
+        g_pXMLWriter->AddAttribute( "FrameCount", static_cast<INT>( GetFrameCount( g_pScene->GetChildByIndex( 0 ) ) ) );
     }
 
     g_pXMLWriter->EndElement();
 }
 
-VOID PrepareDestination()
+void PrepareDestination()
 {
     // trim the filename off the output XATG file path
     CHAR* pLastSlash = strrchr( g_strFileName, '\\' );
-    assert( pLastSlash != NULL );
-    INT iPathSize = (INT)( pLastSlash - g_strFileName );
+    assert( pLastSlash != nullptr );
+    INT iPathSize = static_cast<INT>( pLastSlash - g_strFileName );
 
     // copy base path (not including filename) into g_strOutputFileBasePath
     assert( iPathSize >= 0 );
@@ -1042,15 +1042,15 @@ VOID PrepareDestination()
     // convert base path to lowercase
     _strlwr_s( g_strOutputFileBasePath );
 
-    BOOL bCreateSceneDir = TRUE;
+    bool bCreateSceneDir = true;
     // look for scenes directory at the end of the output file path
     CHAR* strSceneDir = strstr( g_strOutputFileBasePath, g_strSceneOutputSubPath );
-    if( strSceneDir != NULL && 
-        ( strSceneDir - g_strOutputFileBasePath ) == (INT)( strlen( g_strOutputFileBasePath ) - strlen( g_strSceneOutputSubPath ) ) )
+    if( strSceneDir && 
+        ( strSceneDir - g_strOutputFileBasePath ) == static_cast<INT>( strlen( g_strOutputFileBasePath ) - strlen( g_strSceneOutputSubPath ) ) )
     {
         // we found a trailing scenes directory, chop it off.  this affects g_strOutputFileBasePath
         *strSceneDir = '\0';
-        bCreateSceneDir = FALSE;
+        bCreateSceneDir = false;
     }
 
     // compose scene output file path
@@ -1059,16 +1059,16 @@ VOID PrepareDestination()
     if( bCreateSceneDir )
     {
         // create scenes directory if one doesn't exist already
-        CreateDirectory( g_strOutputFileScenePath, NULL );
+        CreateDirectory( g_strOutputFileScenePath, nullptr );
     }
     // add filename back onto g_strOutputFileScenePath
     strcat_s( g_strOutputFileScenePath, pLastSlash );
 
     ExportLog::LogMsg( 1, "Writing to scene file \"%s\".", g_strOutputFileScenePath );
 
-    DWORD dwIndex = g_pManifest->AddFile( g_strOutputFileScenePath, g_strOutputFileScenePath, EFT_SCENEFILE_XML );
+    size_t dwIndex = g_pManifest->AddFile( g_strOutputFileScenePath, g_strOutputFileScenePath, EFT_SCENEFILE_XML );
     const CHAR* strSubPath = strstr( g_strOutputFileScenePath, g_strSceneOutputSubPath );
-    assert( strSubPath != NULL );
+    assert( strSubPath != nullptr );
     strSubPath++;
     g_pManifest->GetFile( dwIndex ).strDevKitFileName = strSubPath;
 
@@ -1076,30 +1076,31 @@ VOID PrepareDestination()
     CHAR strTextureOutputPath[MAX_PATH];
     strcpy_s( strTextureOutputPath, g_strOutputFileBasePath );
     strcat_s( strTextureOutputPath, g_strTextureOutputSubPath );
-    CreateDirectory( strTextureOutputPath, NULL );
+    CreateDirectory( strTextureOutputPath, nullptr );
 }
 
-VOID PrepareBinaryBlob()
+void PrepareBinaryBlob()
 {
     // Check if we're exporting the binary blob.
     g_hBinaryBlobFile = INVALID_HANDLE_VALUE;
-    if( g_XATGSettings.bBinaryBlobExport == FALSE )
+    if( !g_XATGSettings.bBinaryBlobExport )
         return;
 
     // Compose the binary blob filename.
     CHAR strBlobFilename[MAX_PATH];
     strcpy_s( strBlobFilename, g_strOutputFileScenePath );
     CHAR* pExt = strstr( strBlobFilename, ".xatg" );
-    assert( pExt );
+    if ( !pExt )
+        return;
     *pExt = '\0';
     strcat_s( strBlobFilename, ".pmem" );
 
     // Create the file.
-    g_hBinaryBlobFile = CreateFile( strBlobFilename, FILE_WRITE_DATA, 0, NULL, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL );
+    g_hBinaryBlobFile = CreateFile( strBlobFilename, FILE_WRITE_DATA, 0, nullptr, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr );
     if( g_hBinaryBlobFile == INVALID_HANDLE_VALUE )
     {
         ExportLog::LogError( "Could not create physical memory file \"%s\".  Verify that the destination file is not read-only.", strBlobFilename );
-        g_XATGSettings.bBinaryBlobExport = FALSE;
+        g_XATGSettings.bBinaryBlobExport = false;
         return;
     }
     assert( g_hBinaryBlobFile != INVALID_HANDLE_VALUE );
@@ -1118,24 +1119,25 @@ VOID PrepareBinaryBlob()
     g_pXMLWriter->EndElement();
 
     // Add the binary blob file to the manifest.
-    DWORD dwIndex = g_pManifest->AddFile( strBlobFilename, strBlobFilename, EFT_BINARY_RESOURCE );
+    size_t dwIndex = g_pManifest->AddFile( strBlobFilename, strBlobFilename, EFT_BINARY_RESOURCE );
     g_pManifest->GetFile( dwIndex ).strDevKitFileName = strMediaRelativeBlobFilename;
 }
 
-VOID PrepareBundledFile()
+void PrepareBundledFile()
 {
-    if( g_XATGSettings.bBundleTextures == FALSE )
+    if( !g_XATGSettings.bBundleTextures )
         return;
 
     CHAR* pFilename = strrchr( g_strOutputFileScenePath, '\\' );
-    assert( pFilename != NULL );
+    assert( pFilename != nullptr );
 
     // Compose the bundled texture media-relative file name.
     CHAR strMediaRelativeBundleFilename[MAX_PATH];
     strcpy_s( strMediaRelativeBundleFilename, g_strTextureOutputSubPath + 1 );
     strcat_s( strMediaRelativeBundleFilename, pFilename );
     CHAR* pExt = strstr( strMediaRelativeBundleFilename, ".xatg" );
-    assert( pExt != NULL );
+    if ( !pExt )
+        return;
     *pExt = '\0';
     strcat_s( strMediaRelativeBundleFilename, ".xpr" );
 
@@ -1149,7 +1151,8 @@ VOID PrepareBundledFile()
     CHAR strTextureBundleSpecFilename[MAX_PATH];
     strcpy_s( strTextureBundleSpecFilename, strTextureBundleFilename );
     pExt = strstr( strTextureBundleSpecFilename, ".xpr" );
-    assert( pExt != NULL );
+    if ( !pExt )
+        return;
     *pExt = '\0';
     strcat_s( strTextureBundleSpecFilename, ".rdf" );
 
@@ -1157,7 +1160,7 @@ VOID PrepareBundledFile()
     g_pXMLWriter->WriteElement( "BundledResources", strMediaRelativeBundleFilename );
 
     // Add the bundled file name to the manifest.
-    DWORD dwIndex = g_pManifest->AddFile( strTextureBundleSpecFilename, strTextureBundleFilename, EFT_BUNDLED_RESOURCE );
+    size_t dwIndex = g_pManifest->AddFile( strTextureBundleSpecFilename, strTextureBundleFilename, EFT_BUNDLED_RESOURCE );
     g_pManifest->GetFile( dwIndex ).strDevKitFileName = strMediaRelativeBundleFilename;
     g_TextureBundledFile = g_pManifest->GetFile( dwIndex );
 
@@ -1169,20 +1172,20 @@ DWORD GetBinaryBlobCurrentOffset()
 {
     if( g_hBinaryBlobFile == INVALID_HANDLE_VALUE )
         return 0;
-    return GetFileSize( g_hBinaryBlobFile, NULL );
+    return GetFileSize( g_hBinaryBlobFile, nullptr );
 }
 
-VOID WriteBinaryBlobData( BYTE* pData, DWORD dwDataSizeBytes )
+void WriteBinaryBlobData( BYTE* pData, size_t dwDataSizeBytes )
 {
     DWORD dwBytesWritten = 0;
-    WriteFile( g_hBinaryBlobFile, pData, dwDataSizeBytes, &dwBytesWritten, NULL );
+    WriteFile( g_hBinaryBlobFile, pData, static_cast<DWORD>( dwDataSizeBytes ), &dwBytesWritten, nullptr );
     const DWORD dwPadSize = 32;
     if( ( dwDataSizeBytes % dwPadSize ) != 0 )
     {
         DWORD dwZeroPadSize = dwPadSize - ( dwDataSizeBytes % dwPadSize );
         BYTE bZeros[dwPadSize];
         ZeroMemory( bZeros, dwPadSize );
-        WriteFile( g_hBinaryBlobFile, bZeros, dwZeroPadSize, &dwBytesWritten, NULL );
+        WriteFile( g_hBinaryBlobFile, bZeros, dwZeroPadSize, &dwBytesWritten, nullptr );
     }
 }
 
@@ -1200,9 +1203,9 @@ const CHAR* GetCompressedTextureFormatString( D3DFORMAT format )
     return "D3DFMT_A8R8G8B8";
 }
 
-VOID BundleTextures()
+void BundleTextures()
 {
-    assert( g_pManifest != NULL );
+    assert( g_pManifest != nullptr );
 
     if( g_XATGSettings.bUseExistingBundle )
     {
@@ -1227,7 +1230,7 @@ VOID BundleTextures()
 
     ExportFileRecordVector BundledFiles;
 
-    for( DWORD i = 0; i < g_pManifest->GetFileCount(); i++ )
+    for( size_t i = 0; i < g_pManifest->GetFileCount(); i++ )
     {
         // Only process textures.
         ExportFileRecord& File = g_pManifest->GetFile( i );
@@ -1236,7 +1239,7 @@ VOID BundleTextures()
             File.FileType != EFT_TEXTUREVOLUME )
             continue;
 
-        ExportLog::LogMsg( 4, "Bundling resource %s from texture intermediate file %s.", File.strResourceName, File.strIntermediateFileName );
+        ExportLog::LogMsg( 4, "Bundling resource %s from texture intermediate file %s.", File.strResourceName.SafeString(), File.strIntermediateFileName.SafeString() );
 
         // Write the RDF entry to the file.
         switch( File.FileType )
@@ -1258,7 +1261,7 @@ VOID BundleTextures()
     BundleFileWriter.Close();
 
     // If we didn't have any textures to bundle, return.
-    if( BundledFiles.size() == 0 )
+    if( BundledFiles.empty() )
     {
         DeleteFile( g_TextureBundledFile.strSourceFileName );
         g_pManifest->ClearFilesOfType( EFT_BUNDLED_RESOURCE );
@@ -1282,25 +1285,25 @@ VOID BundleTextures()
     strcat_s( strBundlerCmdLine, g_TextureBundledFile.strIntermediateFileName );
     strcat_s( strBundlerCmdLine, "\"" );
 
-    BOOL bExecuteBundler = TRUE;
+    bool bExecuteBundler = true;
 
     if( bExecuteBundler )
     {
         // Run the bundler.
-        ExportLog::LogMsg( 4, "Running the bundler to create %s.", g_TextureBundledFile.strIntermediateFileName );
+        ExportLog::LogMsg( 4, "Running the bundler to create %s.", g_TextureBundledFile.strIntermediateFileName.SafeString() );
         SHELLEXECUTEINFO sei;
         ZeroMemory( &sei, sizeof( SHELLEXECUTEINFO ) );
         sei.cbSize = sizeof( SHELLEXECUTEINFO );
         sei.fMask = SEE_MASK_NOCLOSEPROCESS;
-        sei.hwnd = NULL;
+        sei.hwnd = nullptr;
         sei.lpFile = strBundlerExe;
         sei.lpParameters = strBundlerCmdLine;
-        sei.lpDirectory = NULL;
-        sei.lpVerb = NULL;
+        sei.lpDirectory = nullptr;
+        sei.lpVerb = nullptr;
         sei.nShow = SW_SHOW;
 
         ShellExecuteEx( &sei );
-        if( sei.hProcess != NULL )
+        if( sei.hProcess )
             WaitForSingleObject( sei.hProcess, 600000 );
     }
 

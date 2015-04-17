@@ -21,7 +21,7 @@ extern ATG::ExportScene* g_pScene;
 namespace ATG
 {
 
-VOID ExportTransform::SetIdentity()
+void ExportTransform::SetIdentity()
 {
     D3DXMatrixIdentity( &m_Matrix );
     m_Position = D3DXVECTOR3( 0, 0, 0 );
@@ -29,7 +29,7 @@ VOID ExportTransform::SetIdentity()
     m_Scale = D3DXVECTOR3( 1, 1, 1 );
 }
 
-BOOL ExportTransform::InitializeFromFloatsTransposed( FLOAT* pSixteenFloats )
+bool ExportTransform::InitializeFromFloatsTransposed( float* pSixteenFloats )
 {
     m_Matrix = D3DXMATRIX( pSixteenFloats );
     D3DXMatrixTranspose( &m_Matrix, &m_Matrix );
@@ -37,37 +37,37 @@ BOOL ExportTransform::InitializeFromFloatsTransposed( FLOAT* pSixteenFloats )
     return DecomposeMatrix();
 }
 
-BOOL ExportTransform::InitializeFromFloats( FLOAT* pSixteenFloats )
+bool ExportTransform::InitializeFromFloats( float* pSixteenFloats )
 {
     m_Matrix = D3DXMATRIX( pSixteenFloats );
     g_pScene->GetDCCTransformer()->TransformMatrix( &m_Matrix, &m_Matrix );
     return DecomposeMatrix();
 }
 
-BOOL ExportTransform::DecomposeMatrix()
+bool ExportTransform::DecomposeMatrix()
 {
     D3DXVECTOR3 vAxisX( m_Matrix._11, m_Matrix._12, m_Matrix._13 );
     D3DXVECTOR3 vAxisY( m_Matrix._21, m_Matrix._22, m_Matrix._23 );
     D3DXVECTOR3 vAxisZ( m_Matrix._31, m_Matrix._32, m_Matrix._33 );
-    FLOAT fScaleX = D3DXVec3LengthSq( &vAxisX );
-    FLOAT fScaleY = D3DXVec3LengthSq( &vAxisY );
-    FLOAT fScaleZ = D3DXVec3LengthSq( &vAxisZ );
-    FLOAT fDiffXY = fabs( fScaleX - fScaleY );
-    FLOAT fDiffYZ = fabs( fScaleY - fScaleZ );
-    FLOAT fDiffXZ = fabs( fScaleX - fScaleZ );
-    BOOL bUniformScale = TRUE;
+    float fScaleX = D3DXVec3LengthSq( &vAxisX );
+    float fScaleY = D3DXVec3LengthSq( &vAxisY );
+    float fScaleZ = D3DXVec3LengthSq( &vAxisZ );
+    float fDiffXY = fabs( fScaleX - fScaleY );
+    float fDiffYZ = fabs( fScaleY - fScaleZ );
+    float fDiffXZ = fabs( fScaleX - fScaleZ );
+    bool bUniformScale = true;
     if( fDiffXY > 0.001f || fDiffYZ > 0.001f || fDiffXZ > 0.001f )
-        bUniformScale = FALSE;
+        bUniformScale = false;
     D3DXMatrixDecompose( &m_Scale, &m_Orientation, &m_Position, &m_Matrix );
     return bUniformScale;
 }
 
-VOID ExportTransform::Multiply( CONST D3DXMATRIX& Matrix )
+void ExportTransform::Multiply( const D3DXMATRIX& Matrix )
 {
     D3DXMatrixMultiply( &m_Matrix, &m_Matrix, &Matrix );
 }
 
-VOID ExportTransform::Normalize()
+void ExportTransform::Normalize()
 {
     D3DXVECTOR3 Vec( m_Matrix._11, m_Matrix._21, m_Matrix._31 );
     D3DXVec3Normalize( &Vec, &Vec );
@@ -88,23 +88,8 @@ VOID ExportTransform::Normalize()
     m_Matrix._33 = Vec.z;
 }
 
-ExportBase::~ExportBase(void)
+ExportBase::~ExportBase()
 {
-    ExportAttributeList::iterator iter = m_Attributes.begin();
-    ExportAttributeList::iterator end = m_Attributes.end();
-
-    while( iter != end )
-    {
-        delete *iter;
-        ++iter;
-    }
-    m_Attributes.clear();
-}
-
-BOOL ExportBase::AddAttribute( ExportAttribute* pAttribute )
-{
-    m_Attributes.push_back( pAttribute );
-    return TRUE;
 }
 
 };

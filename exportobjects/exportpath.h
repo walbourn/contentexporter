@@ -29,8 +29,8 @@ public:
     ExportPath( const CHAR* strPath );
     ExportPath( const ExportPath& OtherPath );
 
-    VOID SetPathAndFileName( const CHAR* strPath );
-    VOID SetPathOnly( const CHAR* strPath );
+    void SetPathAndFileName( const CHAR* strPath );
+    void SetPathOnly( const CHAR* strPath );
 
     ExportPath& operator=( const ExportPath& OtherPath );
     operator const CHAR*() const { return m_strPath; }
@@ -42,21 +42,21 @@ public:
     ExportPath GetFileName() const;
     ExportPath GetFileNameWithoutExtension() const;
 
-    BOOL HasExtension() const { return m_strExtension != NULL; }
-    BOOL HasFileName() const;
+    bool HasExtension() const { return m_strExtension != 0; }
+    bool HasFileName() const;
     const CHAR* GetExtension() const;
-    BOOL IsAbsolutePath() const;
-    BOOL IsEmpty() const { return m_strPath[0] == '\0'; }
+    bool IsAbsolutePath() const;
+    bool IsEmpty() const { return m_strPath[0] == '\0'; }
 
-    VOID ChangeExtension( const CHAR* strExtension );
-    VOID ChangeFileName( const CHAR* strFileName );
-    VOID ChangeFileName( const ExportPath& OtherPath );
-    VOID ChangeFileNameWithExtension( const CHAR* strFileName );
-    VOID ChangeFileNameWithExtension( const ExportPath& OtherPath );
-    VOID Append( const ExportPath& OtherPath );
-    VOID AppendToFileName( const CHAR* strText );
-    VOID TrimOffFileName();
+    void ChangeExtension( const CHAR* strExtension );
+    void ChangeFileName( const CHAR* strFileName );
+    void ChangeFileName( const ExportPath& OtherPath );
+    void ChangeFileNameWithExtension( const CHAR* strFileName );
+    void ChangeFileNameWithExtension( const ExportPath& OtherPath );
+    void Append( const ExportPath& OtherPath );
+    void AppendToFileName( const CHAR* strText );
+    void TrimOffFileName();
 
 protected:
-    VOID Initialize( const CHAR* strPath );
+    void Initialize( const CHAR* strPath );
 };

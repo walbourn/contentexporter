@@ -20,12 +20,12 @@ extern ExportPath g_CurrentInputFileName;
 extern ExportPath g_CurrentOutputFileName;
 
 ExportPath g_TextureSubPath;
-BOOL g_bIntermediateDDSFormat = TRUE;
+bool g_bIntermediateDDSFormat = true;
 extern ATG::ExportScene* g_pScene;
 
 namespace ATG
 {
-    DWORD ExportManifest::AddFile( ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType )
+    size_t ExportManifest::AddFile( ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType )
     {
         ExportFileRecord Record;
         Record.strSourceFileName = strSourceFileName;
@@ -34,30 +34,30 @@ namespace ATG
         return AddFile( Record );
     }
 
-    DWORD ExportManifest::AddFile( const ExportFileRecord& File )
+    size_t ExportManifest::AddFile( const ExportFileRecord& File )
     {
-        DWORD dwIndex = FindFile( File.strIntermediateFileName );
-        if( dwIndex != (DWORD)-1 )
+        size_t dwIndex = FindFile( File.strIntermediateFileName );
+        if( dwIndex != (size_t)-1 )
             return dwIndex;
-        dwIndex = (DWORD)m_Files.size();
+        dwIndex = m_Files.size();
         m_Files.push_back( File );
         return dwIndex;
     }
 
-    DWORD ExportManifest::FindFile( ExportString strIntermediateFileName ) const
+    size_t ExportManifest::FindFile( ExportString strIntermediateFileName ) const
     {
-        for( DWORD i = 0; i < m_Files.size(); i++ )
+        for( size_t i = 0; i < m_Files.size(); i++ )
         {
             if( m_Files[i].strIntermediateFileName == strIntermediateFileName )
                 return i;
         }
-        return (DWORD)-1;
+        return (size_t)-1;
     }
 
-    VOID ExportManifest::ClearFilesOfType( ExportFileType FileType )
+    void ExportManifest::ClearFilesOfType( ExportFileType FileType )
     {
         ExportFileRecordVector NewFileList;
-        for( DWORD i = 0; i < m_Files.size(); i++ )
+        for( size_t i = 0; i < m_Files.size(); i++ )
         {
             if( m_Files[i].FileType != FileType )
                 NewFileList.push_back( m_Files[i] );
@@ -66,19 +66,19 @@ namespace ATG
         m_Files = NewFileList;
     }
 
-    VOID ExportTextureConverter::ProcessScene( ExportScene* pScene, ExportManifest* pManifest, const ExportPath& TextureSubPath, BOOL bIntermediateDDSFormat )
+    void ExportTextureConverter::ProcessScene( ExportScene* pScene, ExportManifest* pManifest, const ExportPath& TextureSubPath, bool bIntermediateDDSFormat )
     {
         g_TextureSubPath = TextureSubPath;
         g_bIntermediateDDSFormat = bIntermediateDDSFormat;
 
-        DWORD dwMaterialCount = pScene->GetMaterialCount();
-        for( DWORD i = 0; i < dwMaterialCount; ++i )
+        size_t dwMaterialCount = pScene->GetMaterialCount();
+        for( size_t i = 0; i < dwMaterialCount; ++i )
         {
             ProcessMaterial( pScene->GetMaterial( i ), pManifest );
         }
     }
 
-    VOID ExportTextureConverter::ProcessMaterial( ExportMaterial* pMaterial, ExportManifest* pManifest )
+    void ExportTextureConverter::ProcessMaterial( ExportMaterial* pMaterial, ExportManifest* pManifest )
     {
         MaterialParameterList* pParameters = pMaterial->GetParameterList();
         MaterialParameterList::iterator iter = pParameters->begin();
@@ -95,18 +95,18 @@ namespace ATG
         }
     }
 
-    BOOL ExportManifest::FileExists( const ExportPath& Path )
+    bool ExportManifest::FileExists( const ExportPath& Path )
     {
-        HANDLE hFile = CreateFile( (const CHAR*)Path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+        HANDLE hFile = CreateFile( (const CHAR*)Path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr );
         if( hFile != INVALID_HANDLE_VALUE )
         {
             CloseHandle( hFile );
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
-    VOID ExportTextureConverter::ProcessTextureParameter( ExportMaterialParameter* pParameter, ExportManifest* pManifest )
+    void ExportTextureConverter::ProcessTextureParameter( ExportMaterialParameter* pParameter, ExportManifest* pManifest )
     {
         switch( pParameter->ParamType )
         {
@@ -139,7 +139,6 @@ namespace ATG
             if( !ExportManifest::FileExists( DifferentSourceFileName ) )
             {
                 ExportLog::LogWarning( "Source texture file \"%s\" could not be found.", (const CHAR*)SourceFileName );
-                return;
             }
             else
             {
@@ -167,8 +166,8 @@ namespace ATG
         {
             TexOperation = ETO_CONVERTFORMAT;
             IntermediateFileName.ChangeExtension( strDesiredTextureFileFormat );
-            DWORD dwFoundFile = pManifest->FindFile( (const CHAR*)IntermediateFileName );
-            if( dwFoundFile != (DWORD)-1 )
+            size_t dwFoundFile = pManifest->FindFile( (const CHAR*)IntermediateFileName );
+            if( dwFoundFile != (size_t)-1 )
             {
                 const ExportFileRecord& fr = pManifest->GetFile( dwFoundFile );
                 if( fr.strSourceFileName != ExportString( (const CHAR*)SourceFileName ) )
@@ -237,9 +236,9 @@ namespace ATG
         pManifest->AddFile( fr );
     }
 
-    VOID ConvertImageFormat( LPDIRECT3DDEVICE9 pd3dDevice, const CHAR* strSourceFileName, const CHAR* strDestFileName, D3DFORMAT CompressedFormat )
+    void ConvertImageFormat( LPDIRECT3DDEVICE9 pd3dDevice, const CHAR* strSourceFileName, const CHAR* strDestFileName, D3DFORMAT CompressedFormat )
     {
-        assert( pd3dDevice != NULL );
+        assert( pd3dDevice != nullptr );
 
         if( CompressedFormat != D3DFMT_A8R8G8B8 )
         {
@@ -257,7 +256,7 @@ namespace ATG
         }
 
         // Load texture from source file.
-        LPDIRECT3DTEXTURE9 pTexture = NULL;
+        LPDIRECT3DTEXTURE9 pTexture = nullptr;
         HRESULT hr = D3DXCreateTextureFromFileEx( pd3dDevice, 
             strSourceFileName, 
             D3DX_DEFAULT_NONPOW2, 
@@ -269,24 +268,24 @@ namespace ATG
             D3DX_FILTER_NONE,
             D3DX_DEFAULT,
             0,
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             &pTexture );
 
-        if( FAILED( hr ) || pTexture == NULL )
+        if( FAILED( hr ) || !pTexture )
         {
             ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
             return;
         }
 
         D3DXIMAGE_FILEFORMAT FileFormat = D3DXIFF_DDS;
-        if( strstr( strDestFileName, ".tga" ) != NULL )
+        if( strstr( strDestFileName, ".tga" ) )
         {
             FileFormat = D3DXIFF_TGA;
         }
 
         // Save texture to destination file.
-        hr = D3DXSaveTextureToFile( strDestFileName, FileFormat, pTexture, NULL );
+        hr = D3DXSaveTextureToFile( strDestFileName, FileFormat, pTexture, nullptr );
         if( FAILED( hr ) )
         {
             ExportLog::LogError( "Could not write texture to file \"%s\".", strDestFileName );
@@ -295,9 +294,9 @@ namespace ATG
     }
 
 
-    VOID CreateNormalMapFromBumpMap( LPDIRECT3DDEVICE9 pd3dDevice, const CHAR* strSourceFileName, const CHAR* strDestFileName, D3DFORMAT CompressedFormat )
+    void CreateNormalMapFromBumpMap( LPDIRECT3DDEVICE9 pd3dDevice, const CHAR* strSourceFileName, const CHAR* strDestFileName, D3DFORMAT CompressedFormat )
     {
-        assert( pd3dDevice != NULL );
+        assert( pd3dDevice != nullptr );
 
         ExportLog::LogMsg( 4, "Converting bump map file \"%s\" to normal map file %s.", strSourceFileName, strDestFileName );
 
@@ -308,7 +307,7 @@ namespace ATG
         }
 
         // Load texture from source file.
-        LPDIRECT3DTEXTURE9 pTexture = NULL;
+        LPDIRECT3DTEXTURE9 pTexture = nullptr;
         D3DXCreateTextureFromFileEx( pd3dDevice, 
             strSourceFileName, 
             D3DX_DEFAULT_NONPOW2, 
@@ -320,21 +319,21 @@ namespace ATG
             D3DX_FILTER_NONE,
             D3DX_DEFAULT,
             0,
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
             &pTexture );
 
-        if( pTexture == NULL )
+        if( !pTexture )
         {
             ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
         }
 
         D3DSURFACE_DESC SurfDesc;
         pTexture->GetLevelDesc( 0, &SurfDesc );
-        LPDIRECT3DTEXTURE9 pDestTexture = NULL;
+        LPDIRECT3DTEXTURE9 pDestTexture = nullptr;
         D3DXCreateTexture( pd3dDevice, SurfDesc.Width, SurfDesc.Height, dwMipCount, 0, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pDestTexture );
 
-        HRESULT hr = D3DXComputeNormalMap( pDestTexture, pTexture, NULL, 0, D3DX_CHANNEL_LUMINANCE, 10.0f );
+        HRESULT hr = D3DXComputeNormalMap( pDestTexture, pTexture, nullptr, 0, D3DX_CHANNEL_LUMINANCE, 10.0f );
         if( FAILED( hr ) )
         {
             ExportLog::LogError( "Could not compute normal map." );
@@ -342,7 +341,7 @@ namespace ATG
 
         if( g_pScene->Settings().bGenerateTextureMipMaps )
         {
-            hr = D3DXFilterTexture( pDestTexture, NULL, 0, D3DX_DEFAULT );
+            hr = D3DXFilterTexture( pDestTexture, nullptr, 0, D3DX_DEFAULT );
             if( FAILED(hr) )
             {
                 ExportLog::LogError( "Could not create normal map mip maps." );
@@ -350,13 +349,13 @@ namespace ATG
         }
 
         // Save texture to destination file.
-        D3DXSaveTextureToFile( strDestFileName, D3DXIFF_DDS, pDestTexture, NULL );
+        D3DXSaveTextureToFile( strDestFileName, D3DXIFF_DDS, pDestTexture, nullptr );
         pTexture->Release();
         pDestTexture->Release();
     }
 
 
-    VOID ExportTextureConverter::PerformTextureFileOperations( ExportManifest* pManifest )
+    void ExportTextureConverter::PerformTextureFileOperations( ExportManifest* pManifest )
     {
         LPDIRECT3DDEVICE9 pd3dDevice = ExportMaterial::GetDirect3DDevice();
 
@@ -365,7 +364,7 @@ namespace ATG
             ExportLog::LogMsg( 4, "Reprocessing and overwriting all destination textures." );
         }
 
-        for( DWORD i = 0; i < pManifest->GetFileCount(); i++ )
+        for( size_t i = 0; i < pManifest->GetFileCount(); i++ )
         {
             ExportFileRecord& File = pManifest->GetFile( i );
             if( File.FileType != EFT_TEXTURE2D &&
@@ -378,7 +377,7 @@ namespace ATG
 
             if( ExportManifest::FileExists( File.strIntermediateFileName.SafeString() ) && !g_pScene->Settings().bForceTextureOverwrite )
             {
-                ExportLog::LogMsg( 4, "Destination texture file \"%s\" already exists.", File.strIntermediateFileName );
+                ExportLog::LogMsg( 4, "Destination texture file \"%s\" already exists.", File.strIntermediateFileName.SafeString() );
                 continue;
             }
 
@@ -386,8 +385,8 @@ namespace ATG
             {
             case ETO_NOTHING:
                 // Copy file to intermediate location.
-                ExportLog::LogMsg( 4, "Copying texture \"%s\" to \"%s\"...", File.strSourceFileName, File.strIntermediateFileName );
-                CopyFile( File.strSourceFileName, File.strIntermediateFileName, FALSE );
+                ExportLog::LogMsg( 4, "Copying texture \"%s\" to \"%s\"...", File.strSourceFileName.SafeString(), File.strIntermediateFileName.SafeString() );
+                CopyFile( File.strSourceFileName, File.strIntermediateFileName, false );
                 ExportLog::LogMsg( 4, "Texture copy complete." );
                 break;
             case ETO_CONVERTFORMAT:

@@ -22,15 +22,15 @@ extern ATG::ExportScene* g_pScene;
 namespace ATG
 {
     ExportSubDProcessMesh::ExportSubDProcessMesh()
-        : m_pPolyMesh( NULL ),
-          m_pQuadPatchDataVB( NULL ),
-          m_pTrianglePatchDataVB( NULL ),
-          m_pQuadPatchIB( NULL ),
-          m_pTrianglePatchIB( NULL )
+        : m_pPolyMesh( nullptr ),
+          m_pQuadPatchDataVB( nullptr ),
+          m_pTrianglePatchDataVB( nullptr ),
+          m_pQuadPatchIB( nullptr ),
+          m_pTrianglePatchIB( nullptr )
     {
     }
 
-    VOID ExportSubDProcessMesh::Initialize( ExportMesh* pMesh )
+    void ExportSubDProcessMesh::Initialize( ExportMesh* pMesh )
     {
         m_pPolyMesh = pMesh;
         BuildMesh();
@@ -45,27 +45,27 @@ namespace ATG
         ClearIntermediateBuffers();
     }
 
-    VOID ExportSubDProcessMesh::ByteSwap()
+    void ExportSubDProcessMesh::ByteSwap()
     {
-        if( m_pQuadPatchDataVB != NULL )
+        if( m_pQuadPatchDataVB )
         {
             //m_pQuadPatchDataVB->ByteSwap( GetPatchDataDecl(), GetPatchDataDeclElementCount() );
         }
-        if( m_pQuadPatchIB != NULL )
+        if( m_pQuadPatchIB )
         {
             m_pQuadPatchIB->ByteSwap();
         }
-        if( m_pTrianglePatchDataVB != NULL )
+        if( m_pTrianglePatchDataVB )
         {
             //m_pTrianglePatchDataVB->ByteSwap( GetPatchDataDecl(), GetPatchDataDeclElementCount() );
         }
-        if( m_pTrianglePatchIB != NULL )
+        if( m_pTrianglePatchIB )
         {
             m_pTrianglePatchIB->ByteSwap();
         }
     }
 
-    VOID ExportSubDProcessMesh::ClearIntermediateBuffers()
+    void ExportSubDProcessMesh::ClearIntermediateBuffers()
     {
         m_Quads.clear();
         m_Triangles.clear();
@@ -77,23 +77,23 @@ namespace ATG
         m_BoundaryEdges.clear();
     }
 
-    VOID ExportSubDProcessMesh::BuildMesh()
+    void ExportSubDProcessMesh::BuildMesh()
     {
-        assert( m_pPolyMesh != NULL );
+        assert( m_pPolyMesh != nullptr );
 
         m_Positions.clear();
         m_MeshVertexToPositionMapping.clear();
         m_PositionToMeshVertexMapping.clear();
 
-        const DWORD dwVertexCount = m_pPolyMesh->GetVB()->GetVertexCount();
+        const size_t dwVertexCount = m_pPolyMesh->GetVB()->GetVertexCount();
         m_MeshVertexToPositionMapping.resize( dwVertexCount, -1 );
 
         // compute triangle count
-        const DWORD dwIndexCount = m_pPolyMesh->GetIB()->GetIndexCount();
+        const size_t dwIndexCount = m_pPolyMesh->GetIB()->GetIndexCount();
         assert( dwIndexCount % 3 == 0 );
-        const DWORD dwTriangleCount = dwIndexCount / 3;
+        const size_t dwTriangleCount = dwIndexCount / 3;
 
-        ExportLog::LogMsg( 4, "Processing %d verts and %d triangles into a subdivision surface control mesh.", dwVertexCount, dwTriangleCount );
+        ExportLog::LogMsg( 4, "Processing %Iu verts and %Iu triangles into a subdivision surface control mesh.", dwVertexCount, dwTriangleCount );
 
         INT iCurrentPolyIndex = -1;
         INT iCurrentPolySize = 0;
@@ -101,8 +101,8 @@ namespace ATG
         INT iCurrentPolyPositionIndices[4];
         INT iCurrentPolyMeshIndices[4];
 
-        const DWORD dwSubsetCount = m_pPolyMesh->GetSubsetCount();
-        for( DWORD dwSubsetIndex = 0; dwSubsetIndex < dwSubsetCount; ++dwSubsetIndex )
+        const size_t dwSubsetCount = m_pPolyMesh->GetSubsetCount();
+        for( size_t dwSubsetIndex = 0; dwSubsetIndex < dwSubsetCount; ++dwSubsetIndex )
         {
             const ExportIBSubset* pSubset = m_pPolyMesh->GetSubset( dwSubsetIndex );
             const DWORD dwSubsetTriangleCount = pSubset->GetIndexCount() / 3;
@@ -126,7 +126,7 @@ namespace ATG
                     assert( iCurrentPolySize < 2 );
                     if( iCurrentPolySize == 1 )
                     {
-                        AddTriangle( iCurrentPolyIndex, (INT)dwSubsetIndex, iCurrentPolyPositionIndices, iCurrentPolyMeshIndices );
+                        AddTriangle( iCurrentPolyIndex, static_cast<INT>( dwSubsetIndex ), iCurrentPolyPositionIndices, iCurrentPolyMeshIndices );
                     }
 
                     // clear out the poly state
@@ -154,8 +154,8 @@ namespace ATG
                 DWORD dwBaseIndex = dwTriangleIndex * 3;
                 for( DWORD dwCornerIndex = 0; dwCornerIndex < 3; ++dwCornerIndex )
                 {
-                    INT iMeshIndex = (INT)m_pPolyMesh->GetIB()->GetIndex( dwBaseIndex + dwCornerIndex );
-                    const D3DXVECTOR3* pPosition = (const D3DXVECTOR3*)m_pPolyMesh->GetVB()->GetVertex( (UINT)iMeshIndex );
+                    INT iMeshIndex = static_cast<INT>( m_pPolyMesh->GetIB()->GetIndex( dwBaseIndex + dwCornerIndex ) );
+                    auto pPosition = reinterpret_cast<const D3DXVECTOR3*>( m_pPolyMesh->GetVB()->GetVertex( iMeshIndex ) );
 
                     INT iPositionIndex = CreateOrAddPosition( *pPosition, iMeshIndex );
                     iTriangleIndices[dwCornerIndex] = iPositionIndex;
@@ -190,7 +190,7 @@ namespace ATG
                     assert( iCurrentPolyPositionIndices[3] != -1 );
 
                     // now add the quad
-                    AddQuad( iCurrentPolyIndex, (INT)dwSubsetIndex, iCurrentPolyPositionIndices, iCurrentPolyMeshIndices );
+                    AddQuad( iCurrentPolyIndex, static_cast<INT>( dwSubsetIndex ), iCurrentPolyPositionIndices, iCurrentPolyMeshIndices );
 
                     // and reset the poly state
                     iCurrentPolySize = 0;
@@ -201,7 +201,7 @@ namespace ATG
             assert( iCurrentPolySize < 2 );
             if( iCurrentPolySize == 1 )
             {
-                AddTriangle( iCurrentPolyIndex, (INT)dwSubsetIndex, iCurrentPolyPositionIndices, iCurrentPolyMeshIndices );
+                AddTriangle( iCurrentPolyIndex, static_cast<INT>( dwSubsetIndex ), iCurrentPolyPositionIndices, iCurrentPolyMeshIndices );
                 iCurrentPolySize = 0;
             }
         }
@@ -209,26 +209,26 @@ namespace ATG
         // sanity check our final triangle and quad counts
         assert( dwTriangleCount == ( m_Triangles.size() + m_Quads.size() * 2 ) );
 
-        ExportLog::LogMsg( 3, "Subdivision surface control mesh complete; %d triangles and %d quads found, %d unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
+        ExportLog::LogMsg( 3, "Subdivision surface control mesh complete; %Iu triangles and %Iu quads found, %Iu unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
     }
 
     INT ExportSubDProcessMesh::CreateOrAddPosition( const D3DXVECTOR3& vPosition, INT iMeshVertexIndex )
     {
-        assert( iMeshVertexIndex >= 0 && iMeshVertexIndex < (INT)m_pPolyMesh->GetVB()->GetVertexCount() );
+        assert( iMeshVertexIndex >= 0 && iMeshVertexIndex < static_cast<INT>( m_pPolyMesh->GetVB()->GetVertexCount() ) );
         INT iCurrentIndex = m_MeshVertexToPositionMapping[iMeshVertexIndex];
         if( iCurrentIndex == -1 )
         {
-            DWORD dwPositionCount = (DWORD)m_Positions.size();
-            for( DWORD i = 0; i < dwPositionCount; ++i )
+            size_t dwPositionCount = m_Positions.size();
+            for( size_t i = 0; i < dwPositionCount; ++i )
             {
                 if( vPosition == m_Positions[i] )
                 {
-                    iCurrentIndex = (INT)i;
+                    iCurrentIndex = static_cast<INT>( i );
                     m_MeshVertexToPositionMapping[iMeshVertexIndex] = iCurrentIndex;
                     return iCurrentIndex;
                 }
             }
-            iCurrentIndex = (INT)dwPositionCount;
+            iCurrentIndex = static_cast<INT>( dwPositionCount );
             m_Positions.push_back( vPosition );
             m_PositionToMeshVertexMapping.push_back( iMeshVertexIndex );
             m_MeshVertexToPositionMapping[iMeshVertexIndex] = iCurrentIndex;
@@ -240,7 +240,7 @@ namespace ATG
         }
     }
 
-    VOID ExportSubDProcessMesh::AddTriangle( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices )
+    void ExportSubDProcessMesh::AddTriangle( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices )
     {
         Triangle tri;
         tri.iPolyIndex = iPolyIndex;
@@ -255,12 +255,12 @@ namespace ATG
         m_Triangles.push_back( tri );
     }
 
-    VOID ExportSubDProcessMesh::AddQuad( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices )
+    void ExportSubDProcessMesh::AddQuad( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices )
     {
         Quad quad;
         quad.iPolyIndex = iPolyIndex;
         quad.iMeshSubsetIndex = iSubsetIndex;
-        quad.bDegenerate = FALSE;
+        quad.bDegenerate = false;
         if( g_pScene->Settings().bFlipTriangles )
         {
             // the combination of two flipped triangles causes a bowtie
@@ -286,14 +286,14 @@ namespace ATG
             quad.iMeshIndices[3] = pMeshIndices[3];
         }
 
-        BOOL bDegenerate = FALSE;
+        bool bDegenerate = false;
         for( DWORD i = 0; i < 4; ++i )
         {
             for( DWORD j = i + 1; j < 4; ++j )
             {
                 if( pIndices[i] == pIndices[j] || pMeshIndices[i] == pMeshIndices[j] )
                 {
-                    bDegenerate = TRUE;
+                    bDegenerate = true;
                 }
             }
         }
@@ -305,18 +305,18 @@ namespace ATG
         m_Quads.push_back( quad );
     }
 
-    VOID ExportSubDProcessMesh::BuildBoundaryEdgeTable()
+    void ExportSubDProcessMesh::BuildBoundaryEdgeTable()
     {
-        assert( m_pPolyMesh != NULL );
+        assert( m_pPolyMesh != nullptr );
 
         m_BoundaryEdges.clear();
 
         size_t dwTotalEdgeCount = m_Triangles.size() * 3 + m_Quads.size() * 4;
-        ExportLog::LogMsg( 4, "Scanning %d edges in control mesh for boundary edges.", dwTotalEdgeCount );
+        ExportLog::LogMsg( 4, "Scanning %Iu edges in control mesh for boundary edges.", dwTotalEdgeCount );
 
         // add the edges in all of the triangles
-        const DWORD dwTriangleCount = (DWORD)m_Triangles.size();
-        for( DWORD dwTriangleIndex = 0; dwTriangleIndex < dwTriangleCount; ++dwTriangleIndex )
+        const size_t dwTriangleCount = m_Triangles.size();
+        for( size_t dwTriangleIndex = 0; dwTriangleIndex < dwTriangleCount; ++dwTriangleIndex )
         {
             const Triangle& tri = m_Triangles[dwTriangleIndex];
 
@@ -324,13 +324,13 @@ namespace ATG
             {
                 INT iPositionIndexA = tri.iIndices[ iEdgeIndex ];
                 INT iPositionIndexB = tri.iIndices[ ( iEdgeIndex + 1 ) % 3 ];
-                AddOrRemoveEdge( iPositionIndexA, iPositionIndexB, (INT)dwTriangleIndex, -1, iEdgeIndex );
+                AddOrRemoveEdge( iPositionIndexA, iPositionIndexB, static_cast<INT>( dwTriangleIndex ), -1, iEdgeIndex );
             }
         }
 
         // add the edges in all of the quads
-        const DWORD dwQuadCount = (DWORD)m_Quads.size();
-        for( DWORD dwQuadIndex = 0; dwQuadIndex < dwQuadCount; ++dwQuadIndex )
+        const size_t dwQuadCount = m_Quads.size();
+        for( size_t dwQuadIndex = 0; dwQuadIndex < dwQuadCount; ++dwQuadIndex )
         {
             const Quad& quad = m_Quads[dwQuadIndex];
 
@@ -338,7 +338,7 @@ namespace ATG
             {
                 INT iPositionIndexA = quad.iIndices[ iEdgeIndex ];
                 INT iPositionIndexB = quad.iIndices[ ( iEdgeIndex + 1 ) % 4 ];
-                AddOrRemoveEdge( iPositionIndexA, iPositionIndexB, -1, (INT)dwQuadIndex, iEdgeIndex );
+                AddOrRemoveEdge( iPositionIndexA, iPositionIndexB, -1, static_cast<INT>( dwQuadIndex ), iEdgeIndex );
             }
         }
 
@@ -346,7 +346,7 @@ namespace ATG
         const size_t dwPositionCount = m_Positions.size();
 
         // anything left over in the boundary edge table is a boundary edge
-        ExportLog::LogMsg( 3, "Control mesh has %d boundary edges.", dwBoundaryEdgeCount );
+        ExportLog::LogMsg( 3, "Control mesh has %Iu boundary edges.", dwBoundaryEdgeCount );
 
         // scan for more than 2 incident boundary edges on any position vertex
         m_IncidentBoundaryEdgesPerPosition.clear();
@@ -381,14 +381,14 @@ namespace ATG
             ++iter;
         }
 
-        BOOL bInvalidData = FALSE;
+        bool bInvalidData = false;
         for( DWORD i = 0; i < dwPositionCount; ++i )
         {
             if( m_IncidentBoundaryEdgesPerPosition[i] > 2 )
             {
                 D3DXVECTOR3 vPos = m_Positions[i];
-                ExportLog::LogWarning( "Detected %d incident boundary edges on position %d, which will result in invalid adjacency data.  Location: <%0.3f %0.3f %0.3f>", m_IncidentBoundaryEdgesPerPosition[i], i, vPos.x, vPos.y, vPos.z );
-                bInvalidData = TRUE;
+                ExportLog::LogWarning( "Detected %d incident boundary edges on position %u, which will result in invalid adjacency data.  Location: <%0.3f %0.3f %0.3f>", m_IncidentBoundaryEdgesPerPosition[i], i, vPos.x, vPos.y, vPos.z );
+                bInvalidData = true;
             }
         }
         if( bInvalidData )
@@ -436,12 +436,12 @@ namespace ATG
         }
     }
 
-    VOID ExportSubDProcessMesh::CreateDegenerateGeometry()
+    void ExportSubDProcessMesh::CreateDegenerateGeometry()
     {
-        if( m_BoundaryEdges.size() == 0 )
+        if( m_BoundaryEdges.empty() )
             return;
 
-        ExportLog::LogMsg( 4, "Creating %d degenerate quads from %d boundary edges.", m_BoundaryEdges.size(), m_BoundaryEdges.size() );
+        ExportLog::LogMsg( 4, "Creating %Iu degenerate quads from %Iu boundary edges.", m_BoundaryEdges.size(), m_BoundaryEdges.size() );
 
         const size_t dwPositionCount = m_Positions.size();
 
@@ -480,7 +480,7 @@ namespace ATG
 
             // create a degenerate quad
             Quad quad;
-            quad.bDegenerate = TRUE;
+            quad.bDegenerate = true;
             quad.iPolyIndex = -1;
             if( g_pScene->Settings().bFlipTriangles )
             {
@@ -509,7 +509,7 @@ namespace ATG
 
     INT ExportSubDProcessMesh::CreateOrAddDegeneratePosition( INT iPositionIndex )
     {
-        assert( iPositionIndex >= 0 && iPositionIndex < (INT)m_PositionToDegeneratePositionMapping.size() );
+        assert( iPositionIndex >= 0 && iPositionIndex < static_cast<INT>( m_PositionToDegeneratePositionMapping.size() ) );
 
         // search for a degenerate position for this position index
         size_t iDegeneratePositionIndex = m_PositionToDegeneratePositionMapping[iPositionIndex];
@@ -525,20 +525,20 @@ namespace ATG
         return static_cast<INT>( iDegeneratePositionIndex );
     }
 
-    VOID ExportSubDProcessMesh::ComputeAdjacency()
+    void ExportSubDProcessMesh::ComputeAdjacency()
     {
-        const DWORD dwTriangleCount = (DWORD)m_Triangles.size();
+        const size_t dwTriangleCount = m_Triangles.size();
         if( dwTriangleCount > 0 )
         {
             ExportLog::LogMsg( 4, "Computing triangle adjacency." );
 
-            for( DWORD i = 0; i < dwTriangleCount; ++i )
+            for( size_t i = 0; i < dwTriangleCount; ++i )
             {
-                ComputeTriangleAdjacency( i );
+                ComputeTriangleAdjacency( static_cast<INT>( i ) );
             }
         }
 
-        const DWORD dwQuadCount = (DWORD)m_Quads.size();
+        const size_t dwQuadCount = m_Quads.size();
         if( dwQuadCount > 0 )
         {
             ExportLog::LogMsg( 4, "Computing quad adjacency." );
@@ -546,14 +546,14 @@ namespace ATG
             DWORD dwRegularQuadCount = 0;
             DWORD dwExtraordinaryQuadCount = 0;
 
-            deque<INT> ValenceTwoQuads;
+            std::deque<INT> ValenceTwoQuads;
 
-            for( DWORD i = 0; i < dwQuadCount; ++i )
+            for( size_t i = 0; i < dwQuadCount; ++i )
             {
                 if( m_Quads[i].bDegenerate )
                     continue;
 
-                ComputeQuadAdjacency( i );
+                ComputeQuadAdjacency( static_cast<INT>( i ) );
 
                 const Quad& ProcessedQuad = m_Quads[i];
                 if( ProcessedQuad.bValence[0] == 4 &&
@@ -573,25 +573,25 @@ namespace ATG
                     ProcessedQuad.bValence[2] == 2 ||
                     ProcessedQuad.bValence[3] == 2 )
                 {
-                    ValenceTwoQuads.push_back( (INT)i );
+                    ValenceTwoQuads.push_back( static_cast<INT>( i ) );
                 }
             }
 
-            FLOAT fTotalQuadCount = (FLOAT)( dwRegularQuadCount + dwExtraordinaryQuadCount );
-            FLOAT fRegularPercent = 100.0f * (FLOAT)dwRegularQuadCount / fTotalQuadCount;
+            float fTotalQuadCount = (float)( dwRegularQuadCount + dwExtraordinaryQuadCount );
+            float fRegularPercent = 100.0f * (float)dwRegularQuadCount / fTotalQuadCount;
 
-            ExportLog::LogMsg( 3, "%d regular quads (%0.0f%% of total), %d extraordinary quads.", dwRegularQuadCount, fRegularPercent, dwExtraordinaryQuadCount );
+            ExportLog::LogMsg( 3, "%u regular quads (%0.0f%% of total), %u extraordinary quads.", dwRegularQuadCount, fRegularPercent, dwExtraordinaryQuadCount );
 
             RemoveValenceTwoQuads( ValenceTwoQuads );
         }
     }
 
-    VOID ExportSubDProcessMesh::ComputeTriangleAdjacency( const INT iTriangleIndex )
+    void ExportSubDProcessMesh::ComputeTriangleAdjacency( const INT iTriangleIndex )
     {
         Triangle& tri = m_Triangles[iTriangleIndex];
 
         // This resizable array stores the neighbor list while we're computing adjacency
-        vector< INT > Neighbors;
+        std::vector< INT > Neighbors;
 
         ExportLog::LogMsg( 5, "Computing adjacency for triangle %d: <%d %d %d>", iTriangleIndex, tri.iIndices[0], tri.iIndices[1], tri.iIndices[2] );
 
@@ -607,13 +607,13 @@ namespace ATG
 
             ExportLog::LogMsg( 5, "Corner %d, position index %d", iCornerIndex, iPivotPositionIndex );
 
-            tri.bValence[iCornerIndex] = (BYTE)ExecuteSweep( iPivotPositionIndex, iSweepPositionIndex, iStopPositionIndex, -1, iTriangleIndex, Neighbors );
+            tri.bValence[iCornerIndex] = static_cast<BYTE>( ExecuteSweep( iPivotPositionIndex, iSweepPositionIndex, iStopPositionIndex, -1, iTriangleIndex, Neighbors ) );
 
             // The prefix is the index of the end of this corner's neighbor list.
             // We add 3 since the neighbor list will be appended to the 3 triangle indices in the final per-triangle buffer.
-            tri.bPrefix[iCornerIndex] = (BYTE)Neighbors.size() + 3;
+            tri.bPrefix[iCornerIndex] = static_cast<BYTE>( Neighbors.size() + 3 );
 
-            ExportLog::LogMsg( 5, "Valence %d, prefix %d", tri.bValence[iCornerIndex], tri.bPrefix[iCornerIndex] );
+            ExportLog::LogMsg( 5, "Valence %u, prefix %u", tri.bValence[iCornerIndex], tri.bPrefix[iCornerIndex] );
         }
 
         if( Neighbors.size() > MAX_TRIANGLE_NEIGHBOR_COUNT )
@@ -635,12 +635,12 @@ namespace ATG
         }
     }
 
-    VOID ExportSubDProcessMesh::ComputeQuadAdjacency( const INT iQuadIndex )
+    void ExportSubDProcessMesh::ComputeQuadAdjacency( const INT iQuadIndex )
     {
         Quad& quad = m_Quads[iQuadIndex];
 
         // This resizable array stores the neighbor list while we're computing adjacency
-        vector< INT > Neighbors;
+        std::vector< INT > Neighbors;
 
         ExportLog::LogMsg( 5, "Computing adjacency for quad %d: <%d %d %d %d>", iQuadIndex, quad.iIndices[0], quad.iIndices[1], quad.iIndices[2], quad.iIndices[3] );
 
@@ -656,13 +656,13 @@ namespace ATG
 
             ExportLog::LogMsg( 5, "Corner %d, position index %d", iCornerIndex, iPivotPositionIndex );
 
-            quad.bValence[iCornerIndex] = (BYTE)ExecuteSweep( iPivotPositionIndex, iSweepPositionIndex, iStopPositionIndex, iQuadIndex, -1, Neighbors );
+            quad.bValence[iCornerIndex] = static_cast<BYTE>( ExecuteSweep( iPivotPositionIndex, iSweepPositionIndex, iStopPositionIndex, iQuadIndex, -1, Neighbors ) );
 
             // The prefix is the index of the end of this corner's neighbor list.
             // We add 4 since the neighbor list will be appended to the 4 quad indices in the final per-quad buffer.
-            quad.bPrefix[iCornerIndex] = (BYTE)Neighbors.size() + 4;
+            quad.bPrefix[iCornerIndex] = static_cast<BYTE>( Neighbors.size() + 4 );
 
-            ExportLog::LogMsg( 5, "Valence %d, prefix %d", quad.bValence[iCornerIndex], quad.bPrefix[iCornerIndex] );
+            ExportLog::LogMsg( 5, "Valence %u, prefix %u", quad.bValence[iCornerIndex], quad.bPrefix[iCornerIndex] );
         }
 
         if( Neighbors.size() > MAX_QUAD_NEIGHBOR_COUNT )
@@ -684,7 +684,7 @@ namespace ATG
         }
     }
 
-    INT ExportSubDProcessMesh::ExecuteSweep( INT iPivotPositionIndex, INT iSweepPositionIndex, INT iStopPositionIndex, INT iStartQuadIndex, INT iStartTriangleIndex, vector<INT>& Neighbors )
+    INT ExportSubDProcessMesh::ExecuteSweep( INT iPivotPositionIndex, INT iSweepPositionIndex, INT iStopPositionIndex, INT iStartQuadIndex, INT iStartTriangleIndex, std::vector<INT>& Neighbors )
     {
         INT iValence = 2;
 
@@ -702,15 +702,15 @@ namespace ATG
         INT iCurrentQuadIndex = iStartQuadIndex;
         INT iCurrentTriangleIndex = iStartTriangleIndex;
 
-        BOOL bSweepComplete = FALSE;
-        BOOL bFirstSweep = TRUE;
+        bool bSweepComplete = false;
+        bool bFirstSweep = true;
 
         while( !bSweepComplete )
         {
             if( iValence >= MAX_QUAD_NEIGHBOR_COUNT )
             {
                 ExportLog::LogError( "Maximum valence encountered.  Terminating sweep to prevent infinite loop." );
-                bSweepComplete = TRUE;
+                bSweepComplete = true;
                 continue;
             }
 
@@ -721,7 +721,7 @@ namespace ATG
                 // Determine if we have reached the stop quad
                 if( iNextQuadIndex == iStopQuadIndex )
                 {
-                    bSweepComplete = TRUE;
+                    bSweepComplete = true;
                     continue;
                 }
 
@@ -750,7 +750,7 @@ namespace ATG
 
                 // Move our sweep point
                 iSweepPositionIndex = iNextSweepPositionIndex;
-                bFirstSweep = FALSE;
+                bFirstSweep = false;
                 continue;
             }
 
@@ -761,7 +761,7 @@ namespace ATG
                 // Determine if we have reached the stop triangle
                 if( iNextTriIndex == iStopTriangleIndex )
                 {
-                    bSweepComplete = TRUE;
+                    bSweepComplete = true;
                     continue;
                 }
 
@@ -781,13 +781,13 @@ namespace ATG
 
                 // Move our sweep point
                 iSweepPositionIndex = iNextSweepPositionIndex;
-                bFirstSweep = FALSE;
+                bFirstSweep = false;
                 continue;
             }
 
             // Neither quad nor triangle was found
             // End the sweep for this corner
-            bSweepComplete = TRUE;
+            bSweepComplete = true;
         }
 
         if( iValence <= 2 && iStartQuadIndex != -1 )
@@ -815,7 +815,7 @@ namespace ATG
 
     INT ExportSubDProcessMesh::FindTriangleWithEdge( INT iStartPositionIndex, INT iEndPositionIndex, INT iExcludeThisTriangle )
     {
-        INT iTriangleCount = (INT)m_Triangles.size();
+        INT iTriangleCount = static_cast<INT>( m_Triangles.size() );
         for( INT i = 0; i < iTriangleCount; ++i )
         {
             if( i == iExcludeThisTriangle )
@@ -836,7 +836,7 @@ namespace ATG
 
     INT ExportSubDProcessMesh::FindQuadWithEdge( INT iStartPositionIndex, INT iEndPositionIndex, INT iExcludeThisQuad )
     {
-        INT iQuadCount = (INT)m_Quads.size();
+        INT iQuadCount = static_cast<INT>( m_Quads.size() );
         for( INT i = 0; i < iQuadCount; ++i )
         {
             if( i == iExcludeThisQuad )
@@ -923,7 +923,7 @@ namespace ATG
         return -1;
     }
 
-    BOOL QuadsHaveTwoMatchingEdges( const ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
+    bool QuadsHaveTwoMatchingEdges( const ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
     {
         DWORD dwMatchingVertexCount = 0;
         for( DWORD i = 0; i < 4; ++i )
@@ -940,18 +940,18 @@ namespace ATG
         return dwMatchingVertexCount == 3;
     }
 
-    VOID MergeQuads( ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
+    void MergeQuads( ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
     {
         INT iUniqueIndexA = -1;
         INT iUniquePositionInA = -1;
         for( INT i = 0; i < 4; ++i )
         {
-            BOOL bFound = FALSE;
+            bool bFound = false;
             for( INT j = 0; j < 4; ++j )
             {
                 if( QuadA.iIndices[i] == QuadB.iIndices[j] )
                 {
-                    bFound = TRUE;
+                    bFound = true;
                 }
             }
             if( !bFound )
@@ -967,12 +967,12 @@ namespace ATG
         INT iUniquePositionInB = -1;
         for( INT i = 0; i < 4; ++i )
         {
-            BOOL bFound = FALSE;
+            bool bFound = false;
             for( INT j = 0; j < 4; ++j )
             {
                 if( QuadB.iIndices[i] == QuadA.iIndices[j] )
                 {
-                    bFound = TRUE;
+                    bFound = true;
                 }
             }
             if( !bFound )
@@ -1001,7 +1001,7 @@ namespace ATG
         }
     }
 
-    VOID ExportSubDProcessMesh::RemoveValenceTwoQuads( deque<INT>& BadQuads )
+    void ExportSubDProcessMesh::RemoveValenceTwoQuads( std::deque<INT>& BadQuads )
     {
         if( BadQuads.empty() )
         {
@@ -1011,7 +1011,7 @@ namespace ATG
         // The valence 2 quads (bad quads) should come in pairs.
         assert( BadQuads.size() % 2 == 0 );
 
-        vector<INT> QuadsForAdjacency;
+        std::vector<INT> QuadsForAdjacency;
 
         // Find pairs of quads that share two edges.
         while( !BadQuads.empty() )
@@ -1022,8 +1022,8 @@ namespace ATG
             Quad& QuadA = m_Quads[iQuadAIndex];
             
             // Find a quad in the bad quad list that adjoins quad A.
-            BOOL bMatchedQuad = FALSE;
-            deque<INT>::iterator iter = BadQuads.begin();
+            bool bMatchedQuad = false;
+            std::deque<INT>::iterator iter = BadQuads.begin();
             while( iter != BadQuads.end() )
             {
                 int iQuadBIndex = *iter;
@@ -1034,7 +1034,7 @@ namespace ATG
                     ExportLog::LogMsg( 4, "Merging quad %d into quad %d, and eliminating quad %d.", iQuadBIndex, iQuadAIndex, iQuadBIndex );
 
                     // Merge the second quad into the first quad.
-                    bMatchedQuad = TRUE;
+                    bMatchedQuad = true;
                     MergeQuads( QuadA, QuadB );
 
                     // The first quad needs to have its adjacency recomputed.
@@ -1042,7 +1042,7 @@ namespace ATG
 
                     // The second quad needs to be removed from the quad array.
                     // Setting the degenerate flag will effectively do this.
-                    QuadB.bDegenerate = TRUE;
+                    QuadB.bDegenerate = true;
 
                     // Remove the second quad from the bad quad list.
                     BadQuads.erase( iter );
@@ -1056,7 +1056,7 @@ namespace ATG
             {
                 // Can this error condition ever be encountered?
                 ExportLog::LogError( "Quad %d has a vertex with valence 2, but was not matched with an adjacent quad.  Quad will be removed.", iQuadAIndex );
-                QuadA.bDegenerate = TRUE;
+                QuadA.bDegenerate = true;
                 break;
             }
         }
@@ -1069,7 +1069,7 @@ namespace ATG
         }
     }
 
-    BOOL QuadPatchSortPredicate( const ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
+    bool QuadPatchSortPredicate( const ExportSubDProcessMesh::Quad& QuadA, const ExportSubDProcessMesh::Quad& QuadB )
     {
         INT iScoreA = 0;
         if( !QuadA.bDegenerate )
@@ -1094,7 +1094,7 @@ namespace ATG
         return iScoreA < iScoreB;
     }
 
-    BOOL TrianglePatchSortPredicate( const ExportSubDProcessMesh::Triangle& TriangleA, const ExportSubDProcessMesh::Triangle& TriangleB )
+    bool TrianglePatchSortPredicate( const ExportSubDProcessMesh::Triangle& TriangleA, const ExportSubDProcessMesh::Triangle& TriangleB )
     {
         INT iScoreA = TriangleA.iMeshSubsetIndex;
         if( TriangleA.bValence[0] != 4 || TriangleA.bValence[1] != 4 || TriangleA.bValence[2] != 4 || TriangleA.bValence[3] != 4 )
@@ -1111,18 +1111,18 @@ namespace ATG
         return iScoreA < iScoreB;
     }
 
-    VOID ExportSubDProcessMesh::SortPatches()
+    void ExportSubDProcessMesh::SortPatches()
     {
         std::stable_sort( m_Quads.begin(), m_Quads.end(), QuadPatchSortPredicate );
         std::stable_sort( m_Triangles.begin(), m_Triangles.end(), TrianglePatchSortPredicate );
     }
 
-    VOID ExportSubDProcessMesh::BuildQuadPatchBuffer()
+    void ExportSubDProcessMesh::BuildQuadPatchBuffer()
     {
-        DWORD dwQuadCount = (DWORD)m_Quads.size();
+        size_t dwQuadCount = m_Quads.size();
 
-        DWORD dwActiveQuadCount = 0;
-        for( DWORD i = 0; i < dwQuadCount; ++i )
+        size_t dwActiveQuadCount = 0;
+        for( size_t i = 0; i < dwQuadCount; ++i )
         {
             if( !m_Quads[i].bDegenerate )
             {
@@ -1133,27 +1133,27 @@ namespace ATG
         if( dwActiveQuadCount == 0 )
             return;
 
-        assert( m_pQuadPatchDataVB == NULL );
+        assert( m_pQuadPatchDataVB == nullptr );
         m_pQuadPatchDataVB = new ExportVB();
-        m_pQuadPatchDataVB->SetVertexCount( dwActiveQuadCount );
+        m_pQuadPatchDataVB->SetVertexCount( static_cast<UINT>( dwActiveQuadCount ) );
         m_pQuadPatchDataVB->SetVertexSize( sizeof( PatchData ) );
         m_pQuadPatchDataVB->Allocate();
 
         m_pQuadPatchIB = new ExportIB();
-        m_pQuadPatchIB->SetIndexCount( MAX_POINT_COUNT * dwActiveQuadCount );
+        m_pQuadPatchIB->SetIndexCount( static_cast<UINT>( MAX_POINT_COUNT * dwActiveQuadCount ) );
         m_pQuadPatchIB->SetIndexSize( 4 );
         m_pQuadPatchIB->Allocate();
 
-        DWORD* pIndexData = (DWORD*)m_pQuadPatchIB->GetIndexData();
+        auto pIndexData = reinterpret_cast<DWORD*>( m_pQuadPatchIB->GetIndexData() );
 
         DWORD dwIndex = 0;
-        for( DWORD i = 0; i < dwQuadCount; ++i )
+        for( size_t i = 0; i < dwQuadCount; ++i )
         {
             const Quad& quad = m_Quads[i];
             if( quad.bDegenerate )
                 continue;
 
-            PatchData* pPatchData = (PatchData*)m_pQuadPatchDataVB->GetVertex( dwIndex );
+            auto pPatchData = reinterpret_cast<PatchData*>( m_pQuadPatchDataVB->GetVertex( dwIndex ) );
             ZeroMemory( pPatchData, sizeof( PatchData ) );
 
             for( DWORD j = 0; j < 4; ++j )
@@ -1171,7 +1171,7 @@ namespace ATG
                 {
                     INT iMeshIndex = m_PositionToMeshVertexMapping[iPositionIndex];
                     assert( iMeshIndex != -1 );
-                    pIndexData[ j + 4 ] = (DWORD)iMeshIndex;
+                    pIndexData[ j + 4 ] = static_cast<DWORD>( iMeshIndex );
                 }
             }
 
@@ -1180,28 +1180,28 @@ namespace ATG
         }
     }
 
-    VOID ExportSubDProcessMesh::BuildTriPatchBuffer()
+    void ExportSubDProcessMesh::BuildTriPatchBuffer()
     {
-        DWORD dwTriangleCount = (DWORD)m_Triangles.size();
+        size_t dwTriangleCount = m_Triangles.size();
         if( dwTriangleCount == 0 )
             return;
 
-        assert( m_pTrianglePatchDataVB == NULL );
+        assert( m_pTrianglePatchDataVB == nullptr );
         m_pTrianglePatchDataVB = new ExportVB();
-        m_pTrianglePatchDataVB->SetVertexCount( dwTriangleCount );
+        m_pTrianglePatchDataVB->SetVertexCount( static_cast<UINT>( dwTriangleCount ) );
         m_pTrianglePatchDataVB->SetVertexSize( sizeof( PatchData ) );
         m_pTrianglePatchDataVB->Allocate();
 
         m_pTrianglePatchIB = new ExportIB();
-        m_pTrianglePatchIB->SetIndexCount( dwTriangleCount * MAX_POINT_COUNT );
+        m_pTrianglePatchIB->SetIndexCount( static_cast<UINT>( dwTriangleCount * MAX_POINT_COUNT ) );
         m_pTrianglePatchIB->SetIndexSize( 4 );
         m_pTrianglePatchIB->Allocate();
 
-        DWORD* pIndexData = (DWORD*)m_pTrianglePatchIB->GetIndexData();
-        for( DWORD i = 0; i < dwTriangleCount; ++i )
+        auto pIndexData = reinterpret_cast<DWORD*>( m_pTrianglePatchIB->GetIndexData() );
+        for( size_t i = 0; i < dwTriangleCount; ++i )
         {
             const Triangle& Triangle = m_Triangles[i];
-            PatchData* pPatchData = (PatchData*)m_pTrianglePatchDataVB->GetVertex( i );
+            auto pPatchData = reinterpret_cast<PatchData*>( m_pTrianglePatchDataVB->GetVertex( i ) );
             ZeroMemory( pPatchData, sizeof( PatchData ) );
 
             for( DWORD j = 0; j < 3; ++j )
@@ -1219,7 +1219,7 @@ namespace ATG
                 {
                     INT iMeshIndex = m_PositionToMeshVertexMapping[iPositionIndex];
                     assert( iMeshIndex != -1 );
-                    pIndexData[ j + 3 ] = (DWORD)iMeshIndex;
+                    pIndexData[ j + 3 ] = static_cast<DWORD>( iMeshIndex );
                 }
             }
 
@@ -1227,16 +1227,16 @@ namespace ATG
         }
     }
 
-    VOID ExportSubDProcessMesh::ConvertSubsets()
+    void ExportSubDProcessMesh::ConvertSubsets()
     {
         size_t dwQuadCount = m_Quads.size();
 
         ExportSubDPatchSubset CurrentSubset = { 0 };
-        CurrentSubset.bQuadPatches = TRUE;
+        CurrentSubset.bQuadPatches = true;
         CurrentSubset.iOriginalMeshSubset = -1;
 
         INT iPatchCount = 0;
-        for( DWORD i = 0; i < dwQuadCount; ++i )
+        for( size_t i = 0; i < dwQuadCount; ++i )
         {
             if( m_Quads[i].bDegenerate )
                 continue;
@@ -1263,12 +1263,12 @@ namespace ATG
 
         iPatchCount = 0;
         size_t dwTriCount = m_Triangles.size();
-        CurrentSubset.bQuadPatches = FALSE;
+        CurrentSubset.bQuadPatches = false;
         CurrentSubset.dwStartPatch = 0;
         CurrentSubset.dwPatchCount = 0;
         CurrentSubset.iOriginalMeshSubset = -1;
 
-        for( DWORD i = 0; i < dwTriCount; ++i )
+        for( size_t i = 0; i < dwTriCount; ++i )
         {
             INT iMeshSubsetIndex = m_Triangles[i].iMeshSubsetIndex;
             if( iMeshSubsetIndex != CurrentSubset.iOriginalMeshSubset )
@@ -1309,13 +1309,13 @@ namespace ATG
 
     ExportSubDPatchSubset* ExportSubDProcessMesh::FindSubset( ExportString strName )
     {
-        DWORD dwCount = GetSubsetCount();
-        for( DWORD i = 0; i < dwCount; ++i )
+        size_t dwCount = GetSubsetCount();
+        for( size_t i = 0; i < dwCount; ++i )
         {
             if( m_Subsets[i].Name == strName )
                 return &m_Subsets[i];
         }
-        return NULL;
+        return nullptr;
     }
 }
 

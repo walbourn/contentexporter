@@ -24,39 +24,39 @@ namespace ATG
     public:
         ExportConsoleDialog();
 
-        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ); 
-        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl );
-        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam );
+        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override;
+        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
+        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
 
-        virtual VOID LogMessage( const CHAR* strMessage );
-        virtual VOID LogWarning( const CHAR* strMessage );
-        virtual VOID LogError( const CHAR* strMessage );
-        virtual VOID LogCommand( DWORD dwCommand, VOID* pData );
+        virtual void LogMessage( const CHAR* strMessage ) override;
+        virtual void LogWarning( const CHAR* strMessage ) override;
+        virtual void LogError( const CHAR* strMessage ) override;
+        virtual void LogCommand( DWORD dwCommand, void* pData ) override;
 
-        virtual void Initialize( const CHAR* strTitle );
-        virtual void Terminate();
-        virtual void SetCaption( const CHAR* strCaption );
-        virtual void StartNewTask( const CHAR* strCaption, FLOAT fTaskPercentOfWhole );
-        virtual void SetProgress( FLOAT fTaskRelativeProgress );
+        virtual void Initialize( const CHAR* strTitle ) override;
+        virtual void Terminate() override;
+        virtual void SetCaption( const CHAR* strCaption ) override;
+        virtual void StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole ) override;
+        virtual void SetProgress( float fTaskRelativeProgress ) override;
 
-        VOID ConsolePrint( COLORREF rgb, const CHAR* strText );
-        VOID ConsoleNewline();
-        VOID ConsoleClear();
+        void ConsolePrint( COLORREF rgb, const CHAR* strText );
+        void ConsoleNewline();
+        void ConsoleClear();
 
-        static UINT WINAPI ThreadEntry( VOID* pData );
+        static UINT WINAPI ThreadEntry( void* pData );
 
     protected:
-        VOID RecordWarning( const CHAR* strMessage );
-        VOID RecordError( const CHAR* strMessage );
-        VOID PrintWarningsAndErrors();
-        VOID ClearWarningsAndErrors();
+        void RecordWarning( const CHAR* strMessage );
+        void RecordError( const CHAR* strMessage );
+        void PrintWarningsAndErrors();
+        void ClearWarningsAndErrors();
 
     protected:
         HWND    m_hRichTextBox;
         HWND    m_hProgressText;
         HWND    m_hProgressBar;
         HWND    m_hOKButton;
-        FLOAT   m_fCurrentTaskMin;
-        FLOAT   m_fCurrentTaskSize;
+        float   m_fCurrentTaskMin;
+        float   m_fCurrentTaskSize;
     };
 }

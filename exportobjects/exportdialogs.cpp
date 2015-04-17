@@ -20,29 +20,29 @@
 
 namespace ATG
 {
-    const CHAR* g_strTitle = NULL;
-    HWND g_hParentWindow = NULL;
-    HINSTANCE g_hInstance = NULL;
-    HMODULE g_hRichEdit = NULL;
+    const CHAR* g_strTitle = nullptr;
+    HWND g_hParentWindow = nullptr;
+    HINSTANCE g_hInstance = nullptr;
+    HMODULE g_hRichEdit = nullptr;
 
     ExportConsoleDialog g_ConsoleDlg;
     ExportSettingsDialog g_SettingsDlg;
 
-    UINT WINAPI ExportConsoleDialog::ThreadEntry( VOID* pData )
+    UINT WINAPI ExportConsoleDialog::ThreadEntry( void* pData )
     {
-        ExportConsoleDialog* pDlg = (ExportConsoleDialog*)pData;
+        auto pDlg = reinterpret_cast<ExportConsoleDialog*>( pData );
         pDlg->DoModal( g_hInstance, g_hParentWindow );
         return 0;
     }
 
-    UINT WINAPI ExportSettingsDialog::ThreadEntry( VOID* pData )
+    UINT WINAPI ExportSettingsDialog::ThreadEntry( void* pData )
     {
-        ExportSettingsDialog* pDlg = (ExportSettingsDialog*)pData;
+        auto pDlg = reinterpret_cast<ExportSettingsDialog*>( pData );
         pDlg->DoModal( g_hInstance, g_hParentWindow );
         return 0;
     }
 
-    VOID InitializeExportDialogs( const CHAR* strTitle, HWND hParentWindow, HINSTANCE hInst )
+    void InitializeExportDialogs( const CHAR* strTitle, HWND hParentWindow, HINSTANCE hInst )
     {
         g_strTitle = strTitle;
         g_hInstance = hInst;
@@ -55,7 +55,7 @@ namespace ATG
         InitCommonControlsEx( &ICEX );
         InitCommonControls();
         HMODULE g_hRichEdit = LoadLibrary( TEXT( "Riched32.dll" ) );
-        assert( g_hRichEdit != NULL );
+        assert( g_hRichEdit != nullptr );
         UNREFERENCED_PARAMETER(g_hRichEdit);
 
         ExportLog::AddListener( &g_ConsoleDlg );
@@ -63,40 +63,40 @@ namespace ATG
 
         const DWORD dwStackSize = 8192;
 
-        _beginthreadex( NULL, dwStackSize, ExportConsoleDialog::ThreadEntry, &g_ConsoleDlg, 0, NULL );
-        _beginthreadex( NULL, dwStackSize, ExportSettingsDialog::ThreadEntry, &g_SettingsDlg, 0, NULL );
+        _beginthreadex( nullptr, dwStackSize, ExportConsoleDialog::ThreadEntry, &g_ConsoleDlg, 0, nullptr );
+        _beginthreadex( nullptr, dwStackSize, ExportSettingsDialog::ThreadEntry, &g_SettingsDlg, 0, nullptr );
     }
 
-    VOID TerminateExportDialogs()
+    void TerminateExportDialogs()
     {
         FreeLibrary( g_hRichEdit );
     }
 
-    VOID ShowConsoleDialog()
+    void ShowConsoleDialog()
     {
         g_ConsoleDlg.Show();
     }
 
-    BOOL ShowSettingsDialog( BOOL bModal )
+    bool ShowSettingsDialog( bool bModal )
     {
         g_SettingsDlg.Show();
         if( bModal )
         {
             while( g_SettingsDlg.GetDialogState() == ExportSettingsDialog::DS_VISIBLE ) { Sleep(0); }
             if( g_SettingsDlg.GetDialogState() != ExportSettingsDialog::DS_HIDDEN_OK )
-                return FALSE;
+                return false;
         }
-        return TRUE;
+        return true;
     }
 
-    VOID ExportDialogBase::Show()
+    void ExportDialogBase::Show()
     {
         ShowWindow( m_hwnd, SW_SHOWNORMAL );
         SetWindowPos( m_hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE );
         UpdateWindow( m_hwnd );
     }
 
-    VOID ExportDialogBase::Hide()
+    void ExportDialogBase::Hide()
     {
         ShowWindow( m_hwnd, SW_HIDE );
     }

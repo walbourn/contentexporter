@@ -18,7 +18,7 @@
 
 namespace ATG
 {
-    static const DWORD SETTINGS_STRING_LENGTH = 256;
+    static const size_t SETTINGS_STRING_LENGTH = 256;
 
     class ExportVariant
     {
@@ -37,9 +37,9 @@ namespace ATG
         { }
         union
         {
-            FLOAT           m_fValue;
+            float           m_fValue;
             INT             m_iValue;
-            BOOL            m_bValue;
+            bool            m_bValue;
         };
         ExportMutableString m_strValue;
         VariantType         m_Type;
@@ -72,7 +72,7 @@ namespace ATG
 
         ExportVariant       m_DefaultValue;
         ExportVariant       m_CurrentValue;
-        VOID*               m_pLinkedCurrentValue;
+        void*               m_pLinkedCurrentValue;
 
         ExportVariant       m_MinValue;
         ExportVariant       m_MaxValue;
@@ -86,29 +86,29 @@ namespace ATG
         ExportSettingsEntry();
         ~ExportSettingsEntry();
 
-        VOID SetDefaultValue( BOOL bSetChildren = FALSE, BOOL bSetSiblings = FALSE );
-        FLOAT GetValueFloat() const;
-        BOOL GetValueBool() const;
+        void SetDefaultValue( bool bSetChildren = false, bool bSetSiblings = false );
+        float GetValueFloat() const;
+        bool GetValueBool() const;
         INT GetValueInt() const;
         const CHAR* GetValueString() const;
-        VOID SetValue( FLOAT fValue );
-        VOID SetValue( INT iValue );
-        VOID SetValue( const CHAR* strValue );
+        void SetValue( float fValue );
+        void SetValue( INT iValue );
+        void SetValue( const CHAR* strValue );
 
-        VOID AddChild( ExportSettingsEntry* pNewChild )
+        void AddChild( ExportSettingsEntry* pNewChild )
         {
             pNewChild->m_pSibling = m_pFirstChild;
             m_pFirstChild = pNewChild;
         }
-        VOID ReverseChildOrder();
-        VOID CreateSettingName();
+        void ReverseChildOrder();
+        void CreateSettingName();
 
     protected:
-        VOID* GetCurrentValue()
+        void* GetCurrentValue()
         {
             return m_pLinkedCurrentValue ? m_pLinkedCurrentValue : &m_CurrentValue;
         }
-        const VOID* GetCurrentValue() const
+        const void* GetCurrentValue() const
         {
             return m_pLinkedCurrentValue ? m_pLinkedCurrentValue : &m_CurrentValue;
         }
@@ -122,27 +122,27 @@ namespace ATG
 
         ExportSettingsEntry* AddRootCategory( ExportString Caption );
         ExportSettingsEntry* AddCategory( ExportSettingsEntry* pParentCategory, ExportString Caption );
-        BOOL                 DeleteRootCategoryAndChildren( ExportSettingsEntry* pCategory );
+        bool                 DeleteRootCategoryAndChildren( ExportSettingsEntry* pCategory );
 
-        ExportSettingsEntry* AddBool( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, BOOL bDefaultValue, BOOL* pLinkedValue = NULL );
-        ExportSettingsEntry* AddFloatBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, FLOAT fDefaultValue, FLOAT fMin, FLOAT fMax, FLOAT* pLinkedValue = NULL );
-        ExportSettingsEntry* AddIntBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue = NULL );
-        ExportSettingsEntry* AddString( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue = NULL );
-        ExportSettingsEntry* AddEnum( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue = NULL );
+        ExportSettingsEntry* AddBool( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, bool bDefaultValue, bool* pLinkedValue = nullptr );
+        ExportSettingsEntry* AddFloatBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, float fDefaultValue, float fMin, float fMax, float* pLinkedValue = nullptr );
+        ExportSettingsEntry* AddIntBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue = nullptr );
+        ExportSettingsEntry* AddString( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue = nullptr );
+        ExportSettingsEntry* AddEnum( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue = nullptr );
 
-        VOID SetDefaultValues();
+        void SetDefaultValues();
 
-        DWORD GetRootCategoryCount() const { return (DWORD)m_RootCategories.size(); }
-        ExportSettingsEntry* GetRootCategory( DWORD dwIndex ) { return m_RootCategories[ dwIndex ]; }
+        size_t GetRootCategoryCount() const { return m_RootCategories.size(); }
+        ExportSettingsEntry* GetRootCategory( size_t dwIndex ) { return m_RootCategories[ dwIndex ]; }
 
-        BOOL LoadSettings( const CHAR* strFileName );
-        BOOL SaveSettings( const CHAR* strFileName );
+        bool LoadSettings( const CHAR* strFileName );
+        bool SaveSettings( const CHAR* strFileName );
 
-        BOOL MarshalAllSettings( CHAR* strDestBuffer, DWORD dwBufferSize, BOOL bNewLines, ExportSettingsEntry* pRoot = NULL );
-        BOOL UnMarshalAllSettings( const CHAR* strSrcBuffer );
+        bool MarshalAllSettings( CHAR* strDestBuffer, DWORD dwBufferSize, bool bNewLines, ExportSettingsEntry* pRoot = nullptr );
+        bool UnMarshalAllSettings( const CHAR* strSrcBuffer );
 
     protected:
-        ExportSettingsEntry* FindSettingsEntry( ExportString SettingName, BOOL bCommandLineName, ExportSettingsEntry* pRoot );
+        ExportSettingsEntry* FindSettingsEntry( ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot );
 
         typedef std::vector<ExportSettingsEntry*> SettingsEntryArray;
         SettingsEntryArray  m_RootCategories;
@@ -154,50 +154,50 @@ namespace ATG
     {
     public:
         ExportCoreSettings();
-        VOID SetDefaultSettings();
+        void SetDefaultSettings();
     public:
-        BOOL        bFlipTriangles;
-        BOOL        bInvertTexVCoord;
-        BOOL        bExportScene;
-        BOOL        bExportLights;
-        BOOL        bExportCameras;
-        BOOL        bExportMaterials;
-        BOOL        bExportMeshes;
-        BOOL        bExportHiddenObjects;
-        BOOL        bExportAnimations;
+        bool        bFlipTriangles;
+        bool        bInvertTexVCoord;
+        bool        bExportScene;
+        bool        bExportLights;
+        bool        bExportCameras;
+        bool        bExportMaterials;
+        bool        bExportMeshes;
+        bool        bExportHiddenObjects;
+        bool        bExportAnimations;
         BOOL        bLittleEndian;
-        BOOL        bExportNormals;
-        BOOL        bForceIndex32Format;
+        bool        bExportNormals;
+        bool        bForceIndex32Format;
         INT         iMaxUVSetCount;
-        BOOL        bExportSkinWeights;
-        BOOL        bForceExportSkinWeights;
-        BOOL        bComputeVertexTangentSpace;
-        BOOL        bExportBinormal;
-        BOOL        bSetBindPoseBeforeSceneParse;
+        bool        bExportSkinWeights;
+        bool        bForceExportSkinWeights;
+        bool        bComputeVertexTangentSpace;
+        bool        bExportBinormal;
+        bool        bSetBindPoseBeforeSceneParse;
         INT         iAnimSampleCountPerFrame;
         INT         iAnimPositionExportQuality;
         INT         iAnimOrientationExportQuality;
-        BOOL        bRenameAnimationsToFileName;
+        bool        bRenameAnimationsToFileName;
         CHAR        strDefaultMaterialName[SETTINGS_STRING_LENGTH];
         CHAR        strDefaultDiffuseMapTextureName[SETTINGS_STRING_LENGTH];
         CHAR        strDefaultNormalMapTextureName[SETTINGS_STRING_LENGTH];
-        BOOL        bCompressVertexData;
+        bool        bCompressVertexData;
         DWORD       dwNormalCompressedType;
         DWORD       dwTexCoordCompressedType;
         DWORD       dwPositionCompressedType;
-        BOOL        bTextureCompression;
-        BOOL        bGenerateTextureMipMaps;
-        BOOL        bForceTextureOverwrite;
-        BOOL        bConvertMeshesToSubD;
+        bool        bTextureCompression;
+        bool        bGenerateTextureMipMaps;
+        bool        bForceTextureOverwrite;
+        bool        bConvertMeshesToSubD;
         INT         iGenerateUVAtlasOnTexCoordIndex;
-        FLOAT       fUVAtlasMaxStretch;
-        FLOAT       fUVAtlasGutter;
+        float       fUVAtlasMaxStretch;
+        float       fUVAtlasGutter;
         INT         iUVAtlasTextureSize;
-        FLOAT       fLightRangeScale;
+        float       fLightRangeScale;
         CHAR        strMeshNameDecoration[SETTINGS_STRING_LENGTH];
         CHAR        strAnimationRootNodeName[SETTINGS_STRING_LENGTH];
-        BOOL        bOptimizeAnimations;
-        FLOAT       fExportScale;
+        bool        bOptimizeAnimations;
+        float       fExportScale;
     };
 
     extern ExportCoreSettings       g_ExportCoreSettings;

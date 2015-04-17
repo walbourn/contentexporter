@@ -25,7 +25,7 @@ namespace ATG
 // The algorithm is based on  Jack Ritter, "An Efficient Bounding Sphere", 
 // Graphics Gems.
 //-----------------------------------------------------------------------------
-VOID ComputeBoundingSphereFromPoints( Sphere* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride )
+void ComputeBoundingSphereFromPoints( Sphere* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride )
 {
     XMASSERT( pOut );
     XMASSERT( Count > 0 );
@@ -131,7 +131,7 @@ VOID ComputeBoundingSphereFromPoints( Sphere* pOut, UINT Count, const XMFLOAT3* 
 //-----------------------------------------------------------------------------
 // Find the minimum axis aligned bounding box containing a set of points.
 //-----------------------------------------------------------------------------
-VOID ComputeBoundingAxisAlignedBoxFromPoints( AxisAlignedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride )
+void ComputeBoundingAxisAlignedBoxFromPoints( AxisAlignedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride )
 {
     XMASSERT( pOut );
     XMASSERT( Count > 0 );
@@ -160,9 +160,9 @@ VOID ComputeBoundingAxisAlignedBoxFromPoints( AxisAlignedBox* pOut, UINT Count, 
 
 
 //-----------------------------------------------------------------------------
-static inline BOOL SolveCubic( FLOAT e, FLOAT f, FLOAT g, FLOAT *t, FLOAT *u, FLOAT *v )
+static inline bool SolveCubic( float e, float f, float g, float *t, float *u, float *v )
 {
-    FLOAT p, q, h, rc, d, theta, costh3, sinth3;
+    float p, q, h, rc, d, theta, costh3, sinth3;
 
     p = f - e * e / 3.0f;
     q = g - e * f / 3.0f + e * e * e * 2.0f / 27.0f;
@@ -170,7 +170,7 @@ static inline BOOL SolveCubic( FLOAT e, FLOAT f, FLOAT g, FLOAT *t, FLOAT *u, FL
     
     if (h > 0.0) 
     {
-        return FALSE; // only one real root
+        return false; // only one real root
     }
 
     if ((h == 0.0) && (q == 0.0)) // all the same root
@@ -179,7 +179,7 @@ static inline BOOL SolveCubic( FLOAT e, FLOAT f, FLOAT g, FLOAT *t, FLOAT *u, FL
         *u = - e / 3;
         *v = - e / 3;
         
-        return TRUE;
+        return true;
     }
 
     d = sqrtf(q * q / 4.0f - h);
@@ -195,21 +195,21 @@ static inline BOOL SolveCubic( FLOAT e, FLOAT f, FLOAT g, FLOAT *t, FLOAT *u, FL
     *u = -rc * (costh3 + sinth3) - e / 3.0f;
     *v = -rc * (costh3 - sinth3) - e / 3.0f;
     
-    return TRUE;
+    return true;
 }
 
 
 
 //-----------------------------------------------------------------------------
-static inline XMVECTOR CalculateEigenVector( FLOAT m11, FLOAT m12, FLOAT m13, 
-                                             FLOAT m22, FLOAT m23, FLOAT m33, FLOAT e )
+static inline XMVECTOR CalculateEigenVector( float m11, float m12, float m13, 
+                                             float m22, float m23, float m33, float e )
 {
     XMVECTOR vTmp = XMVectorZero();
-    FLOAT f1, f2, f3;
+    float f1, f2, f3;
 
-    vTmp = XMVectorSetX( vTmp, (FLOAT)(m12 * m23 - m13 * (m22 - e)) );
-    vTmp = XMVectorSetY( vTmp, (FLOAT)(m13 * m12 - m23 * (m11 - e)) );
-    vTmp = XMVectorSetZ( vTmp, (FLOAT)((m11 - e) * (m22 - e) - m12 * m12) );
+    vTmp = XMVectorSetX( vTmp, (float)(m12 * m23 - m13 * (m22 - e)) );
+    vTmp = XMVectorSetY( vTmp, (float)(m13 * m12 - m23 * (m11 - e)) );
+    vTmp = XMVectorSetZ( vTmp, (float)((m11 - e) * (m22 - e) - m12 * m12) );
 
     if ((XMVectorGetX(vTmp) == 0.0) && (XMVectorGetY(vTmp) == 0.0) && (XMVectorGetZ(vTmp) == 0.0)) // planar or linear
     {
@@ -247,11 +247,11 @@ static inline XMVECTOR CalculateEigenVector( FLOAT m11, FLOAT m12, FLOAT m13,
             vTmp = XMVectorSetZ( vTmp, 0.0f );
             // recalculate y to make equation work
             if (m12 != 0.0)
-                vTmp = XMVectorSetY( vTmp, (FLOAT)(-f1 / f2) );
+                vTmp = XMVectorSetY( vTmp, (float)(-f1 / f2) );
         }
         else
         {
-            vTmp = XMVectorSetZ( vTmp, (FLOAT)((f2 - f1) / f3) );
+            vTmp = XMVectorSetZ( vTmp, (float)((f2 - f1) / f3) );
         }
     }
     
@@ -270,14 +270,14 @@ static inline XMVECTOR CalculateEigenVector( FLOAT m11, FLOAT m12, FLOAT m13,
 
 
 //-----------------------------------------------------------------------------
-static inline BOOL CalculateEigenVectors( FLOAT m11, FLOAT m12, FLOAT m13, 
-                                          FLOAT m22, FLOAT m23, FLOAT m33, 
-                                          FLOAT e1, FLOAT e2, FLOAT e3, 
+static inline bool CalculateEigenVectors( float m11, float m12, float m13, 
+                                          float m22, float m23, float m33, 
+                                          float e1, float e2, float e3, 
                                           XMVECTOR *pV1, XMVECTOR *pV2, XMVECTOR *pV3 )
 {
     XMVECTOR vTmp, vUp, vRight;
 
-    BOOL v1z, v2z, v3z, e12, e13, e23;
+    bool v1z, v2z, v3z, e12, e13, e23;
 
     vUp = XMVectorSet( 0, 1, 0, 0 );
     vRight = XMVectorSet( 1, 0, 0, 0 );
@@ -286,11 +286,11 @@ static inline BOOL CalculateEigenVectors( FLOAT m11, FLOAT m12, FLOAT m13,
     *pV2 = CalculateEigenVector( m11, m12, m13, m22, m23, m33, e2 );
     *pV3 = CalculateEigenVector( m11, m12, m13, m22, m23, m33, e3 );
 
-    v1z = v2z = v3z = FALSE;
+    v1z = v2z = v3z = false;
 
-    if ((XMVectorGetX(*pV1) == 0.0) && (XMVectorGetY(*pV1) == 0.0) && (XMVectorGetZ(*pV1) == 0.0)) v1z = TRUE;
-    if ((XMVectorGetX(*pV2) == 0.0) && (XMVectorGetY(*pV2) == 0.0) && (XMVectorGetZ(*pV2) == 0.0)) v2z = TRUE;
-    if ((XMVectorGetX(*pV3) == 0.0) && (XMVectorGetY(*pV3) == 0.0) && (XMVectorGetZ(*pV3) == 0.0)) v3z = TRUE;
+    if ((XMVectorGetX(*pV1) == 0.0) && (XMVectorGetY(*pV1) == 0.0) && (XMVectorGetZ(*pV1) == 0.0)) v1z = true;
+    if ((XMVectorGetX(*pV2) == 0.0) && (XMVectorGetY(*pV2) == 0.0) && (XMVectorGetZ(*pV2) == 0.0)) v2z = true;
+    if ((XMVectorGetX(*pV3) == 0.0) && (XMVectorGetY(*pV3) == 0.0) && (XMVectorGetZ(*pV3) == 0.0)) v3z = true;
 
     e12 = (fabsf(XMVectorGetX(XMVector3Dot( *pV1, *pV2 ))) >  0.1f); // check for non-orthogonal vectors
     e13 = (fabsf(XMVectorGetX(XMVector3Dot( *pV1, *pV3 ))) >  0.1f);
@@ -302,7 +302,7 @@ static inline BOOL CalculateEigenVectors( FLOAT m11, FLOAT m12, FLOAT m13,
         *pV1 = XMVectorSet( 1, 0, 0, 0 );
         *pV2 = XMVectorSet( 0, 1, 0, 0 );
         *pV3 = XMVectorSet( 0, 0, 1, 0 );
-        return TRUE;
+        return true;
     }
 
     if (v1z && v2z)
@@ -314,7 +314,7 @@ static inline BOOL CalculateEigenVectors( FLOAT m11, FLOAT m12, FLOAT m13,
         }
         *pV1 = XMVector3Normalize( vTmp );
         *pV2 = XMVector3Cross( *pV3, *pV1 );
-        return TRUE;
+        return true;
     }
 
     if (v3z && v1z)
@@ -326,7 +326,7 @@ static inline BOOL CalculateEigenVectors( FLOAT m11, FLOAT m12, FLOAT m13,
         }
         *pV3 = XMVector3Normalize( vTmp );
         *pV1 = XMVector3Cross( *pV2, *pV3 );
-        return TRUE;
+        return true;
     }
 
     if (v2z && v3z)
@@ -338,38 +338,38 @@ static inline BOOL CalculateEigenVectors( FLOAT m11, FLOAT m12, FLOAT m13,
         }
         *pV2 = XMVector3Normalize( vTmp );
         *pV3 = XMVector3Cross( *pV1, *pV2 );
-        return TRUE;
+        return true;
     }
 
     if ((v1z) || e12)
     {   
         *pV1 = XMVector3Cross( *pV2, *pV3 );
-        return TRUE;
+        return true;
     }
 
     if ((v2z) || e23)
     {   
         *pV2 = XMVector3Cross( *pV3, *pV1 );
-        return TRUE;
+        return true;
     }
 
     if ((v3z) || e13)
     {   
         *pV3 = XMVector3Cross( *pV1, *pV2 );
-        return TRUE;
+        return true;
     }
     
-    return TRUE;
+    return true;
 }
 
 
 
 //-----------------------------------------------------------------------------
-static inline BOOL CalculateEigenVectorsFromCovarianceMatrix( FLOAT Cxx, FLOAT Cyy, FLOAT Czz, 
-                                                              FLOAT Cxy, FLOAT Cxz, FLOAT Cyz, 
+static inline bool CalculateEigenVectorsFromCovarianceMatrix( float Cxx, float Cyy, float Czz, 
+                                                              float Cxy, float Cxz, float Cyz, 
                                                               XMVECTOR *pV1, XMVECTOR *pV2, XMVECTOR *pV3 )
 {
-    FLOAT e, f, g, ev1, ev2, ev3;
+    float e, f, g, ev1, ev2, ev3;
 
     // Calculate the eigenvalues by solving a cubic equation.
     e = -(Cxx + Cyy + Czz);
@@ -382,7 +382,7 @@ static inline BOOL CalculateEigenVectorsFromCovarianceMatrix( FLOAT Cxx, FLOAT C
         *pV1 = XMVectorSet( 1, 0, 0, 0 );
         *pV2 = XMVectorSet( 0, 1, 0, 0 );
         *pV3 = XMVectorSet( 0, 0, 1, 0 );
-        return FALSE;
+        return false;
     }
     
     return CalculateEigenVectors( Cxx, Cxy, Cxz, Cyy, Cyz, Czz, ev1, ev2, ev3, pV1, pV2, pV3 );
@@ -401,10 +401,10 @@ static inline BOOL CalculateEigenVectorsFromCovarianceMatrix( FLOAT Cxx, FLOAT C
 // Exact computation of the minimum oriented bounding box is possible but the
 // best know algorithm is O(N^3) and is significanly more complex to implement.
 //-----------------------------------------------------------------------------
-VOID ComputeBoundingOrientedBoxFromPoints( OrientedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride )
+void ComputeBoundingOrientedBoxFromPoints( OrientedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride )
 {
-    static CONST XMVECTORI32 PermuteXXY = { XM_PERMUTE_0X, XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_0W };
-    static CONST XMVECTORI32 PermuteYZZ = { XM_PERMUTE_0Y, XM_PERMUTE_0Z, XM_PERMUTE_0Z, XM_PERMUTE_0W };
+    static const XMVECTORI32 PermuteXXY = { XM_PERMUTE_0X, XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_0W };
+    static const XMVECTORI32 PermuteYZZ = { XM_PERMUTE_0Y, XM_PERMUTE_0Z, XM_PERMUTE_0Z, XM_PERMUTE_0W };
 
     XMASSERT( pOut );
     XMASSERT( Count > 0 );
@@ -420,7 +420,7 @@ VOID ComputeBoundingOrientedBoxFromPoints( OrientedBox* pOut, UINT Count, const 
         CenterOfMass += Point;
     }
     
-    CenterOfMass *= XMVectorReciprocal( XMVectorReplicate( FLOAT(Count) ) );
+    CenterOfMass *= XMVectorReciprocal( XMVectorReplicate( float(Count) ) );
 
     // Compute the inertia tensor of the points around the center of mass.
     // Using the center of mass is not strictly necessary, but will hopefully

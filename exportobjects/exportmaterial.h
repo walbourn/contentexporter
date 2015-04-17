@@ -40,9 +40,9 @@ public:
     ExportString                    Name;
     ExportMaterialParameterType     ParamType;
     ExportString                    Hint;
-    BOOL                            bInstanceParam;
+    bool                            bInstanceParam;
     ExportString                    ValueString;
-    FLOAT                           ValueFloat[16];
+    float                           ValueFloat[16];
     INT                             ValueInt;
     DWORD                           Flags;
 };
@@ -56,22 +56,22 @@ public:
     ExportMaterial( ExportString name );
     ~ExportMaterial();
 
-    VOID SetMaterialDefinition( const ExportMaterialDefinition* pDef ) { m_pMaterialDefinition = pDef; }
+    void SetMaterialDefinition( const ExportMaterialDefinition* pDef ) { m_pMaterialDefinition = pDef; }
     const ExportMaterialDefinition* GetMaterialDefinition() const { return m_pMaterialDefinition; }
 
-    VOID SetDefaultMaterialName( const ExportString strDefaultName ) { m_DefaultMaterialName = strDefaultName; }
+    void SetDefaultMaterialName( const ExportString strDefaultName ) { m_DefaultMaterialName = strDefaultName; }
     ExportString GetDefaultMaterialName() const { return m_DefaultMaterialName; }
 
-    VOID AddParameter( CONST ExportMaterialParameter& Param ) { m_Parameters.push_back( Param ); }
+    void AddParameter( const ExportMaterialParameter& Param ) { m_Parameters.push_back( Param ); }
     MaterialParameterList* GetParameterList() { return &m_Parameters; }
-    DWORD GetParameterCount() const { return (DWORD)m_Parameters.size(); }
+    size_t GetParameterCount() const { return m_Parameters.size(); }
     ExportMaterialParameter* FindParameter( const ExportString strName );
 
-    VOID SetTransparent( BOOL bTransparent ) { m_bTransparent = bTransparent; }
-    BOOL IsTransparent() const { return m_bTransparent; }
+    void SetTransparent( bool bTransparent ) { m_bTransparent = bTransparent; }
+    bool IsTransparent() const { return m_bTransparent; }
 
     static LPDIRECT3DDEVICE9 GetDirect3DDevice();
-    static VOID ReleaseDirect3DDevice();
+    static void ReleaseDirect3DDevice();
 
     static ExportString GetDefaultDiffuseMapTextureName();
     static ExportString GetDefaultNormalMapTextureName();
@@ -80,7 +80,7 @@ protected:
     const ExportMaterialDefinition*     m_pMaterialDefinition;
     ExportString                        m_DefaultMaterialName;
     MaterialParameterList               m_Parameters;
-    BOOL                                m_bTransparent;
+    bool                                m_bTransparent;
 };
 
 };

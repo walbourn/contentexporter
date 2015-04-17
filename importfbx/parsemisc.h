@@ -16,16 +16,14 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-using namespace ATG;
+void ParseNode( FbxNode* pNode, ATG::ExportFrame* pParentFrame, const D3DXMATRIX& matParentWorld );
 
-VOID ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& matParentWorld );
+void ParseCamera( FbxCamera* pFbxCamera, ATG::ExportFrame* pParentFrame );
+void ParseLight( FbxLight* pFbxLight, ATG::ExportFrame* pParentFrame );
 
-VOID ParseCamera( FbxCamera* pFbxCamera, ExportFrame* pParentFrame );
-VOID ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame );
+void FixupNode( ATG::ExportFrame* pFrame, const D3DXMATRIX& matParentWorld );
 
-VOID FixupNode( ExportFrame* pFrame, const D3DXMATRIX& matParentWorld );
-
-typedef stdext::hash_map<FbxNode*,FbxMatrix> PoseMap;
+typedef std::hash_map<FbxNode*,FbxMatrix> PoseMap;
 extern PoseMap g_BindPoseMap;
-extern BOOL g_bBindPoseFixupRequired;
+extern bool g_bBindPoseFixupRequired;
 

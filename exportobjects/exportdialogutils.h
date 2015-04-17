@@ -28,8 +28,8 @@ namespace ATG
         };
 
         ThinDialog() : 
-            m_hwnd( NULL ),
-            m_strTemplate( NULL )
+            m_hwnd( nullptr ),
+            m_strTemplate( nullptr )
         {
         };
 
@@ -40,26 +40,26 @@ namespace ATG
 
         INT DoModal( HINSTANCE hinst, HWND hwndParent )
         {
-            return (INT)::DialogBoxParam( hinst, 
+            return static_cast<INT>( ::DialogBoxParam( hinst, 
                 m_strTemplate, 
                 hwndParent, 
-                (DLGPROC)DlgProc,
-                (LPARAM)this );
+                reinterpret_cast<DLGPROC>( DlgProc ),
+                reinterpret_cast<LPARAM>( this ) ) );
         };
 
-        BOOL DoModeless( HINSTANCE hinst, HWND hwndParent )
+        bool DoModeless( HINSTANCE hinst, HWND hwndParent )
         {
             m_hwnd = ::CreateDialogParam( hinst,
                 m_strTemplate, 
                 hwndParent, 
-                (DLGPROC)DlgProc,
-                (LPARAM)this );
-            return (m_hwnd != NULL );
+                reinterpret_cast<DLGPROC>( DlgProc ),
+                reinterpret_cast<LPARAM>( this ) );
+            return (m_hwnd != 0);
         };
 
-        BOOL Destroy()
+        void Destroy()
         {
-            return ::DestroyWindow( m_hwnd );
+            ::DestroyWindow( m_hwnd );
         }
 
     protected:
@@ -81,14 +81,14 @@ namespace ATG
         {
             if (pDlg)   
             {
-                ::SetWindowLongPtr( hwndDlg, GWLP_USERDATA, (LONG_PTR)pDlg );
+                ::SetWindowLongPtr( hwndDlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pDlg ) );
                 pDlg->m_hwnd = hwndDlg;
             }
         };
 
         static  ThinDialog* GetInstance( HWND hwndDlg )
         {
-            return ( ThinDialog* )( ::GetWindowLongPtr( hwndDlg, GWLP_USERDATA ) );
+            return reinterpret_cast<ThinDialog*>( ::GetWindowLongPtr( hwndDlg, GWLP_USERDATA ) );
         }
     };
 
@@ -102,9 +102,9 @@ namespace ATG
     This class is really useful for laying out a window of UI elements that needs to be 
     arbitrarily resizable.
 
-    Specifications for rows and columns come in the form of FLOATs.  If the FLOAT is
+    Specifications for rows and columns come in the form of FLOATs.  If the float is
     less than or equal to 1, it is INTerpreted as a percentage of the adjusted size of
-    the grid.  If the FLOAT is greater than 1, it is INTerpreted as an exact pixel size
+    the grid.  If the float is greater than 1, it is INTerpreted as an exact pixel size
     that is expected in the final pixel allocation.
 
     After the specs have been set, an input rect is passed in.  A border amount (also a parameter)
@@ -170,15 +170,15 @@ namespace ATG
         {
             assert(rows > 0 && columns > 0);
             Reset();
-            FLOAT share = 1.0f / (FLOAT)rows;
+            float share = 1.0f / (float)rows;
             for (INT i = 0; i < rows; i++)
                 m_rowSpec[i] = share;
-            share = 1.0f / (FLOAT)columns;
+            share = 1.0f / (float)columns;
             for (INT i = 0; i < columns; i++)
                 m_columnSpec[i] = share;
         }
 
-        ~GridLayout(void)
+        ~GridLayout()
         {
         }
 
@@ -189,7 +189,7 @@ namespace ATG
         // if the value is less than 1, the allocation will be a percentage of the adjusted height.
         // if the value is 1, the allocation will be 100% of the adjusted height.
         // if the value is greater than 1, the allocation will be that amount in pixels.
-        void SetRowSpec(UINT index, FLOAT s = 1)
+        void SetRowSpec(UINT index, float s = 1)
         {
             assert(index < GRIDMAX);
             m_rowSpec[index] = s;
@@ -201,14 +201,14 @@ namespace ATG
             assert(index < GRIDMAX);
             RECT rect;
             GetWindowRect(window, &rect);
-            m_rowSpec[index] = (FLOAT)(rect.bottom - rect.top);
+            m_rowSpec[index] = (float)(rect.bottom - rect.top);
         }
 
         // SetColumnSpec sets the allocation spec for a column.
         // if the value is less than 1, the allocation will be a percentage of the adjusted width.
         // if the value is 1, the allocation will be 100% of the adjusted width.
         // if the value is greater than 1, the allocation will be that amount in pixels.
-        void SetColumnSpec(UINT index, FLOAT s = 1)
+        void SetColumnSpec(UINT index, float s = 1)
         {
             assert(index < GRIDMAX);
             m_columnSpec[index] = s;
@@ -220,7 +220,7 @@ namespace ATG
             assert(index < GRIDMAX);
             RECT rect;
             GetWindowRect(window, &rect);
-            m_columnSpec[index] = (FLOAT)(rect.right - rect.left);
+            m_columnSpec[index] = (float)(rect.right - rect.left);
         }
 
         // allocation methods
@@ -240,15 +240,15 @@ namespace ATG
     private:
         void Reset()
         {
-            ZeroMemory(m_columnSpec, GRIDMAX * sizeof(FLOAT));
-            ZeroMemory(m_rowSpec, GRIDMAX * sizeof(FLOAT));
+            ZeroMemory(m_columnSpec, GRIDMAX * sizeof(float));
+            ZeroMemory(m_rowSpec, GRIDMAX * sizeof(float));
             ZeroMemory(m_columnAlloc, GRIDMAX * sizeof(INT));
             ZeroMemory(m_rowAlloc, GRIDMAX * sizeof(INT));
         }
 
     private:
-        FLOAT m_columnSpec[GRIDMAX];
-        FLOAT m_rowSpec[GRIDMAX];
+        float m_columnSpec[GRIDMAX];
+        float m_rowSpec[GRIDMAX];
 
         INT m_columnAlloc[GRIDMAX];
         INT m_rowAlloc[GRIDMAX];

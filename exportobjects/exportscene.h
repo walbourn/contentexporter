@@ -20,8 +20,6 @@
 namespace ATG
 {
 
-using namespace std;
-
 class ExportMaterial;
 class ExportMeshBase;
 class ExportAnimation;
@@ -37,24 +35,24 @@ public:
     {
         ZeroMemory( this, sizeof( ExportStatistics ) );
     }
-    VOID StartExport() { StartExportTime = GetTickCount(); }
-    VOID StartSceneParse() { StartSceneParseTime = GetTickCount(); }
-    VOID StartSave() { StartSaveTime = GetTickCount(); }
-    VOID EndExport() { EndExportTime = GetTickCount(); }
-    DWORD       StartExportTime;
-    DWORD       StartSceneParseTime;
-    DWORD       StartSaveTime;
-    DWORD       EndExportTime;
-    UINT        TrisExported;
-    UINT        VertsExported;
-    UINT        MaterialsExported;
-    UINT        VertexBytesExported;
-    UINT        IndexBytesExported;
-    UINT        MeshesExported;
-    UINT        SubDMeshesProcessed;
-    UINT        SubDQuadsProcessed;
-    UINT        SubDTrisProcessed;
-    VOID FinalReport();
+    void StartExport() { StartExportTime = GetTickCount64(); }
+    void StartSceneParse() { StartSceneParseTime = GetTickCount64(); }
+    void StartSave() { StartSaveTime = GetTickCount64(); }
+    void EndExport() { EndExportTime = GetTickCount64(); }
+    ULONGLONG   StartExportTime;
+    ULONGLONG   StartSceneParseTime;
+    ULONGLONG   StartSaveTime;
+    ULONGLONG   EndExportTime;
+    size_t      TrisExported;
+    size_t      VertsExported;
+    size_t      MaterialsExported;
+    size_t      VertexBytesExported;
+    size_t      IndexBytesExported;
+    size_t      MeshesExported;
+    size_t      SubDMeshesProcessed;
+    size_t      SubDQuadsProcessed;
+    size_t      SubDTrisProcessed;
+    void FinalReport();
 };
 
 class ExportInformation
@@ -71,10 +69,10 @@ public:
 class IDCCTransformer
 {
 public:
-    virtual VOID TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST = NULL;
-    virtual VOID TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVECTOR3* pSrcPosition ) CONST = NULL;
-    virtual VOID TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST = NULL;
-    virtual FLOAT TransformLength( FLOAT fInputLength ) CONST = NULL;
+    virtual void TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX* pSrcMatrix ) const = 0;
+    virtual void TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVECTOR3* pSrcPosition ) const = 0;
+    virtual void TransformDirection( D3DXVECTOR3* pDestDirection, const D3DXVECTOR3* pSrcDirection ) const = 0;
+    virtual float TransformLength( float fInputLength ) const = 0;
 };
 
 class ExportScene :
@@ -88,27 +86,27 @@ public:
     ExportCoreSettings& Settings() { return g_ExportCoreSettings; }
     ExportInformation& Information() { return m_Information; }
 
-    BOOL AddMaterial( ExportMaterial* pMaterial );
-    BOOL AddMesh( ExportMeshBase* pMesh );
-    BOOL AddAnimation( ExportAnimation* pAnimation );
+    bool AddMaterial( ExportMaterial* pMaterial );
+    bool AddMesh( ExportMeshBase* pMesh );
+    bool AddAnimation( ExportAnimation* pAnimation );
 
     ExportMaterial* FindMaterial( ExportString name );
     ExportMeshBase* FindMesh( ExportString name );
     ExportAnimation* FindAnimation( ExportString name );
-    ExportMaterial* FindMaterial( VOID* pDCCObject );
-    ExportMeshBase* FindMesh( VOID* pDCCObject );
-    ExportAnimation* FindAnimation( VOID* pDCCObject );
+    ExportMaterial* FindMaterial( void* pDCCObject );
+    ExportMeshBase* FindMesh( void* pDCCObject );
+    ExportAnimation* FindAnimation( void* pDCCObject );
 
-    UINT GetMaterialCount() CONST { return (UINT)m_vMaterials.size(); }
-    UINT GetMeshCount() CONST { return (UINT)m_vMeshes.size(); }
-    UINT GetAnimationCount() CONST { return (UINT)m_vAnimations.size(); }
+    size_t GetMaterialCount() const { return m_vMaterials.size(); }
+    size_t GetMeshCount() const { return m_vMeshes.size(); }
+    size_t GetAnimationCount() const { return m_vAnimations.size(); }
 
-    ExportMaterial* GetMaterial( UINT uIndex ) { return m_vMaterials[ uIndex ]; }
-    ExportMeshBase* GetMesh( UINT uIndex ) { return m_vMeshes[ uIndex ]; }
-    ExportAnimation* GetAnimation( UINT uIndex ) { return m_vAnimations[ uIndex ]; }
+    ExportMaterial* GetMaterial( size_t uIndex ) { return m_vMaterials[ uIndex ]; }
+    ExportMeshBase* GetMesh( size_t uIndex ) { return m_vMeshes[ uIndex ]; }
+    ExportAnimation* GetAnimation( size_t uIndex ) { return m_vAnimations[ uIndex ]; }
 
     IDCCTransformer* GetDCCTransformer() { return m_pDCCTransformer; }
-    VOID SetDCCTransformer( IDCCTransformer* pDCCTransformer ) { m_pDCCTransformer = pDCCTransformer; }
+    void SetDCCTransformer( IDCCTransformer* pDCCTransformer ) { m_pDCCTransformer = pDCCTransformer; }
 
 protected:    
     ExportMaterialList          m_vMaterials;

@@ -26,12 +26,12 @@ namespace ATG
     // Desc: Constructor for the XML writer class.
     //----------------------------------------------------------------------------------
     XMLWriter::XMLWriter()
-        : m_strBuffer( NULL ),
+        : m_strBuffer( nullptr ),
           m_uBufferSizeRemaining( 0 ),
           m_hFile( INVALID_HANDLE_VALUE ),
           m_strNameStackTop( m_strNameStack ),
           m_uIndentCount( 0 ),
-          m_bValid( FALSE )
+          m_bValid( false )
     {
     }
 
@@ -40,7 +40,7 @@ namespace ATG
     // Name: XMLWriter
     // Desc: Constructor for the XML writer class.
     //----------------------------------------------------------------------------------
-    XMLWriter::XMLWriter( CONST CHAR* strFileName )
+    XMLWriter::XMLWriter( const CHAR* strFileName )
     {
         Initialize( strFileName );
     }
@@ -70,26 +70,26 @@ namespace ATG
     // Name: Initialize
     // Desc: Sets up the XML writer to write to a file.
     //----------------------------------------------------------------------------------
-    VOID XMLWriter::Initialize( CONST CHAR* strFileName )
+    void XMLWriter::Initialize( const CHAR* strFileName )
     {
         m_strBuffer = new CHAR[WRITE_BUFFER_SIZE];
         m_strBufferStart = m_strBuffer;
         m_uBufferSizeRemaining = WRITE_BUFFER_SIZE;
-        m_bOpenTagFinished = TRUE;
-        m_bWriteCloseTagIndent = FALSE;
-        m_hFile = CreateFile( strFileName, FILE_WRITE_DATA, 0, NULL, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL );
+        m_bOpenTagFinished = true;
+        m_bWriteCloseTagIndent = false;
+        m_hFile = CreateFile( strFileName, FILE_WRITE_DATA, 0, nullptr, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr );
         m_strNameStack[0] = '\0';
         m_strNameStackTop = m_strNameStack;
         m_NameStackPositions.clear();
         SetIndentCount( 4 );
-        m_bWriteNewlines = TRUE;
+        m_bWriteNewlines = true;
         if( m_hFile == INVALID_HANDLE_VALUE )
         {
-            m_bValid = FALSE;
+            m_bValid = false;
         }
         else
         {
-            m_bValid = TRUE;
+            m_bValid = true;
         }
     }
 
@@ -98,20 +98,20 @@ namespace ATG
     // Name: Initialize
     // Desc: Sets up the XML writer to write to a string buffer.
     //----------------------------------------------------------------------------------
-    VOID XMLWriter::Initialize( CHAR* strBuffer, UINT uBufferSize )
+    void XMLWriter::Initialize( CHAR* strBuffer, UINT uBufferSize )
     {
         m_strBuffer = strBuffer;
         m_strBufferStart = m_strBuffer;
         m_uBufferSizeRemaining = uBufferSize;
         m_hFile = INVALID_HANDLE_VALUE;
-        m_bOpenTagFinished = TRUE;
-        m_bWriteCloseTagIndent = FALSE;
+        m_bOpenTagFinished = true;
+        m_bWriteCloseTagIndent = false;
         m_strNameStack[0] = '\0';
         m_strNameStackTop = m_strNameStack;
         m_NameStackPositions.clear();
         SetIndentCount( 0 );
-        m_bWriteNewlines = FALSE;
-        m_bValid = TRUE;
+        m_bWriteNewlines = false;
+        m_bValid = true;
     }
 
 
@@ -119,32 +119,32 @@ namespace ATG
     // Name: Close
     // Desc: Cleans up the output of the XML writing operation.
     //----------------------------------------------------------------------------------
-    VOID XMLWriter::Close()
+    void XMLWriter::Close()
     {
         if( m_hFile != INVALID_HANDLE_VALUE )
         {
             FlushBufferToFile();
             CloseHandle( m_hFile );
             delete[] m_strBufferStart;
-            m_strBufferStart = NULL;
-            m_strBuffer = NULL;
+            m_strBufferStart = nullptr;
+            m_strBuffer = nullptr;
             m_hFile = INVALID_HANDLE_VALUE;
         }
-        if( m_strBuffer != NULL )
+        if( m_strBuffer )
         {
-            m_strBuffer = NULL;
-            m_strBufferStart = NULL;
+            m_strBuffer = nullptr;
+            m_strBufferStart = nullptr;
             m_uBufferSizeRemaining = 0;
         }
     }
 
 
-    VOID XMLWriter::FlushBufferToFile()
+    void XMLWriter::FlushBufferToFile()
     {
         if( m_uBufferSizeRemaining >= WRITE_BUFFER_SIZE || m_hFile == INVALID_HANDLE_VALUE )
             return;
         DWORD dwBytesWritten = 0;
-        WriteFile( m_hFile, m_strBufferStart, WRITE_BUFFER_SIZE - m_uBufferSizeRemaining, &dwBytesWritten, NULL );
+        WriteFile( m_hFile, m_strBufferStart, WRITE_BUFFER_SIZE - m_uBufferSizeRemaining, &dwBytesWritten, nullptr );
         m_uBufferSizeRemaining = WRITE_BUFFER_SIZE;
         m_strBuffer = m_strBufferStart;
     }
@@ -154,7 +154,7 @@ namespace ATG
     // Name: SetIndentCount
     // Desc: Builds a string with the correct amount of indentation spaces.
     //----------------------------------------------------------------------------------
-    VOID XMLWriter::SetIndentCount( UINT uSpaces )
+    void XMLWriter::SetIndentCount( UINT uSpaces )
     {
         m_uIndentCount = ( uSpaces > 8 ) ? 8 : uSpaces;
         if( m_uIndentCount > 0 )
@@ -167,22 +167,22 @@ namespace ATG
     // Name: StartElement
     // Desc: Writes the beginning of an XML open tag.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::StartElement( CONST CHAR* strName )
+    bool XMLWriter::StartElement( const CHAR* strName )
     {
         if( !m_bOpenTagFinished )
         {
             if( !EndOpenTag() ) 
-                return FALSE;
+                return false;
             if( !WriteNewline() )
-                return FALSE;
+                return false;
         }
-        BOOL result = TRUE;
+        bool result = true;
         result &= WriteIndent();
         PushName( strName );
         result &= OutputStringFast( "<", 1 );
         result &= OutputString( strName );
-        m_bOpenTagFinished = FALSE;
-        m_bWriteCloseTagIndent = FALSE;
+        m_bOpenTagFinished = false;
+        m_bWriteCloseTagIndent = false;
         return result;
     }
 
@@ -191,18 +191,18 @@ namespace ATG
     // Name: EndElement
     // Desc: Writes an element close tag corresponding with the most recent open tag.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::EndElement()
+    bool XMLWriter::EndElement()
     {
-        CONST CHAR* strName = PopName();
-        if( strName == NULL )
-            return FALSE;
-        BOOL result = TRUE;
+        const CHAR* strName = PopName();
+        if( !strName )
+            return false;
+        bool result = true;
         if( !m_bOpenTagFinished )
         {
-            m_bOpenTagFinished = TRUE;
+            m_bOpenTagFinished = true;
             result &= OutputStringFast( " />", 3 );
             result &= WriteNewline();
-            m_bWriteCloseTagIndent = TRUE;
+            m_bWriteCloseTagIndent = true;
             return result;
         }
         if( m_bWriteCloseTagIndent )
@@ -211,7 +211,7 @@ namespace ATG
         result &= OutputString( strName );
         result &= OutputStringFast( ">", 1 );
         result &= WriteNewline();
-        m_bWriteCloseTagIndent = TRUE;
+        m_bWriteCloseTagIndent = true;
         return result;
     }
 
@@ -220,9 +220,9 @@ namespace ATG
     // Name: WriteElement
     // Desc: Convenience function to write an XML element with a body and no attributes.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteElement( CONST CHAR* strName, CONST CHAR* strBody )
+    bool XMLWriter::WriteElement( const CHAR* strName, const CHAR* strBody )
     {
-        BOOL result = TRUE;
+        bool result = true;
         result &= StartElement( strName );
         result &= WriteString( strBody );
         result &= EndElement();
@@ -234,9 +234,9 @@ namespace ATG
     // Name: WriteElement
     // Desc: Convenience function to write an XML element with a body and no attributes.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteElement( CONST CHAR* strName, INT iBody )
+    bool XMLWriter::WriteElement( const CHAR* strName, INT iBody )
     {
-        BOOL result = TRUE;
+        bool result = true;
         result &= StartElement( strName );
         CHAR strTemp[32];
         _itoa_s( iBody, strTemp, 10 );
@@ -250,9 +250,9 @@ namespace ATG
     // Name: WriteElement
     // Desc: Convenience function to write an XML element with a body and no attributes.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteElement( CONST CHAR* strName, FLOAT fBody )
+    bool XMLWriter::WriteElement( const CHAR* strName, float fBody )
     {
-        BOOL result = TRUE;
+        bool result = true;
         result &= StartElement( strName );
         CHAR strTemp[32];
         sprintf_s( strTemp, "%f", fBody );
@@ -266,9 +266,9 @@ namespace ATG
     // Name: WriteElementFormat
     // Desc: Convenience function to write an XML element with a body and no attributes.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteElementFormat( CONST CHAR* strName, CONST CHAR* strFormat, ... )
+    bool XMLWriter::WriteElementFormat( const CHAR* strName, const CHAR* strFormat, ... )
     {
-        BOOL result = TRUE;
+        bool result = true;
         result &= StartElement( strName );
         CHAR strTemp[512];
         va_list args;
@@ -284,15 +284,15 @@ namespace ATG
     // Name: StartCDATA
     // Desc: Starts a CDATA block.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::StartCDATA()
+    bool XMLWriter::StartCDATA()
     {
-        BOOL bResult = TRUE;
+        bool bResult = true;
         if( !m_bOpenTagFinished )
         {
             if( !EndOpenTag() ) 
-                return FALSE;
+                return false;
             if( !WriteNewline() )
-                return FALSE;
+                return false;
         }
         bResult &= WriteIndent();
         bResult &= OutputStringFast( "<![CDATA[", 9 );
@@ -304,12 +304,12 @@ namespace ATG
     // Name: EndCDATA
     // Desc: Ends a CDATA block.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::EndCDATA()
+    bool XMLWriter::EndCDATA()
     {
-        BOOL bResult = TRUE;
+        bool bResult = true;
         bResult &= OutputStringFast( "]]>", 3 );
         bResult &= WriteNewline();
-        m_bWriteCloseTagIndent = TRUE;
+        m_bWriteCloseTagIndent = true;
         return bResult;
     }
 
@@ -318,9 +318,9 @@ namespace ATG
     // Name: WriteCDATA
     // Desc: Writes a CDATA block.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteCDATA( CONST CHAR* strData, DWORD dwDataLength )
+    bool XMLWriter::WriteCDATA( const CHAR* strData, DWORD dwDataLength )
     {
-        BOOL bResult = StartCDATA();
+        bool bResult = StartCDATA();
         bResult &= OutputStringFast( strData, dwDataLength );
         bResult &= EndCDATA();
         return bResult;
@@ -331,21 +331,21 @@ namespace ATG
     // Name: StartComment
     // Desc: Writes the beginning of an XML comment tag.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::StartComment( BOOL bInline )
+    bool XMLWriter::StartComment( bool bInline )
     {
         if( !m_bOpenTagFinished )
         {
             if( !EndOpenTag() ) 
-                return FALSE;
+                return false;
             if( !bInline && !WriteNewline() )
-                return FALSE;
+                return false;
         }
-        BOOL result = TRUE;
+        bool result = true;
         if( !bInline )
             result &= WriteIndent();
         result &= OutputStringFast( "<!-- ", 5 );
-        m_bOpenTagFinished = TRUE;
-        m_bWriteCloseTagIndent = FALSE;
+        m_bOpenTagFinished = true;
+        m_bWriteCloseTagIndent = false;
         m_bInlineComment = bInline;
         return result;
     }
@@ -355,9 +355,9 @@ namespace ATG
     // Name: EndComment
     // Desc: Writes a comment close tag.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::EndComment()
+    bool XMLWriter::EndComment()
     {
-        BOOL result = TRUE;
+        bool result = true;
         result &= OutputStringFast( " -->", 4 );
         if( !m_bInlineComment )
             result &= WriteNewline();
@@ -370,9 +370,9 @@ namespace ATG
     // Name: WriteComment
     // Desc: Convenience function to write an entire comment.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteComment( CONST CHAR* strComment, BOOL bInline )
+    bool XMLWriter::WriteComment( const CHAR* strComment, bool bInline )
     {
-        BOOL result = TRUE;
+        bool result = true;
         result &= StartComment( bInline );
         result &= WriteString( strComment );
         result &= EndComment();
@@ -386,11 +386,11 @@ namespace ATG
     //       after calling StartElement(), but before calling WriteString() or
     //       EndElement().
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::AddAttributeFormat( CONST CHAR* strName, CONST CHAR* strFormat, ... )
+    bool XMLWriter::AddAttributeFormat( const CHAR* strName, const CHAR* strFormat, ... )
     {
         if( m_bOpenTagFinished )
-            return FALSE;
-        BOOL result = TRUE;
+            return false;
+        bool result = true;
         result &= OutputStringFast( " ", 1 );
         result &= OutputString( strName );
         result &= OutputStringFast( "=\"", 2 );
@@ -410,11 +410,11 @@ namespace ATG
     //       after calling StartElement(), but before calling WriteString() or
     //       EndElement().
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::AddAttribute( CONST CHAR* strName, CONST CHAR* strValue )
+    bool XMLWriter::AddAttribute( const CHAR* strName, const CHAR* strValue )
     {
         if( m_bOpenTagFinished )
-            return FALSE;
-        BOOL result = TRUE;
+            return false;
+        bool result = true;
         result &= OutputStringFast( " ", 1 );
         result &= OutputString( strName );
         result &= OutputStringFast( "=\"", 2 );
@@ -430,10 +430,10 @@ namespace ATG
     //       after calling StartElement(), but before calling WriteString() or
     //       EndElement().
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::AddAttribute( CONST CHAR* strName, CONST WCHAR* wstrValue )
+    bool XMLWriter::AddAttribute( const CHAR* strName, const WCHAR* wstrValue )
     {
         CHAR strTemp[256];
-        WideCharToMultiByte( CP_ACP, 0, wstrValue, (INT)wcslen( wstrValue ) + 1, strTemp, 256, NULL, NULL );
+        WideCharToMultiByte( CP_ACP, 0, wstrValue, static_cast<INT>( wcslen( wstrValue ) + 1 ), strTemp, 256, nullptr, nullptr );
         return AddAttribute( strName, strTemp );
     }
 
@@ -444,7 +444,7 @@ namespace ATG
     //       after calling StartElement(), but before calling WriteString() or
     //       EndElement().
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::AddAttribute( CONST CHAR* strName, INT iValue )
+    bool XMLWriter::AddAttribute( const CHAR* strName, INT iValue )
     {
         CHAR strTemp[20];
         _itoa_s( iValue, strTemp, 10 );
@@ -458,7 +458,7 @@ namespace ATG
     //       after calling StartElement(), but before calling WriteString() or
     //       EndElement().
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::AddAttribute( CONST CHAR* strName, FLOAT fValue )
+    bool XMLWriter::AddAttribute( const CHAR* strName, float fValue )
     {
         CHAR strTemp[20];
         sprintf_s( strTemp, "%f", fValue );
@@ -470,14 +470,14 @@ namespace ATG
     // Name: WriteString
     // Desc: Writes a string after an XML open tag.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteString( CONST CHAR* strText )
+    bool XMLWriter::WriteString( const CHAR* strText )
     {
-        if( strText == NULL )
+        if( !strText )
             strText = "";
         if( !m_bOpenTagFinished )
         {
             if( !EndOpenTag() )
-                return FALSE;
+                return false;
         }
         return OutputString( strText );
     }
@@ -487,12 +487,12 @@ namespace ATG
     // Name: WriteStringFormat
     // Desc: Writes a formatted string after an XML open tag.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteStringFormat( CONST CHAR* strFormat, ... )
+    bool XMLWriter::WriteStringFormat( const CHAR* strFormat, ... )
     {
         if( !m_bOpenTagFinished )
         {
             if( !EndOpenTag() )
-                return FALSE;
+                return false;
         }
         CHAR strTemp[1024];
         va_list args;
@@ -507,12 +507,12 @@ namespace ATG
     // Desc: Writes the closing angle bracket of an XML open tag, and sets the proper
     //       state.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::EndOpenTag()
+    bool XMLWriter::EndOpenTag()
     {
         assert( !m_bOpenTagFinished );
         OutputStringFast( ">", 1 );
-        m_bOpenTagFinished = TRUE;
-        return TRUE;
+        m_bOpenTagFinished = true;
+        return true;
     }
 
 
@@ -521,10 +521,10 @@ namespace ATG
     // Desc: Writes a new line, if that option is enabled.  Writes a hard return to
     //       files, and a soft return to buffers.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteNewline()
+    bool XMLWriter::WriteNewline()
     {
         if( !m_bWriteNewlines )
-            return TRUE;
+            return true;
         if( m_hFile != INVALID_HANDLE_VALUE )
             return OutputStringFast( "\r\n", 2 );
         return OutputStringFast( "\n", 1 );
@@ -535,16 +535,16 @@ namespace ATG
     // Name: WriteIndent
     // Desc: Writes an indentation using spaces if indentation is enabled.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::WriteIndent()
+    bool XMLWriter::WriteIndent()
     {
         if( m_uIndentCount == 0 )
-            return TRUE;
-        for( UINT i = 0; i < m_NameStackPositions.size(); i++ )
+            return true;
+        for( size_t i = 0; i < m_NameStackPositions.size(); i++ )
         {
             if( !OutputStringFast( m_strIndent, m_uIndentCount ) )
-                return FALSE;
+                return false;
         }
-        return TRUE;
+        return true;
     }
 
 
@@ -552,15 +552,15 @@ namespace ATG
     // Name: PushName
     // Desc: Pushes an XML tag name onto the stack.  This is used to write an open tag.
     //----------------------------------------------------------------------------------
-    VOID XMLWriter::PushName( CONST CHAR* strName )
+    void XMLWriter::PushName( const CHAR* strName )
     {
-        UINT uLen = (UINT)strlen( strName );
+        size_t uLen = strlen( strName );
         if( ( m_strNameStackTop - m_strNameStack + uLen ) >= XMLWRITER_NAME_STACK_SIZE )
         {
             assert( false );
             return;
         }
-        m_NameStackPositions.push_back( (UINT)( m_strNameStackTop - m_strNameStack ) );
+        m_NameStackPositions.push_back( static_cast<UINT>( m_strNameStackTop - m_strNameStack ) );
         *m_strNameStackTop = '\0';
         strcat_s( m_strNameStack, strName );
         m_strNameStackTop += uLen;
@@ -571,10 +571,10 @@ namespace ATG
     // Name: PopName
     // Desc: Pops an XML tag name off the stack.  This is used to write a close tag.
     //----------------------------------------------------------------------------------
-    CONST CHAR* XMLWriter::PopName()
+    const CHAR* XMLWriter::PopName()
     {
-        if( m_NameStackPositions.size() == 0 )
-            return NULL;
+        if( m_NameStackPositions.empty() )
+            return nullptr;
         UINT uPos = m_NameStackPositions.back();
         m_NameStackPositions.pop_back();
         *m_strNameStackTop = '\0';
@@ -587,10 +587,10 @@ namespace ATG
     // Name: OutputString
     // Desc: Sends a null-terminated string to the output.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::OutputString( CONST CHAR* strText )
+    bool XMLWriter::OutputString( const CHAR* strText )
     {
-        assert( strText != NULL );
-        return OutputStringFast( strText, (UINT)strlen( strText ) );
+        assert( strText != nullptr );
+        return OutputStringFast( strText, static_cast<UINT>( strlen( strText ) ) );
     }
 
 
@@ -598,7 +598,7 @@ namespace ATG
     // Name: OutputStringFast
     // Desc: Sends a string with a supplied length to the output.
     //----------------------------------------------------------------------------------
-    BOOL XMLWriter::OutputStringFast( CONST CHAR* strText, UINT uLength )
+    bool XMLWriter::OutputStringFast( const CHAR* strText, UINT uLength )
     {
         if( m_hFile != INVALID_HANDLE_VALUE )
         {
@@ -614,17 +614,17 @@ namespace ATG
             memcpy( m_strBuffer, strText, uLength );
             m_uBufferSizeRemaining -= uLength;
             m_strBuffer += uLength;
-            return TRUE;
+            return true;
         }
-        else if( m_strBuffer != NULL )
+        else if( m_strBuffer )
         {
             if( ( uLength + 1 ) > m_uBufferSizeRemaining )
-                return FALSE;
+                return false;
             memcpy( m_strBuffer, strText, uLength + 1 );
             m_uBufferSizeRemaining -= uLength;
             m_strBuffer += uLength;
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 }

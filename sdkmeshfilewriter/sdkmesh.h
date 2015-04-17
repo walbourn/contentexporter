@@ -184,7 +184,7 @@ struct SDKMESH_MATERIAL
     D3DXVECTOR4 Ambient;
     D3DXVECTOR4 Specular;
     D3DXVECTOR4 Emissive;
-    FLOAT		Power;
+    float		Power;
 
     union
     {

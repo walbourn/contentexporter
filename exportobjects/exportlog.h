@@ -23,16 +23,16 @@ namespace ATG
 class ILogListener
 {
 public:
-    virtual VOID LogMessage( const CHAR* strMessage ) = 0;
-    virtual VOID LogWarning( const CHAR* strMessage ) { LogMessage( strMessage ); }
-    virtual VOID LogError( const CHAR* strMessage ) { LogMessage( strMessage ); }
-    virtual VOID LogCommand( DWORD dwCommand, VOID* pData ) { UNREFERENCED_PARAMETER( dwCommand ); UNREFERENCED_PARAMETER( pData ); }
+    virtual void LogMessage( const CHAR* strMessage ) = 0;
+    virtual void LogWarning( const CHAR* strMessage ) { LogMessage( strMessage ); }
+    virtual void LogError( const CHAR* strMessage ) { LogMessage( strMessage ); }
+    virtual void LogCommand( DWORD dwCommand, void* pData ) { UNREFERENCED_PARAMETER( dwCommand ); UNREFERENCED_PARAMETER( pData ); }
 };
 
 class DebugSpewListener : public ILogListener
 {
 public:
-    virtual VOID LogMessage( const CHAR* strMessage )
+    virtual void LogMessage( const CHAR* strMessage ) override
     {
         OutputDebugStringA( strMessage );
         OutputDebugStringA( "\n" );
@@ -44,9 +44,10 @@ class FileListener : public ILogListener
 public:
     FileListener();
     ~FileListener();
-    VOID StartLogging( const CHAR* strFileName );
-    VOID StopLogging();
-    virtual VOID LogMessage( const CHAR* strMessage );
+    void StartLogging( const CHAR* strFileName );
+    void StopLogging();
+
+    virtual void LogMessage( const CHAR* strMessage ) override;
 protected:
     HANDLE      m_hFileHandle;
 };
@@ -61,19 +62,19 @@ public:
         ELC_ENDEXPORT
     };
 
-    static VOID EnableLogging( BOOL bEnable );
-    static VOID SetLogLevel( UINT uLevel );
+    static void EnableLogging( bool bEnable );
+    static void SetLogLevel( UINT uLevel );
     static UINT GetLogLevel();
-    static VOID AddListener( ILogListener* pListener );
-    static VOID ClearListeners();
+    static void AddListener( ILogListener* pListener );
+    static void ClearListeners();
 
-    static VOID GenerateLogReport( BOOL bEchoWarningsAndErrors = TRUE );
-    static VOID ResetCounters();
+    static void GenerateLogReport( bool bEchoWarningsAndErrors = true );
+    static void ResetCounters();
 
-    static VOID LogCommand( DWORD dwCommand, VOID* pData = NULL );
-    static VOID LogError( const CHAR* strFormat, ... );
-    static VOID LogWarning( const CHAR* strFormat, ... );
-    static VOID LogMsg( UINT uImportance, const CHAR* strFormat, ... );
+    static void LogCommand( DWORD dwCommand, void* pData = nullptr );
+    static void LogError( _In_z_ _Printf_format_string_ const CHAR* strFormat, ... );
+    static void LogWarning( _In_z_ _Printf_format_string_ const CHAR* strFormat, ... );
+    static void LogMsg( UINT uImportance, _In_z_ _Printf_format_string_ const CHAR* strFormat, ... );
 };
 
 };

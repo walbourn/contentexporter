@@ -29,7 +29,7 @@ namespace ATG
 
 using namespace ATG;
 
-ExportScene* g_pScene = NULL;
+ExportScene* g_pScene = nullptr;
 FBXTransformer g_FBXTransformer;
 
 class ConsoleOutListener : public ILogListener
@@ -47,17 +47,17 @@ public:
         m_wDefaultConsoleTextAttributes = csbi.wAttributes;
         m_wBackgroundAttributes = m_wDefaultConsoleTextAttributes & 0x00F0;
     }
-    virtual VOID LogMessage( const CHAR* strMessage )
+    virtual void LogMessage( const CHAR* strMessage ) override
     {
         puts( strMessage );
     }
-    virtual VOID LogWarning( const CHAR* strMessage )
+    virtual void LogWarning( const CHAR* strMessage ) override
     {
         SetConsoleTextAttribute( m_hOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY | m_wBackgroundAttributes );
         LogMessage( strMessage );
         SetConsoleTextAttribute( m_hOut, m_wDefaultConsoleTextAttributes );
     }
-    virtual VOID LogError( const CHAR* strMessage )
+    virtual void LogError( const CHAR* strMessage ) override
     {
         SetConsoleTextAttribute( m_hOut, FOREGROUND_RED | FOREGROUND_INTENSITY | m_wBackgroundAttributes );
         LogMessage( strMessage );
@@ -65,8 +65,8 @@ public:
     }
 };
 
-BOOL g_bHelpPrinted = FALSE;
-VOID PrintHelp();
+bool g_bHelpPrinted = false;
+void PrintHelp();
 
 ConsoleOutListener g_ConsoleOutListener;
 DebugSpewListener g_DebugSpewListener;
@@ -89,7 +89,7 @@ enum ExportFileFormat
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
 
-typedef BOOL MacroCommandCallback( const CHAR* strArgument );
+typedef bool MacroCommandCallback( const CHAR* strArgument );
 
 struct MacroCommand
 {
@@ -99,177 +99,177 @@ struct MacroCommand
     MacroCommandCallback* pCallback;
 };
 
-BOOL MacroDisplayHelp( const CHAR* strArgument )
+bool MacroDisplayHelp( const CHAR* strArgument )
 {
     PrintHelp();
-    return FALSE;
+    return false;
 }
 
-BOOL MacroSetOutputPath( const CHAR* strArgument )
+bool MacroSetOutputPath( const CHAR* strArgument )
 {
     g_OutputFilePath.SetPathOnly( strArgument );
-    return TRUE;
+    return true;
 }
 
-BOOL MacroCollisionMesh( const CHAR* strArgument )
+bool MacroCollisionMesh( const CHAR* strArgument )
 {
-    g_pScene->Settings().bExportAnimations = FALSE;
-    g_pScene->Settings().bCompressVertexData = FALSE;
-    g_pScene->Settings().bComputeVertexTangentSpace = FALSE;
-    g_pScene->Settings().bExportBinormal = FALSE;
-    g_pScene->Settings().bExportCameras = FALSE;
-    g_pScene->Settings().bExportLights = FALSE;
-    g_pScene->Settings().bExportMaterials = FALSE;
-    g_pScene->Settings().bExportNormals = FALSE;
-    g_pScene->Settings().bExportSkinWeights = FALSE;
-    g_pScene->Settings().bForceIndex32Format = TRUE;
+    g_pScene->Settings().bExportAnimations = false;
+    g_pScene->Settings().bCompressVertexData = false;
+    g_pScene->Settings().bComputeVertexTangentSpace = false;
+    g_pScene->Settings().bExportBinormal = false;
+    g_pScene->Settings().bExportCameras = false;
+    g_pScene->Settings().bExportLights = false;
+    g_pScene->Settings().bExportMaterials = false;
+    g_pScene->Settings().bExportNormals = false;
+    g_pScene->Settings().bExportSkinWeights = false;
+    g_pScene->Settings().bForceIndex32Format = true;
     g_pScene->Settings().iMaxUVSetCount = 0;
-    g_XATGSettings.bBundleTextures = FALSE;
-    g_XATGSettings.bUseExistingBundle = FALSE;
+    g_XATGSettings.bBundleTextures = false;
+    g_XATGSettings.bUseExistingBundle = false;
     strcpy_s( g_pScene->Settings().strMeshNameDecoration, "CollisionMesh" );
-    return FALSE;
+    return false;
 }
 
-BOOL MacroAnimation( const CHAR* strArgument )
+bool MacroAnimation( const CHAR* strArgument )
 {
-    g_pScene->Settings().bExportAnimations = TRUE;
-    g_pScene->Settings().bCompressVertexData = FALSE;
-    g_pScene->Settings().bComputeVertexTangentSpace = FALSE;
-    g_pScene->Settings().bExportBinormal = FALSE;
-    g_pScene->Settings().bExportCameras = FALSE;
-    g_pScene->Settings().bExportLights = FALSE;
-    g_pScene->Settings().bExportMaterials = FALSE;
-    g_pScene->Settings().bExportNormals = FALSE;
-    g_pScene->Settings().bExportSkinWeights = FALSE;
-    g_pScene->Settings().bForceIndex32Format = FALSE;
-    g_pScene->Settings().bExportMeshes = FALSE;
-    g_pScene->Settings().bExportScene = FALSE;
+    g_pScene->Settings().bExportAnimations = true;
+    g_pScene->Settings().bCompressVertexData = false;
+    g_pScene->Settings().bComputeVertexTangentSpace = false;
+    g_pScene->Settings().bExportBinormal = false;
+    g_pScene->Settings().bExportCameras = false;
+    g_pScene->Settings().bExportLights = false;
+    g_pScene->Settings().bExportMaterials = false;
+    g_pScene->Settings().bExportNormals = false;
+    g_pScene->Settings().bExportSkinWeights = false;
+    g_pScene->Settings().bForceIndex32Format = false;
+    g_pScene->Settings().bExportMeshes = false;
+    g_pScene->Settings().bExportScene = false;
     g_pScene->Settings().iMaxUVSetCount = 0;
-    g_XATGSettings.bBinaryBlobExport = FALSE;
-    g_XATGSettings.bBundleTextures = FALSE;
-    g_XATGSettings.bUseExistingBundle = FALSE;
-    g_pScene->Settings().bRenameAnimationsToFileName = TRUE;
-    return FALSE;
+    g_XATGSettings.bBinaryBlobExport = false;
+    g_XATGSettings.bBundleTextures = false;
+    g_XATGSettings.bUseExistingBundle = false;
+    g_pScene->Settings().bRenameAnimationsToFileName = true;
+    return false;
 }
 
-BOOL MacroCharacter( const CHAR* strArgument )
+bool MacroCharacter( const CHAR* strArgument )
 {
-    g_pScene->Settings().bExportAnimations = FALSE;
-    g_pScene->Settings().bExportCameras = FALSE;
-    g_pScene->Settings().bExportLights = FALSE;
-    g_pScene->Settings().bExportMaterials = TRUE;
-    g_pScene->Settings().bExportMeshes = TRUE;
-    g_pScene->Settings().bExportScene = TRUE;
-    return FALSE;
+    g_pScene->Settings().bExportAnimations = false;
+    g_pScene->Settings().bExportCameras = false;
+    g_pScene->Settings().bExportLights = false;
+    g_pScene->Settings().bExportMaterials = true;
+    g_pScene->Settings().bExportMeshes = true;
+    g_pScene->Settings().bExportScene = true;
+    return false;
 }
 
-BOOL MacroWindowsD3D9( const CHAR* strArgument )
+bool MacroWindowsD3D9( const CHAR* strArgument )
 {
-    g_pScene->Settings().bLittleEndian = TRUE;
-    g_XATGSettings.bBundleTextures = FALSE;
-    g_XATGSettings.bUseExistingBundle = FALSE;
-    g_pScene->Settings().bCompressVertexData = FALSE;
+    g_pScene->Settings().bLittleEndian = true;
+    g_XATGSettings.bBundleTextures = false;
+    g_XATGSettings.bUseExistingBundle = false;
+    g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroWindowsD3D10( const CHAR* strArgument )
+bool MacroWindowsD3D10( const CHAR* strArgument )
 {
-    g_pScene->Settings().bLittleEndian = TRUE;
-    g_XATGSettings.bBundleTextures = FALSE;
-    g_XATGSettings.bUseExistingBundle = FALSE;
-    g_pScene->Settings().bCompressVertexData = FALSE;
+    g_pScene->Settings().bLittleEndian = true;
+    g_XATGSettings.bBundleTextures = false;
+    g_XATGSettings.bUseExistingBundle = false;
+    g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroWindowsD3D11( const CHAR* strArgument )
+bool MacroWindowsD3D11( const CHAR* strArgument )
 {
-    g_pScene->Settings().bLittleEndian = TRUE;
-    g_XATGSettings.bBundleTextures = FALSE;
-    g_XATGSettings.bUseExistingBundle = FALSE;
-    g_pScene->Settings().bCompressVertexData = FALSE;
+    g_pScene->Settings().bLittleEndian = true;
+    g_XATGSettings.bBundleTextures = false;
+    g_XATGSettings.bUseExistingBundle = false;
+    g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroXbox360( const CHAR* strArgument )
+bool MacroXbox360( const CHAR* strArgument )
 {
-    g_pScene->Settings().bLittleEndian = FALSE;
-    g_XATGSettings.bBinaryBlobExport = TRUE;
-    g_XATGSettings.bBundleTextures = TRUE;
-    g_XATGSettings.bUseExistingBundle = TRUE;
-    g_pScene->Settings().bCompressVertexData = TRUE;
+    g_pScene->Settings().bLittleEndian = false;
+    g_XATGSettings.bBinaryBlobExport = true;
+    g_XATGSettings.bBundleTextures = true;
+    g_XATGSettings.bUseExistingBundle = true;
+    g_pScene->Settings().bCompressVertexData = true;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
     g_ExportFileFormat = FILEFORMAT_XATG;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroSDKMesh( const CHAR* strArgument )
+bool MacroSDKMesh( const CHAR* strArgument )
 {
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroXATG( const CHAR* strArgument )
+bool MacroXATG( const CHAR* strArgument )
 {
     g_ExportFileFormat = FILEFORMAT_XATG;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroSubD11( const CHAR* strArgument )
+bool MacroSubD11( const CHAR* strArgument )
 {
-    MacroWindowsD3D11( NULL );
-    MacroSDKMesh( NULL );
-    g_pScene->Settings().bCompressVertexData = FALSE;
-    g_pScene->Settings().bConvertMeshesToSubD = TRUE;
-    g_pScene->Settings().bExportBinormal = FALSE;
-    g_pScene->Settings().bForceExportSkinWeights = TRUE;
+    MacroWindowsD3D11( nullptr );
+    MacroSDKMesh( nullptr );
+    g_pScene->Settings().bCompressVertexData = false;
+    g_pScene->Settings().bConvertMeshesToSubD = true;
+    g_pScene->Settings().bExportBinormal = false;
+    g_pScene->Settings().bForceExportSkinWeights = true;
     g_pScene->Settings().iMaxUVSetCount = 1;
-    g_pScene->Settings().bOptimizeAnimations = FALSE;
-    return FALSE;
+    g_pScene->Settings().bOptimizeAnimations = false;
+    return false;
 }
 
-BOOL MacroSubDXbox( const CHAR* strArgument )
+bool MacroSubDXbox( const CHAR* strArgument )
 {
-    MacroXbox360( NULL );
-    g_pScene->Settings().bCompressVertexData = TRUE;
-    g_pScene->Settings().bConvertMeshesToSubD = TRUE;
-    g_pScene->Settings().bExportBinormal = FALSE;
-    g_pScene->Settings().bForceExportSkinWeights = TRUE;
+    MacroXbox360( nullptr );
+    g_pScene->Settings().bCompressVertexData = true;
+    g_pScene->Settings().bConvertMeshesToSubD = true;
+    g_pScene->Settings().bExportBinormal = false;
+    g_pScene->Settings().bForceExportSkinWeights = true;
     g_pScene->Settings().iMaxUVSetCount = 1;
-    return FALSE;
+    return false;
 }
 
-BOOL MacroSetLogLevel( const CHAR* strArgument )
+bool MacroSetLogLevel( const CHAR* strArgument )
 {
     INT iValue = atoi( strArgument );
-    iValue = min( 10, max( 0, iValue ) );
-    ExportLog::SetLogLevel( (UINT)iValue );
-    return TRUE;
+    iValue = std::min( 10, std::max( 0, iValue ) );
+    ExportLog::SetLogLevel( static_cast<UINT>( iValue ) );
+    return true;
 }
 
-BOOL MacroSetVerbose( const CHAR* strArgument )
+bool MacroSetVerbose( const CHAR* strArgument )
 {
     ExportLog::SetLogLevel( 4 );
-    return FALSE;
+    return false;
 }
 
-BOOL MacroAttach( const CHAR* strArgument )
+bool MacroAttach( const CHAR* strArgument )
 {
 #ifdef _DEBUG
     ExportLog::LogMsg( 0, "!!! Attach debugger NOW and then press any key..." );
-    _getch();
+    (void)_getch();
 #endif
-    return FALSE;
+    return false;
 }
 
-BOOL MacroSaveSettings( const CHAR* strArgument )
+bool MacroSaveSettings( const CHAR* strArgument )
 {
-    BOOL bResult = g_SettingsManager.SaveSettings( strArgument );
+    bool bResult = g_SettingsManager.SaveSettings( strArgument );
     if( !bResult )
     {
         ExportLog::LogError( "Could not save settings to file \"%s\".", strArgument );
@@ -278,12 +278,12 @@ BOOL MacroSaveSettings( const CHAR* strArgument )
     {
         ExportLog::LogMsg( 1, "Saved settings to file \"%s\".", strArgument );
     }
-    return TRUE;
+    return true;
 }
 
-BOOL MacroLoadSettings( const CHAR* strArgument )
+bool MacroLoadSettings( const CHAR* strArgument )
 {
-    BOOL bResult = g_SettingsManager.LoadSettings( strArgument );
+    bool bResult = g_SettingsManager.LoadSettings( strArgument );
     if( !bResult )
     {
         ExportLog::LogError( "Could not load settings from file \"%s\".", strArgument );
@@ -292,26 +292,26 @@ BOOL MacroLoadSettings( const CHAR* strArgument )
     {
         ExportLog::LogMsg( 1, "Loaded settings from file \"%s\".", strArgument );
     }
-    return TRUE;
+    return true;
 }
 
-BOOL MacroLoadFileList( const CHAR* strArgument )
+bool MacroLoadFileList( const CHAR* strArgument )
 {
-    FILE* fp = NULL;
+    FILE* fp = nullptr;
     fopen_s( &fp, strArgument, "r" );
-    if( fp == NULL )
+    if( !fp )
     {
         ExportLog::LogError( "Could not load file list from file \"%s\".", strArgument );
-        return TRUE;
+        return true;
     }
 
-    DWORD dwCount = 0;
+    size_t dwCount = 0;
     while( !feof( fp ) )
     {
         CHAR strFileName[MAX_PATH];
         fgets( strFileName, ARRAYSIZE( strFileName ), fp );
         CHAR* strNewline = strchr( strFileName, '\n' );
-        if( strNewline != NULL )
+        if( strNewline )
         {
             *strNewline = '\0';
         }
@@ -322,9 +322,9 @@ BOOL MacroLoadFileList( const CHAR* strArgument )
 
     fclose( fp );
 
-    ExportLog::LogMsg( 1, "Loaded %d input filenames from file \"%s\".", dwCount, strArgument );
+    ExportLog::LogMsg( 1, "Loaded %Iu input filenames from file \"%s\".", dwCount, strArgument );
 
-    return TRUE;
+    return true;
 }
 
 MacroCommand g_MacroCommands[] = {
@@ -340,7 +340,7 @@ MacroCommand g_MacroCommands[] = {
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
     { "windowsd3d10", "", "Sets export options for a Windows Direct3D 10 target", MacroWindowsD3D10 },
-    { "windowsd3d11", "", "Sets export options for a Windows Direct3D 10 target", MacroWindowsD3D11 },
+    { "windowsd3d11", "", "Sets export options for a Windows Direct3D 11 target", MacroWindowsD3D11 },
     { "collisionmesh", "", "Sets export options for collision mesh export", MacroCollisionMesh },
     { "animation", "", "Sets export options for animation track export", MacroAnimation },
     { "character", "", "Sets export options for character (mesh & skeleton) export", MacroCharacter },
@@ -354,13 +354,13 @@ MacroCommand g_MacroCommands[] = {
 
 ExportSettingsEntry* FindCommandHelper( ExportSettingsEntry* pRoot, const CHAR* strCommand )
 {
-    if( pRoot == NULL )
-        return NULL;
+    if( !pRoot )
+        return nullptr;
 
     if( pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY )
     {
         ExportSettingsEntry* pResult = FindCommandHelper( pRoot->m_pFirstChild, strCommand );
-        if( pResult != NULL )
+        if( pResult )
             return pResult;
         return FindCommandHelper( pRoot->m_pSibling, strCommand );
     }
@@ -375,35 +375,35 @@ ExportSettingsEntry* FindCommandHelper( ExportSettingsEntry* pRoot, const CHAR* 
 
 ExportSettingsEntry* FindCommand( const CHAR* strCommand )
 {
-    ExportSettingsEntry* pResult = NULL;
-    DWORD dwCount = g_SettingsManager.GetRootCategoryCount();
-    for( DWORD i = 0; i < dwCount; ++i )
+    ExportSettingsEntry* pResult = nullptr;
+    size_t dwCount = g_SettingsManager.GetRootCategoryCount();
+    for( size_t i = 0; i < dwCount; ++i )
     {
         auto pEntry = g_SettingsManager.GetRootCategory( i );
         pResult = FindCommandHelper( pEntry, strCommand );
-        if( pResult != NULL )
+        if( pResult )
             return pResult;
     }
-    return NULL;
+    return nullptr;
 }
 
-BOOL ParseMacroCommand( const CHAR* strCommand, const CHAR* strArgument, BOOL* pMacroFound )
+bool ParseMacroCommand( const CHAR* strCommand, const CHAR* strArgument, bool* pMacroFound )
 {
-    *pMacroFound = FALSE;
-    DWORD dwCount = ARRAYSIZE( g_MacroCommands );
-    for( DWORD i = 0; i < dwCount; ++i )
+    *pMacroFound = false;
+    size_t dwCount = ARRAYSIZE( g_MacroCommands );
+    for( size_t i = 0; i < dwCount; ++i )
     {
         MacroCommand& Command = g_MacroCommands[i];
         if( _stricmp( strCommand, Command.strCommandLine ) == 0 )
         {
-            *pMacroFound = TRUE;
+            *pMacroFound = true;
             return (Command.pCallback)( strArgument );
         }
     }
-    return FALSE;
+    return false;
 }
 
-BOOL ParseEnum( ExportSettingsEntry* pEntry, const CHAR* strArgument )
+bool ParseEnum( ExportSettingsEntry* pEntry, const CHAR* strArgument )
 {
     DWORD dwEnumCount = pEntry->m_dwEnumValueCount;
     for( DWORD i = 0; i < dwEnumCount; ++i )
@@ -411,29 +411,29 @@ BOOL ParseEnum( ExportSettingsEntry* pEntry, const CHAR* strArgument )
         if( _stricmp( strArgument, pEntry->m_pEnumValues[i].strCommandLine ) == 0 )
         {
             pEntry->SetValue( pEntry->m_pEnumValues[i].iValue );
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
-BOOL ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
+bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
 {
     CHAR strCommand[128];
     strcpy_s( strCommand, strOriginalCommand );
     _strlwr_s( strCommand );
 
-    BOOL bUsedArgument = FALSE;
+    bool bUsedArgument = false;
 
     ExportSettingsEntry* pEntry = FindCommand( strCommand );
-    if( pEntry == NULL )
+    if( !pEntry )
     {
-        BOOL bMacro = FALSE;
+        bool bMacro = false;
         bUsedArgument = ParseMacroCommand( strCommand, strArgument, &bMacro );
         if( !bMacro )
         {
             ExportLog::LogWarning( "Unknown command line option \"%s\"", strCommand );
-            return FALSE;
+            return false;
         }
         return bUsedArgument;
     }
@@ -443,15 +443,15 @@ BOOL ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
     {
     case ExportSettingsEntry::CT_CHECKBOX:
         {
-            DWORD dwLength = (DWORD)strlen( strCommandName );
+            size_t dwLength = strlen( strCommandName );
             CHAR Argument = strCommand[dwLength];
             if( Argument == '+' )
             {
-                pEntry->SetValue( TRUE );
+                pEntry->SetValue( true );
             }
             else if( Argument == '-' )
             {
-                pEntry->SetValue( FALSE );
+                pEntry->SetValue( false );
             }
             else
             {
@@ -461,68 +461,68 @@ BOOL ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
         }
     case ExportSettingsEntry::CT_BOUNDEDINTSLIDER:
         {
-            if( strArgument == NULL )
+            if( !strArgument )
             {
                 ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
                 break;
             }
             INT iValue = atoi( strArgument );
             pEntry->SetValue( iValue );
-            bUsedArgument = TRUE;
+            bUsedArgument = true;
             break;
         }
     case ExportSettingsEntry::CT_BOUNDEDFLOATSLIDER:
         {
-            if( strArgument == NULL )
+            if( !strArgument )
             {
                 ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
                 break;
             }
-            FLOAT fValue = (FLOAT)atof( strArgument );
+            float fValue = (float)atof( strArgument );
             pEntry->SetValue( fValue );
-            bUsedArgument = TRUE;
+            bUsedArgument = true;
             break;
         }
     case ExportSettingsEntry::CT_ENUM:
         {
-            if( strArgument == NULL )
+            if( !strArgument )
             {
                 ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
                 break;
             }
-            BOOL bValid = ParseEnum( pEntry, strArgument );
+            bool bValid = ParseEnum( pEntry, strArgument );
             if( !bValid )
             {
                 ExportLog::LogWarning( "Invalid value given for command \"%s\".", strCommand );
             }
-            bUsedArgument = TRUE;
+            bUsedArgument = true;
             break;
         }
     case ExportSettingsEntry::CT_STRING:
         {
-            if( strArgument == NULL )
+            if( !strArgument )
             {
                 ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
                 break;
             }
             pEntry->SetValue( strArgument );
-            bUsedArgument = TRUE;
+            bUsedArgument = true;
             break;
         }
     }
     return bUsedArgument;
 }
 
-VOID PrintEntryHelp( ExportSettingsEntry* pEntry )
+void PrintEntryHelp( ExportSettingsEntry* pEntry )
 {
-    if( pEntry == NULL )
+    if( !pEntry )
         return;
 
     static CHAR strAnnotation[256];
     switch( pEntry->m_Type )
     {
     case ExportSettingsEntry::CT_CATEGORY:
-        ExportLog::LogMsg( 0, "\n%s Options:", pEntry->m_DisplayName );
+        ExportLog::LogMsg( 0, "\n%s Options:", pEntry->m_DisplayName.SafeString() );
         PrintEntryHelp( pEntry->m_pFirstChild );
         PrintEntryHelp( pEntry->m_pSibling );
         return;
@@ -551,37 +551,37 @@ VOID PrintEntryHelp( ExportSettingsEntry* pEntry )
             break;
         }
     case ExportSettingsEntry::CT_STRING:
-        sprintf_s( strAnnotation, " <string default: \"%s\">", pEntry->m_DefaultValue.m_strValue );
+        sprintf_s( strAnnotation, " <string default: \"%s\">", (const CHAR*)pEntry->m_DefaultValue.m_strValue );
         break;
     }
 
-    if( pEntry->m_CommandLineOptionName != NULL )
+    if( pEntry->m_CommandLineOptionName )
     {
-        ExportLog::LogMsg( 0, "    -%s%s : %s", pEntry->m_CommandLineOptionName, strAnnotation, pEntry->m_DisplayName );
+        ExportLog::LogMsg( 0, "    -%s%s : %s", pEntry->m_CommandLineOptionName.SafeString(), strAnnotation, pEntry->m_DisplayName.SafeString() );
     }
     PrintEntryHelp( pEntry->m_pSibling );
 }
 
-VOID PrintHelp()
+void PrintHelp()
 {
     if( g_bHelpPrinted )
     {
         return;
     }
-    g_bHelpPrinted = TRUE;
+    g_bHelpPrinted = true;
 
     ExportLog::LogMsg( 0, "\nUsage: ContentExporter [options] \"filename1\" \"filename2\" ... \"filenameN\"" );
     ExportLog::LogMsg( 0, "\nThe following command line options can be used to modify scene parse and file output behavior." );
 
     ExportLog::LogMsg( 0, "\nGeneral & Macro Options:" );
-    DWORD dwMacroCount = ARRAYSIZE( g_MacroCommands );
-    for( DWORD i = 0; i < dwMacroCount; ++i )
+    size_t dwMacroCount = ARRAYSIZE( g_MacroCommands );
+    for( size_t i = 0; i < dwMacroCount; ++i )
     {
         ExportLog::LogMsg( 0, "    -%s%s : %s", g_MacroCommands[i].strCommandLine, g_MacroCommands[i].strAnnotation, g_MacroCommands[i].strDescription );
     }
 
-    DWORD dwRootCategoryCount = g_SettingsManager.GetRootCategoryCount();
-    for( DWORD i = 0; i < dwRootCategoryCount; ++i )
+    size_t dwRootCategoryCount = g_SettingsManager.GetRootCategoryCount();
+    for( size_t i = 0; i < dwRootCategoryCount; ++i )
     {
         auto pCategory = g_SettingsManager.GetRootCategory( i );
         PrintEntryHelp( pCategory );
@@ -589,7 +589,7 @@ VOID PrintHelp()
     ExportLog::LogMsg( 0, "" );
 }
 
-VOID ParseInputFileName( const CHAR* strFileName )
+void ParseInputFileName( const CHAR* strFileName )
 {
     ExportPath InputFileName( strFileName );
     if( !InputFileName.IsAbsolutePath() )
@@ -603,7 +603,7 @@ VOID ParseInputFileName( const CHAR* strFileName )
 
 std::vector<CHAR*> g_CommandStrings;
 
-VOID ParseCommandLine( INT argc, CHAR* argv[] )
+void ParseCommandLine( INT argc, CHAR* argv[] )
 {
     assert( argc >= 1 );
 
@@ -613,18 +613,18 @@ VOID ParseCommandLine( INT argc, CHAR* argv[] )
         g_CommandStrings.push_back( strToken );
     }
 
-    DWORD dwCommandCount = (DWORD)g_CommandStrings.size();
-    for( DWORD i = 0; i < dwCommandCount; ++i )
+    size_t dwCommandCount = g_CommandStrings.size();
+    for( size_t i = 0; i < dwCommandCount; ++i )
     {
         const CHAR* strCommand = g_CommandStrings[i];
         if( strCommand[0] == '-' || strCommand[0] == '/' )
         {
-            const CHAR* strArgument = NULL;
+            const CHAR* strArgument = nullptr;
             if( i < ( dwCommandCount - 1 ) )
             {
                 strArgument = g_CommandStrings[i + 1];
             }
-            BOOL bCommandWithParameter = ParseCommand( strCommand + 1, strArgument );
+            bool bCommandWithParameter = ParseCommand( strCommand + 1, strArgument );
             if( bCommandWithParameter )
             {
                 ++i;
@@ -637,7 +637,7 @@ VOID ParseCommandLine( INT argc, CHAR* argv[] )
     }
 }
 
-VOID BuildOutputFileName( const ExportPath& InputFileName )
+void BuildOutputFileName( const ExportPath& InputFileName )
 {
     if( !g_OutputFilePath.IsEmpty() )
     {
@@ -661,7 +661,7 @@ VOID BuildOutputFileName( const ExportPath& InputFileName )
     }
 }
 
-INT __cdecl _tmain(INT argc, _TCHAR* argv[])
+int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 {
     g_WorkingPath = ExportPath::GetCurrentPath();
 
@@ -680,7 +680,7 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 #endif
 
     ExportLog::SetLogLevel( 1 );
-    ExportLog::EnableLogging( TRUE );
+    ExportLog::EnableLogging( true );
 
     ExportLog::LogMsg( 0, "----------------------------------------------------------" );
     ExportLog::LogMsg( 0, g_strExporterName );
@@ -702,12 +702,12 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 
     ExportLog::LogMsg( 9, "Microsoft C++ compiler version %d", _MSC_VER );
 
-    DWORD dwInputFileCount = (DWORD)g_InputFileNames.size();
+    size_t dwInputFileCount = g_InputFileNames.size();
     if( dwInputFileCount == 0 )
     {
         ExportLog::LogError( "No input filename(s) provided." );
         PrintHelp();
-        return E_FAIL;
+        return 1;
     }
 
     ExportCoreSettings InitialSettings = g_pScene->Settings();
@@ -734,7 +734,7 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
 
     ExportMaterial::GetDirect3DDevice();
 
-    for( DWORD i = 0; i < dwInputFileCount; ++i )
+    for( size_t i = 0; i < dwInputFileCount; ++i )
     {
         ExportPath InputFileName = g_InputFileNames[i];
         g_CurrentInputFileName = InputFileName;
@@ -743,7 +743,7 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
         if( g_CurrentOutputFileName.IsEmpty() )
         {
             ExportLog::LogError( "Output filename is invalid." );
-            return E_FAIL;
+            return 1;
         }
         g_pScene->Statistics().StartExport();
         g_pScene->Statistics().StartSceneParse();
@@ -761,7 +761,7 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
         {
             if( g_ExportFileFormat == FILEFORMAT_SDKMESH )
             {
-                ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "", TRUE );
+                ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "", true );
                 WriteSDKMeshFile( g_CurrentOutputFileName, &g_Manifest );
                 ExportTextureConverter::PerformTextureFileOperations( &g_Manifest );
             }
@@ -769,14 +769,14 @@ INT __cdecl _tmain(INT argc, _TCHAR* argv[])
             {
                 if( g_XATGSettings.bBundleTextures )
                 {
-                    ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "textures\\", FALSE );
+                    ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "textures\\", false );
                     WriteXATGFile( g_CurrentOutputFileName, &g_Manifest );
                     ExportTextureConverter::PerformTextureFileOperations( &g_Manifest );
                     BundleTextures();
                 }
                 else
                 {
-                    ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "textures\\", TRUE );
+                    ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "textures\\", true );
                     WriteXATGFile( g_CurrentOutputFileName, &g_Manifest );
                     ExportTextureConverter::PerformTextureFileOperations( &g_Manifest );
                 }

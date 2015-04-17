@@ -41,10 +41,10 @@ namespace ATG
         D3DXVECTOR3         LocalPosition;
         D3DXCOLOR           Color;
         D3DXVECTOR3         Direction;
-        FLOAT               fRange;
+        float               fRange;
         LightFalloff        Falloff;
         LightFalloff        SpotFalloff;
-        FLOAT               fInnerAngle;
-        FLOAT               fOuterAngle;
+        float               fInnerAngle;
+        float               fOuterAngle;
     };
 }

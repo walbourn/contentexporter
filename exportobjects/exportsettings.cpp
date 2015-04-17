@@ -21,58 +21,60 @@ namespace ATG
     ExportCoreSettings      g_ExportCoreSettings;
 
     ExportSettingsEntry::ExportSettingsEntry()
-        : m_pFirstChild( NULL ),
-          m_pSibling( NULL ),
-          m_pLinkedCurrentValue( NULL ),
-          m_pEnumValues( NULL ),
+        : m_pFirstChild( nullptr ),
+          m_pSibling( nullptr ),
+          m_pLinkedCurrentValue( nullptr ),
+          m_pEnumValues( nullptr ),
           m_dwEnumValueCount( 0 )
     {
     }
 
     ExportSettingsEntry::~ExportSettingsEntry()
     {
-        if( m_pFirstChild != NULL )
+        if( m_pFirstChild )
         {
             delete m_pFirstChild;
-            m_pFirstChild = NULL;
+            m_pFirstChild = nullptr;
         }
-        if( m_pSibling != NULL )
+        if( m_pSibling )
         {
             delete m_pSibling;
-            m_pSibling = NULL;
+            m_pSibling = nullptr;
         }
     }
 
-    VOID ExportSettingsEntry::SetDefaultValue( BOOL bSetChildren, BOOL bSetSiblings )
+    void ExportSettingsEntry::SetDefaultValue( bool bSetChildren, bool bSetSiblings )
     {
-        if( m_pLinkedCurrentValue != NULL )
+        if( m_pLinkedCurrentValue )
         {
             if( m_DefaultValue.m_Type == ExportVariant::VT_STRING )
                 strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, m_DefaultValue.m_strValue );
+            else if( m_DefaultValue.m_Type == ExportVariant::VT_BOOL )
+                *reinterpret_cast<bool*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_iValue ? true : false;
             else
-                *(INT*)m_pLinkedCurrentValue = m_DefaultValue.m_iValue;
+                *reinterpret_cast<INT*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_iValue;
         }
         else
         {
             m_CurrentValue = m_DefaultValue;
         }
 
-        if( bSetSiblings && m_pSibling != NULL )
+        if( bSetSiblings && m_pSibling )
         {
-            m_pSibling->SetDefaultValue( bSetChildren, TRUE );
+            m_pSibling->SetDefaultValue( bSetChildren, true );
         }
-        if( bSetChildren && m_pFirstChild != NULL )
+        if( bSetChildren && m_pFirstChild )
         {
-            m_pFirstChild->SetDefaultValue( TRUE, TRUE );
+            m_pFirstChild->SetDefaultValue( true, true );
         }
     }
 
-    VOID ExportSettingsEntry::ReverseChildOrder()
+    void ExportSettingsEntry::ReverseChildOrder()
     {
-        ExportSettingsEntry* pHead = NULL;
+        ExportSettingsEntry* pHead = nullptr;
         ExportSettingsEntry* pCurrent = m_pFirstChild;
 
-        while( pCurrent != NULL )
+        while( pCurrent )
         {
             ExportSettingsEntry* pNext = pCurrent->m_pSibling;
             pCurrent->m_pSibling = pHead;
@@ -83,7 +85,7 @@ namespace ATG
         m_pFirstChild = pHead;
     }
 
-    VOID ExportSettingsEntry::CreateSettingName()
+    void ExportSettingsEntry::CreateSettingName()
     {
         CHAR strSettingName[512];
         ZeroMemory( strSettingName, sizeof( strSettingName ) );
@@ -103,53 +105,62 @@ namespace ATG
         m_SettingName = strSettingName;
     }
 
-    BOOL ExportSettingsEntry::GetValueBool() const
+    bool ExportSettingsEntry::GetValueBool() const
     {
         assert( m_Type == CT_CHECKBOX );
-        const BOOL* pValue = (const BOOL*)GetCurrentValue();
+        auto pValue = reinterpret_cast<const bool*>( GetCurrentValue() );
         return *pValue;
     }
 
     const CHAR* ExportSettingsEntry::GetValueString() const
     {
         assert( m_Type == CT_STRING );
-        if( m_pLinkedCurrentValue != NULL )
-            return (const CHAR*)m_pLinkedCurrentValue;
+        if( m_pLinkedCurrentValue )
+            return reinterpret_cast<const CHAR*>( m_pLinkedCurrentValue );
         return m_CurrentValue.m_strValue;
     }
 
     INT ExportSettingsEntry::GetValueInt() const
     {
         assert( m_Type == CT_BOUNDEDINTSLIDER || m_Type == CT_ENUM );
-        const INT* pValue = (const INT*)GetCurrentValue();
+        auto pValue = reinterpret_cast<const INT*>( GetCurrentValue() );
         return *pValue;
     }
 
-    FLOAT ExportSettingsEntry::GetValueFloat() const
+    float ExportSettingsEntry::GetValueFloat() const
     {
         assert( m_Type == CT_BOUNDEDFLOATSLIDER );
-        const FLOAT* pValue = (const FLOAT*)GetCurrentValue();
+        auto pValue = reinterpret_cast<const float*>( GetCurrentValue() );
         return *pValue;
     }
 
-    VOID ExportSettingsEntry::SetValue( INT iValue )
+    void ExportSettingsEntry::SetValue( INT iValue )
     {
         assert( m_Type == CT_BOUNDEDINTSLIDER || m_Type == CT_CHECKBOX || m_Type == CT_ENUM );
-        INT* pValue = (INT*)GetCurrentValue();
-        *pValue = iValue;
+
+        if ( m_CurrentValue.m_Type == ExportVariant::VT_BOOL )
+        {
+            auto pValue = reinterpret_cast<bool*>( GetCurrentValue() );
+            *pValue = iValue ? true : false;
+        }
+        else
+        {
+            auto pValue = reinterpret_cast<INT*>( GetCurrentValue() );
+            *pValue = iValue;
+        }
     }
 
-    VOID ExportSettingsEntry::SetValue( FLOAT fValue )
+    void ExportSettingsEntry::SetValue( float fValue )
     {
         assert( m_Type == CT_BOUNDEDFLOATSLIDER );
-        FLOAT* pValue = (FLOAT*)GetCurrentValue();
+        auto pValue = reinterpret_cast<float*>( GetCurrentValue() );
         *pValue = fValue;
     }
 
-    VOID ExportSettingsEntry::SetValue( const CHAR* strValue )
+    void ExportSettingsEntry::SetValue( const CHAR* strValue )
     {
         assert( m_Type == CT_STRING );
-        if( m_pLinkedCurrentValue != NULL )
+        if( m_pLinkedCurrentValue )
         {
             strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, strValue );
         }
@@ -161,8 +172,8 @@ namespace ATG
 
     ExportSettingsManager::~ExportSettingsManager()
     {
-        DWORD dwCount = GetRootCategoryCount();
-        for( DWORD i = 0; i < dwCount; ++i )
+        size_t dwCount = GetRootCategoryCount();
+        for( size_t i = 0; i < dwCount; ++i )
         {
             delete GetRootCategory( i );
         }
@@ -171,7 +182,7 @@ namespace ATG
 
     ExportSettingsEntry* ExportSettingsManager::AddRootCategory( ExportString Caption )
     {
-        return AddCategory( NULL, Caption );
+        return AddCategory( nullptr, Caption );
     }
 
     ExportSettingsEntry* ExportSettingsManager::AddCategory( ExportSettingsEntry* pParentCategory, ExportString Caption )
@@ -179,7 +190,7 @@ namespace ATG
         ExportSettingsEntry* pNewCategory = new ExportSettingsEntry();
         pNewCategory->m_DisplayName = Caption;
         pNewCategory->m_Type = ExportSettingsEntry::CT_CATEGORY;
-        if( pParentCategory != NULL )
+        if( pParentCategory )
         {
             pParentCategory->AddChild( pNewCategory );
         }
@@ -191,9 +202,9 @@ namespace ATG
         return pNewCategory;
     }
 
-    ExportSettingsEntry* ExportSettingsManager::AddBool( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, BOOL bDefaultValue, BOOL* pLinkedValue )
+    ExportSettingsEntry* ExportSettingsManager::AddBool( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, bool bDefaultValue, bool* pLinkedValue )
     {
-        assert( pCategory != NULL );
+        assert( pCategory != nullptr );
         ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
         pNewEntry->m_DisplayName = Caption;
         pNewEntry->CreateSettingName();
@@ -210,7 +221,7 @@ namespace ATG
 
     ExportSettingsEntry* ExportSettingsManager::AddIntBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue )
     {
-        assert( pCategory != NULL );
+        assert( pCategory != nullptr );
         ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
         pNewEntry->m_DisplayName = Caption;
         pNewEntry->CreateSettingName();
@@ -228,9 +239,9 @@ namespace ATG
         return pNewEntry;
     }
 
-    ExportSettingsEntry* ExportSettingsManager::AddFloatBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, FLOAT fDefaultValue, FLOAT fMin, FLOAT fMax, FLOAT* pLinkedValue )
+    ExportSettingsEntry* ExportSettingsManager::AddFloatBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, float fDefaultValue, float fMin, float fMax, float* pLinkedValue )
     {
-        assert( pCategory != NULL );
+        assert( pCategory != nullptr );
         ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
         pNewEntry->m_DisplayName = Caption;
         pNewEntry->CreateSettingName();
@@ -250,7 +261,7 @@ namespace ATG
 
     ExportSettingsEntry* ExportSettingsManager::AddString( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue )
     {
-        assert( pCategory != NULL );
+        assert( pCategory != nullptr );
         ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
         pNewEntry->m_DisplayName = Caption;
         pNewEntry->CreateSettingName();
@@ -267,7 +278,7 @@ namespace ATG
 
     ExportSettingsEntry* ExportSettingsManager::AddEnum( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue )
     {
-        assert( pCategory != NULL );
+        assert( pCategory != nullptr );
         ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
         pNewEntry->m_DisplayName = Caption;
         pNewEntry->CreateSettingName();
@@ -284,31 +295,31 @@ namespace ATG
         return pNewEntry;
     }
 
-    BOOL ExportSettingsManager::MarshalAllSettings( CHAR* strDestBuffer, DWORD dwBufferSize, BOOL bNewLines, ExportSettingsEntry* pRoot )
+    bool ExportSettingsManager::MarshalAllSettings( CHAR* strDestBuffer, DWORD dwBufferSize, bool bNewLines, ExportSettingsEntry* pRoot )
     {
-        BOOL bResult = TRUE;
-        if( pRoot == NULL )
+        bool bResult = true;
+        if( !pRoot )
         {
-            DWORD dwRootCount = GetRootCategoryCount();
-            for( DWORD i = 0; i < dwRootCount; ++i )
+            size_t dwRootCount = GetRootCategoryCount();
+            for( size_t i = 0; i < dwRootCount; ++i )
             {
                 bResult &= MarshalAllSettings( strDestBuffer, dwBufferSize, bNewLines, GetRootCategory( i ) );
             }
             return bResult;
         }
 
-        if( pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY && pRoot->m_pFirstChild != NULL )
+        if( pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY && pRoot->m_pFirstChild )
         {
             bResult &= MarshalAllSettings( strDestBuffer, dwBufferSize, bNewLines, pRoot->m_pFirstChild );
         }
         else
         {
-            DWORD dwCurrentLen = (DWORD)strlen( strDestBuffer );
+            size_t dwCurrentLen = strlen( strDestBuffer );
             CHAR* strCurrentSpot = strDestBuffer + dwCurrentLen;
             const CHAR* strSettingName = pRoot->m_CommandLineOptionName.SafeString();
-            DWORD dwNameLen = (DWORD)strlen( strSettingName );
+            size_t dwNameLen = strlen( strSettingName );
             if( dwCurrentLen + dwNameLen + 1 > dwBufferSize )
-                return FALSE;
+                return false;
             strcat_s( strDestBuffer, dwBufferSize, strSettingName );
             strcat_s( strDestBuffer, dwBufferSize, "=" );
             dwCurrentLen += ( dwNameLen + 1 );
@@ -318,11 +329,11 @@ namespace ATG
             case ExportVariant::VT_STRING:
                 {
                     const CHAR* strValue = pRoot->GetValueString();
-                    DWORD dwValueLen = (DWORD)strlen( strValue );
+                    size_t dwValueLen = strlen( strValue );
                     if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )
                     {
                         *strCurrentSpot = '\0';
-                        return FALSE;
+                        return false;
                     }
                     strcat_s( strDestBuffer, dwBufferSize, strValue );
                     break;
@@ -335,27 +346,27 @@ namespace ATG
                         iValue = pRoot->GetValueBool();
                     else
                         iValue = pRoot->GetValueInt();
-                    CHAR strValue[32];
+                    CHAR strValue[32] = {0};
                     _itoa_s( iValue, strValue, 10 );
-                    DWORD dwValueLen = (DWORD)strlen( strValue );
+                    size_t dwValueLen = strlen( strValue );
                     if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )
                     {
                         *strCurrentSpot = '\0';
-                        return FALSE;
+                        return false;
                     }
                     strcat_s( strDestBuffer, dwBufferSize, strValue );
                     break;
                 }
             case ExportVariant::VT_FLOAT:
                 {
-                    FLOAT fValue = pRoot->GetValueFloat();
+                    float fValue = pRoot->GetValueFloat();
                     CHAR strValue[32];
                     sprintf_s( strValue, "%0.5f", fValue );
-                    DWORD dwValueLen = (DWORD)strlen( strValue );
+                    size_t dwValueLen = strlen( strValue );
                     if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )
                     {
                         *strCurrentSpot = '\0';
-                        return FALSE;
+                        return false;
                     }
                     strcat_s( strDestBuffer, dwBufferSize, strValue );
                     break;
@@ -371,7 +382,7 @@ namespace ATG
             }
         }
 
-        if( pRoot->m_pSibling != NULL )
+        if( pRoot->m_pSibling )
         {
             bResult &= MarshalAllSettings( strDestBuffer, dwBufferSize, bNewLines, pRoot->m_pSibling );
         }
@@ -379,38 +390,38 @@ namespace ATG
         return bResult;
     }
 
-    BOOL ExportSettingsManager::UnMarshalAllSettings( const CHAR* strSrcBuffer )
+    bool ExportSettingsManager::UnMarshalAllSettings( const CHAR* strSrcBuffer )
     {
-        DWORD dwSrcLen = (DWORD)strlen( strSrcBuffer );
+        size_t dwSrcLen = strlen( strSrcBuffer );
         if( dwSrcLen == 0 )
-            return TRUE;
+            return true;
 
-        CHAR* strSrcTokenized = new CHAR[dwSrcLen + 1];
-        strcpy_s( strSrcTokenized, dwSrcLen + 1, strSrcBuffer );
+        std::unique_ptr<CHAR[]> strSrcTokenized( new CHAR[dwSrcLen + 1] );
+        strcpy_s( strSrcTokenized.get(), dwSrcLen + 1, strSrcBuffer );
 
         static const CHAR* strDelimiters = ";\n";
 
-        CHAR* strNextToken = NULL;
-        CHAR* pToken = strtok_s( strSrcTokenized, strDelimiters, &strNextToken );
-        while( pToken != NULL )
+        CHAR* strNextToken = nullptr;
+        CHAR* pToken = strtok_s( strSrcTokenized.get(), strDelimiters, &strNextToken );
+        while( pToken )
         {
-            BOOL bProcess = TRUE;
+            bool bProcess = true;
             if( strlen( pToken ) == 0 )
-                bProcess = FALSE;
+                bProcess = false;
             if( *pToken == '#' )
-                bProcess = FALSE;
+                bProcess = false;
 
             if( bProcess )
             {
                 CHAR* strSettingName = pToken;
                 CHAR* strEquals = strchr( pToken, '=' );
-                if( strEquals == NULL )
+                if( !strEquals )
                     break;
                 CHAR* strValue = strEquals + 1;
                 *strEquals = '\0';
 
-                ExportSettingsEntry* pEntry = FindSettingsEntry( strSettingName, TRUE, NULL );
-                if( pEntry != NULL )
+                ExportSettingsEntry* pEntry = FindSettingsEntry( strSettingName, true, nullptr );
+                if( pEntry )
                 {
                     ExportLog::LogMsg( 4, "Setting \"%s\" = \"%s\"", strSettingName, strValue );
                     switch( pEntry->m_CurrentValue.m_Type )
@@ -423,7 +434,7 @@ namespace ATG
                         pEntry->SetValue( atoi( strValue ) );
                         break;
                     case ExportVariant::VT_FLOAT:
-                        pEntry->SetValue( (FLOAT)atof( strValue ) );
+                        pEntry->SetValue( (float)atof( strValue ) );
                         break;
                     }
                 }
@@ -432,18 +443,16 @@ namespace ATG
                     ExportLog::LogWarning( "Did not find setting \"%s\"", strSettingName );
                 }
             }
-            pToken = strtok_s( NULL, strDelimiters, &strNextToken );
+            pToken = strtok_s( nullptr, strDelimiters, &strNextToken );
         }
 
-        delete[] strSrcTokenized;
-
-        return TRUE;
+        return true;
     }
 
-    ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry( ExportString SettingName, BOOL bCommandLineName, ExportSettingsEntry* pRoot )
+    ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry( ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot )
     {
-        static ExportSettingsEntry* pCachedNextEntry = NULL;
-        if( pCachedNextEntry != NULL )
+        static ExportSettingsEntry* pCachedNextEntry = nullptr;
+        if( pCachedNextEntry )
         {
             if( ( bCommandLineName && pCachedNextEntry->m_CommandLineOptionName == SettingName ) ||
                 ( !bCommandLineName && pCachedNextEntry->m_SettingName == SettingName ) )
@@ -454,13 +463,13 @@ namespace ATG
             }
         }
 
-        if( pRoot == NULL )
+        if( !pRoot )
         {
-            DWORD dwRootCount = GetRootCategoryCount();
-            for( DWORD i = 0; i < dwRootCount; ++i )
+            size_t dwRootCount = GetRootCategoryCount();
+            for( size_t i = 0; i < dwRootCount; ++i )
             {
                 ExportSettingsEntry* pFound = FindSettingsEntry( SettingName, bCommandLineName, GetRootCategory( i ) );
-                if( pFound != NULL )
+                if( pFound )
                 {
                     pCachedNextEntry = pFound->m_pSibling;
                     return pFound;
@@ -471,15 +480,15 @@ namespace ATG
         {
             if( pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY )
             {
-                if( pRoot->m_pFirstChild != NULL )
+                if( pRoot->m_pFirstChild )
                 {
                     ExportSettingsEntry* pEntry = FindSettingsEntry( SettingName, bCommandLineName, pRoot->m_pFirstChild );
-                    if( pEntry != NULL )
+                    if( pEntry )
                     {
                         return pEntry;
                     }
                 }
-                if( pRoot->m_pSibling != NULL )
+                if( pRoot->m_pSibling )
                 {
                     return FindSettingsEntry( SettingName, bCommandLineName, pRoot->m_pSibling );
                 }
@@ -489,78 +498,74 @@ namespace ATG
             {
                 return pRoot;
             }
-            if( pRoot->m_pSibling != NULL )
+            if( pRoot->m_pSibling )
             {
                 return FindSettingsEntry( SettingName, bCommandLineName, pRoot->m_pSibling );
             }
         }
-        return NULL;
+        return nullptr;
     }
 
-    VOID ExportSettingsManager::SetDefaultValues()
+    void ExportSettingsManager::SetDefaultValues()
     {
-        DWORD dwCount = GetRootCategoryCount();
-        for( DWORD i = 0; i < dwCount; ++i )
+        size_t dwCount = GetRootCategoryCount();
+        for( size_t i = 0; i < dwCount; ++i )
         {
-            m_RootCategories[i]->SetDefaultValue( TRUE, TRUE );
+            m_RootCategories[i]->SetDefaultValue( true, true );
         }
     }
 
-    BOOL ExportSettingsManager::SaveSettings( const CHAR* strFileName )
+    bool ExportSettingsManager::SaveSettings( const CHAR* strFileName )
     {
-        const DWORD dwBufferSize = 32 * 1024;
-        CHAR* strBuffer = new CHAR[dwBufferSize];
-        ZeroMemory( strBuffer, dwBufferSize * sizeof( CHAR ) );
+        const size_t dwBufferSize = 32 * 1024;
+        std::unique_ptr<CHAR[]> strBuffer( new CHAR[dwBufferSize] );
+        ZeroMemory( strBuffer.get(), dwBufferSize * sizeof( CHAR ) );
 
-        BOOL bSuccess = MarshalAllSettings( strBuffer, dwBufferSize, TRUE, NULL );
+        bool bSuccess = MarshalAllSettings( strBuffer.get(), dwBufferSize, true, nullptr );
         if( !bSuccess )
         {
-            return FALSE;
+            return false;
         }
 
-        FILE* fp = NULL;
+        FILE* fp = nullptr;
         fopen_s( &fp, strFileName, "w" );
-        if( fp != NULL )
+        if( fp )
         {
-            fputs( strBuffer, fp );
+            fputs( strBuffer.get(), fp );
             fclose( fp );
-            delete[] strBuffer;
-            return TRUE;
+            return true;
         }
         else
         {
-            delete[] strBuffer;
-            return FALSE;
+            return false;
         }
     }
 
-    BOOL ExportSettingsManager::LoadSettings( const CHAR* strFileName )
+    bool ExportSettingsManager::LoadSettings( const CHAR* strFileName )
     {
-        FILE* fp = NULL;
+        FILE* fp = nullptr;
         fopen_s( &fp, strFileName, "r" );
-        if( fp == NULL )
+        if( !fp )
         {
-            return FALSE;
+            return false;
         }
 
-        const DWORD dwBufferSize = 32 * 1024;
-        CHAR* strBuffer = new CHAR[dwBufferSize];
-        ZeroMemory( strBuffer, dwBufferSize * sizeof( CHAR ) );
+        const size_t dwBufferSize = 32 * 1024;
+        std::unique_ptr<CHAR[]> strBuffer( new CHAR[dwBufferSize] );
+        ZeroMemory( strBuffer.get(), dwBufferSize * sizeof( CHAR ) );
 
-        size_t dwReadBytes = fread( strBuffer, sizeof(CHAR), dwBufferSize, fp );
+        size_t dwReadBytes = fread( strBuffer.get(), sizeof(CHAR), dwBufferSize, fp );
         fclose( fp );
 
         if( dwReadBytes == 0 )
         {
-            delete[] strBuffer;
-            return FALSE;
+            return false;
         }
         else
         {
             assert( dwReadBytes < dwBufferSize );
             strBuffer[dwReadBytes] = '\0';
-            BOOL bSuccess = UnMarshalAllSettings( strBuffer );
-            delete[] strBuffer;
+            bool bSuccess = UnMarshalAllSettings( strBuffer.get() );
             return bSuccess;
         }
     }
@@ -576,20 +581,20 @@ namespace ATG
         pCategoryPlatform->ReverseChildOrder();
         
         ExportSettingsEntry* pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
-        g_SettingsManager.AddBool( pCategoryScene, "Export Hidden Objects", "exporthiddenobjects", FALSE, &bExportHiddenObjects );
-        g_SettingsManager.AddBool( pCategoryScene, "Export Frames", "exportframes", TRUE, &bExportScene );
-        g_SettingsManager.AddBool( pCategoryScene, "Export Lights", "exportlights", TRUE, &bExportLights );
+        g_SettingsManager.AddBool( pCategoryScene, "Export Hidden Objects", "exporthiddenobjects", false, &bExportHiddenObjects );
+        g_SettingsManager.AddBool( pCategoryScene, "Export Frames", "exportframes", true, &bExportScene );
+        g_SettingsManager.AddBool( pCategoryScene, "Export Lights", "exportlights", true, &bExportLights );
         g_SettingsManager.AddFloatBounded( pCategoryScene, "Light Range Scale", "lightrangescale", 1.0f, 0.0f, 1000.0f, &fLightRangeScale );
-        g_SettingsManager.AddBool( pCategoryScene, "Export Cameras", "exportcameras", TRUE, &bExportCameras );
-        g_SettingsManager.AddBool( pCategoryScene, "Export in Bind Pose", "exportbindpose", TRUE, &bSetBindPoseBeforeSceneParse );
+        g_SettingsManager.AddBool( pCategoryScene, "Export Cameras", "exportcameras", true, &bExportCameras );
+        g_SettingsManager.AddBool( pCategoryScene, "Export in Bind Pose", "exportbindpose", true, &bSetBindPoseBeforeSceneParse );
         g_SettingsManager.AddFloatBounded( pCategoryScene, "Export Scene Scale (1.0 = default)", "exportscale", 1.0f, 0.0f, 1000000.f, &fExportScale );
         pCategoryScene->ReverseChildOrder();
 
         ExportSettingsEntry* pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", TRUE, &bExportMeshes );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", TRUE, &bCompressVertexData );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", TRUE, &bComputeVertexTangentSpace );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Export Binormals", "exportbinormals", TRUE, &bExportBinormal );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", true, &bCompressVertexData );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", true, &bComputeVertexTangentSpace );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Export Binormals", "exportbinormals", true, &bExportBinormal );
         static const ExportEnumValue VertexNormalTypes[] = {
             { "FLOAT3 (12 bytes)", "float3", D3DDECLTYPE_FLOAT3 },
             { "DEC3N (4 bytes)", "dec3n", D3DDECLTYPE_DEC3N },
@@ -598,13 +603,13 @@ namespace ATG
             { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
         };
         g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_DEC3N, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", TRUE, &bExportNormals );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", FALSE, &bForceIndex32Format );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", false, &bForceIndex32Format );
         g_SettingsManager.AddIntBounded( pCategoryMeshes, "Max UV Set Count", "maxuvsetcount", 8, 0, 8, &iMaxUVSetCount );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Export Bone Weights & Indices for Skinned Meshes", "exportboneweights", TRUE, &bExportSkinWeights );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Always Export Bone Weights & Indices for Skinned Meshes (even if no data present)", "forceboneweights", FALSE, &bForceExportSkinWeights );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Flip Triangle Winding", "fliptriangles", TRUE, &bFlipTriangles );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", TRUE, &bInvertTexVCoord );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Export Bone Weights & Indices for Skinned Meshes", "exportboneweights", true, &bExportSkinWeights );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Always Export Bone Weights & Indices for Skinned Meshes (even if no data present)", "forceboneweights", false, &bForceExportSkinWeights );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Flip Triangle Winding", "fliptriangles", true, &bFlipTriangles );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", true, &bInvertTexVCoord );
         g_SettingsManager.AddString( pCategoryMeshes, "Mesh Name Decoration, applied as a prefix to mesh names", "meshnamedecoration", "Mesh", strMeshNameDecoration );
 
         ExportSettingsEntry* pCategoryUVAtlas = g_SettingsManager.AddCategory( pCategoryMeshes, "UV Atlas Generation" );
@@ -615,25 +620,25 @@ namespace ATG
         pCategoryUVAtlas->ReverseChildOrder();
 
         ExportSettingsEntry* pCategorySubD = g_SettingsManager.AddCategory( pCategoryMeshes, "Subdivision Surfaces" );
-        g_SettingsManager.AddBool( pCategorySubD, "Convert Poly Meshes to Subdivision Surfaces", "convertmeshtosubd", FALSE, &bConvertMeshesToSubD );
+        g_SettingsManager.AddBool( pCategorySubD, "Convert Poly Meshes to Subdivision Surfaces", "convertmeshtosubd", false, &bConvertMeshesToSubD );
         pCategorySubD->ReverseChildOrder();
 
         pCategoryMeshes->ReverseChildOrder();
 
         ExportSettingsEntry* pCategoryMaterials = g_SettingsManager.AddRootCategory( "Materials" );
-        g_SettingsManager.AddBool( pCategoryMaterials, "Export Materials", "exportmaterials", TRUE, &bExportMaterials );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Export Materials", "exportmaterials", true, &bExportMaterials );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Material Name", "defaultmaterialname", "Default", strDefaultMaterialName );
-        g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", TRUE, &bTextureCompression );
-        g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", FALSE, &bGenerateTextureMipMaps );
-        g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", FALSE, &bForceTextureOverwrite );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", false, &bGenerateTextureMipMaps );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", false, &bForceTextureOverwrite );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Diffuse Map Texture Filename", "defaultdiffusemap", "default.dds", strDefaultDiffuseMapTextureName );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "default-normalmap.dds", strDefaultNormalMapTextureName );
         pCategoryMaterials->ReverseChildOrder();
 
         ExportSettingsEntry* pCategoryAnimation = g_SettingsManager.AddRootCategory( "Animation" );
-        g_SettingsManager.AddBool( pCategoryAnimation, "Export Animations", "exportanimations", TRUE, &bExportAnimations );
-        g_SettingsManager.AddBool( pCategoryAnimation, "Optimize Animations", "optimizeanimations", TRUE, &bOptimizeAnimations );
-        g_SettingsManager.AddBool( pCategoryAnimation, "Rename Animations To Match Output File Name", "renameanimations", TRUE, &bRenameAnimationsToFileName );
+        g_SettingsManager.AddBool( pCategoryAnimation, "Export Animations", "exportanimations", true, &bExportAnimations );
+        g_SettingsManager.AddBool( pCategoryAnimation, "Optimize Animations", "optimizeanimations", true, &bOptimizeAnimations );
+        g_SettingsManager.AddBool( pCategoryAnimation, "Rename Animations To Match Output File Name", "renameanimations", true, &bRenameAnimationsToFileName );
         g_SettingsManager.AddIntBounded( pCategoryAnimation, "Animation Baking Sample Count Per Frame", "animsamplecount", 1, 1, 10, &iAnimSampleCountPerFrame );
         g_SettingsManager.AddIntBounded( pCategoryAnimation, "Position Curve Quality", "positioncurvequality", 50, 0, 100, &iAnimPositionExportQuality );
         g_SettingsManager.AddIntBounded( pCategoryAnimation, "Orientation Curve Quality", "orientationcurvequality", 50, 0, 100, &iAnimOrientationExportQuality );
@@ -643,7 +648,7 @@ namespace ATG
         SetDefaultSettings();
     }
 
-    VOID ExportCoreSettings::SetDefaultSettings()
+    void ExportCoreSettings::SetDefaultSettings()
     {
         g_SettingsManager.SetDefaultValues();
     }

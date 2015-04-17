@@ -18,7 +18,7 @@
 
 namespace ATG
 {
-    VOID ThinDialog::CenterOnParent()
+    void ThinDialog::CenterOnParent()
     {
         // center ourself in our parent
         RECT rcParent;
@@ -35,7 +35,7 @@ namespace ATG
         ::GetWindowRect( m_hwnd, &rcChild );
         x = ((rcParent.right - rcParent.left) - (rcChild.right - rcChild.left)) / 2;
         y = ((rcParent.bottom - rcParent.top) - (rcChild.bottom - rcChild.top)) / 2;
-        ::SetWindowPos( m_hwnd, NULL, x, y, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER );
+        ::SetWindowPos( m_hwnd, nullptr, x, y, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER );
     }
 
 
@@ -43,37 +43,37 @@ namespace ATG
     {
         LRESULT lrt = FALSE;
 
-        ThinDialog* pDlg = GetInstance( hwndDlg );
+        auto pDlg = GetInstance( hwndDlg );
 
         switch (uMsg)
         {
         case WM_NCACTIVATE:
             if ( pDlg )
             {
-                lrt = pDlg->OnNcActivate( (BOOL)wParam );
+                lrt = pDlg->OnNcActivate( static_cast<BOOL>( wParam ) );
             }
             break;
         case WM_ACTIVATE:
             if (pDlg)
             {
-                lrt = pDlg->OnActivate( (BOOL)wParam, (DWORD)lParam );
+                lrt = pDlg->OnActivate( static_cast<BOOL>( wParam ), static_cast<DWORD>( lParam ) );
             }
             break;
         case WM_INITDIALOG:
-            pDlg = (ThinDialog*)lParam;
+            pDlg = reinterpret_cast<ThinDialog*>( lParam );
             SetInstance( hwndDlg, pDlg );
             lrt = pDlg->OnInitDialog( (HWND)wParam );
             break;
 
         case WM_NOTIFY:
             assert( pDlg );
-            lrt = pDlg->OnNotify( (INT)wParam, (LPNMHDR)lParam );
+            lrt = pDlg->OnNotify( static_cast<INT>( wParam ), reinterpret_cast<LPNMHDR>( lParam ) );
             break;
 
         case WM_DESTROY:
             assert( pDlg );
             lrt = pDlg->OnDestroyDialog();
-            pDlg->m_hwnd = NULL;
+            pDlg->m_hwnd = nullptr;
             break;
 
         case WM_COMMAND:
@@ -111,38 +111,38 @@ namespace ATG
         UNREFERENCED_PARAMETER( uMsg );
         UNREFERENCED_PARAMETER( wParam );
         UNREFERENCED_PARAMETER( lParam );
-        return FALSE;
+        return false;
     };
 
     LRESULT ThinDialog::OnNcActivate( BOOL fDrawActive )
     {
         UNREFERENCED_PARAMETER( fDrawActive );
-        return FALSE;
+        return false;
     };
 
     LRESULT ThinDialog::OnActivate( BOOL fActivated, DWORD idThread )
     {
         UNREFERENCED_PARAMETER( fActivated );
         UNREFERENCED_PARAMETER( idThread );
-        return FALSE;
+        return false;
     };
 
     LRESULT ThinDialog::OnInitDialog( HWND hwndFocusCtrl )
     {
         UNREFERENCED_PARAMETER( hwndFocusCtrl );
-        return FALSE;
+        return false;
     };
 
     LRESULT ThinDialog::OnDestroyDialog( )
     {
-        return FALSE;
+        return false;
     };
 
     LRESULT ThinDialog::OnNotify( INT idCtrl, LPNMHDR pnmh )
     {
         UNREFERENCED_PARAMETER( idCtrl );
         UNREFERENCED_PARAMETER( pnmh );
-        return FALSE;
+        return false;
     };
 
     LRESULT ThinDialog::OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl )
@@ -150,10 +150,10 @@ namespace ATG
         UNREFERENCED_PARAMETER( wNotifyCode );
         UNREFERENCED_PARAMETER( idCtrl );
         UNREFERENCED_PARAMETER( hwndCtrl );
-        return FALSE;
+        return false;
     };
 
-    VOID GridLayout::SetRect(const LPRECT rect, INT border)
+    void GridLayout::SetRect(const LPRECT rect, INT border)
     {
         m_xOffset = rect->left + border;
         m_yOffset = rect->top + border;
@@ -171,7 +171,7 @@ namespace ATG
         {
             if (m_rowSpec[i] > 1)
             {
-                INT amount = (INT)m_rowSpec[i];
+                INT amount = static_cast<INT>( m_rowSpec[i] );
                 if (amount > height)
                     amount = height;
                 m_rowAlloc[i] = amount;
@@ -179,7 +179,7 @@ namespace ATG
             }
             if (m_columnSpec[i] > 1)
             {
-                INT amount = (INT)m_columnSpec[i];
+                INT amount = static_cast<INT>( m_columnSpec[i] );
                 if (amount > width)
                     amount = width;
                 m_columnAlloc[i] = amount;
@@ -195,7 +195,7 @@ namespace ATG
         {
             if (m_rowSpec[i] > 0 && m_rowSpec[i] <= 1)
             {
-                INT amount = (INT)(m_rowSpec[i] * (float)height);
+                INT amount = static_cast<INT>(m_rowSpec[i] * (float)height);
                 if (amount > remHeight)
                     amount = remHeight;
                 m_rowAlloc[i] = amount;
@@ -203,7 +203,7 @@ namespace ATG
             }
             if (m_columnSpec[i] > 0 && m_columnSpec[i] <= 1)
             {
-                INT amount = (INT)(m_columnSpec[i] * (float)width);
+                INT amount = static_cast<INT>(m_columnSpec[i] * (float)width);
                 if (amount > remWidth)
                     amount = remWidth;
                 m_columnAlloc[i] = amount;
@@ -212,21 +212,21 @@ namespace ATG
         }
     }
 
-    VOID GridLayout::SetClientRect(HWND hwnd, INT border)
+    void GridLayout::SetClientRect(HWND hwnd, INT border)
     {
         RECT rect;
         GetClientRect(hwnd, &rect);
         SetRect(&rect, border);
     }
 
-    VOID GridLayout::SetWindowRect(HWND hwnd, INT border)
+    void GridLayout::SetWindowRect(HWND hwnd, INT border)
     {
         RECT rect;
         GetWindowRect(hwnd, &rect);
         SetRect(&rect, border);
     }
 
-    VOID GridLayout::GetRect(LPRECT destRect, INT rowStart, INT colStart, INT rowSpan, INT colSpan, INT border)
+    void GridLayout::GetRect(LPRECT destRect, INT rowStart, INT colStart, INT rowSpan, INT colSpan, INT border)
     {
         destRect->left = m_xOffset;
         destRect->top = m_yOffset;
@@ -254,7 +254,7 @@ namespace ATG
         destRect->bottom -= border;
     }
 
-    VOID GridLayout::PlaceWindow(HWND hwnd, INT rowStart, INT colStart, INT rowSpan, INT colSpan, INT border, DWORD alignment)
+    void GridLayout::PlaceWindow(HWND hwnd, INT rowStart, INT colStart, INT rowSpan, INT colSpan, INT border, DWORD alignment)
     {
         RECT rect;
         GetRect(&rect, rowStart, colStart, rowSpan, colSpan, border);
@@ -319,12 +319,12 @@ namespace ATG
 
         // move window INTo place
         if (newSizeX == sizeX && newSizeY == sizeY)
-            SetWindowPos(hwnd, NULL, px, py, 0, 0, SWP_NOZORDER|SWP_NOSIZE);
+            SetWindowPos(hwnd, nullptr, px, py, 0, 0, SWP_NOZORDER|SWP_NOSIZE);
         else
-            SetWindowPos(hwnd, NULL, px, py, newSizeX, newSizeY, SWP_NOZORDER);
+            SetWindowPos(hwnd, nullptr, px, py, newSizeX, newSizeY, SWP_NOZORDER);
     }
 
-    VOID GridLayout::PlaceLayout(GridLayout& layout, INT rowStart, INT colStart, INT rowSpan, INT colSpan, INT border)
+    void GridLayout::PlaceLayout(GridLayout& layout, INT rowStart, INT colStart, INT rowSpan, INT colSpan, INT border)
     {
         RECT cellRect;
         GetRect(&cellRect, rowStart, colStart, rowSpan, colSpan, border);

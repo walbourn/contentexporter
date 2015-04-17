@@ -26,45 +26,45 @@ CHAR g_strMaterialDBFileName[ MAX_PATH ] = {0};
 const CHAR* ConvertString( const WCHAR* strData, DWORD dwLength = 0 )
 {
     static CHAR strText[256];
-    if( strData == NULL )
+    if( !strData )
         strData = L"";
     if( dwLength == 0 )
-        dwLength = (DWORD)wcslen( strData );
+        dwLength = static_cast<DWORD>( wcslen( strData ) );
     assert( dwLength < 255 );
-    WideCharToMultiByte( CP_ACP, 0, strData, dwLength, strText, 256, NULL, NULL );
+    WideCharToMultiByte( CP_ACP, 0, strData, dwLength, strText, 256, nullptr, nullptr );
     strText[ dwLength ] = '\0';
     return strText;
 }
 
-VOID CopyString( const WCHAR* strData, DWORD dwLength, WCHAR* strDest, DWORD dwDestLength )
+void CopyString( const WCHAR* strData, size_t dwLength, WCHAR* strDest, size_t dwDestLength )
 {
     wcsncpy_s( strDest, dwDestLength, strData, dwLength );
     strDest[ dwLength ] = L'\0';
 }
 
-HRESULT MaterialDatabaseReader::ElementBegin( CONST WCHAR* strName, UINT NameLen, CONST XMLAttribute *pAttributes, UINT NumAttributes )
+HRESULT MaterialDatabaseReader::ElementBegin( const WCHAR* strName, UINT NameLen, const XMLAttribute *pAttributes, UINT NumAttributes )
 {
     ProcessElementBeginContent();
 
     CopyString( strName, NameLen, m_strCurrentElementName, ARRAYSIZE(m_strCurrentElementName) );
-    m_bCurrentElementEndTag = FALSE;
+    m_bCurrentElementEndTag = false;
 
     ParseAttributes( pAttributes, NumAttributes );
 
     return S_OK;
 }
 
-HRESULT MaterialDatabaseReader::ElementContent( CONST WCHAR *strData, UINT DataLen, BOOL More )
+HRESULT MaterialDatabaseReader::ElementContent( const WCHAR *strData, UINT DataLen, bool More )
 {
     return S_OK;
 }
 
-HRESULT MaterialDatabaseReader::ElementEnd( CONST WCHAR *strName, UINT NameLen )
+HRESULT MaterialDatabaseReader::ElementEnd( const WCHAR *strName, UINT NameLen )
 {
     ProcessElementBeginContent();
 
     CopyString( strName, NameLen, m_strCurrentElementName, ARRAYSIZE(m_strCurrentElementName) );
-    m_bCurrentElementEndTag = TRUE;
+    m_bCurrentElementEndTag = true;
 
     ProcessElementEnd();
 
@@ -73,10 +73,10 @@ HRESULT MaterialDatabaseReader::ElementEnd( CONST WCHAR *strName, UINT NameLen )
     return S_OK;
 }
 
-VOID MaterialDatabaseReader::ParseAttributes( const XMLAttribute* pAttributes, DWORD dwAttributeCount )
+void MaterialDatabaseReader::ParseAttributes( const XMLAttribute* pAttributes, size_t dwAttributeCount )
 {
     m_CurrentElementAttributes.clear();
-    for( DWORD i = 0; i < dwAttributeCount; ++i )
+    for( size_t i = 0; i < dwAttributeCount; ++i )
     {
         ElementAttribute ea;
         CopyString( pAttributes[i].strName, pAttributes[i].NameLen, ea.strName, ARRAYSIZE(ea.strName) );
@@ -87,23 +87,23 @@ VOID MaterialDatabaseReader::ParseAttributes( const XMLAttribute* pAttributes, D
 
 const WCHAR* MaterialDatabaseReader::FindAttribute( const WCHAR* strName )
 {
-    DWORD dwCount = (DWORD)m_CurrentElementAttributes.size();
-    for( DWORD i = 0; i < dwCount; ++i )
+    size_t dwCount = m_CurrentElementAttributes.size();
+    for( size_t i = 0; i < dwCount; ++i )
     {
         if( _wcsicmp( strName, m_CurrentElementAttributes[i].strName ) == 0 )
             return m_CurrentElementAttributes[i].strValue;
     }
-    return NULL;
+    return nullptr;
 }
 
-VOID MaterialDatabaseReader::Error( HRESULT hError, CONST CHAR *strMessage )
+void MaterialDatabaseReader::Error( HRESULT hError, const CHAR *strMessage )
 {
 
 }
 
 ExportMaterialParameterType ConvertType( const WCHAR* strType )
 {
-    if( strType == NULL )
+    if( !strType )
         return MPT_STRING;
 
     if( _wcsicmp( strType, L"bool" ) == 0 )
@@ -130,29 +130,29 @@ ExportMaterialParameterType ConvertType( const WCHAR* strType )
     return MPT_STRING;
 }
 
-BOOL ConvertBool( const WCHAR* strBool, BOOL bDefaultValue )
+bool ConvertBool( const WCHAR* strBool, bool bDefaultValue )
 {
-    if( strBool == NULL )
+    if( !strBool )
         return bDefaultValue;
     WCHAR FirstChar = strBool[0];
     return ( FirstChar == L'T' || FirstChar == L't' || FirstChar == L'1' );
 }
 
-VOID MaterialDatabaseReader::ProcessElementBeginContent()
+void MaterialDatabaseReader::ProcessElementBeginContent()
 {
     if( MATCH_ELEMENT_NAME( L"Material" ) )
     {
-        m_pCurrentMaterial = NULL;
+        m_pCurrentMaterial = nullptr;
 
         const WCHAR* strName = FindAttribute( L"Name" );
-        if( strName == NULL )
+        if( !strName )
             return;
 
         m_pCurrentMaterial = new ExportMaterialDefinition();
         m_pCurrentMaterial->strName = ConvertString( strName );
 
         const WCHAR* strDesc = FindAttribute( L"Description" );
-        if( strDesc != NULL )
+        if( strDesc )
             m_pCurrentMaterial->strDescription = ConvertString( strDesc );
 
         g_Materials.push_back( m_pCurrentMaterial );
@@ -160,14 +160,14 @@ VOID MaterialDatabaseReader::ProcessElementBeginContent()
     }
     else if( MATCH_ELEMENT_NAME( L"Parameter" ) )
     {
-        if( m_pCurrentMaterial == NULL )
+        if( !m_pCurrentMaterial )
             return;
 
-        if( m_pCurrentParam != NULL )
+        if( m_pCurrentParam )
             return;
 
         const WCHAR* strName = FindAttribute( L"Name" );
-        if( strName == NULL )
+        if( !strName )
             return;
 
         m_pCurrentParam = new ExportMaterialParameterDefinition();
@@ -176,7 +176,7 @@ VOID MaterialDatabaseReader::ProcessElementBeginContent()
         m_pCurrentMaterial->Parameters.push_back( m_pCurrentParam );
 
         const WCHAR* strDisplayName = FindAttribute( L"DisplayName" );
-        if( strDisplayName != NULL )
+        if( strDisplayName )
             m_pCurrentParam->strDisplayName = ConvertString( strDisplayName );
         else
             m_pCurrentParam->strDisplayName = m_pCurrentParam->strName;
@@ -185,7 +185,7 @@ VOID MaterialDatabaseReader::ProcessElementBeginContent()
         m_pCurrentParam->strDescription = ConvertString( strDesc );
 
         const WCHAR* strDisplayHint = FindAttribute( L"DisplayHint" );
-        if( strDisplayHint == NULL || wcslen( strDisplayHint ) < 1 )
+        if( !strDisplayHint || wcslen( strDisplayHint ) < 1 )
             m_pCurrentParam->strDisplayHint = " ";
         else
             m_pCurrentParam->strDisplayHint = ConvertString( strDisplayHint );
@@ -197,13 +197,13 @@ VOID MaterialDatabaseReader::ProcessElementBeginContent()
         m_pCurrentParam->ParamType = ConvertType( strType );
 
         const WCHAR* strVisible = FindAttribute( L"ToolVisible" );
-        m_pCurrentParam->bVisibleInTool = ConvertBool( strVisible, FALSE );
+        m_pCurrentParam->bVisibleInTool = ConvertBool( strVisible, false );
 
         const WCHAR* strExport = FindAttribute( L"Export" );
-        m_pCurrentParam->bExportToContentFile = ConvertBool( strExport, TRUE );
+        m_pCurrentParam->bExportToContentFile = ConvertBool( strExport, true );
 
         const WCHAR* strDetectAlpha = FindAttribute( L"DetectAlpha" );
-        m_pCurrentParam->bDetectAlpha = ConvertBool( strDetectAlpha, FALSE );
+        m_pCurrentParam->bDetectAlpha = ConvertBool( strDetectAlpha, false );
 
         const WCHAR* strDefaultValue = FindAttribute( L"DefaultValue" );
         m_pCurrentParam->strDefaultValue = ConvertString( strDefaultValue );
@@ -211,40 +211,40 @@ VOID MaterialDatabaseReader::ProcessElementBeginContent()
     }
 }
 
-VOID MaterialDatabaseReader::ProcessElementEnd()
+void MaterialDatabaseReader::ProcessElementEnd()
 {
     if( MATCH_ELEMENT_NAME( L"Material" ) )
     {
-        assert( m_pCurrentMaterial != NULL );
-        assert( m_pCurrentParam == NULL );
-        m_pCurrentMaterial = NULL;
+        assert( m_pCurrentMaterial != nullptr );
+        assert( m_pCurrentParam == nullptr );
+        m_pCurrentMaterial = nullptr;
     }
     else if( MATCH_ELEMENT_NAME( L"Parameter" ) )
     {
-        assert( m_pCurrentMaterial != NULL );
-        assert( m_pCurrentParam != NULL );
-        m_pCurrentParam = NULL;
+        assert( m_pCurrentMaterial != nullptr );
+        assert( m_pCurrentParam != nullptr );
+        m_pCurrentParam = nullptr;
     }
 }
 
 ExportMaterialDefinition::~ExportMaterialDefinition()
 {
-    DWORD dwCount = (DWORD)Parameters.size();
-    for( DWORD i = 0; i < dwCount; ++i )
+    size_t dwCount = Parameters.size();
+    for( size_t i = 0; i < dwCount; ++i )
         delete Parameters[i];
     Parameters.clear();
 }
 
-VOID ExportMaterialDatabase::Clear()
+void ExportMaterialDatabase::Clear()
 {
-    for( DWORD i = 0; i < g_Materials.size(); ++i )
+    for( size_t i = 0; i < g_Materials.size(); ++i )
     {
         delete g_Materials[i];
     }
     g_Materials.clear();
 }
 
-BOOL ExportMaterialDatabase::Initialize( const CHAR* strFileName )
+bool ExportMaterialDatabase::Initialize( const CHAR* strFileName )
 {
     MaterialDatabaseReader mdr;
     XMLParser xp;
@@ -262,12 +262,12 @@ const CHAR* ExportMaterialDatabase::GetDatabaseFileName()
     return g_strMaterialDBFileName;
 }
 
-DWORD ExportMaterialDatabase::GetMaterialCount()
+size_t ExportMaterialDatabase::GetMaterialCount()
 {
-    return (DWORD)g_Materials.size();
+    return g_Materials.size();
 }
 
-const ExportMaterialDefinition* ExportMaterialDatabase::GetMaterial( DWORD dwIndex )
+const ExportMaterialDefinition* ExportMaterialDatabase::GetMaterial( size_t dwIndex )
 {
     assert( dwIndex < GetMaterialCount() );
     return g_Materials[ dwIndex ];
@@ -275,13 +275,13 @@ const ExportMaterialDefinition* ExportMaterialDatabase::GetMaterial( DWORD dwInd
 
 const ExportMaterialDefinition* ExportMaterialDatabase::FindMaterial( ExportString strName )
 {
-    DWORD dwCount = GetMaterialCount();
-    for( DWORD i = 0; i < dwCount; ++i )
+    size_t dwCount = GetMaterialCount();
+    for( size_t i = 0; i < dwCount; ++i )
     {
         if( g_Materials[i]->strName == strName )
             return g_Materials[i];
     }
-    return NULL;
+    return nullptr;
 }
 
 }

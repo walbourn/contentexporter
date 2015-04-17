@@ -16,30 +16,32 @@
 #include "ParseMisc.h"
 #include "ParseMesh.h"
 
+using namespace ATG;
+
 extern ATG::ExportScene* g_pScene;
 
 static D3DXMATRIX ConvertMatrix( const FbxMatrix& matFbx )
 {
     D3DXMATRIX matConverted;
-    FLOAT* pFloats = (FLOAT*)&matConverted;
+    float* pFloats = (float*)&matConverted;
     const DOUBLE* pDoubles = (const DOUBLE*)matFbx.mData;
     for( DWORD i = 0; i < 16; ++i )
     {
-        pFloats[i] = (FLOAT)pDoubles[i];
+        pFloats[i] = (float)pDoubles[i];
     }
     return matConverted;
 }
 
-inline BOOL IsEqual( FLOAT A, FLOAT B )
+inline bool IsEqual( float A, float B )
 {
     return fabs( A - B ) <= 1e-5f;
 }
 
-D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX& matParentWorld, const BOOL bWarnings = TRUE )
+D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX& matParentWorld, const bool bWarnings = true )
 {
     D3DXMATRIX matWorld;
     D3DXMATRIX matLocal;
-    BOOL bProcessDefaultTransform = TRUE;
+    bool bProcessDefaultTransform = true;
 
     if( !g_BindPoseMap.empty() )
     {
@@ -49,9 +51,9 @@ D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX
             FbxMatrix PoseMatrix = iter->second;
             matWorld = ConvertMatrix( PoseMatrix );
             D3DXMATRIX matInvParentWorld;
-            D3DXMatrixInverse( &matInvParentWorld, NULL, &matParentWorld );
+            D3DXMatrixInverse( &matInvParentWorld, nullptr, &matParentWorld );
             D3DXMatrixMultiply( &matLocal, &matWorld, &matInvParentWorld );
-            bProcessDefaultTransform = FALSE;
+            bProcessDefaultTransform = false;
         }
     }
 
@@ -74,7 +76,7 @@ D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX
         D3DXMatrixMultiply( &matWorld, &matParentWorld, &matLocal );
     }
 
-    pFrame->Transform().InitializeFromFloats( (FLOAT*)&matLocal );
+    pFrame->Transform().InitializeFromFloats( (float*)&matLocal );
 
     const D3DXVECTOR3& Scale = pFrame->Transform().Scale();
     if( bWarnings && 
@@ -102,8 +104,7 @@ D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX
     return matWorld;
 }
 
-
-VOID ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& matParentWorld )
+void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& matParentWorld )
 {
     ExportLog::LogMsg( 2, "Parsing node \"%s\".", pNode->GetName() );
 
@@ -112,13 +113,13 @@ VOID ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& mat
     D3DXMATRIX matWorld = ParseTransform( pNode, pFrame, matParentWorld );
     pParentFrame->AddChild( pFrame );
 
-    if( pNode->GetSubdiv() != NULL )
+    if( pNode->GetSubdiv() )
     {
         ParseSubDiv( pNode, pNode->GetSubdiv(), pFrame );
     }
-    else if( pNode->GetMesh() != NULL )
+    else if( pNode->GetMesh() )
     {
-        ParseMesh( pNode, pNode->GetMesh(), pFrame, FALSE );
+        ParseMesh( pNode, pNode->GetMesh(), pFrame, false );
     }
     ParseCamera( pNode->GetCamera(), pFrame );
     ParseLight( pNode->GetLight(), pFrame );
@@ -130,31 +131,31 @@ VOID ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& mat
     }
 }
 
-VOID FixupNode( ExportFrame* pFrame, const D3DXMATRIX& matParentWorld )
+void FixupNode( ExportFrame* pFrame, const D3DXMATRIX& matParentWorld )
 {
     auto pNode = reinterpret_cast<FbxNode*>( pFrame->GetDCCObject() );
 
     D3DXMATRIX matWorld;
-    if( pNode != NULL )
+    if( pNode )
     {
         ExportLog::LogMsg( 4, "Fixing up frame \"%s\".", pFrame->GetName().SafeString() );
-        matWorld = ParseTransform( pNode, pFrame, matParentWorld, FALSE );
+        matWorld = ParseTransform( pNode, pFrame, matParentWorld, false );
     }
     else
     {
         matWorld = matParentWorld;
     }
 
-    DWORD dwChildCount = pFrame->GetChildCount();
-    for( DWORD i = 0; i < dwChildCount; ++i )
+    size_t dwChildCount = pFrame->GetChildCount();
+    for( size_t i = 0; i < dwChildCount; ++i )
     {
         FixupNode( pFrame->GetChildByIndex( i ), matWorld );
     }
 }
 
-VOID ParseCamera( FbxCamera* pFbxCamera, ExportFrame* pParentFrame )
+void ParseCamera( FbxCamera* pFbxCamera, ExportFrame* pParentFrame )
 {
-    if( pFbxCamera == NULL || !g_pScene->Settings().bExportCameras )
+    if( !pFbxCamera || !g_pScene->Settings().bExportCameras )
         return;
 
     ExportLog::LogMsg( 2, "Parsing camera \"%s\".", pFbxCamera->GetName() );
@@ -162,18 +163,20 @@ VOID ParseCamera( FbxCamera* pFbxCamera, ExportFrame* pParentFrame )
     ExportCamera* pCamera = new ExportCamera( pFbxCamera->GetName() );
     pCamera->SetDCCObject( pFbxCamera );
 
-    pCamera->fNearClip = (FLOAT)pFbxCamera->NearPlane.Get();
-    pCamera->fFarClip = (FLOAT)pFbxCamera->FarPlane.Get();
-    pCamera->fFieldOfView = (FLOAT)pFbxCamera->FieldOfView.Get();
-    pCamera->fFocalLength = (FLOAT)pFbxCamera->FocalLength.Get();
+    pCamera->fNearClip = (float)pFbxCamera->NearPlane.Get();
+    pCamera->fFarClip = (float)pFbxCamera->FarPlane.Get();
+    pCamera->fFieldOfView = (float)pFbxCamera->FieldOfView.Get();
+    pCamera->fFocalLength = (float)pFbxCamera->FocalLength.Get();
 
     pParentFrame->AddCamera( pCamera );
 }
 
-VOID ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
+void ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
 {
-    if( pFbxLight == NULL || !g_pScene->Settings().bExportLights )
+    if( !pFbxLight || !g_pScene->Settings().bExportLights )
         return;
+
+    ExportLog::LogMsg( 2, "Parsing light \"%s\".", pFbxLight->GetName() );
 
     switch( pFbxLight->LightType.Get() )
     {
@@ -192,17 +195,15 @@ VOID ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
         return;
     }
 
-    ExportLog::LogMsg( 2, "Parsing light \"%s\".", pFbxLight->GetName() );
-
     ExportLight* pLight = new ExportLight( pFbxLight->GetName() );
     pLight->SetDCCObject( pFbxLight );
     pParentFrame->AddLight( pLight );
 
     auto colorRGB = pFbxLight->Color.Get();
-    FLOAT fIntensity = (FLOAT)pFbxLight->Intensity.Get();
+    float fIntensity = (float)pFbxLight->Intensity.Get();
     fIntensity *= 0.01f;
 
-    D3DXCOLOR Color( (FLOAT)colorRGB[0], (FLOAT)colorRGB[1], (FLOAT)colorRGB[2], 1.0f );
+    D3DXCOLOR Color( (float)colorRGB[0], (float)colorRGB[1], (float)colorRGB[2], 1.0f );
     Color *= fIntensity;
     pLight->Color = Color;
 
@@ -243,8 +244,8 @@ VOID ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
 
     case FbxLight::eSpot:
         pLight->Type = ExportLight::LT_SPOT;
-        pLight->fOuterAngle = (FLOAT)pFbxLight->OuterAngle.Get();
-        pLight->fInnerAngle = (FLOAT)pFbxLight->InnerAngle.Get();
+        pLight->fOuterAngle = (float)pFbxLight->OuterAngle.Get();
+        pLight->fInnerAngle = (float)pFbxLight->InnerAngle.Get();
         pLight->SpotFalloff = pLight->Falloff;
         break;
 

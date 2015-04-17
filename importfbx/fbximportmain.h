@@ -15,38 +15,36 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-using namespace ATG;
-
-class FBXTransformer : public IDCCTransformer
+class FBXTransformer : public ATG::IDCCTransformer
 {
 public:
     FBXTransformer()
         : m_fUnitScale( 1.0f )
     { }
 
-    VOID Initialize( FbxScene* pScene );
+    void Initialize( FbxScene* pScene );
 
-    virtual VOID TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST;
-    virtual VOID TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVECTOR3* pSrcPosition ) CONST;
-    virtual VOID TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST;
-    virtual FLOAT TransformLength( FLOAT fInputLength ) CONST;
+    virtual void TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX* pSrcMatrix ) const override;
+    virtual void TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVECTOR3* pSrcPosition ) const override;
+    virtual void TransformDirection( D3DXVECTOR3* pDestDirection, const D3DXVECTOR3* pSrcDirection ) const override;
+    virtual float TransformLength( float fInputLength ) const override;
 
     // Sets unit scale for exporting all geometry - works with characters too.
-    void SetUnitScale( const FLOAT fScale )
+    void SetUnitScale( const float fScale )
     {
         m_fUnitScale = fScale;
     }
 
 protected:
-    FLOAT m_fUnitScale;
-    BOOL  m_bMaxConversion;
+    float m_fUnitScale;
+    bool  m_bMaxConversion;
 };
 
 class FBXImport
 {
 public:
     static HRESULT Initialize();
-    static VOID ClearScene();
+    static void ClearScene();
 
     static HRESULT ImportFile( const CHAR* strFileName );
 

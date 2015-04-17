@@ -19,16 +19,16 @@ namespace ATG
 {
 
 ExportMaterial::ExportMaterial()
-: ExportBase( NULL ),
-  m_pMaterialDefinition( NULL ),
-  m_bTransparent( FALSE )
+: ExportBase( nullptr ),
+  m_pMaterialDefinition( nullptr ),
+  m_bTransparent( false )
 {
 }
 
 ExportMaterial::ExportMaterial( ExportString name )
 : ExportBase( name ),
-  m_pMaterialDefinition( NULL ),
-  m_bTransparent( FALSE )
+  m_pMaterialDefinition( nullptr ),
+  m_bTransparent( false )
 {
 }
 
@@ -47,28 +47,28 @@ ExportMaterialParameter* ExportMaterial::FindParameter( const ExportString strNa
             return &param;
         ++iter;
     }
-    return NULL;
+    return nullptr;
 }
 
-LPDIRECT3DDEVICE9 g_pd3dDevice = NULL;
+LPDIRECT3DDEVICE9 g_pd3dDevice = nullptr;
 DWORD g_dwRefCount = 0;
 
 LPDIRECT3DDEVICE9 ExportMaterial::GetDirect3DDevice()
 {
     if( g_dwRefCount > 0 )
     {
-        assert( g_pd3dDevice != NULL );
+        assert( g_pd3dDevice != nullptr );
         ++g_dwRefCount;
         return g_pd3dDevice;
     }
 
     ExportLog::LogMsg( 5, "Initializing D3D device..." );
 
-    assert( g_pd3dDevice == NULL );
+    assert( g_pd3dDevice == nullptr );
 
     IDirect3D9* pD3D = Direct3DCreate9( D3D_SDK_VERSION );
-    if( pD3D == NULL )
-        return NULL;
+    if( !pD3D )
+        return nullptr;
 
     D3DDISPLAYMODE Mode;
     pD3D->GetAdapterDisplayMode(0, &Mode);
@@ -82,7 +82,7 @@ LPDIRECT3DDEVICE9 ExportMaterial::GetDirect3DDevice()
     pp.BackBufferFormat = Mode.Format;
     pp.BackBufferCount  = 1;
     pp.SwapEffect       = D3DSWAPEFFECT_COPY;
-    pp.Windowed         = TRUE;
+    pp.Windowed         = true;
 
     HRESULT hr;
     hr = pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, hDCCWindow, 
@@ -99,9 +99,9 @@ LPDIRECT3DDEVICE9 ExportMaterial::GetDirect3DDevice()
 }
 
 
-VOID ExportMaterial::ReleaseDirect3DDevice()
+void ExportMaterial::ReleaseDirect3DDevice()
 {
-    if( g_pd3dDevice == NULL )
+    if( !g_pd3dDevice )
     {
         return;
     }
@@ -111,9 +111,9 @@ VOID ExportMaterial::ReleaseDirect3DDevice()
 
     if( g_dwRefCount == 0 )
     {
-        assert( g_pd3dDevice != NULL );
+        assert( g_pd3dDevice != nullptr );
         g_pd3dDevice->Release();
-        g_pd3dDevice = NULL;
+        g_pd3dDevice = nullptr;
         ExportLog::LogMsg( 5, "D3D device released." );
     }
 }

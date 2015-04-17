@@ -15,6 +15,8 @@
 #include "StdAfx.h"
 #include "ParseAnimation.h"
 
+using namespace ATG;
+
 extern ATG::ExportScene* g_pScene;
 
 struct AnimationScanNode
@@ -26,9 +28,9 @@ struct AnimationScanNode
     D3DXMATRIX matGlobal;
 };
 
-typedef vector<AnimationScanNode> ScanList;
+typedef std::vector<AnimationScanNode> ScanList;
 
-VOID ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIndex, BOOL bIncludeNode )
+void ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIndex, bool bIncludeNode )
 {
     INT iCurrentIndex = iParentIndex;
 
@@ -37,13 +39,13 @@ VOID ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIn
         const CHAR* strNodeName = pNode->GetName();
         if( _stricmp( strNodeName, g_pScene->Settings().strAnimationRootNodeName ) == 0 )
         {
-            bIncludeNode = TRUE;
+            bIncludeNode = true;
         }
     }
 
     if( bIncludeNode )
     {
-        iCurrentIndex = (INT)scanlist.size();
+        iCurrentIndex = static_cast<INT>( scanlist.size() );
 
         // add node to anim list
         AnimationScanNode asn = { 0 };
@@ -63,25 +65,25 @@ VOID ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIn
 static D3DXMATRIX ConvertMatrix( const FbxMatrix& matrix )
 {
     D3DXMATRIX matResult;
-    FLOAT* fData = (FLOAT*)&matResult;
+    float* fData = (float*)&matResult;
     DOUBLE* pSrcData = (DOUBLE*)&matrix;
     for( DWORD i = 0; i < 16; ++i )
     {
-        fData[i] = (FLOAT)pSrcData[i];
+        fData[i] = (float)pSrcData[i];
     }
     return matResult;
 }
 
 
-VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatrix& matFBXGlobal, FLOAT fTime )
+void AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatrix& matFBXGlobal, float fTime )
 {
     D3DXMATRIX matGlobal = ConvertMatrix( matFBXGlobal );
     asn.matGlobal = matGlobal;
     D3DXMATRIX matLocal = matGlobal;
-    if( pParent != NULL )
+    if( pParent )
     {
         D3DXMATRIX matInvParentGlobal;
-        D3DXMatrixInverse( &matInvParentGlobal, NULL, &pParent->matGlobal );
+        D3DXMatrixInverse( &matInvParentGlobal, nullptr, &pParent->matGlobal );
 
         D3DXMatrixMultiply( &matLocal, &matGlobal, &matInvParentGlobal );
     }
@@ -98,27 +100,27 @@ VOID AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatri
     asn.pTrack->TransformTrack.AddKey( fTime, *(D3DXVECTOR3*)&vTranslation, *(D3DXQUATERNION*)&qRotation, *(D3DXVECTOR3*)&vScale );
 }
 
-VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFbxScene )
+void CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFbxScene )
 {
-    const FLOAT fDeltaTime = pAnim->fSourceSamplingInterval;
-    const FLOAT fStartTime = pAnim->fStartTime;
-    const FLOAT fEndTime = pAnim->fEndTime;
-    FLOAT fCurrentTime = fStartTime;
+    const float fDeltaTime = pAnim->fSourceSamplingInterval;
+    const float fStartTime = pAnim->fStartTime;
+    const float fEndTime = pAnim->fEndTime;
+    float fCurrentTime = fStartTime;
 
-    DWORD dwNodeCount = (DWORD)scanlist.size();
+    size_t dwNodeCount = scanlist.size();
 
-    ExportLog::LogMsg( 2, "Capturing animation data from %d nodes, from time %0.3f to %0.3f, at an interval of %0.3f seconds.", dwNodeCount, fStartTime, fEndTime, fDeltaTime );
+    ExportLog::LogMsg( 2, "Capturing animation data from %Iu nodes, from time %0.3f to %0.3f, at an interval of %0.3f seconds.", dwNodeCount, fStartTime, fEndTime, fDeltaTime );
 
     while( fCurrentTime <= fEndTime )
     {
         FbxTime CurrentTime;
         CurrentTime.SetSecondDouble( fCurrentTime );
-        for( DWORD i = 0; i < dwNodeCount; ++i )
+        for( size_t i = 0; i < dwNodeCount; ++i )
         {
             AnimationScanNode& asn = scanlist[i];
             auto pAnimEvaluator = pFbxScene->GetEvaluator();
             auto matGlobal = pAnimEvaluator->GetNodeGlobalTransform( asn.pNode, CurrentTime );
-            AnimationScanNode* pParent = NULL;
+            AnimationScanNode* pParent = nullptr;
             if( asn.iParentIndex >= 0 )
                 pParent = &scanlist[asn.iParentIndex];
             AddKey( asn, pParent, matGlobal, fCurrentTime - fStartTime );
@@ -127,7 +129,7 @@ VOID CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFb
     }
 }
 
-VOID ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
+void ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
 {
     // TODO - Ignore "Default"? FBXSDK_TAKENODE_DEFAULT_NAME
 
@@ -149,15 +151,15 @@ VOID ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
     FbxTime FrameTime;
     FrameTime.SetTime( 0, 0, 0, 1, 0, pFbxScene->GetGlobalSettings().GetTimeMode() );
 
-    FLOAT fFrameTime = (FLOAT)FrameTime.GetSecondDouble();
-    FLOAT fSampleTime = fFrameTime / (FLOAT)g_pScene->Settings().iAnimSampleCountPerFrame;
+    float fFrameTime = (float)FrameTime.GetSecondDouble();
+    float fSampleTime = fFrameTime / (float)g_pScene->Settings().iAnimSampleCountPerFrame;
     assert( fSampleTime > 0 );
 
     float fStartTime, fEndTime;
-    if( pTakeInfo != NULL )
+    if( pTakeInfo )
     {
-        fStartTime = (FLOAT)pTakeInfo->mLocalTimeSpan.GetStart().GetSecondDouble();
-        fEndTime = (FLOAT)pTakeInfo->mLocalTimeSpan.GetStop().GetSecondDouble();
+        fStartTime = (float)pTakeInfo->mLocalTimeSpan.GetStart().GetSecondDouble();
+        fEndTime = (float)pTakeInfo->mLocalTimeSpan.GetStop().GetSecondDouble();
     }
     else
     {
@@ -169,22 +171,23 @@ VOID ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
 
         ExportLog::LogWarning( "Animation take \"%s\" has no takeinfo; using defaults.", pAnim->GetName().SafeString() );
     }
+
     pAnim->fStartTime = fStartTime;
     pAnim->fEndTime = fEndTime;
     pAnim->fSourceFrameInterval = fFrameTime;
     pAnim->fSourceSamplingInterval = fSampleTime;
 
-    BOOL bIncludeAllNodes = TRUE;
+    bool bIncludeAllNodes = true;
     if( strlen( g_pScene->Settings().strAnimationRootNodeName ) > 0 )
     {
-        bIncludeAllNodes = FALSE;
+        bIncludeAllNodes = false;
     }
 
     ScanList scanlist;
     ParseNode( pFbxScene->GetRootNode(), scanlist, 0, -1, bIncludeAllNodes );
 
-    DWORD dwTrackCount = (DWORD)scanlist.size();
-    for( DWORD i = 0; i < dwTrackCount; ++i )
+    size_t dwTrackCount = scanlist.size();
+    for( size_t i = 0; i < dwTrackCount; ++i )
     {
         const CHAR* strTrackName = scanlist[i].pNode->GetName();
         ExportLog::LogMsg( 4, "Track: %s", strTrackName );
@@ -200,9 +203,9 @@ VOID ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
     pAnim->Optimize();
 }
 
-VOID ParseAnimation( FbxScene* pFbxScene )
+void ParseAnimation( FbxScene* pFbxScene )
 {
-    assert( pFbxScene != NULL );
+    assert( pFbxScene != nullptr );
 
     // set animation quality settings
     ExportAnimation::SetAnimationExportQuality( g_pScene->Settings().iAnimPositionExportQuality, g_pScene->Settings().iAnimOrientationExportQuality, 50 );
@@ -210,7 +213,7 @@ VOID ParseAnimation( FbxScene* pFbxScene )
     FbxArray<FbxString*> AnimStackNameArray;
     pFbxScene->FillAnimStackNameArray( AnimStackNameArray );
 
-    DWORD dwAnimStackCount = (DWORD)AnimStackNameArray.GetCount();
+    DWORD dwAnimStackCount = static_cast<DWORD>( AnimStackNameArray.GetCount() );
     for( DWORD i = 0; i < dwAnimStackCount; ++i )
     {
         ParseAnimStack( pFbxScene, AnimStackNameArray.GetAt(i) );

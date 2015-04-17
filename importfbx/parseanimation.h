@@ -15,6 +15,4 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-using namespace ATG;
-
-VOID ParseAnimation( FbxScene* pFbxScene );
+void ParseAnimation( FbxScene* pFbxScene );

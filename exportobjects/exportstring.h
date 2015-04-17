@@ -27,7 +27,7 @@ class ExportMutableString
 {
 public:
     ExportMutableString()
-        : m_strValue( NULL )
+        : m_strValue( nullptr )
     { }
     ExportMutableString( const CHAR* strCopy )
     {
@@ -39,9 +39,8 @@ public:
     }
     ~ExportMutableString()
     {
-        Deallocate();
     }
-    operator const CHAR* () const { return m_strValue; }
+    operator const CHAR* () const { return m_strValue.get(); }
     ExportMutableString& operator=( const CHAR* strRHS )
     {
         SetAsCopy( strRHS );
@@ -53,43 +52,32 @@ public:
         return *this;
     }
 protected:
-    VOID SetAsCopy( const CHAR* strCopy )
+    void SetAsCopy( const CHAR* strCopy )
     {
-        if( strCopy == NULL )
+        if( !strCopy )
         {
-            Deallocate();
+            m_strValue.reset();
             return;
         }
-        DWORD dwSize = (DWORD)strlen( strCopy ) + 1;
-        Allocate( dwSize );
-        strcpy_s( m_strValue, dwSize, strCopy );
+        size_t dwSize = strlen( strCopy ) + 1;
+        m_strValue.reset( new CHAR[dwSize] );
+        strcpy_s( m_strValue.get(), dwSize, strCopy );
     }
-    VOID Allocate( DWORD dwSize )
-    {
-        Deallocate();
-        m_strValue = new CHAR[dwSize];
-    }
-    VOID Deallocate()
-    {
-        if( m_strValue != NULL )
-            delete[] m_strValue;
-        m_strValue = NULL;
-    }
-    CHAR*   m_strValue;
+    std::unique_ptr<CHAR[]> m_strValue;
 };
 
 class ExportString
 {
 public:
-    ExportString() : m_strString( NULL ) {}
+    ExportString() : m_strString( nullptr ) {}
     ExportString( const CHAR* strString ) { m_strString = AddString( strString ); }
     ExportString( const ExportString& other ) : m_strString( other.m_strString ) {}
 
     ExportString& operator= ( const ExportString& RHS ) { m_strString = RHS.m_strString; return *this; }
     ExportString& operator= ( const CHAR* strRHS ) { m_strString = AddString( strRHS ); return *this; }
 
-    BOOL operator== ( const ExportString& RHS ) const { return m_strString == RHS.m_strString; }
-    inline BOOL operator== ( const CHAR* strRHS ) const;
+    bool operator== ( const ExportString& RHS ) const { return m_strString == RHS.m_strString; }
+    inline bool operator== ( const CHAR* strRHS ) const;
 
     operator const CHAR* () const { return m_strString; }
     inline const CHAR* SafeString() const;
@@ -102,8 +90,8 @@ protected:
 
 const CHAR* ExportString::AddString( const CHAR* strString )
 {
-    if( strString == NULL )
-        return NULL;
+    if( !strString )
+        return nullptr;
     typedef std::list< const CHAR* > StringList;
     static StringList s_StringLists[ EXPORTSTRING_HASHSIZE ];
 
@@ -121,33 +109,33 @@ const CHAR* ExportString::AddString( const CHAR* strString )
         ++iter;
     }
 
-    DWORD dwSize = (DWORD)strlen( strString ) + 1;
+    size_t dwSize = strlen( strString ) + 1;
     CHAR* strCopy = new CHAR[ dwSize ];
     strcpy_s( strCopy, dwSize, strString );
     CurrentList.push_back( strCopy );
     return strCopy;
 }
 
-BOOL ExportString::operator== ( const CHAR* strRHS ) const
+bool ExportString::operator== ( const CHAR* strRHS ) const
 {
-    if( strRHS == NULL )
+    if( !strRHS )
     {
-        if( m_strString == NULL )
-            return TRUE;
-        return FALSE;
+        if( !m_strString )
+            return true;
+        return false;
     }
-    else if( m_strString == NULL )
-        return FALSE;
+    else if( !m_strString )
+        return false;
 
     if( m_strString == strRHS )
-        return TRUE;
+        return true;
 
     return EXPORTSTRING_COMPARE( m_strString, strRHS ) == 0;
 }
 
 const CHAR* ExportString::SafeString() const
 {
-    if( m_strString == NULL )
+    if( !m_strString )
         return "";
     return m_strString;
 }
@@ -155,7 +143,7 @@ const CHAR* ExportString::SafeString() const
 BYTE ExportString::HashString( const CHAR* strString )
 {
     BYTE sum = 0;
-    const BYTE* p = (const BYTE*)strString;
+    auto p = reinterpret_cast<const BYTE*>( strString );
     if( *p ) sum += (*p++ & 0x1F); else return sum;
     if( *p ) sum += (*p++ & 0x1F); else return sum;
     if( *p ) sum += (*p++ & 0x1F); else return sum;

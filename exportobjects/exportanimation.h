@@ -19,31 +19,23 @@
 namespace ATG
 {
 
-using namespace std;
-
-class ExportAnimationAnnotationTrack
-{
-public:
-protected:
-};
-
 struct ExportAnimationPositionKey
 {
-    FLOAT           fTime;
+    float           fTime;
     D3DXVECTOR3     Position;
 };
 typedef std::vector<ExportAnimationPositionKey> PositionKeyList;
 
 struct ExportAnimationOrientationKey
 {
-    FLOAT           fTime;
+    float           fTime;
     D3DXQUATERNION  Orientation;
 };
 typedef std::vector<ExportAnimationOrientationKey> OrientationKeyList;
 
 struct ExportAnimationScaleKey
 {
-    FLOAT           fTime;
+    float           fTime;
     D3DXVECTOR3     Scale;
 };
 typedef std::vector<ExportAnimationScaleKey> ScaleKeyList;
@@ -54,36 +46,36 @@ class ExportAnimationTransformTrack
 {
 public:
     ExportAnimationTransformTrack()
-        : pSourceFrame( NULL )
+        : pSourceFrame( nullptr )
     {
     }
-    VOID AddKey( FLOAT fTime, const ExportTransform& Transform );
-    VOID AddKey( FLOAT fTime, const D3DXMATRIX& matTransform );
-    VOID AddKey( FLOAT fTime, const D3DXVECTOR3& Position, const D3DXQUATERNION& Orientation, const D3DXVECTOR3& Scale );
-    VOID OptimizeKeys();
-    VOID SortKeys();
-    VOID EndianSwap();
-    FLOAT* GetPositionData() const { return (FLOAT*)&PositionKeys.front(); }
-    FLOAT* GetOrientationData() const { return (FLOAT*)&OrientationKeys.front(); }
-    FLOAT* GetScaleData() const { return (FLOAT*)&ScaleKeys.front(); }
-    DWORD GetPositionDataSize() const { return (DWORD)PositionKeys.size() * 4 * sizeof( FLOAT ); }
-    DWORD GetOrientationDataSize() const { return (DWORD)OrientationKeys.size() * 5 * sizeof( FLOAT ); }
-    DWORD GetScaleDataSize() const { return (DWORD)ScaleKeys.size() * 4 * sizeof( FLOAT ); }
+    void AddKey( float fTime, const ExportTransform& Transform );
+    void AddKey( float fTime, const D3DXMATRIX& matTransform );
+    void AddKey( float fTime, const D3DXVECTOR3& Position, const D3DXQUATERNION& Orientation, const D3DXVECTOR3& Scale );
+    void OptimizeKeys();
+    void SortKeys();
+    void EndianSwap();
+    float* GetPositionData() const { return (float*)( &PositionKeys.front() ); }
+    float* GetOrientationData() const { return (float*)( &OrientationKeys.front() ); }
+    float* GetScaleData() const { return (float*)( &ScaleKeys.front() ); }
+    size_t GetPositionDataSize() const { return PositionKeys.size() * 4 * sizeof( float ); }
+    size_t GetOrientationDataSize() const { return OrientationKeys.size() * 5 * sizeof( float ); }
+    size_t GetScaleDataSize() const { return ScaleKeys.size() * 4 * sizeof( float ); }
     ExportAnimationPositionKey* GetPositionKeys() { return &PositionKeys.front(); }
-    DWORD GetPositionKeyCount() const { return (DWORD)PositionKeys.size(); }
+    size_t GetPositionKeyCount() const { return PositionKeys.size(); }
     ExportAnimationOrientationKey* GetOrientationKeys() { return &OrientationKeys.front(); }
-    DWORD GetOrientationKeyCount() const { return (DWORD)OrientationKeys.size(); }
+    size_t GetOrientationKeyCount() const { return OrientationKeys.size(); }
     ExportAnimationScaleKey* GetScaleKeys() { return &ScaleKeys.front(); }
-    DWORD GetScaleKeyCount() const { return (DWORD)ScaleKeys.size(); }
-    BOOL IsTrackEmpty();
+    size_t GetScaleKeyCount() const { return ScaleKeys.size(); }
+    bool IsTrackEmpty();
 protected:
-    VOID OptimizePositionKeys();
-    VOID OptimizeOrientationKeys();
-    VOID OptimizeScaleKeys();
+    void OptimizePositionKeys();
+    void OptimizeOrientationKeys();
+    void OptimizeScaleKeys();
 
-    BOOL PositionChangedFromLastTwoKeys( const ExportAnimationPositionKey& pk );
-    BOOL OrientationChangedFromLastTwoKeys( const ExportAnimationOrientationKey& ok );
-    BOOL ScaleChangedFromLastTwoKeys( const ExportAnimationScaleKey& sk );
+    bool PositionChangedFromLastTwoKeys( const ExportAnimationPositionKey& pk );
+    bool OrientationChangedFromLastTwoKeys( const ExportAnimationOrientationKey& ok );
+    bool ScaleChangedFromLastTwoKeys( const ExportAnimationScaleKey& sk );
 public:
     PositionKeyList         PositionKeys;
     OrientationKeyList      OrientationKeys;
@@ -96,29 +88,28 @@ class ExportAnimationTrack :
 {
 public:
     ExportAnimationTransformTrack       TransformTrack;
-    ExportAnimationAnnotationTrack      AnnotationTrack;
 };
 
 class ExportAnimation :
     public ExportBase
 {
 public:
-    ExportAnimation(void);
-    ~ExportAnimation(void);
-    VOID AddTrack( ExportAnimationTrack* pTrack ) { m_vTracks.push_back( pTrack ); }
-    DWORD GetTrackCount() const { return (DWORD)m_vTracks.size(); }
-    ExportAnimationTrack* GetTrack( DWORD dwIndex ) { return m_vTracks[ dwIndex ]; }
-    FLOAT GetDuration() const { return fEndTime - fStartTime; }
-    VOID Optimize();
-    VOID EndianSwap();
-    static VOID SetAnimationExportQuality( INT iPos, INT iOrientation, INT iScale );
+    ExportAnimation();
+    ~ExportAnimation();
+    void AddTrack( ExportAnimationTrack* pTrack ) { m_vTracks.push_back( pTrack ); }
+    size_t GetTrackCount() const { return m_vTracks.size(); }
+    ExportAnimationTrack* GetTrack( size_t dwIndex ) { return m_vTracks[ dwIndex ]; }
+    float GetDuration() const { return fEndTime - fStartTime; }
+    void Optimize();
+    void EndianSwap();
+    static void SetAnimationExportQuality( INT iPos, INT iOrientation, INT iScale );
 public:
-    FLOAT                               fStartTime;
-    FLOAT                               fEndTime;
-    FLOAT                               fSourceFrameInterval;
-    FLOAT                               fSourceSamplingInterval;
+    float                               fStartTime;
+    float                               fEndTime;
+    float                               fSourceFrameInterval;
+    float                               fSourceSamplingInterval;
 protected:
-    vector< ExportAnimationTrack* >     m_vTracks;
+    std::vector< ExportAnimationTrack* >     m_vTracks;
 };
 
 };

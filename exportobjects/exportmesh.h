@@ -19,36 +19,39 @@
 namespace ATG
 {
 
-using namespace std;
-
 class ExportVB
 {
 public:
     ExportVB() 
-        : m_pVertexData( NULL ),
-          m_uVertexCount( 0 ),
+        : m_uVertexCount( 0 ),
           m_uVertexSizeBytes( 0 )
     {
     }
     ~ExportVB()
     {
-        delete[] m_pVertexData;
     }
-    VOID SetVertexSize( UINT uByteCount ) { m_uVertexSizeBytes = uByteCount; }
-    VOID SetVertexCount( UINT uVertexCount ) { m_uVertexCount = uVertexCount; }
-    VOID Allocate();
-    UINT GetVertexSize() const { return m_uVertexSizeBytes; }
-    UINT GetVertexCount() const { return m_uVertexCount; }
-    UINT GetVertexDataSize() const { return m_uVertexSizeBytes * m_uVertexCount; }
-    BYTE* GetVertex( UINT uIndex );
-    BYTE* GetVertexData() { return m_pVertexData; }
-    const BYTE* GetVertexData() const { return m_pVertexData; }
 
-    VOID ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const DWORD dwVertexElementCount );
+    void SetVertexSize( DWORD uByteCount ) { m_uVertexSizeBytes = uByteCount; }
+    DWORD GetVertexSize() const { return m_uVertexSizeBytes; }
+
+    void SetVertexCount( size_t uVertexCount ) { m_uVertexCount = uVertexCount; }
+    size_t GetVertexCount() const { return m_uVertexCount; }
+
+    void Allocate();
+
+    uint8_t* GetVertex( size_t uIndex );
+    const uint8_t* GetVertex( size_t uIndex ) const;
+
+    uint8_t* GetVertexData() { return m_pVertexData.get(); }
+    const uint8_t* GetVertexData() const { return m_pVertexData.get(); }
+    size_t GetVertexDataSize() const { return m_uVertexSizeBytes * m_uVertexCount; }
+
+    void ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const size_t dwVertexElementCount );
+
 protected:
-    UINT        m_uVertexSizeBytes;
-    UINT        m_uVertexCount;
-    BYTE*       m_pVertexData;
+    DWORD                       m_uVertexSizeBytes;
+    size_t                      m_uVertexCount;
+    std::unique_ptr<uint8_t[]>  m_pVertexData;
 };
 
 class ExportIB
@@ -56,47 +59,57 @@ class ExportIB
 public:
     ExportIB()
         : m_uIndexCount( 0 ),
-          m_dwIndexSize( 2 ),
-          m_pIndexData16( NULL )
+          m_dwIndexSize( 2 )
     {
     }
     ~ExportIB()
     {
-        delete[] m_pIndexData16;
     }
 
-    UINT GetIndexCount() const { return m_uIndexCount; }
-    VOID SetIndexSize( DWORD dwIndexSize ) { assert( dwIndexSize == 2 || dwIndexSize == 4 ); m_dwIndexSize = dwIndexSize; }
+    void SetIndexSize( DWORD dwIndexSize ) { assert( dwIndexSize == 2 || dwIndexSize == 4 ); m_dwIndexSize = dwIndexSize; }
     DWORD GetIndexSize() const { return m_dwIndexSize; }
-    VOID SetIndexCount( UINT uIndexCount ) { m_uIndexCount = uIndexCount; }
-    VOID Allocate();
-    DWORD GetIndex( UINT uIndex ) 
-    {
-        if( m_dwIndexSize == 2 )
-            return m_pIndexData16[ uIndex ];
-        else
-            return m_pIndexData32[ uIndex ];
-    }
-    VOID SetIndex( UINT uIndex, DWORD dwData ) 
-    {
-        if( m_dwIndexSize == 2 )
-            m_pIndexData16[ uIndex ] = (WORD)dwData;
-        else
-            m_pIndexData32[ uIndex ] = dwData;
-    }
-    BYTE* GetIndexData() { return (BYTE*)m_pIndexData16; }
-    const BYTE* GetIndexData() const { return (const BYTE*)m_pIndexData16; }
-    DWORD GetIndexDataSize() const { return m_uIndexCount * m_dwIndexSize; }
 
-    VOID ByteSwap();
-protected:
-    DWORD       m_dwIndexSize;
-    UINT        m_uIndexCount;
-    union
+    void SetIndexCount( size_t uIndexCount ) { m_uIndexCount = uIndexCount; }
+    size_t GetIndexCount() const { return m_uIndexCount; }
+
+    void Allocate();
+
+    DWORD GetIndex( size_t uIndex ) const
     {
-        WORD*       m_pIndexData16;
-        DWORD*      m_pIndexData32;
-    };
+        if( m_dwIndexSize == 2 )
+        {
+            auto pIndexData16 = reinterpret_cast<const WORD*>( m_pIndexData.get() );
+            return pIndexData16[ uIndex ];
+        }
+        else
+        {
+            auto pIndexData32 = reinterpret_cast<const DWORD*>( m_pIndexData.get() );
+            return pIndexData32[ uIndex ];
+        }
+    }
+    void SetIndex( size_t uIndex, DWORD dwData ) 
+    {
+        if( m_dwIndexSize == 2 )
+        {
+            auto pIndexData16 = reinterpret_cast<WORD*>( m_pIndexData.get() );
+            pIndexData16[ uIndex ] = static_cast<WORD>( dwData );
+        }
+        else
+        {
+            auto pIndexData32 = reinterpret_cast<DWORD*>( m_pIndexData.get() );
+            pIndexData32[ uIndex ] = dwData;
+        }
+    }
+    uint8_t* GetIndexData() { return m_pIndexData.get(); }
+    const uint8_t* GetIndexData() const { return m_pIndexData.get(); }
+    size_t GetIndexDataSize() const { return m_uIndexCount * m_dwIndexSize; }
+
+    void ByteSwap();
+
+protected:
+    DWORD                       m_dwIndexSize;
+    size_t                      m_uIndexCount;
+    std::unique_ptr<uint8_t[]>  m_pIndexData;
 };
 
 class ExportIBSubset : 
@@ -115,12 +128,12 @@ public:
           m_PrimitiveType( TriangleList )
     {
     }
-    VOID SetStartIndex( UINT uStartIndex ) { m_uStartIndex = uStartIndex; }
-    VOID IncrementIndexCount( UINT uSize ) { m_uIndexCount += uSize; }
-    VOID SetIndexCount( UINT uIndexCount ) { m_uIndexCount = uIndexCount; }
+    void SetStartIndex( UINT uStartIndex ) { m_uStartIndex = uStartIndex; }
+    void IncrementIndexCount( UINT uSize ) { m_uIndexCount += uSize; }
+    void SetIndexCount( UINT uIndexCount ) { m_uIndexCount = uIndexCount; }
     UINT GetStartIndex() const { return m_uStartIndex; }
     UINT GetIndexCount() const { return m_uIndexCount; }
-    VOID SetPrimitiveType( PrimitiveType NewPT ) { m_PrimitiveType = NewPT; }
+    void SetPrimitiveType( PrimitiveType NewPT ) { m_PrimitiveType = NewPT; }
     PrimitiveType GetPrimitiveType() const { return m_PrimitiveType; }
 protected:
     UINT            m_uStartIndex;
@@ -146,7 +159,7 @@ public:
     {
         Initialize();
     }
-    VOID Initialize()
+    void Initialize()
     {
         ZeroMemory( this, sizeof( ExportMeshVertex ) );
         BoneWeights.x = 1.0f;
@@ -162,7 +175,7 @@ public:
     D3DXVECTOR4     TexCoords[8];
     D3DXVECTOR4     Color;
     ExportMeshVertex* pNextDuplicateVertex;
-    BOOL            Equals( const ExportMeshVertex* pOtherVertex ) const;
+    bool            Equals( const ExportMeshVertex* pOtherVertex ) const;
 };
 
 typedef std::vector< ExportMeshVertex* > ExportMeshVertexArray;
@@ -175,7 +188,7 @@ public:
           PolygonIndex( -1 )
     {
     }
-    VOID Initialize()
+    void Initialize()
     {
         SubsetIndex = 0;
         Vertex[0].Initialize();
@@ -201,11 +214,11 @@ public:
     {
         Terminate();
     }
-    VOID Initialize() { SetSizeHint( 50000 ); }
-    VOID Terminate();
-    VOID SetSizeHint( UINT uAnticipatedSize );
+    void Initialize() { SetSizeHint( 50000 ); }
+    void Terminate();
+    void SetSizeHint( UINT uAnticipatedSize );
     ExportMeshTriangle* GetNewTriangle();
-    VOID ClearAllTriangles();
+    void ClearAllTriangles();
 private:
     struct AllocationBlock
     {
@@ -224,22 +237,22 @@ struct ExportVertexFormat
 {
 public:
     ExportVertexFormat()
-        : m_bPosition( TRUE ),
-          m_bNormal( TRUE ),
-          m_bSkinData( FALSE ),
-          m_bTangent( FALSE ),
-          m_bBinormal( FALSE ),
-          m_bVertexColor( TRUE ),
+        : m_bPosition( true ),
+          m_bNormal( true ),
+          m_bSkinData( false ),
+          m_bTangent( false ),
+          m_bBinormal( false ),
+          m_bVertexColor( true ),
           m_uUVSetCount( 1 ),
           m_uUVSetSize( 2 )
     {
     }
-    BOOL        m_bPosition;
-    BOOL        m_bNormal;
-    BOOL        m_bTangent;
-    BOOL        m_bBinormal;
-    BOOL        m_bSkinData;
-    BOOL        m_bVertexColor;
+    bool        m_bPosition;
+    bool        m_bNormal;
+    bool        m_bTangent;
+    bool        m_bBinormal;
+    bool        m_bSkinData;
+    bool        m_bVertexColor;
     UINT        m_uUVSetCount;
     UINT        m_uUVSetSize;
 };
@@ -264,11 +277,11 @@ public:
         OrientedBoxBound = 2
     };
 
-    virtual MeshType GetMeshType() const = NULL;
+    virtual MeshType GetMeshType() const = 0;
 
-    VOID AddSubset( ExportIBSubset* pSubset ) { m_vSubsets.push_back( pSubset ); }
-    UINT GetSubsetCount() const { return (UINT)m_vSubsets.size(); }
-    ExportIBSubset* GetSubset( UINT uIndex ) { return m_vSubsets[ uIndex ]; }
+    void AddSubset( ExportIBSubset* pSubset ) { m_vSubsets.push_back( pSubset ); }
+    size_t GetSubsetCount() const { return m_vSubsets.size(); }
+    ExportIBSubset* GetSubset( size_t uIndex ) { return m_vSubsets[ uIndex ]; }
     ExportIBSubset* FindSubset( const ExportString Name );
 
     Sphere& GetBoundingSphere() { return m_BoundingSphere; }
@@ -276,17 +289,17 @@ public:
     OrientedBox& GetBoundingOBB() { return m_BoundingOBB; }
     BoundsType GetSmallestBound() const { return m_SmallestBound; }
 
-    virtual VOID AddInfluence( ExportString InfluenceName ) { m_InfluenceNames.push_back( InfluenceName ); }
-    UINT GetInfluenceCount() const { return (UINT)m_InfluenceNames.size(); }
-    ExportString GetInfluence( UINT uIndex ) const { return m_InfluenceNames[uIndex]; }
+    virtual void AddInfluence( ExportString InfluenceName ) { m_InfluenceNames.push_back( InfluenceName ); }
+    size_t GetInfluenceCount() const { return m_InfluenceNames.size(); }
+    ExportString GetInfluence( size_t uIndex ) const { return m_InfluenceNames[uIndex]; }
 
 protected:
     Sphere                          m_BoundingSphere;
     AxisAlignedBox                  m_BoundingAABB;
     OrientedBox                     m_BoundingOBB;
     BoundsType                      m_SmallestBound;
-    vector< ExportIBSubset* >       m_vSubsets;
-    vector< ExportString >          m_InfluenceNames;
+    std::vector< ExportIBSubset* >  m_vSubsets;
+    std::vector< ExportString >     m_InfluenceNames;
 };
 
 
@@ -306,50 +319,50 @@ public:
     ExportMesh( ExportString name );
     ~ExportMesh();
 
-    virtual MeshType GetMeshType() const { return ExportMeshBase::PolyMesh; }
+    virtual MeshType GetMeshType() const override { return ExportMeshBase::PolyMesh; }
 
-    VOID SetVertexUVCount( UINT uCount ) { m_VertexFormat.m_uUVSetCount = uCount; }
-    VOID SetVertexUVDimension( UINT uDimension ) { m_VertexFormat.m_uUVSetSize = uDimension; }
-    VOID SetVertexNormalCount( UINT uCount );
-    VOID SetVertexColorCount( UINT uCount ) { m_VertexFormat.m_bVertexColor = ( uCount > 0 ); }
+    void SetVertexUVCount( UINT uCount ) { m_VertexFormat.m_uUVSetCount = uCount; }
+    void SetVertexUVDimension( UINT uDimension ) { m_VertexFormat.m_uUVSetSize = uDimension; }
+    void SetVertexNormalCount( UINT uCount );
+    void SetVertexColorCount( UINT uCount ) { m_VertexFormat.m_bVertexColor = ( uCount > 0 ); }
 
-    UINT GetVertexDeclElementCount() const { return (UINT)m_VertexElements.size(); }
-    const D3DVERTEXELEMENT9& GetVertexDeclElement( UINT uIndex ) const { return m_VertexElements[ uIndex ]; }
+    size_t GetVertexDeclElementCount() const { return m_VertexElements.size(); }
+    const D3DVERTEXELEMENT9& GetVertexDeclElement( size_t uIndex ) const { return m_VertexElements[ uIndex ]; }
 
-    VOID AddRawTriangle( ExportMeshTriangle* pTriangle );
-    VOID Optimize( DWORD dwFlags );
-    VOID ByteSwap();
+    void AddRawTriangle( ExportMeshTriangle* pTriangle );
+    void Optimize( DWORD dwFlags );
+    void ByteSwap();
 
     ExportVB* GetVB() { return m_pVB; }
     ExportIB* GetIB() { return m_pIB; }
 
     ExportSubDProcessMesh* GetSubDMesh() { return m_pSubDMesh; }
 
-    DWORD GetTriangleCount() const { return (DWORD)m_TriangleToPolygonMapping.size(); }
-    INT GetPolygonForTriangle( DWORD dwTriangleIndex ) const { return m_TriangleToPolygonMapping[dwTriangleIndex]; }
+    size_t GetTriangleCount() const { return m_TriangleToPolygonMapping.size(); }
+    INT GetPolygonForTriangle( size_t dwTriangleIndex ) const { return m_TriangleToPolygonMapping[dwTriangleIndex]; }
 
-    virtual VOID AddInfluence( ExportString InfluenceName ) { m_InfluenceNames.push_back( InfluenceName ); m_VertexFormat.m_bSkinData = TRUE; }
+    virtual void AddInfluence( ExportString InfluenceName ) override { m_InfluenceNames.push_back( InfluenceName ); m_VertexFormat.m_bSkinData = true; }
 
 protected:
-    VOID BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags );
-    VOID ClearRawTriangles();
+    void BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags );
+    void ClearRawTriangles();
     ID3DXMesh* CreateD3DXMesh();
-    VOID CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh );
+    void CopyD3DXMeshIntoMesh( ID3DXMesh* pMesh );
     HRESULT ComputeVertexTangentSpacesD3DX( ID3DXMesh** ppMesh );
     HRESULT ComputeUVAtlas( ID3DXMesh** ppMesh );
-    VOID ComputeBoneSubsetGroups();
-    VOID SortRawTrianglesBySubsetIndex();
-    VOID ComputeBounds();
+    void ComputeBoneSubsetGroups();
+    void SortRawTrianglesBySubsetIndex();
+    void ComputeBounds();
 
 protected:
-    ExportVB*                       m_pVB;
-    ExportIB*                       m_pIB;
-    ExportMeshTriangleArray         m_RawTriangles;
-    vector< INT >                   m_TriangleToPolygonMapping;
-    ExportVertexFormat              m_VertexFormat;
-    vector< D3DVERTEXELEMENT9 >     m_VertexElements;
-    UINT                            m_uDCCVertexCount;
-    ExportSubDProcessMesh*          m_pSubDMesh;
+    ExportVB*                           m_pVB;
+    ExportIB*                           m_pIB;
+    ExportMeshTriangleArray             m_RawTriangles;
+    std::vector< INT >                  m_TriangleToPolygonMapping;
+    ExportVertexFormat                  m_VertexFormat;
+    std::vector< D3DVERTEXELEMENT9 >    m_VertexElements;
+    UINT                                m_uDCCVertexCount;
+    ExportSubDProcessMesh*              m_pSubDMesh;
 };
 
 class ExportMaterialSubsetBinding
@@ -370,30 +383,30 @@ class ExportModel
 public:
     ExportModel( ExportMeshBase* pMesh )
         : m_pMesh( pMesh ),
-          m_bCastsShadows( TRUE ),
-          m_bReceivesShadows( TRUE )
+          m_bCastsShadows( true ),
+          m_bReceivesShadows( true )
     {
     }
     ~ExportModel();
     ExportMeshBase* GetMesh() { return m_pMesh; }
-    BOOL SetSubsetBinding( ExportString SubsetName, ExportMaterial* pMaterial, BOOL bSkipValidation = FALSE );
-    UINT GetBindingCount() const { return (UINT)m_vBindings.size(); }
-    ExportMaterialSubsetBinding* GetBinding( UINT i ) { return m_vBindings[i]; }
+    bool SetSubsetBinding( ExportString SubsetName, ExportMaterial* pMaterial, bool bSkipValidation = false );
+    size_t GetBindingCount() const { return m_vBindings.size(); }
+    ExportMaterialSubsetBinding* GetBinding( size_t i ) { return m_vBindings[i]; }
 
-    BOOL IsShadowCaster() const { return m_bCastsShadows; }
-    BOOL IsShadowReceiver() const { return m_bReceivesShadows; }
-    VOID SetCastsShadows( BOOL bValue ) { m_bCastsShadows = bValue; }
-    VOID SetReceivesShadows( BOOL bValue ) { m_bReceivesShadows = bValue; }
+    bool IsShadowCaster() const { return m_bCastsShadows; }
+    bool IsShadowReceiver() const { return m_bReceivesShadows; }
+    void SetCastsShadows( bool bValue ) { m_bCastsShadows = bValue; }
+    void SetReceivesShadows( bool bValue ) { m_bReceivesShadows = bValue; }
 
 protected:
     ExportMeshBase*                     m_pMesh;
     ExportMaterialSubsetBindingArray    m_vBindings;
-    BOOL                                m_bCastsShadows;
-    BOOL                                m_bReceivesShadows;
+    bool                                m_bCastsShadows;
+    bool                                m_bReceivesShadows;
 };
 
 DWORD MakeCompressedVector( const D3DXVECTOR3& Vec3 );
-VOID NormalizeBoneWeights( BYTE* pWeights );
+void NormalizeBoneWeights( BYTE* pWeights );
 
 };
 

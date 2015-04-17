@@ -37,19 +37,10 @@ namespace ATG
         SetWindowText( m_hwnd, g_strTitle );
         SetWindowText( m_hProgressText, g_strTitle );
 
-        /*
-        // Change the font type of the output window to courier
-        CHARFORMAT cf;
-        cf.cbSize = sizeof(CHARFORMAT);
-        SendMessage( m_hRichTextBox, EM_GETCHARFORMAT, 0, (LPARAM)&cf );
-        cf.dwMask &= ~CFM_COLOR;
-        strcpy_s( cf.szFaceName, "courier" );
-        SendMessage( m_hRichTextBox, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&cf );
-        */
         SendMessage( m_hwnd, WM_SIZE, 0, 0 );
-        SetTimer( m_hwnd, 1, 0, NULL );
+        SetTimer( m_hwnd, 1, 0, nullptr );
 
-        return FALSE;
+        return false;
     }
 
     LRESULT ExportConsoleDialog::OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl )
@@ -64,11 +55,11 @@ namespace ATG
             {
             case BN_CLICKED:
                 Hide();
-                return TRUE;
+                return true;
             }
             break;
         }
-        return FALSE;
+        return false;
     }
 
     LRESULT ExportConsoleDialog::OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam )
@@ -81,7 +72,7 @@ namespace ATG
         case WM_TIMER:
             Hide();
             KillTimer( m_hwnd, wParam );
-            return FALSE;
+            return false;
         case WM_SIZE:
             {
                 GridLayout Layout( 3, 2 );
@@ -98,13 +89,13 @@ namespace ATG
                 Layout.PlaceWindow( m_hProgressText, 1, 0, 1, 2, dwInnerBorder );
                 Layout.PlaceWindow( m_hProgressBar, 2, 0, 1, 1, dwInnerBorder );
                 Layout.PlaceWindow( m_hOKButton, 2, 1, 1, 1, dwInnerBorder );
-                return FALSE;
+                return false;
             }
         }
-        return FALSE;
+        return false;
     }
 
-    VOID ExportConsoleDialog::ConsolePrint( COLORREF rgb, const CHAR* strText )
+    void ExportConsoleDialog::ConsolePrint( COLORREF rgb, const CHAR* strText )
     {
         CHARRANGE cr = { -1, -2 };
 
@@ -116,32 +107,32 @@ namespace ATG
             cf.dwMask = CFM_COLOR;
             cf.dwEffects = 0;
             cf.crTextColor = rgb;
-            SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf );
+            SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_SETCHARFORMAT, SCF_SELECTION, reinterpret_cast<LPARAM>( &cf ) );
         }
 
         // Move the selection to the end
-        SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_EXSETSEL, 0, (LPARAM)&cr );
+        SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_EXSETSEL, 0, reinterpret_cast<LPARAM>( &cr ) );
 
         // Add the text and scroll it into view
-        SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_REPLACESEL, 0, (LPARAM)strText );
+        SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_REPLACESEL, 0, reinterpret_cast<LPARAM>( strText ) );
         SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_SCROLLCARET, 0, 0L );
     }
 
-    VOID ExportConsoleDialog::ConsoleNewline()
+    void ExportConsoleDialog::ConsoleNewline()
     {
         ConsolePrint( 0, "\n" );
         SendMessage( m_hRichTextBox, EM_LINESCROLL, 0, 1 );
     }
 
-    VOID ExportConsoleDialog::ConsoleClear()
+    void ExportConsoleDialog::ConsoleClear()
     {
         SETTEXTEX stx;
         stx.codepage = CP_ACP;
         stx.flags = ST_DEFAULT;
-        SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_SETTEXTEX, (WPARAM)&stx, (LPARAM)"" );
+        SendDlgItemMessage( m_hwnd, IDC_RICHTEXT, EM_SETTEXTEX, reinterpret_cast<WPARAM>( &stx ), reinterpret_cast<LPARAM>( "" ) );
     }
 
-    VOID ExportConsoleDialog::LogCommand( DWORD dwCommand, VOID* pData )
+    void ExportConsoleDialog::LogCommand( DWORD dwCommand, void* pData )
     {
         UNREFERENCED_PARAMETER( pData );
 
@@ -158,25 +149,25 @@ namespace ATG
         }
     }
 
-    VOID ExportConsoleDialog::LogMessage( const CHAR* strMessage )
+    void ExportConsoleDialog::LogMessage( const CHAR* strMessage )
     {
         ConsolePrint( RGB(0, 0, 0), strMessage );
         ConsoleNewline();
     }
 
-    VOID ExportConsoleDialog::LogWarning( const CHAR* strMessage )
+    void ExportConsoleDialog::LogWarning( const CHAR* strMessage )
     {
         ConsolePrint( RGB(255, 128, 0), strMessage );
         ConsoleNewline();
     }
 
-    VOID ExportConsoleDialog::LogError( const CHAR* strMessage )
+    void ExportConsoleDialog::LogError( const CHAR* strMessage )
     {
         ConsolePrint( RGB(255, 0, 0), strMessage );
         ConsoleNewline();
     }
 
-    VOID ExportConsoleDialog::Initialize( const CHAR *strTitle )
+    void ExportConsoleDialog::Initialize( const CHAR *strTitle )
     {
         UNREFERENCED_PARAMETER( strTitle );
         m_fCurrentTaskMin = 0;
@@ -187,18 +178,18 @@ namespace ATG
         SetCaption( "" );
     }
 
-    VOID ExportConsoleDialog::Terminate()
+    void ExportConsoleDialog::Terminate()
     {
         SetCaption( "Export complete." );
         SendDlgItemMessage( m_hwnd, IDC_EXPORTPROGRESS, PBM_SETPOS, 1000, 0 );
     }
 
-    VOID ExportConsoleDialog::SetCaption( const CHAR* strCaption )
+    void ExportConsoleDialog::SetCaption( const CHAR* strCaption )
     {
         SetWindowText( m_hProgressText, strCaption );
     }
 
-    VOID ExportConsoleDialog::StartNewTask( const CHAR* strCaption, FLOAT fTaskPercentOfWhole )
+    void ExportConsoleDialog::StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole )
     {
         SetCaption( strCaption );
         m_fCurrentTaskMin += m_fCurrentTaskSize;
@@ -206,14 +197,14 @@ namespace ATG
         SetProgress( 0 );
     }
 
-    VOID ExportConsoleDialog::SetProgress( FLOAT fTaskRelativeProgress )
+    void ExportConsoleDialog::SetProgress( float fTaskRelativeProgress )
     {
         if( fTaskRelativeProgress > 1 )
             fTaskRelativeProgress = 1;
         else if( fTaskRelativeProgress < 0 )
             fTaskRelativeProgress = 0;
-        FLOAT fAbsoluteProgress = ( fTaskRelativeProgress * m_fCurrentTaskSize ) + m_fCurrentTaskMin;
-        INT iProgress = (INT)( fAbsoluteProgress * 1000.0f );
+        float fAbsoluteProgress = ( fTaskRelativeProgress * m_fCurrentTaskSize ) + m_fCurrentTaskMin;
+        INT iProgress = static_cast<INT>( fAbsoluteProgress * 1000.0f );
         SendDlgItemMessage( m_hwnd, IDC_EXPORTPROGRESS, PBM_SETPOS, iProgress, 0 );
     }
 

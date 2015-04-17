@@ -15,7 +15,5 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-using namespace ATG;
-
-VOID ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, BOOL bSubDProcess = FALSE, const CHAR* strSuffix = NULL );
-VOID ParseSubDiv( FbxNode* pNode, FbxSubDiv* pFbxSubD, ExportFrame* pParentFrame );
+void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ATG::ExportFrame* pParentFrame, bool bSubDProcess = false, const CHAR* strSuffix = nullptr );
+void ParseSubDiv( FbxNode* pNode, FbxSubDiv* pFbxSubD, ATG::ExportFrame* pParentFrame );

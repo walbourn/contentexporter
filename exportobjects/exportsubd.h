@@ -16,7 +16,6 @@
 #pragma once
 
 #include <deque>
-using namespace stdext;
 
 namespace ATG
 {
@@ -24,7 +23,7 @@ namespace ATG
     {
         ExportString    Name;
         INT             iOriginalMeshSubset;
-        BOOL            bQuadPatches;
+        bool            bQuadPatches;
         DWORD           dwStartPatch;
         DWORD           dwPatchCount;
     };
@@ -63,7 +62,7 @@ namespace ATG
             BYTE bPrefix[4];
             INT iPolyIndex;
             INT iMeshSubsetIndex;
-            BOOL bDegenerate;
+            bool bDegenerate;
         };
     protected:
         struct Edge
@@ -72,15 +71,15 @@ namespace ATG
             INT iQuadIndex;
             INT iLocalIndex;
         };
-        typedef hash_map< UINT64, Edge > EdgeMap;
+        typedef std::hash_map< UINT64, Edge > EdgeMap;
 
-        vector< Triangle >          m_Triangles;
-        vector< Quad >              m_Quads;
-        vector< D3DXVECTOR3 >       m_Positions;
-        vector< INT >               m_MeshVertexToPositionMapping;
-        vector< INT >               m_PositionToMeshVertexMapping;
-        vector< INT >               m_PositionToDegeneratePositionMapping;
-        vector< INT >               m_IncidentBoundaryEdgesPerPosition;
+        std::vector< Triangle >     m_Triangles;
+        std::vector< Quad >         m_Quads;
+        std::vector< D3DXVECTOR3 >  m_Positions;
+        std::vector< INT >          m_MeshVertexToPositionMapping;
+        std::vector< INT >          m_PositionToMeshVertexMapping;
+        std::vector< INT >          m_PositionToDegeneratePositionMapping;
+        std::vector< INT >          m_IncidentBoundaryEdgesPerPosition;
         EdgeMap                     m_BoundaryEdges;
 
         ExportMesh*             m_pPolyMesh;
@@ -89,43 +88,43 @@ namespace ATG
         ExportVB*               m_pQuadPatchDataVB;
         ExportVB*               m_pTrianglePatchDataVB;
 
-        vector< ExportSubDPatchSubset > m_Subsets;
+        std::vector< ExportSubDPatchSubset > m_Subsets;
     public:
         ExportSubDProcessMesh();
-        VOID Initialize( ExportMesh* pMesh );
+        void Initialize( ExportMesh* pMesh );
 
-        VOID ByteSwap();
+        void ByteSwap();
 
-        DWORD GetQuadPatchCount() const { return ( m_pQuadPatchDataVB != NULL ) ? m_pQuadPatchDataVB->GetVertexCount() : 0; }
+        size_t GetQuadPatchCount() const { return ( m_pQuadPatchDataVB ) ? m_pQuadPatchDataVB->GetVertexCount() : 0; }
         ExportVB* GetQuadPatchDataVB() const { return m_pQuadPatchDataVB; }
         ExportIB* GetQuadPatchIB() const { return m_pQuadPatchIB; }
-        DWORD GetTrianglePatchCount() const { return ( m_pTrianglePatchDataVB != NULL ) ? m_pTrianglePatchDataVB->GetVertexCount() : 0; }
+        size_t GetTrianglePatchCount() const { return ( m_pTrianglePatchDataVB ) ? m_pTrianglePatchDataVB->GetVertexCount() : 0; }
         ExportVB* GetTrianglePatchDataVB() const { return m_pTrianglePatchDataVB; }
         ExportIB* GetTriPatchIB() const { return m_pTrianglePatchIB; }
 
-        DWORD GetSubsetCount() const { return (DWORD)m_Subsets.size(); }
-        ExportSubDPatchSubset* GetSubset( DWORD dwIndex ) { return &m_Subsets[dwIndex]; }
+        size_t GetSubsetCount() const { return m_Subsets.size(); }
+        ExportSubDPatchSubset* GetSubset( size_t dwIndex ) { return &m_Subsets[dwIndex]; }
         ExportSubDPatchSubset* FindSubset( ExportString strName );
 
         static const D3DVERTEXELEMENT9* GetPatchDataDecl();
         static DWORD GetPatchDataDeclElementCount();
 
     protected:
-        VOID BuildMesh();
+        void BuildMesh();
         INT CreateOrAddPosition( const D3DXVECTOR3& vPosition, INT iMeshVertexIndex );
-        VOID AddTriangle( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
-        VOID AddQuad( INT iPolyIndex,  INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
+        void AddTriangle( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
+        void AddQuad( INT iPolyIndex,  INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
 
-        VOID BuildBoundaryEdgeTable();
+        void BuildBoundaryEdgeTable();
         INT AddOrRemoveEdge( INT iPositionIndexA, INT iPositionIndexB, INT iTriangleIndex, INT iQuadIndex, INT iLocalIndex );
 
-        VOID CreateDegenerateGeometry();
+        void CreateDegenerateGeometry();
         INT CreateOrAddDegeneratePosition( INT iPositionIndex );
 
-        VOID ComputeAdjacency();
-        VOID ComputeTriangleAdjacency( const INT iTriangleIndex );
-        VOID ComputeQuadAdjacency( const INT iQuadIndex );
-        INT ExecuteSweep( INT iPivotPositionIndex, INT iSweepPositionIndex, INT iStopPositionIndex, INT iStartQuadIndex, INT iStartTriangleIndex, vector<INT>& Neighbors );
+        void ComputeAdjacency();
+        void ComputeTriangleAdjacency( const INT iTriangleIndex );
+        void ComputeQuadAdjacency( const INT iQuadIndex );
+        INT ExecuteSweep( INT iPivotPositionIndex, INT iSweepPositionIndex, INT iStopPositionIndex, INT iStartQuadIndex, INT iStartTriangleIndex, std::vector<INT>& Neighbors );
         INT FindTriangleWithEdge( INT iStartPositionIndex, INT iEndPositionIndex, INT iExcludeThisTriangle );
         INT FindQuadWithEdge( INT iStartPositionIndex, INT iEndPositionIndex, INT iExcludeThisQuad );
         INT FindLocalIndexInTriangle( INT iTriangleIndex, INT iPositionIndex );
@@ -134,17 +133,17 @@ namespace ATG
         INT GetNextPositionIndexInQuad( INT iQuadIndex, INT iPivotPositionIndex, INT iSweepPositionIndex );
         INT GetOppositePositionIndexInQuad( INT iQuadIndex, INT iPositionIndex );
 
-        VOID RemoveValenceTwoQuads( deque<INT>& BadQuads );
+        void RemoveValenceTwoQuads( std::deque<INT>& BadQuads );
 
         D3DXVECTOR3 GetQuadCenter( INT iQuadIndex );
 
-        VOID SortPatches();
+        void SortPatches();
 
-        VOID BuildQuadPatchBuffer();
-        VOID BuildTriPatchBuffer();
+        void BuildQuadPatchBuffer();
+        void BuildTriPatchBuffer();
 
-        VOID ConvertSubsets();
+        void ConvertSubsets();
 
-        VOID ClearIntermediateBuffers();
+        void ClearIntermediateBuffers();
     };
 }

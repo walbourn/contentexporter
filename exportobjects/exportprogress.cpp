@@ -17,23 +17,23 @@
 
 namespace ATG
 {
-    VOID ExportProgress::Initialize( CONST CHAR* strTitle )
+    void ExportProgress::Initialize( const CHAR* strTitle )
     {
     }
 
-    VOID ExportProgress::Terminate()
+    void ExportProgress::Terminate()
     {
     }
 
-    VOID ExportProgress::StartNewTask( CONST CHAR* strCaption, FLOAT fTaskPercentOfWhole )
+    void ExportProgress::StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole )
     {
     }
 
-    VOID ExportProgress::SetCaption( CONST CHAR* strCaption )
+    void ExportProgress::SetCaption( const CHAR* strCaption )
     {
     }
 
-    VOID ExportProgress::SetProgress( FLOAT fTaskRelativeProgress )
+    void ExportProgress::SetProgress( float fTaskRelativeProgress )
     {
     }
 

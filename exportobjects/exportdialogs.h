@@ -19,16 +19,16 @@
 
 namespace ATG
 {
-    VOID InitializeExportDialogs( const CHAR* strTitle, HWND hParentWindow, HINSTANCE hInst );
-    VOID TerminateExportDialogs();
+    void InitializeExportDialogs( const CHAR* strTitle, HWND hParentWindow, HINSTANCE hInst );
+    void TerminateExportDialogs();
 
-    VOID ShowConsoleDialog();
-    BOOL ShowSettingsDialog( BOOL bModal );
+    void ShowConsoleDialog();
+    bool ShowSettingsDialog( bool bModal );
 
     class ExportDialogBase : public ThinDialog
     {
     public:
-        virtual VOID Show();
-        virtual VOID Hide();
+        virtual void Show();
+        virtual void Hide();
     };
 }

@@ -28,16 +28,16 @@ namespace ATG
     ExportSettingsDialog::ExportSettingsDialog()
     {
         m_strTemplate = "ExportSettings";
-        m_pCurrentCategory = NULL;
+        m_pCurrentCategory = nullptr;
         m_DialogState = DS_HIDDEN_UNKNOWN;
-        m_bControlDataUpdate = FALSE;
+        m_bControlDataUpdate = false;
     }
 
-    VOID ExportSettingsDialog::Show()
+    void ExportSettingsDialog::Show()
     {
         ExportDialogBase::Show();
         m_DialogState = DS_VISIBLE;
-        TreeView_SelectItem( m_hCategoryTree, NULL );
+        TreeView_SelectItem( m_hCategoryTree, nullptr );
         TreeView_SelectItem( m_hCategoryTree, TreeView_GetRoot( m_hCategoryTree ) );
     }
 
@@ -57,10 +57,10 @@ namespace ATG
         case WM_PAINT:
         case WM_ERASEBKGND:
             {
-                DWORD dwID = (DWORD)GetWindowLongPtr( hWnd, GWLP_ID );
+                DWORD dwID = static_cast<DWORD>( GetWindowLongPtr( hWnd, GWLP_ID ) );
                 if( dwID != IDC_DYNAMICCONTROL )
                 {
-                    ExportSettingsDialog* pDlg = (ExportSettingsDialog*)GetWindowLongPtr( hWnd, GWLP_USERDATA );
+                    auto pDlg = reinterpret_cast<ExportSettingsDialog*>( GetWindowLongPtr( hWnd, GWLP_USERDATA ) );
                     return CallWindowProc( pDlg->m_pStaticWndProc, hWnd, message, wParam, lParam );
                 }
                 return DefWindowProc( hWnd, message, wParam, lParam );
@@ -85,9 +85,9 @@ namespace ATG
 
         m_hScrollingPane = CreateWindowEx( 
             WS_EX_CLIENTEDGE | WS_EX_CONTROLPARENT,                          
-            "Static",                // window class 
-            NULL,    // text for window title bar 
-            WS_CHILD |        // window styles 
+            "Static",       // window class 
+            nullptr,        // text for window title bar 
+            WS_CHILD |      // window styles 
             WS_CLIPCHILDREN |
             WS_VSCROLL |
             WS_VISIBLE |
@@ -97,13 +97,13 @@ namespace ATG
             100,
             100,
             m_hwnd,             
-            (HMENU) NULL,        // window class menu 
-            g_hInstance,               // instance owning this window 
-            NULL        // pointer not needed 
+            nullptr,        // window class menu 
+            g_hInstance,    // instance owning this window 
+            nullptr         // pointer not needed 
             ); 
 
-        SetWindowLongPtr( m_hScrollingPane, GWLP_USERDATA, (LONG_PTR)this );
-        m_pStaticWndProc = (WNDPROC)SetWindowLongPtr( m_hScrollingPane, GWLP_WNDPROC, (LONG_PTR)ScrollPaneWndProc );
+        SetWindowLongPtr( m_hScrollingPane, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( this ) );
+        m_pStaticWndProc = reinterpret_cast<WNDPROC>( SetWindowLongPtr( m_hScrollingPane, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>( ScrollPaneWndProc ) ) );
 
         SetWindowText( m_hwnd, g_strTitle );
 
@@ -112,9 +112,9 @@ namespace ATG
         //PopulateControls();
 
         SendMessage( m_hwnd, WM_SIZE, 0, 0 );
-        SetTimer( m_hwnd, 1, 0, NULL );
+        SetTimer( m_hwnd, 1, 0, nullptr );
 
-        return FALSE;
+        return false;
     }
 
 
@@ -134,9 +134,9 @@ namespace ATG
             dwX, dwY,
             dwWidth, 25,
             hParent,
-            NULL, g_hInstance, NULL );
+            nullptr, g_hInstance, nullptr );
 
-        SendMessage( hLabel, WM_SETFONT, (WPARAM)hFont, TRUE );
+        SendMessage( hLabel, WM_SETFONT, reinterpret_cast<WPARAM>( hFont ), TRUE );
 
         return hLabel;
     }
@@ -149,8 +149,8 @@ namespace ATG
             WS_CHILD | WS_VISIBLE | BS_CHECKBOX,
             dwX, dwY, 25, 25,
             hParent, 
-            NULL, g_hInstance, NULL );
-        SetWindowLongPtr( hCheckbox, GWLP_USERDATA, (LONG_PTR)pData );
+            nullptr, g_hInstance, nullptr );
+        SetWindowLongPtr( hCheckbox, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pData ) );
         SetWindowLongPtr( hCheckbox, GWLP_ID, IDC_DYNAMICCONTROL );
         return hCheckbox;
     }
@@ -164,8 +164,8 @@ namespace ATG
             WS_CHILD | WS_VISIBLE,
             dwX, dwY, dwWidth, 25,
             hParent,
-            NULL, g_hInstance, NULL );
-        SetWindowLongPtr( hEditBox, GWLP_USERDATA, (LONG_PTR)pData );
+            nullptr, g_hInstance, nullptr );
+        SetWindowLongPtr( hEditBox, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pData ) );
         SetWindowLongPtr( hEditBox, GWLP_ID, IDC_DYNAMICCONTROL );
         return hEditBox;
     }
@@ -173,12 +173,12 @@ namespace ATG
 
     HWND CreateTrackBar( HWND hParent, DWORD dwX, DWORD dwY, DWORD dwWidth, ExportSettingsEntry* pData )
     {
-        HWND hTrackBar = CreateWindowEx( 0, TRACKBAR_CLASS, NULL, 
+        HWND hTrackBar = CreateWindowEx( 0, TRACKBAR_CLASS, nullptr, 
             TBS_AUTOTICKS | TBS_HORZ | TBS_TOOLTIPS | WS_VISIBLE | WS_CHILD, 
             dwX, dwY, dwWidth, 30,
             hParent,
-            NULL, g_hInstance, NULL );
-        SetWindowLongPtr( hTrackBar, GWLP_USERDATA, (LONG_PTR)pData );
+            nullptr, g_hInstance, nullptr );
+        SetWindowLongPtr( hTrackBar, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pData ) );
         SetWindowLongPtr( hTrackBar, GWLP_ID, IDC_DYNAMICCONTROL );
         SendMessage( hTrackBar, TBM_SETRANGE, TRUE, MAKELONG( pData->m_MinValue.m_iValue, pData->m_MaxValue.m_iValue ) );
         SendMessage( hTrackBar, TBM_SETTICFREQ, 10, 0 );
@@ -188,12 +188,12 @@ namespace ATG
 
     HWND CreateTrackBarFloat( HWND hParent, DWORD dwX, DWORD dwY, DWORD dwWidth, ExportSettingsEntry* pData )
     {
-        HWND hTrackBar = CreateWindowEx( 0, TRACKBAR_CLASS, NULL, 
+        HWND hTrackBar = CreateWindowEx( 0, TRACKBAR_CLASS, nullptr, 
             TBS_AUTOTICKS | TBS_HORZ | WS_VISIBLE | WS_CHILD, 
             dwX, dwY, dwWidth, 30,
             hParent,
-            NULL, g_hInstance, NULL );
-        SetWindowLongPtr( hTrackBar, GWLP_USERDATA, (LONG_PTR)pData );
+            nullptr, g_hInstance, nullptr );
+        SetWindowLongPtr( hTrackBar, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pData ) );
         SetWindowLongPtr( hTrackBar, GWLP_ID, IDC_DYNAMICCONTROL );
         SendMessage( hTrackBar, TBM_SETRANGE, TRUE, MAKELONG( 0, 1000 ) );
         SendMessage( hTrackBar, TBM_SETTICFREQ, 100, 0 );
@@ -207,8 +207,8 @@ namespace ATG
         HWND hDropList = CreateWindowEx( 0, WC_COMBOBOXEX, "",
             CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE,
             dwX, dwY, dwWidth, 300,
-            hParent, NULL, g_hInstance, NULL );
-        SetWindowLongPtr( hDropList, GWLP_USERDATA, (LONG_PTR)pData );
+            hParent, nullptr, g_hInstance, nullptr );
+        SetWindowLongPtr( hDropList, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pData ) );
         SetWindowLongPtr( hDropList, GWLP_ID, IDC_DYNAMICDROPLIST );
 
         for( DWORD i = 0; i < pData->m_dwEnumValueCount; ++i )
@@ -216,21 +216,21 @@ namespace ATG
             const ExportEnumValue* pEnumValue = &pData->m_pEnumValues[i];
             COMBOBOXEXITEMA CBItem = {0};
             CBItem.mask = CBEIF_TEXT;
-            CBItem.pszText = (LPSTR)pEnumValue->strLabel;
-            CBItem.iItem = (INT)i;
-            SendMessageA( hDropList, CBEM_INSERTITEM, 0, (LPARAM)&CBItem );
+            CBItem.pszText = const_cast<LPSTR>( pEnumValue->strLabel );
+            CBItem.iItem = static_cast<INT>( i );
+            SendMessageA( hDropList, CBEM_INSERTITEM, 0, reinterpret_cast<LPARAM>( &CBItem ) );
         }
         return hDropList;
     }
 
 
-    VOID ExportSettingsDialog::PopulateControls()
+    void ExportSettingsDialog::PopulateControls()
     {
-        HFONT DlgFont = (HFONT)SendMessage( m_hOKButton, WM_GETFONT, 0, 0 );
+        auto DlgFont = reinterpret_cast<HFONT>( SendMessage( m_hOKButton, WM_GETFONT, 0, 0 ) );
 
-        EnumChildWindows( m_hScrollingPane, DestroyWindowCallback, NULL );
+        EnumChildWindows( m_hScrollingPane, DestroyWindowCallback, 0 );
 
-        if( m_pCurrentCategory == NULL )
+        if( !m_pCurrentCategory )
             return;
 
         RECT ClientRect;
@@ -246,9 +246,9 @@ namespace ATG
 
         const DWORD dwControlWidth = dwClientWidth - dwXPosControl;
 
-        while( pSetting != NULL )
+        while( pSetting )
         {
-            HWND hwndControl = NULL;
+            HWND hwndControl = nullptr;
             DWORD dwControlHeight = 30;
             CreateStaticLabel( m_hScrollingPane, pSetting->m_DisplayName, DlgFont, dwXPosLabel, dwYPos, dwLabelWidth );
             switch( pSetting->m_Type )
@@ -259,7 +259,7 @@ namespace ATG
                 break;
             case ExportSettingsEntry::CT_STRING:
                 hwndControl = CreateEditBox( m_hScrollingPane, dwXPosControl, dwYPos, dwControlWidth, pSetting );
-                SendMessage( hwndControl, WM_SETFONT, (WPARAM)DlgFont, TRUE );
+                SendMessage( hwndControl, WM_SETFONT, reinterpret_cast<WPARAM>( DlgFont ), TRUE );
                 SynchronizeControlUI( hwndControl );
                 break;
             case ExportSettingsEntry::CT_BOUNDEDINTSLIDER:
@@ -274,7 +274,7 @@ namespace ATG
                 break;
             case ExportSettingsEntry::CT_ENUM:
                 hwndControl = CreateDropList( m_hScrollingPane, dwXPosControl, dwYPos, dwControlWidth, pSetting );
-                SendMessage( hwndControl, WM_SETFONT, (WPARAM)DlgFont, TRUE );
+                SendMessage( hwndControl, WM_SETFONT, reinterpret_cast<WPARAM>( DlgFont ), TRUE);
                 SynchronizeControlUI( hwndControl );
                 break;
             }
@@ -284,19 +284,19 @@ namespace ATG
 
         m_dwControlsHeight = dwYPos;
         UpdateVScroll();
-        InvalidateRect( m_hScrollingPane, NULL, TRUE );
+        InvalidateRect( m_hScrollingPane, nullptr, TRUE );
     }
 
 
-    VOID ExportSettingsDialog::PopulateCategories( const ExportSettingsEntry* pEntry, VOID* hParentItem )
+    void ExportSettingsDialog::PopulateCategories( const ExportSettingsEntry* pEntry, void* hParentItem )
     {
-        if( pEntry == NULL )
+        if( !pEntry )
         {
             TreeView_DeleteAllItems( m_hCategoryTree );
-            DWORD dwRootCount = g_SettingsManager.GetRootCategoryCount();
-            for( DWORD i = 0; i < dwRootCount; ++i )
+            size_t dwRootCount = g_SettingsManager.GetRootCategoryCount();
+            for( size_t i = 0; i < dwRootCount; ++i )
             {
-                PopulateCategories( g_SettingsManager.GetRootCategory( i ), NULL );
+                PopulateCategories( g_SettingsManager.GetRootCategory( i ), nullptr );
             }
             return;
         }
@@ -310,17 +310,17 @@ namespace ATG
         strcpy_s( strText, pEntry->m_DisplayName.SafeString() );
         TreeItem.item.pszText = strText;
         TreeItem.item.mask = TVIF_TEXT | TVIF_PARAM;
-        TreeItem.item.lParam = (LPARAM)pEntry;
-        TreeItem.hParent = (HTREEITEM)hParentItem;
+        TreeItem.item.lParam = reinterpret_cast<LPARAM>( pEntry );
+        TreeItem.hParent = reinterpret_cast<HTREEITEM>( hParentItem );
         TreeItem.hInsertAfter = TVI_LAST;
 
         HTREEITEM hCurrentItem = TreeView_InsertItem( m_hCategoryTree, &TreeItem );
 
-        if( pEntry->m_pFirstChild != NULL )
+        if( pEntry->m_pFirstChild )
         {
             PopulateCategories( pEntry->m_pFirstChild, hCurrentItem );
         }
-        if( pEntry->m_pSibling != NULL )
+        if( pEntry->m_pSibling )
         {
             PopulateCategories( pEntry->m_pSibling, hParentItem );
         }
@@ -329,33 +329,33 @@ namespace ATG
 
     INT GetNormalizedIntValue( ExportSettingsEntry* pEntry )
     {
-        FLOAT fValue = pEntry->GetValueFloat();
-        FLOAT fNorm = ( fValue - pEntry->m_MinValue.m_fValue ) / ( pEntry->m_MaxValue.m_fValue - pEntry->m_MinValue.m_fValue );
-        return (INT)( fNorm * 1000.0f );
+        float fValue = pEntry->GetValueFloat();
+        float fNorm = ( fValue - pEntry->m_MinValue.m_fValue ) / ( pEntry->m_MaxValue.m_fValue - pEntry->m_MinValue.m_fValue );
+        return static_cast<INT>( fNorm * 1000.0f );
     }
 
 
-    FLOAT GetFloatFromNormalizedInt( ExportSettingsEntry* pEntry, INT iValue )
+    float GetFloatFromNormalizedInt( ExportSettingsEntry* pEntry, INT iValue )
     {
-        FLOAT fNorm = (FLOAT)iValue / 1000.0f;
-        FLOAT fValue = ( fNorm * ( pEntry->m_MaxValue.m_fValue - pEntry->m_MinValue.m_fValue ) ) + pEntry->m_MinValue.m_fValue;
+        float fNorm = (float)iValue / 1000.0f;
+        float fValue = ( fNorm * ( pEntry->m_MaxValue.m_fValue - pEntry->m_MinValue.m_fValue ) ) + pEntry->m_MinValue.m_fValue;
         return fValue;
     }
 
 
-    VOID ExportSettingsDialog::SynchronizeControlUI( HWND hwndControl )
+    void ExportSettingsDialog::SynchronizeControlUI( HWND hwndControl )
     {
-        if( hwndControl == NULL )
+        if( !hwndControl )
             return;
-        ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndControl, GWLP_USERDATA );
-        if( pEntry == NULL )
+        auto pEntry = reinterpret_cast<ExportSettingsEntry*>( GetWindowLongPtr( hwndControl, GWLP_USERDATA ) );
+        if( !pEntry )
             return;
-        m_bControlDataUpdate = TRUE;
+        m_bControlDataUpdate = true;
         switch( pEntry->m_Type )
         {
         case ExportSettingsEntry::CT_CHECKBOX:
             {
-                BOOL bValue = pEntry->GetValueBool();
+                bool bValue = pEntry->GetValueBool();
                 SendMessage( hwndControl, BM_SETCHECK, bValue ? BST_CHECKED : BST_UNCHECKED, 0 );
                 break;
             }
@@ -390,11 +390,11 @@ namespace ATG
                 break;
             }
         }
-        m_bControlDataUpdate = FALSE;
+        m_bControlDataUpdate = false;
     }
 
 
-    VOID ExportSettingsDialog::UpdateVScroll()
+    void ExportSettingsDialog::UpdateVScroll()
     {
         RECT PageRect;
         GetWindowRect( m_hScrollingPane, &PageRect );
@@ -413,7 +413,7 @@ namespace ATG
     {
         if( idCtrl == 0 )
         {
-            idCtrl = (WORD)GetWindowLongPtr( hwndCtrl, GWLP_ID );
+            idCtrl = static_cast<WORD>( GetWindowLongPtr( hwndCtrl, GWLP_ID ) );
         }
         switch (idCtrl)
         {
@@ -434,8 +434,8 @@ namespace ATG
         case IDC_DYNAMICCONTROL:
             {
                 if( m_bControlDataUpdate )
-                    return TRUE;
-                ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndCtrl, GWLP_USERDATA );
+                    return true;
+                auto pEntry = reinterpret_cast<ExportSettingsEntry*>( GetWindowLongPtr( hwndCtrl, GWLP_USERDATA ) );
                 if( wNotifyCode == BN_CLICKED && pEntry->m_Type == ExportSettingsEntry::CT_CHECKBOX )
                 {
                     pEntry->SetValue( !pEntry->GetValueBool() );
@@ -447,27 +447,27 @@ namespace ATG
                     GetWindowText( hwndCtrl, strText, 256 );
                     pEntry->SetValue( strText );
                 }
-                return TRUE;
+                return true;
             }
         case IDC_DYNAMICDROPLIST:
             {
                 if( m_bControlDataUpdate )
-                    return TRUE;
-                ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndCtrl, GWLP_USERDATA );
+                    return true;
+                auto pEntry = reinterpret_cast<ExportSettingsEntry*>( GetWindowLongPtr( hwndCtrl, GWLP_USERDATA ) );
                 assert( pEntry->m_Type == ExportSettingsEntry::CT_ENUM );
                 if( wNotifyCode == CBN_SELCHANGE )
                 {
                     INT iEnumIndex = ComboBox_GetCurSel( hwndCtrl );
                     if( iEnumIndex < 0 )
                         iEnumIndex = 0;
-                    if( iEnumIndex >= (INT)pEntry->m_dwEnumValueCount )
-                        iEnumIndex = (INT)pEntry->m_dwEnumValueCount - 1;
+                    if( iEnumIndex >= static_cast<INT>( pEntry->m_dwEnumValueCount ) )
+                        iEnumIndex = static_cast<INT>( pEntry->m_dwEnumValueCount - 1 );
                     pEntry->SetValue( pEntry->m_pEnumValues[iEnumIndex].iValue );
                 }
-                return TRUE;
+                return true;
             }
         }
-        return FALSE;
+        return false;
     }
 
     LRESULT ExportSettingsDialog::OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam )
@@ -480,7 +480,7 @@ namespace ATG
         case WM_TIMER:
             Hide();
             KillTimer( m_hwnd, wParam );
-            return FALSE;
+            return false;
         case WM_SIZE:
             {
                 const DWORD dwBorderSize = 4;
@@ -490,14 +490,14 @@ namespace ATG
                 RootLayout.SetRowSpec( 1, 30 );
                 RootLayout.SetClientRect( m_hwnd, dwBorderSize );
 
-                const FLOAT fSplitterWidth = 5.0f;
+                const float fSplitterWidth = 5.0f;
                 GridLayout PanesLayout( 1, 3 );
                 PanesLayout.SetColumnSpec( 0, 200 );
                 PanesLayout.SetColumnSpec( 1, fSplitterWidth );
                 PanesLayout.SetColumnSpec( 2, 1.0f );
                 RootLayout.PlaceLayout( PanesLayout, 0, 0, 1, 1, dwBorderSize );
 
-                const FLOAT fButtonWidth = 100.0f;
+                const float fButtonWidth = 100.0f;
                 GridLayout ButtonsLayout( 1, 3 );
                 ButtonsLayout.SetColumnSpec( 0, 1.0f );
                 ButtonsLayout.SetColumnSpec( 1, fButtonWidth );
@@ -512,7 +512,7 @@ namespace ATG
 
                 PopulateControls();
 
-                return FALSE;
+                return false;
             }
         case WM_VSCROLL:
             {
@@ -574,30 +574,30 @@ namespace ATG
                 // If the position has changed, scroll window and update it
                 if( si.nPos != iCurrentScrollPos )
                 {                    
-                    ScrollWindow(m_hScrollingPane, 0, ( iCurrentScrollPos - si.nPos ), NULL, NULL);
+                    ScrollWindow(m_hScrollingPane, 0, ( iCurrentScrollPos - si.nPos ), nullptr, nullptr);
                     UpdateWindow (m_hScrollingPane);
                 }
-                return FALSE;
+                return false;
             }
         case WM_HSCROLL:
             {
                 if( m_bControlDataUpdate )
-                    return FALSE;
+                    return false;
                 HWND hwndControl = (HWND)lParam;
                 if( GetWindowLongPtr( hwndControl, GWLP_ID ) != IDC_DYNAMICCONTROL )
                     return 1;
-                ExportSettingsEntry* pEntry = (ExportSettingsEntry*)GetWindowLongPtr( hwndControl, GWLP_USERDATA );
-                if( pEntry == NULL )
-                    return FALSE;
-                INT iPos = (INT)SendMessage( hwndControl, TBM_GETPOS, 0, 0 );
+                auto pEntry = reinterpret_cast<ExportSettingsEntry*>( GetWindowLongPtr( hwndControl, GWLP_USERDATA ) );
+                if( !pEntry )
+                    return false;
+                INT iPos = static_cast<INT>( SendMessage( hwndControl, TBM_GETPOS, 0, 0 ) );
                 if( pEntry->m_Type == ExportSettingsEntry::CT_BOUNDEDINTSLIDER )
                     pEntry->SetValue( iPos );
                 else
                     pEntry->SetValue( GetFloatFromNormalizedInt( pEntry, iPos ) );
-                return FALSE;
+                return false;
             }
         }
-        return FALSE;
+        return false;
     }
 
     LRESULT ExportSettingsDialog::OnNotify( INT idCtrl, LPNMHDR pnmh )
@@ -609,19 +609,19 @@ namespace ATG
             {
             case TVN_SELCHANGED:
                 {
-                    NM_TREEVIEW* pNMTV = (NM_TREEVIEW*)pnmh;
-                    ExportSettingsEntry* pEntry = (ExportSettingsEntry*)pNMTV->itemNew.lParam;
-                    if( pEntry == NULL )
-                        return TRUE;
-                    assert( pEntry != NULL );
+                    auto pNMTV = reinterpret_cast<NM_TREEVIEW*>( pnmh );
+                    auto pEntry = reinterpret_cast<ExportSettingsEntry*>( pNMTV->itemNew.lParam );
+                    if( !pEntry )
+                        return true;
+                    assert( pEntry != nullptr );
                     assert( pEntry->m_Type == ExportSettingsEntry::CT_CATEGORY );
                     m_pCurrentCategory = pEntry;
                     PopulateControls();
-                    return TRUE;
+                    return true;
                 }
             }
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 }

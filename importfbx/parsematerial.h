@@ -15,6 +15,4 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-using namespace ATG;
-
-ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial );
+ATG::ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial );

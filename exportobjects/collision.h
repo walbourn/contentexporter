@@ -31,7 +31,7 @@ namespace ATG
 struct Sphere
 {
     XMFLOAT3 Center;            // Center of the sphere.
-    FLOAT Radius;               // Radius of the sphere.
+    float Radius;               // Radius of the sphere.
 };
 
 struct AxisAlignedBox
@@ -51,8 +51,8 @@ struct OrientedBox
 //-----------------------------------------------------------------------------
 // Bounding volume construction.
 //-----------------------------------------------------------------------------
-VOID ComputeBoundingSphereFromPoints( Sphere* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride );
-VOID ComputeBoundingAxisAlignedBoxFromPoints( AxisAlignedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride );
-VOID ComputeBoundingOrientedBoxFromPoints( OrientedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride );
+void ComputeBoundingSphereFromPoints( Sphere* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride );
+void ComputeBoundingAxisAlignedBoxFromPoints( AxisAlignedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride );
+void ComputeBoundingOrientedBoxFromPoints( OrientedBox* pOut, UINT Count, const XMFLOAT3* pPoints, UINT Stride );
 
 }; // namespace

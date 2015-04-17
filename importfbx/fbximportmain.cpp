@@ -19,19 +19,19 @@
 
 using namespace ATG;
 
-FbxManager* g_pSDKManager = NULL;
-FbxImporter* g_pImporter = NULL;
-FbxScene* g_pFBXScene = NULL;
+FbxManager* g_pSDKManager = nullptr;
+FbxImporter* g_pImporter = nullptr;
+FbxScene* g_pFBXScene = nullptr;
 
 std::vector<FbxPose*> g_BindPoses;
 PoseMap g_BindPoseMap;
-BOOL g_bBindPoseFixupRequired = FALSE;
+bool g_bBindPoseFixupRequired = false;
 
 extern ATG::ExportScene* g_pScene;
 
 extern ExportPath g_CurrentOutputFileName;
 
-VOID FBXTransformer::Initialize( FbxScene* pScene )
+void FBXTransformer::Initialize( FbxScene* pScene )
 {
     ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
     auto SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
@@ -45,17 +45,17 @@ VOID FBXTransformer::Initialize( FbxScene* pScene )
     if( UpVector == FbxAxisSystem::eZAxis )
     {
         ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
-        m_bMaxConversion = TRUE;
+        m_bMaxConversion = true;
     }
     else
     {
-        m_bMaxConversion = FALSE;
+        m_bMaxConversion = false;
     }
 
-    SetUnitScale( (FLOAT)g_pScene->Settings().fExportScale );
+    SetUnitScale( (float)g_pScene->Settings().fExportScale );
 }
 
-VOID FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX* pSrcMatrix ) CONST
+void FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX* pSrcMatrix ) const
 {
     D3DXMATRIX SrcMatrix;
     if( pSrcMatrix == pDestMatrix )
@@ -85,7 +85,7 @@ VOID FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, CONST D3DXMATRIX*
     pDestMatrix->_43 *= m_fUnitScale;
 }
 
-VOID FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVECTOR3* pSrcPosition ) CONST
+void FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVECTOR3* pSrcPosition ) const
 {
     D3DXVECTOR3 SrcVector;
     if( pSrcPosition == pDestPosition )
@@ -108,7 +108,7 @@ VOID FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, CONST D3DXVE
     }
 }
 
-VOID FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DXVECTOR3* pSrcDirection ) CONST
+void FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, const D3DXVECTOR3* pSrcDirection ) const
 {
     D3DXVECTOR3 SrcVector;
     if( pSrcDirection == pDestDirection )
@@ -131,7 +131,7 @@ VOID FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, CONST D3DX
     }
 }
 
-FLOAT FBXTransformer::TransformLength( FLOAT fInputLength ) CONST
+float FBXTransformer::TransformLength( float fInputLength ) const
 {
     return fInputLength * m_fUnitScale;
 }
@@ -139,10 +139,10 @@ FLOAT FBXTransformer::TransformLength( FLOAT fInputLength ) CONST
 
 HRESULT FBXImport::Initialize()
 {
-    if( g_pSDKManager == NULL )
+    if( !g_pSDKManager )
     {
         g_pSDKManager = FbxManager::Create();
-        if( g_pSDKManager == NULL )
+        if( !g_pSDKManager )
             return E_FAIL;
 
         auto ios = FbxIOSettings::Create( g_pSDKManager, IOSROOT );
@@ -152,7 +152,7 @@ HRESULT FBXImport::Initialize()
         g_pSDKManager->SetIOSettings(ios);
     }
 
-    if( g_pImporter == NULL )
+    if( !g_pImporter )
     {
         g_pImporter = FbxImporter::Create( g_pSDKManager, "" );
     }
@@ -161,14 +161,14 @@ HRESULT FBXImport::Initialize()
     return S_OK;
 }
 
-VOID FBXImport::ClearScene()
+void FBXImport::ClearScene()
 {
     g_pFBXScene->Clear();
 }
 
-VOID SetBindPose()
+void SetBindPose()
 {
-    assert( g_pFBXScene != NULL );
+    assert( g_pFBXScene != nullptr );
 
     g_BindPoses.clear();
     INT iPoseCount = g_pFBXScene->GetPoseCount();
@@ -196,8 +196,8 @@ VOID SetBindPose()
         return;
     }
 
-    DWORD dwPoseCount = (DWORD)g_BindPoses.size();
-    for( DWORD i = 0; i < dwPoseCount; ++i )
+    size_t dwPoseCount = g_BindPoses.size();
+    for( size_t i = 0; i < dwPoseCount; ++i )
     {
         FbxPose* pPose = g_BindPoses[i];
         INT iNodeCount = pPose->GetCount();
@@ -220,16 +220,16 @@ VOID SetBindPose()
         }
     }
 
-    ExportLog::LogMsg( 3, "Created bind pose map with %d nodes.", (INT)g_BindPoseMap.size() );
+    ExportLog::LogMsg( 3, "Created bind pose map with %Iu nodes.", g_BindPoseMap.size() );
 }
 
 HRESULT FBXImport::ImportFile( const CHAR* strFileName )
 {
-    assert( g_pSDKManager != NULL );
-    assert( g_pImporter != NULL );
-    assert( g_pFBXScene != NULL );
+    assert( g_pSDKManager != nullptr );
+    assert( g_pImporter != nullptr );
+    assert( g_pFBXScene != nullptr );
 
-    assert( g_pScene != NULL );
+    assert( g_pScene != nullptr );
 
     CHAR strTemp[200];
     g_pScene->Information().ExporterName = g_strExporterName;
@@ -244,7 +244,7 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
     ExportLog::LogMsg( 1, "Loading FBX file \"%s\"...", strFileName );
 
     INT iFileFormat = -1;
-    BOOL bResult = g_pImporter->Initialize( strFileName, iFileFormat, g_pSDKManager->GetIOSettings() );
+    bool bResult = g_pImporter->Initialize( strFileName, iFileFormat, g_pSDKManager->GetIOSettings() );
 
     if( !bResult )
     {
@@ -266,13 +266,13 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
 
     ExportLog::LogMsg( 2, "Parsing scene." );
 
-    FBXTransformer* pTransformer = (FBXTransformer*)g_pScene->GetDCCTransformer();
+    auto pTransformer = reinterpret_cast<FBXTransformer*>( g_pScene->GetDCCTransformer() );
     pTransformer->Initialize( g_pFBXScene );
 
     SetBindPose();
-    g_bBindPoseFixupRequired = FALSE;
+    g_bBindPoseFixupRequired = false;
 
-    assert( g_pFBXScene->GetRootNode() != NULL );
+    assert( g_pFBXScene->GetRootNode() != nullptr );
     D3DXMATRIX matIdentity;
     D3DXMatrixIdentity( &matIdentity );
     ParseNode( g_pFBXScene->GetRootNode(), g_pScene, matIdentity );
@@ -290,13 +290,13 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
         {
             auto AnimName = g_CurrentOutputFileName.GetFileNameWithoutExtension();
 
-            DWORD dwAnimCount = g_pScene->GetAnimationCount();
-            for( DWORD i = 0; i < dwAnimCount; ++i )
+            size_t dwAnimCount = g_pScene->GetAnimationCount();
+            for( size_t i = 0; i < dwAnimCount; ++i )
             {
                 CHAR strCurrentAnimName[MAX_PATH];
                 if( i > 0 )
                 {
-                    sprintf_s( strCurrentAnimName, "%s%d", (const CHAR*)AnimName, i );
+                    sprintf_s( strCurrentAnimName, "%s%Iu", (const CHAR*)AnimName, i );
                 }
                 else
                 {

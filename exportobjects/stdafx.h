@@ -15,8 +15,9 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-#pragma warning( disable: 4100 )
+#pragma warning( disable : 4100 4481 )
 
+#define NOMINMAX
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
@@ -27,12 +28,18 @@
 #include <vector>
 #include <hash_map>
 #include <algorithm>
+#include <memory>
 #include <commctrl.h>
 #include <richedit.h>
 #include <process.h>
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
+
+#pragma warning(push)
+#pragma warning(disable : 4005 4668)
+#include <stdint.h>
+#pragma warning(pop)
 
 #include <xnamath.h>
 

@@ -20,17 +20,17 @@ namespace ATG
 
 class ExportManifest;
 
-BOOL WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest );
+bool WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest );
 
-VOID BundleTextures();
+void BundleTextures();
 
 struct XATGExportSettings
 {
-    BOOL    bBundleTextures;
-    BOOL    bUseExistingBundle;
-    BOOL    bBinaryBlobExport;
+    bool    bBundleTextures;
+    bool    bUseExistingBundle;
+    bool    bBinaryBlobExport;
 };
 
-VOID XATGInitializeSettings();
+void XATGInitializeSettings();
 
 }

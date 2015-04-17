@@ -17,25 +17,25 @@
 
 namespace ATG
 {
-    FLOAT g_fPositionExportTolerance = 0.99f;
-    FLOAT g_fOrientationExportTolerance = 0.99f;
-    FLOAT g_fScaleExportTolerance = 0.99f;
+    float g_fPositionExportTolerance = 0.99f;
+    float g_fOrientationExportTolerance = 0.99f;
+    float g_fScaleExportTolerance = 0.99f;
 
-    FLOAT ConvertToleranceValue( INT iValue )
+    float ConvertToleranceValue( INT iValue )
     {
-        FLOAT fExponent = (FLOAT)iValue / 15.0f;
-        FLOAT fValue = 1.0f - powf( 10.0f, -fExponent );
-        return max( min( fValue, 1.0f ), 0.9f );
+        float fExponent = (float)iValue / 15.0f;
+        float fValue = 1.0f - powf( 10.0f, -fExponent );
+        return std::max( std::min( fValue, 1.0f ), 0.9f );
     }
 
-    VOID ExportAnimation::SetAnimationExportQuality( INT iPos, INT iOrientation, INT iScale )
+    void ExportAnimation::SetAnimationExportQuality( INT iPos, INT iOrientation, INT iScale )
     {
         g_fPositionExportTolerance = ConvertToleranceValue( iPos );
         g_fOrientationExportTolerance = ConvertToleranceValue( iOrientation );
         g_fScaleExportTolerance = ConvertToleranceValue( iScale );
     }
 
-    VOID ExportAnimationTransformTrack::AddKey( FLOAT fTime, const D3DXVECTOR3& Position, const D3DXQUATERNION& Orientation, const D3DXVECTOR3& Scale )
+    void ExportAnimationTransformTrack::AddKey( float fTime, const D3DXVECTOR3& Position, const D3DXQUATERNION& Orientation, const D3DXVECTOR3& Scale )
     {
         ExportAnimationPositionKey PositionKey;
         ExportAnimationOrientationKey OrientationKey;
@@ -47,7 +47,7 @@ namespace ATG
         OrientationKey.Orientation = Orientation;
         ScaleKey.Scale = Scale;
 
-        const BOOL bForceNoConstantOptimization = !g_ExportCoreSettings.bOptimizeAnimations;
+        const bool bForceNoConstantOptimization = !g_ExportCoreSettings.bOptimizeAnimations;
 
         if( bForceNoConstantOptimization || PositionChangedFromLastTwoKeys( PositionKey ) )
         {
@@ -80,46 +80,46 @@ namespace ATG
         }
     }
 
-    VOID ExportAnimationTransformTrack::AddKey( FLOAT fTime, const ExportTransform& Transform )
+    void ExportAnimationTransformTrack::AddKey( float fTime, const ExportTransform& Transform )
     {
         AddKey( fTime, Transform.Position(), Transform.Orientation(), Transform.Scale() );
     }
 
-    VOID ExportAnimationTransformTrack::AddKey( FLOAT fTime, const D3DXMATRIX& matTransform )
+    void ExportAnimationTransformTrack::AddKey( float fTime, const D3DXMATRIX& matTransform )
     {
         ExportTransform Transform;
-        Transform.InitializeFromFloats( (FLOAT*)&matTransform );
+        Transform.InitializeFromFloats( (float*)&matTransform );
         AddKey( fTime, Transform );
     }
 
-    BOOL ExportAnimationTransformTrack::PositionChangedFromLastTwoKeys( const ExportAnimationPositionKey& pk )
+    bool ExportAnimationTransformTrack::PositionChangedFromLastTwoKeys( const ExportAnimationPositionKey& pk )
     {
         if( PositionKeys.size() < 2 )
-            return TRUE;
+            return true;
         const ExportAnimationPositionKey& pk1 = PositionKeys[ PositionKeys.size() - 1 ];
         const ExportAnimationPositionKey& pk2 = PositionKeys[ PositionKeys.size() - 2 ];
         return ( pk1.Position != pk.Position || pk2.Position != pk.Position );
     }
 
-    BOOL ExportAnimationTransformTrack::OrientationChangedFromLastTwoKeys( const ExportAnimationOrientationKey& pk )
+    bool ExportAnimationTransformTrack::OrientationChangedFromLastTwoKeys( const ExportAnimationOrientationKey& pk )
     {
         if( OrientationKeys.size() < 2 )
-            return TRUE;
+            return true;
         const ExportAnimationOrientationKey& pk1 = OrientationKeys[ OrientationKeys.size() - 1 ];
         const ExportAnimationOrientationKey& pk2 = OrientationKeys[ OrientationKeys.size() - 2 ];
         return ( pk1.Orientation != pk.Orientation || pk2.Orientation != pk.Orientation );
     }
 
-    BOOL ExportAnimationTransformTrack::ScaleChangedFromLastTwoKeys( const ExportAnimationScaleKey& pk )
+    bool ExportAnimationTransformTrack::ScaleChangedFromLastTwoKeys( const ExportAnimationScaleKey& pk )
     {
         if( ScaleKeys.size() < 2 )
-            return TRUE;
+            return true;
         const ExportAnimationScaleKey& pk1 = ScaleKeys[ ScaleKeys.size() - 1 ];
         const ExportAnimationScaleKey& pk2 = ScaleKeys[ ScaleKeys.size() - 2 ];
         return ( pk1.Scale != pk.Scale || pk2.Scale != pk.Scale );
     }
 
-    VOID ExportAnimationTransformTrack::OptimizeKeys()
+    void ExportAnimationTransformTrack::OptimizeKeys()
     {
         SortKeys();
 
@@ -131,7 +131,7 @@ namespace ATG
     D3DXVECTOR3 ComputeSlope( const ExportAnimationPositionKey& KeyA, const ExportAnimationPositionKey& KeyB )
     {
         D3DXVECTOR3 vDelta = KeyB.Position - KeyA.Position;
-        FLOAT fTimeDelta = KeyB.fTime - KeyA.fTime;
+        float fTimeDelta = KeyB.fTime - KeyA.fTime;
         assert( fTimeDelta > 0.0f );
         return vDelta / fTimeDelta;
     }
@@ -139,7 +139,7 @@ namespace ATG
     D3DXVECTOR4 ComputeSlope( const ExportAnimationOrientationKey& KeyA, const ExportAnimationOrientationKey& KeyB )
     {
         D3DXVECTOR4 vDelta = (D3DXVECTOR4)KeyB.Orientation - (D3DXVECTOR4)KeyA.Orientation;
-        FLOAT fTimeDelta = KeyB.fTime - KeyA.fTime;
+        float fTimeDelta = KeyB.fTime - KeyA.fTime;
         assert( fTimeDelta > 0.0f );
         return vDelta / fTimeDelta;
     }
@@ -147,12 +147,12 @@ namespace ATG
     D3DXVECTOR3 ComputeSlope( const ExportAnimationScaleKey& KeyA, const ExportAnimationScaleKey& KeyB )
     {
         D3DXVECTOR3 vDelta = KeyB.Scale - KeyA.Scale;
-        FLOAT fTimeDelta = KeyB.fTime - KeyA.fTime;
+        float fTimeDelta = KeyB.fTime - KeyA.fTime;
         assert( fTimeDelta > 0.0f );
         return vDelta / fTimeDelta;
     }
 
-    BOOL NewSlopeEncountered( const D3DXVECTOR3& vSlopeRef, const D3DXVECTOR3& vSlopeNew, const FLOAT fThreshold )
+    bool NewSlopeEncountered( const D3DXVECTOR3& vSlopeRef, const D3DXVECTOR3& vSlopeNew, const float fThreshold )
     {
         D3DXVECTOR3 vRefNormalized;
         if( D3DXVec3LengthSq( &vSlopeRef ) < 1e-4f )
@@ -173,11 +173,11 @@ namespace ATG
             D3DXVec3Normalize( &vNewNormalized, &vSlopeNew );
         }
 
-        FLOAT fDot = D3DXVec3Dot( &vRefNormalized, &vNewNormalized );
+        float fDot = D3DXVec3Dot( &vRefNormalized, &vNewNormalized );
         return( fDot <= fThreshold );
     }
 
-    BOOL NewSlopeEncountered( const D3DXVECTOR4& vSlopeRef, const D3DXVECTOR4& vSlopeNew, const FLOAT fThreshold )
+    bool NewSlopeEncountered( const D3DXVECTOR4& vSlopeRef, const D3DXVECTOR4& vSlopeNew, const float fThreshold )
     {
         D3DXVECTOR4 vRefNormalized;
         if( D3DXVec4LengthSq( &vSlopeRef ) < 1e-4f )
@@ -198,11 +198,11 @@ namespace ATG
             D3DXVec4Normalize( &vNewNormalized, &vSlopeNew );
         }
 
-        FLOAT fDot = D3DXVec4Dot( &vRefNormalized, &vNewNormalized );
+        float fDot = D3DXVec4Dot( &vRefNormalized, &vNewNormalized );
         return( fDot <= fThreshold );
     }
 
-    VOID ExportAnimationTransformTrack::OptimizePositionKeys()
+    void ExportAnimationTransformTrack::OptimizePositionKeys()
     {
         if( PositionKeys.size() < 2 )
             return;
@@ -211,7 +211,7 @@ namespace ATG
         PositionKeyList NewKeyList;
         NewKeyList.push_back( PositionKeys[0] );
 
-        for( DWORD i = 1; i < PositionKeys.size(); ++i )
+        for( size_t i = 1; i < PositionKeys.size(); ++i )
         {
             D3DXVECTOR3 vSlope = ComputeSlope( PositionKeys[i - 1], PositionKeys[i] );
             if( NewSlopeEncountered( vCurrentSlope, vSlope, g_fPositionExportTolerance ) )
@@ -233,7 +233,7 @@ namespace ATG
         PositionKeys = NewKeyList;
     }
 
-    VOID ExportAnimationTransformTrack::OptimizeOrientationKeys()
+    void ExportAnimationTransformTrack::OptimizeOrientationKeys()
     {
         if( OrientationKeys.size() < 2 )
             return;
@@ -242,7 +242,7 @@ namespace ATG
         OrientationKeyList NewKeyList;
         NewKeyList.push_back( OrientationKeys[0] );
 
-        for( DWORD i = 1; i < OrientationKeys.size(); ++i )
+        for( size_t i = 1; i < OrientationKeys.size(); ++i )
         {
             D3DXVECTOR4 vSlope = ComputeSlope( OrientationKeys[i - 1], OrientationKeys[i] );
             if( NewSlopeEncountered( vCurrentSlope, vSlope, g_fOrientationExportTolerance ) )
@@ -264,7 +264,7 @@ namespace ATG
         OrientationKeys = NewKeyList;
     }
 
-    VOID ExportAnimationTransformTrack::OptimizeScaleKeys()
+    void ExportAnimationTransformTrack::OptimizeScaleKeys()
     {
         if( ScaleKeys.size() < 2 )
             return;
@@ -273,7 +273,7 @@ namespace ATG
         ScaleKeyList NewKeyList;
         NewKeyList.push_back( ScaleKeys[0] );
 
-        for( DWORD i = 1; i < ScaleKeys.size(); ++i )
+        for( size_t i = 1; i < ScaleKeys.size(); ++i )
         {
             D3DXVECTOR3 vSlope = ComputeSlope( ScaleKeys[i - 1], ScaleKeys[i] );
             if( NewSlopeEncountered( vCurrentSlope, vSlope, g_fScaleExportTolerance ) )
@@ -295,74 +295,74 @@ namespace ATG
         ScaleKeys = NewKeyList;
     }
 
-    BOOL PositionLessEqual( ExportAnimationPositionKey& A, ExportAnimationPositionKey& B )
+    bool PositionLessEqual( ExportAnimationPositionKey& A, ExportAnimationPositionKey& B )
     {
         return A.fTime <= B.fTime;
     }
 
-    BOOL OrientationLessEqual( ExportAnimationOrientationKey& A, ExportAnimationOrientationKey& B )
+    bool OrientationLessEqual( ExportAnimationOrientationKey& A, ExportAnimationOrientationKey& B )
     {
         return A.fTime <= B.fTime;
     }
 
-    BOOL ScaleLessEqual( ExportAnimationScaleKey& A, ExportAnimationScaleKey& B )
+    bool ScaleLessEqual( ExportAnimationScaleKey& A, ExportAnimationScaleKey& B )
     {
         return A.fTime <= B.fTime;
     }
 
-    VOID ExportAnimationTransformTrack::SortKeys()
+    void ExportAnimationTransformTrack::SortKeys()
     {
         std::sort( PositionKeys.begin(), PositionKeys.end(), PositionLessEqual );
         std::sort( OrientationKeys.begin(), OrientationKeys.end(), OrientationLessEqual );
         std::sort( ScaleKeys.begin(), ScaleKeys.end(), ScaleLessEqual );
     }
 
-    VOID ExportAnimationTransformTrack::EndianSwap()
+    void ExportAnimationTransformTrack::EndianSwap()
     {
-        DWORD dwPositionFloatCount = GetPositionDataSize() / sizeof( FLOAT );
-        DWORD dwOrientationFloatCount = GetOrientationDataSize() / sizeof( FLOAT );
-        DWORD dwScaleFloatCount = GetScaleDataSize() / sizeof( FLOAT );
+        size_t dwPositionFloatCount = GetPositionDataSize() / sizeof( float );
+        size_t dwOrientationFloatCount = GetOrientationDataSize() / sizeof( float );
+        size_t dwScaleFloatCount = GetScaleDataSize() / sizeof( float );
 
-        DWORD* pData = (DWORD*)GetPositionData();
-        for( DWORD i = 0; i < dwPositionFloatCount; ++i )
+        auto pData = reinterpret_cast<DWORD*>( GetPositionData() );
+        for( size_t i = 0; i < dwPositionFloatCount; ++i )
         {
             *pData = _byteswap_ulong( *pData );
             ++pData;
         }
-        pData = (DWORD*)GetOrientationData();
-        for( DWORD i = 0; i < dwOrientationFloatCount; ++i )
+        pData = reinterpret_cast<DWORD*>( GetOrientationData() );
+        for( size_t i = 0; i < dwOrientationFloatCount; ++i )
         {
             *pData = _byteswap_ulong( *pData );
             ++pData;
         }
-        pData = (DWORD*)GetScaleData();
-        for( DWORD i = 0; i < dwScaleFloatCount; ++i )
+        pData = reinterpret_cast<DWORD*>( GetScaleData() );
+        for( size_t i = 0; i < dwScaleFloatCount; ++i )
         {
             *pData = _byteswap_ulong( *pData );
             ++pData;
         }
     }
 
-    BOOL ExportAnimationTransformTrack::IsTrackEmpty()
+    bool ExportAnimationTransformTrack::IsTrackEmpty()
     {
         // If any key array has more than 1 key, the track is not empty
         if( PositionKeys.size() > 1 ||
             OrientationKeys.size() > 1 ||
             ScaleKeys.size() > 1 )
         {
-            return FALSE;
+            return false;
         }
 
-        BOOL bResult = TRUE;
+        bool bResult = true;
 
-        if( pSourceFrame != NULL )
+        if( pSourceFrame )
         {
             // Check for an orientation that is different from the scene position
             if( OrientationKeys.size() == 1 )
             {
                 if( OrientationKeys[0].Orientation != pSourceFrame->Transform().Orientation() )
                 {
-                    bResult = FALSE;
+                    bResult = false;
                 }
             }
             // Check for a position that is different from the scene position
@@ -370,7 +370,7 @@ namespace ATG
             {
                 if( PositionKeys[0].Position != pSourceFrame->Transform().Position() )
                 {
-                    bResult = FALSE;
+                    bResult = false;
                 }
             }
             // Check for a scale that is different from the scene scale
@@ -378,38 +378,41 @@ namespace ATG
             {
                 if( ScaleKeys[0].Scale != pSourceFrame->Transform().Scale() )
                 {
-                    bResult = FALSE;
+                    bResult = false;
                 }
             }
         }
         else
         {
-            bResult = FALSE;
+            bResult = false;
         }
 
         return bResult;
     }
 
-ExportAnimation::ExportAnimation(void)
+ExportAnimation::ExportAnimation()
 {
 }
 
-ExportAnimation::~ExportAnimation(void)
+ExportAnimation::~ExportAnimation()
 {
 }
 
-VOID ExportAnimation::Optimize()
+void ExportAnimation::Optimize()
 {
     if( !g_ExportCoreSettings.bOptimizeAnimations )
     {
         return;
     }
 
-    ExportLog::LogMsg( 4, "Optimizing animation with %d tracks.", m_vTracks.size() );
-    vector< ExportAnimationTrack* > NewTrackList;
-    for( DWORD i = 0; i < m_vTracks.size(); i++ )
+    ExportLog::LogMsg( 4, "Optimizing animation with %Iu tracks.", m_vTracks.size() );
+    std::vector< ExportAnimationTrack* > NewTrackList;
+    for( size_t i = 0; i < m_vTracks.size(); i++ )
     {
         ExportAnimationTrack* pTrack = m_vTracks[i];
+        if ( !pTrack )
+            continue;
+
         pTrack->TransformTrack.OptimizeKeys();
         if( pTrack->TransformTrack.IsTrackEmpty() )
         {
@@ -420,13 +423,13 @@ VOID ExportAnimation::Optimize()
             NewTrackList.push_back( pTrack );
         }
     }
-    ExportLog::LogMsg( 4, "Animation has %d tracks after optimization.", NewTrackList.size() );
+    ExportLog::LogMsg( 4, "Animation has %Iu tracks after optimization.", NewTrackList.size() );
     m_vTracks = NewTrackList;
 }
 
-VOID ExportAnimation::EndianSwap()
+void ExportAnimation::EndianSwap()
 {
-    for( DWORD i = 0; i < m_vTracks.size(); i++ )
+    for( size_t i = 0; i < m_vTracks.size(); i++ )
     {
         ExportAnimationTrack* pTrack = m_vTracks[i];
         pTrack->TransformTrack.EndianSwap();

@@ -17,37 +17,37 @@
 
 namespace ATG
 {
-    BOOL g_bLoggingEnabled = TRUE;
+    bool g_bLoggingEnabled = true;
     UINT g_uLogLevel = 10;
     typedef std::list< ILogListener* > LogListenerList;
     LogListenerList g_Listeners;
 
-    DWORD g_dwWarningCount = 0;
-    DWORD g_dwErrorCount = 0;
+    size_t g_dwWarningCount = 0;
+    size_t g_dwErrorCount = 0;
 
     typedef std::list<const CHAR*> StringList;
     StringList      g_WarningsList;
     StringList      g_ErrorsList;
 
     CHAR g_strBuf[500];
-    VOID BroadcastMessage( UINT uMessageType, const CHAR* strMsg );
+    void BroadcastMessage( UINT uMessageType, const CHAR* strMsg );
 
-    VOID ExportLog::AddListener( ILogListener* pListener )
+    void ExportLog::AddListener( ILogListener* pListener )
     {
         g_Listeners.push_back( pListener );
     }
 
-    VOID ExportLog::ClearListeners()
+    void ExportLog::ClearListeners()
     {
         g_Listeners.clear();
     }
 
-    VOID ExportLog::EnableLogging( BOOL bEnable )
+    void ExportLog::EnableLogging( bool bEnable )
     {
         g_bLoggingEnabled = bEnable;
     }
 
-    VOID ExportLog::SetLogLevel( UINT uLevel )
+    void ExportLog::SetLogLevel( UINT uLevel )
     {
         g_uLogLevel = uLevel;
     }
@@ -57,9 +57,9 @@ namespace ATG
         return g_uLogLevel;
     }
 
-    VOID ExportLog::GenerateLogReport( BOOL bEchoWarningsAndErrors )
+    void ExportLog::GenerateLogReport( bool bEchoWarningsAndErrors )
     {
-        LogMsg( 0, "%d warning(s), %d error(s).", g_dwWarningCount, g_dwErrorCount );
+        LogMsg( 0, "%Iu warning(s), %Iu error(s).", g_dwWarningCount, g_dwErrorCount );
         if( !bEchoWarningsAndErrors )
             return;
 
@@ -80,7 +80,7 @@ namespace ATG
         }
     }
 
-    VOID ExportLog::ResetCounters()
+    void ExportLog::ResetCounters()
     {
         StringList::iterator iter = g_WarningsList.begin();
         StringList::iterator end = g_WarningsList.end();
@@ -104,7 +104,7 @@ namespace ATG
         g_dwErrorCount = 0;
     }
 
-    VOID BroadcastMessage( UINT uMessageType, const CHAR* strMsg )
+    void BroadcastMessage( UINT uMessageType, const CHAR* strMsg )
     {
         LogListenerList::iterator iter = g_Listeners.begin();
         LogListenerList::iterator end = g_Listeners.end();
@@ -128,7 +128,7 @@ namespace ATG
     }
 
 
-    VOID ExportLog::LogCommand( DWORD dwCommand, VOID* pData )
+    void ExportLog::LogCommand( DWORD dwCommand, void* pData )
     {
         LogListenerList::iterator iter = g_Listeners.begin();
         LogListenerList::iterator end = g_Listeners.end();
@@ -141,7 +141,7 @@ namespace ATG
     }
 
 
-    VOID ExportLog::LogMsg( UINT uImportance, const CHAR* strFormat, ... )
+    void ExportLog::LogMsg( UINT uImportance, _In_z_ _Printf_format_string_ const CHAR* strFormat, ... )
     {
         if( !g_bLoggingEnabled || ( uImportance > g_uLogLevel ) )
             return;
@@ -153,16 +153,16 @@ namespace ATG
     }
 
 
-    VOID RecordMessage( StringList& DestStringList, const CHAR* strMessage )
+    void RecordMessage( StringList& DestStringList, const CHAR* strMessage )
     {
-        DWORD dwLength = (DWORD)strlen( strMessage );
+        size_t dwLength = strlen( strMessage );
         CHAR* strCopy = new CHAR[ dwLength + 1 ];
         strcpy_s( strCopy, dwLength + 1, strMessage );
         DestStringList.push_back( strCopy );
     }
 
 
-    VOID ExportLog::LogError( const CHAR* strFormat, ... )
+    void ExportLog::LogError( _In_z_ _Printf_format_string_ const CHAR* strFormat, ... )
     {
         if( !g_bLoggingEnabled )
             return;
@@ -178,7 +178,7 @@ namespace ATG
         BroadcastMessage( 2, g_strBuf );
     }
 
-    VOID ExportLog::LogWarning( const CHAR* strFormat, ... )
+    void ExportLog::LogWarning( _In_z_ _Printf_format_string_ const CHAR* strFormat, ... )
     {
         if( !g_bLoggingEnabled )
             return;
@@ -204,26 +204,26 @@ namespace ATG
         StopLogging();
     }
 
-    VOID FileListener::StartLogging( const CHAR* strFileName )
+    void FileListener::StartLogging( const CHAR* strFileName )
     {
         assert( m_hFileHandle == INVALID_HANDLE_VALUE );
-        m_hFileHandle = CreateFile( strFileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+        m_hFileHandle = CreateFile( strFileName, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr );
     }
 
-    VOID FileListener::StopLogging()
+    void FileListener::StopLogging()
     {
         if( m_hFileHandle != INVALID_HANDLE_VALUE )
             CloseHandle( m_hFileHandle );
         m_hFileHandle = INVALID_HANDLE_VALUE;
     }
 
-    VOID FileListener::LogMessage( const CHAR* strMessage )
+    void FileListener::LogMessage( const CHAR* strMessage )
     {
         if( m_hFileHandle == INVALID_HANDLE_VALUE )
             return;
         DWORD dwByteCount = 0;
-        WriteFile( m_hFileHandle, strMessage, (DWORD)strlen( strMessage ), &dwByteCount, NULL );
+        WriteFile( m_hFileHandle, strMessage, static_cast<DWORD>( strlen( strMessage ) ), &dwByteCount, nullptr );
         const CHAR* strNewline = "\r\n";
-        WriteFile( m_hFileHandle, strNewline, 2, &dwByteCount, NULL );
+        WriteFile( m_hFileHandle, strNewline, 2, &dwByteCount, nullptr );
     }
 }

@@ -24,54 +24,54 @@ namespace ATG
     public:
         XMLWriter();
         XMLWriter( CHAR* strBuffer, UINT uBufferSize );
-        XMLWriter( CONST CHAR* strFileName );
+        XMLWriter( const CHAR* strFileName );
         ~XMLWriter();
 
-        VOID Initialize( CHAR* strBuffer, UINT uBufferSize );
-        VOID Initialize( CONST CHAR* strFileName );
-        VOID Close();
+        void Initialize( CHAR* strBuffer, UINT uBufferSize );
+        void Initialize( const CHAR* strFileName );
+        void Close();
 
-        BOOL IsValid() const { return m_bValid; }
+        bool IsValid() const { return m_bValid; }
 
-        VOID SetIndentCount( UINT uSpaces );
-        VOID EnableNewlines( BOOL bWriteNewLines ) { m_bWriteNewlines = bWriteNewLines; }
+        void SetIndentCount( UINT uSpaces );
+        void EnableNewlines( bool bWriteNewLines ) { m_bWriteNewlines = bWriteNewLines; }
 
-        BOOL StartElement( CONST CHAR* strName );
-        BOOL EndElement();
-        BOOL WriteElement( CONST CHAR* strName, CONST CHAR* strBody );
-        BOOL WriteElement( CONST CHAR* strName, INT iBody );
-        BOOL WriteElement( CONST CHAR* strName, FLOAT fBody );
-        BOOL WriteElementFormat( CONST CHAR* strName, CONST CHAR* strFormat, ... );
+        bool StartElement( const CHAR* strName );
+        bool EndElement();
+        bool WriteElement( const CHAR* strName, const CHAR* strBody );
+        bool WriteElement( const CHAR* strName, INT iBody );
+        bool WriteElement( const CHAR* strName, float fBody );
+        bool WriteElementFormat( const CHAR* strName, const CHAR* strFormat, ... );
 
-        BOOL StartCDATA();
-        BOOL EndCDATA();
-        BOOL WriteCDATA( CONST CHAR* strData, DWORD dwDataLength );
+        bool StartCDATA();
+        bool EndCDATA();
+        bool WriteCDATA( const CHAR* strData, DWORD dwDataLength );
 
-        BOOL StartComment( BOOL bInline = FALSE );
-        BOOL EndComment();
-        BOOL WriteComment( CONST CHAR* strComment, BOOL bInline = FALSE );
+        bool StartComment( bool bInline = false );
+        bool EndComment();
+        bool WriteComment( const CHAR* strComment, bool bInline = false );
 
-        BOOL AddAttributeFormat( CONST CHAR* strName, CONST CHAR* strFormat, ... );
-        BOOL AddAttribute( CONST CHAR* strName, CONST CHAR* strValue );
-        BOOL AddAttribute( CONST CHAR* strName, CONST WCHAR* wstrValue );
-        BOOL AddAttribute( CONST CHAR* strName, INT iValue );
-        BOOL AddAttribute( CONST CHAR* strName, FLOAT fValue );
+        bool AddAttributeFormat( const CHAR* strName, const CHAR* strFormat, ... );
+        bool AddAttribute( const CHAR* strName, const CHAR* strValue );
+        bool AddAttribute( const CHAR* strName, const WCHAR* wstrValue );
+        bool AddAttribute( const CHAR* strName, INT iValue );
+        bool AddAttribute( const CHAR* strName, float fValue );
 
-        BOOL WriteString( CONST CHAR* strText );
-        BOOL WriteStringFormat( CONST CHAR* strFormat, ... );
+        bool WriteString( const CHAR* strText );
+        bool WriteStringFormat( const CHAR* strFormat, ... );
 
     private:
 
-        VOID PushName( CONST CHAR* strName );
-        CONST CHAR* PopName();
+        void PushName( const CHAR* strName );
+        const CHAR* PopName();
 
-        inline BOOL EndOpenTag();
-        inline BOOL WriteNewline();
-        inline BOOL WriteIndent();
+        inline bool EndOpenTag();
+        inline bool WriteNewline();
+        inline bool WriteIndent();
 
-        inline BOOL OutputString( CONST CHAR* strText );
-        inline BOOL OutputStringFast( CONST CHAR* strText, UINT uLength );
-        VOID FlushBufferToFile();
+        inline bool OutputString( const CHAR* strText );
+        inline bool OutputStringFast( const CHAR* strText, UINT uLength );
+        void FlushBufferToFile();
 
         HANDLE          m_hFile;
         CHAR*           m_strBuffer;
@@ -84,18 +84,18 @@ namespace ATG
         std::vector<UINT>    m_NameStackPositions;
         UINT            m_uIndentCount;
         CHAR            m_strIndent[9];
-        BOOL            m_bWriteNewlines;
+        bool            m_bWriteNewlines;
 
-        BOOL            m_bOpenTagFinished;
-        BOOL            m_bWriteCloseTagIndent;
-        BOOL            m_bInlineComment;
+        bool            m_bOpenTagFinished;
+        bool            m_bWriteCloseTagIndent;
+        bool            m_bInlineComment;
 
-        BOOL            m_bValid;
+        bool            m_bValid;
     };
 
     class IXMLSerializable
     {
     public:
-        virtual BOOL Serialize( XMLWriter* pXMLWriter ) = 0;
+        virtual bool Serialize( XMLWriter* pXMLWriter ) = 0;
     };
 }

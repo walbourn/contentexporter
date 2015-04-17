@@ -58,9 +58,9 @@ namespace ATG
         ExportString                strDisplayHint;
         ExportString                strDefaultValue;
         ExportString                strLoaderHint;
-        BOOL                        bVisibleInTool;
-        BOOL                        bExportToContentFile;
-        BOOL                        bDetectAlpha;
+        bool                        bVisibleInTool;
+        bool                        bExportToContentFile;
+        bool                        bDetectAlpha;
     };
     typedef std::vector<ExportMaterialParameterDefinition*> ExportMaterialParameterDefinitionVector;
 
@@ -78,27 +78,27 @@ namespace ATG
     {
     public:
         MaterialDatabaseReader()
-            : m_pCurrentMaterial( NULL ),
-            m_pCurrentParam( NULL )
+            : m_pCurrentMaterial( nullptr ),
+            m_pCurrentParam( nullptr )
         { }
-        virtual HRESULT  StartDocument() { return S_OK; }
-        virtual HRESULT  EndDocument() { return S_OK; }
+        virtual HRESULT  StartDocument() override { return S_OK; }
+        virtual HRESULT  EndDocument() override { return S_OK; }
 
-        virtual HRESULT  ElementBegin( CONST WCHAR* strName, UINT NameLen, 
-            CONST XMLAttribute *pAttributes, UINT NumAttributes );
-        virtual HRESULT  ElementContent( CONST WCHAR *strData, UINT DataLen, BOOL More );
-        virtual HRESULT  ElementEnd( CONST WCHAR *strName, UINT NameLen );
+        virtual HRESULT  ElementBegin( const WCHAR* strName, UINT NameLen, 
+            const XMLAttribute *pAttributes, UINT NumAttributes ) override;
+        virtual HRESULT  ElementContent( const WCHAR *strData, UINT DataLen, bool More ) override;
+        virtual HRESULT  ElementEnd( const WCHAR *strName, UINT NameLen ) override;
 
-        virtual HRESULT  CDATABegin( ) { return S_OK; }
-        virtual HRESULT  CDATAData( CONST WCHAR *strCDATA, UINT CDATALen, BOOL bMore ) { return S_OK; }
-        virtual HRESULT  CDATAEnd( ) { return S_OK; }
+        virtual HRESULT  CDATABegin( ) override { return S_OK; }
+        virtual HRESULT  CDATAData( const WCHAR *strCDATA, UINT CDATALen, bool bMore ) override { return S_OK; }
+        virtual HRESULT  CDATAEnd( ) override { return S_OK; }
 
-        virtual VOID     Error( HRESULT hError, CONST CHAR *strMessage );
+        virtual void     Error( HRESULT hError, const CHAR *strMessage ) override;
     protected:
-        VOID             ParseAttributes( const XMLAttribute* pAttributes, DWORD dwAttributeCount );
+        void             ParseAttributes( const XMLAttribute* pAttributes, size_t dwAttributeCount );
         const WCHAR*     FindAttribute( const WCHAR* strName );
-        VOID             ProcessElementBeginContent();
-        VOID             ProcessElementEnd();
+        void             ProcessElementBeginContent();
+        void             ProcessElementEnd();
     protected:
         struct ElementAttribute
         {
@@ -108,7 +108,7 @@ namespace ATG
         typedef std::vector<ElementAttribute> ElementAttributeVector;
 
         WCHAR                   m_strCurrentElementName[256];
-        BOOL                    m_bCurrentElementEndTag;
+        bool                    m_bCurrentElementEndTag;
         ElementAttributeVector  m_CurrentElementAttributes;
 
         ExportMaterialDefinition*               m_pCurrentMaterial;
@@ -118,11 +118,11 @@ namespace ATG
     class ExportMaterialDatabase
     {
     public:
-        static VOID Clear();
-        static BOOL Initialize( const CHAR* strFileName );
+        static void Clear();
+        static bool Initialize( const CHAR* strFileName );
         static const CHAR* GetDatabaseFileName();
-        static DWORD GetMaterialCount();
-        static const ExportMaterialDefinition* GetMaterial( DWORD dwIndex );
+        static size_t GetMaterialCount();
+        static const ExportMaterialDefinition* GetMaterial( size_t dwIndex );
         static const ExportMaterialDefinition* FindMaterial( ExportString strName );
     };
 

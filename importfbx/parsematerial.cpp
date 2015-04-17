@@ -16,23 +16,25 @@
 #include <algorithm>
 #include "ParseMaterial.h"
 
+using namespace ATG;
+
 extern ATG::ExportScene* g_pScene;
 
-BOOL MaterialParameterSort( ExportMaterialParameter A, ExportMaterialParameter B )
+bool MaterialParameterSort( ExportMaterialParameter A, ExportMaterialParameter B )
 {
     if( A.ParamType == MPT_TEXTURE2D && B.ParamType != MPT_TEXTURE2D )
-        return TRUE;
-    return FALSE;
+        return true;
+    return false;
 }
 
-VOID FixupGenericMaterial( ExportMaterial* pMaterial )
+void FixupGenericMaterial( ExportMaterial* pMaterial )
 {
     ExportMaterialParameter OutputParam;
     OutputParam.ParamType = MPT_TEXTURE2D;
-    OutputParam.bInstanceParam = TRUE;
+    OutputParam.bInstanceParam = true;
 
     ExportMaterialParameter* pParam = pMaterial->FindParameter( "DiffuseTexture" );
-    if( pParam == NULL )
+    if( !pParam )
     {
         ExportLog::LogWarning( "Material \"%s\" has no diffuse texture.  Assigning a default diffuse texture.", pMaterial->GetName().SafeString() );
         OutputParam.Name = "DiffuseTexture";
@@ -41,7 +43,7 @@ VOID FixupGenericMaterial( ExportMaterial* pMaterial )
     }
 
     pParam = pMaterial->FindParameter( "NormalMapTexture" );
-    if( pParam == NULL )
+    if( !pParam )
     {
         ExportLog::LogWarning( "Material \"%s\" has no normal map texture.  Assigning a default normal map texture.", pMaterial->GetName().SafeString() );
         OutputParam.Name = "NormalMapTexture";
@@ -54,20 +56,7 @@ VOID FixupGenericMaterial( ExportMaterial* pMaterial )
     std::stable_sort( pParamList->begin(), pParamList->end(), MaterialParameterSort );
 }
 
-/*
-KFbxTexture* GetTexture( KFbxLayer* pLayer, KFbxLayerElement::ELayerElementType TextureType, const DWORD dwMaterialIndex, const DWORD dwMaterialCount )
-{
-    KFbxLayerElementTexture* pTextureSet = pLayer->GetTextures( TextureType );
-    if( pTextureSet == NULL )
-        return NULL;
-
-    DWORD dwTextureCount = pTextureSet->GetDirectArray().GetCount();
-    assert( dwTextureCount <= dwMaterialCount );
-    return pTextureSet->GetDirectArray().GetAt( dwMaterialIndex );
-}
-*/
-
-VOID AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, DWORD dwIndex, const CHAR* strFileName, DWORD dwFlags )
+void AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, DWORD dwIndex, const CHAR* strFileName, DWORD dwFlags )
 {
     ExportMaterialParameter OutputParam;
     if( dwIndex == 0 )
@@ -77,20 +66,20 @@ VOID AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, D
     else
     {
         CHAR strDecoratedName[512];
-        sprintf_s( strDecoratedName, "%s%d", strParamName, dwIndex );
+        sprintf_s( strDecoratedName, "%s%u", strParamName, dwIndex );
         OutputParam.Name = strDecoratedName;
     }
     ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%s\"", OutputParam.Name.SafeString(), strFileName );
     OutputParam.ValueString = strFileName;
     OutputParam.ParamType = MPT_TEXTURE2D;
-    OutputParam.bInstanceParam = TRUE;
+    OutputParam.bInstanceParam = true;
     OutputParam.Flags = dwFlags;
     pMaterial->AddParameter( OutputParam );
 }
 
-BOOL ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
+bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
 {
-    BOOL bResult = FALSE;
+    bool bResult = false;
     DWORD dwLayeredTextureCount = Property.GetSrcObjectCount( FbxLayeredTexture::ClassId );
     if( dwLayeredTextureCount > 0 )
     {
@@ -102,12 +91,12 @@ BOOL ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
             for( DWORD j = 0; j < dwTextureCount; ++j )
             {
                 auto pFbxTexture = FbxCast<FbxFileTexture>( pFbxLayeredTexture->GetSrcObject( FbxFileTexture::ClassId, j ) );
-                if( pFbxTexture == NULL )
+                if( !pFbxTexture )
                     continue;
 
                 AddTextureParameter( pMaterial, strParameterName, dwTextureIndex, pFbxTexture->GetFileName(), dwFlags );
                 ++dwTextureIndex;
-                bResult = TRUE;
+                bResult = true;
             }
         }
     }
@@ -117,11 +106,11 @@ BOOL ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
         for( DWORD i = 0; i < dwTextureCount; ++i )
         {
             auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject( FbxFileTexture::ClassId, i ) );
-            if( pFbxTexture == NULL )
+            if( !pFbxTexture )
                 continue;
 
             AddTextureParameter( pMaterial, strParameterName, i, pFbxTexture->GetFileName(), dwFlags );
-            bResult = TRUE;
+            bResult = true;
         }
     }
     return bResult;
@@ -133,7 +122,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
         return nullptr;
 
     auto pExistingMaterial = g_pScene->FindMaterial( pFbxMaterial );
-    if( pExistingMaterial != NULL )
+    if( pExistingMaterial )
     {
         ExportLog::LogMsg( 4, "Found existing material \"%s\".", pFbxMaterial->GetName() );
         return pExistingMaterial;
@@ -141,25 +130,25 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 
     ExportLog::LogMsg( 2, "Parsing material \"%s\".", pFbxMaterial->GetName() );
 
-    BOOL bRenameMaterial = FALSE;
+    bool bRenameMaterial = false;
     ExportString MaterialName( pFbxMaterial->GetName() );
-    ExportMaterial* pSameNameMaterial = NULL;
+    ExportMaterial* pSameNameMaterial = nullptr;
     DWORD dwRenameIndex = 0;
     do 
     {
         pSameNameMaterial = g_pScene->FindMaterial( MaterialName );
-        if( pSameNameMaterial != NULL )
+        if( pSameNameMaterial )
         {
-            bRenameMaterial = TRUE;
+            bRenameMaterial = true;
             CHAR strName[200];
-            sprintf_s( strName, "%s_%d", pFbxMaterial->GetName(), dwRenameIndex++ );
+            sprintf_s( strName, "%s_%u", pFbxMaterial->GetName(), dwRenameIndex++ );
             MaterialName = strName;
         }
-    } while ( pSameNameMaterial != NULL );
+    } while ( pSameNameMaterial );
 
     if( bRenameMaterial )
     {
-        ExportLog::LogMsg( 2, "Found duplicate material name; renaming material \"%s\" to \"%s\".", pFbxMaterial->GetName(), MaterialName );
+        ExportLog::LogMsg( 2, "Found duplicate material name; renaming material \"%s\" to \"%s\".", pFbxMaterial->GetName(), MaterialName.SafeString() );
     }
 
     ExportMaterial* pMaterial = new ExportMaterial( MaterialName );
@@ -199,20 +188,20 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
         if( !Property.IsValid() )
             continue;
 
-        BOOL bFound = ExtractTextures( Property, tpe.strParameterName, pMaterial, tpe.dwParameterFlags );
+        bool bFound = ExtractTextures( Property, tpe.strParameterName, pMaterial, tpe.dwParameterFlags );
         if( bFound )
         {
             if( tpe.dwPostOperations & PPO_TransparentMaterial )
             {
                 ExportLog::LogMsg( 4, "Material \"%s\" is transparent.", pMaterial->GetName().SafeString() );
-                pMaterial->SetTransparent( TRUE );
+                pMaterial->SetTransparent( true );
             }
         }
     }
 
     FixupGenericMaterial( pMaterial );
 
-    BOOL bResult = g_pScene->AddMaterial( pMaterial );
+    bool bResult = g_pScene->AddMaterial( pMaterial );
     assert( bResult );
     if( !bResult )
     {

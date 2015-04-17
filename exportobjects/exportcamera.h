@@ -25,9 +25,9 @@ namespace ATG
         D3DXVECTOR3         LocalPosition;
         D3DXVECTOR3         Direction;
         D3DXVECTOR3         Up;
-        FLOAT               fFocalLength;
-        FLOAT               fFieldOfView;
-        FLOAT               fNearClip;
-        FLOAT               fFarClip;
+        float               fFocalLength;
+        float               fFieldOfView;
+        float               fNearClip;
+        float               fFarClip;
     };
 }
