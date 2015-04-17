@@ -695,7 +695,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         { CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_FILE_EXTENSION, FILEFORMAT_XATG },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_BINARYFILE_EXTENSION, FILEFORMAT_SDKMESH },
     };
-    g_SettingsManager.AddEnum( g_SettingsManager.GetRootCategory( 0 ), "Output File Format", "fileformat", FILEFORMAT_XATG, FileFormatEnums, ARRAYSIZE( FileFormatEnums ), &g_ExportFileFormat );
+    g_SettingsManager.AddEnum( g_SettingsManager.GetRootCategory( 0 ), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE( FileFormatEnums ), &g_ExportFileFormat );
 
     XATGInitializeSettings();
     ParseCommandLine( argc, argv );

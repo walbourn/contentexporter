@@ -577,7 +577,7 @@ namespace ATG
             { "Big-Endian (PowerPC)", "ppc", 0 },
             { "Little-Endian (Intel)", "intel", 1 },
         };
-        g_SettingsManager.AddEnum( pCategoryPlatform, "Data Endianness", "endian", 0, EndianEnums, ARRAYSIZE( EndianEnums ), &bLittleEndian );
+        g_SettingsManager.AddEnum( pCategoryPlatform, "Data Endianness", "endian", 1, EndianEnums, ARRAYSIZE( EndianEnums ), &bLittleEndian );
         pCategoryPlatform->ReverseChildOrder();
         
         ExportSettingsEntry* pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
@@ -592,7 +592,7 @@ namespace ATG
 
         ExportSettingsEntry* pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", true, &bCompressVertexData );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", false, &bCompressVertexData );
         g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", true, &bComputeVertexTangentSpace );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Binormals", "exportbinormals", true, &bExportBinormal );
         static const ExportEnumValue VertexNormalTypes[] = {
@@ -602,7 +602,7 @@ namespace ATG
             { "SHORT4N (8 bytes)", "short4n", D3DDECLTYPE_SHORT4N },
             { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
         };
-        g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_DEC3N, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
+        g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals );
         g_SettingsManager.AddBool( pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", false, &bForceIndex32Format );
         g_SettingsManager.AddIntBounded( pCategoryMeshes, "Max UV Set Count", "maxuvsetcount", 8, 0, 8, &iMaxUVSetCount );
@@ -629,7 +629,7 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMaterials, "Export Materials", "exportmaterials", true, &bExportMaterials );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Material Name", "defaultmaterialname", "Default", strDefaultMaterialName );
         g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression );
-        g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", false, &bGenerateTextureMipMaps );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", true, &bGenerateTextureMipMaps );
         g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", false, &bForceTextureOverwrite );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Diffuse Map Texture Filename", "defaultdiffusemap", "default.dds", strDefaultDiffuseMapTextureName );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "default-normalmap.dds", strDefaultNormalMapTextureName );
