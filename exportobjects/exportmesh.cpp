@@ -260,6 +260,9 @@ void ExportMeshTriangleAllocator::ClearAllTriangles()
 
 bool ExportMeshVertex::Equals( const ExportMeshVertex* pOtherVertex ) const
 {
+    if ( !pOtherVertex )
+        return false;
+
     if( pOtherVertex == this )
         return true;
     if( pOtherVertex->Position != Position )

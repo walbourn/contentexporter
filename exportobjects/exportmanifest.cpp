@@ -326,6 +326,7 @@ namespace ATG
         if( !pTexture )
         {
             ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
+            return;
         }
 
         D3DSURFACE_DESC SurfDesc;

@@ -16,4 +16,6 @@
 *.ilk
 Debug_2010
 Release_2010
+Debug_2012
+Release_2012
 x64
