@@ -1097,13 +1097,13 @@ namespace ATG
     bool TrianglePatchSortPredicate( const ExportSubDProcessMesh::Triangle& TriangleA, const ExportSubDProcessMesh::Triangle& TriangleB )
     {
         INT iScoreA = TriangleA.iMeshSubsetIndex;
-        if( TriangleA.bValence[0] != 4 || TriangleA.bValence[1] != 4 || TriangleA.bValence[2] != 4 || TriangleA.bValence[3] != 4 )
+        if( TriangleA.bValence[0] != 4 || TriangleA.bValence[1] != 4 || TriangleA.bValence[2] != 4 )
         {
             iScoreA += 1000000;
         }
 
         INT iScoreB = TriangleB.iMeshSubsetIndex;
-        if( TriangleB.bValence[0] != 4 || TriangleB.bValence[1] != 4 || TriangleB.bValence[2] != 4 || TriangleB.bValence[3] != 4 )
+        if( TriangleB.bValence[0] != 4 || TriangleB.bValence[1] != 4 || TriangleB.bValence[2] != 4 )
         {
             iScoreB += 1000000;
         }
