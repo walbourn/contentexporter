@@ -118,7 +118,13 @@ void CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFb
         for( size_t i = 0; i < dwNodeCount; ++i )
         {
             AnimationScanNode& asn = scanlist[i];
+
+#if (FBXSDK_VERSION_MAJOR > 2014 || ((FBXSDK_VERSION_MAJOR==2014) && (FBXSDK_VERSION_MINOR>1) ) )
+            auto pAnimEvaluator = pFbxScene->GetAnimationEvaluator();
+#else
             auto pAnimEvaluator = pFbxScene->GetEvaluator();
+#endif
+
             auto matGlobal = pAnimEvaluator->GetNodeGlobalTransform( asn.pNode, CurrentTime );
             AnimationScanNode* pParent = nullptr;
             if( asn.iParentIndex >= 0 )
@@ -137,7 +143,11 @@ void ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
     if ( !curAnimStack )
         return;
 
+#if (FBXSDK_VERSION_MAJOR > 2014 || ((FBXSDK_VERSION_MAJOR==2014) && (FBXSDK_VERSION_MINOR>1) ) )
+    pFbxScene->GetAnimationEvaluator()->Reset();
+#else
     pFbxScene->GetEvaluator()->SetContext( curAnimStack );
+#endif
 
     auto pTakeInfo = pFbxScene->GetTakeInfo( *strAnimStackName  );
 
