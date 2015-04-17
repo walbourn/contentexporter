@@ -216,7 +216,11 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
     if( !pNormals )
     {
         pFbxMesh->InitNormals();
+#if (FBXSDK_VERSION_MAJOR >= 2015)
+        pFbxMesh->GenerateNormals();
+#else
         pFbxMesh->ComputeVertexNormals();
+#endif
     }
     // Vertex normals and tangent spaces
     if( !g_pScene->Settings().bExportNormals )

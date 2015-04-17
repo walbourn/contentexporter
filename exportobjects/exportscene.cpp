@@ -52,6 +52,8 @@ ExportScene::ExportScene()
     m_Information.MachineName = strComputerName;
     OSVERSIONINFO OSVersion = { 0 };
     OSVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+#pragma prefast (disable : 28159)
+#pragma warning (suppress : 4996)
     GetVersionEx( &OSVersion );
     sprintf_s( strTemp, "Windows NT %u.%u build %u", OSVersion.dwMajorVersion, OSVersion.dwMinorVersion, OSVersion.dwBuildNumber );
     m_Information.PlatformName = strTemp;
