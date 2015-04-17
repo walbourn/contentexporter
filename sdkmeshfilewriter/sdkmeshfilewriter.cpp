@@ -84,6 +84,51 @@ namespace ATG
         SDKMESH_MATERIAL Material;
         ZeroMemory( &Material, sizeof(SDKMESH_MATERIAL) );
         strcpy_s( Material.Name, pMaterial->GetName() );
+
+        auto pColor = pMaterial->FindParameter( "DiffuseColor" );
+        if( pColor )
+        {
+            Material.Diffuse = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], pColor->ValueFloat[3] );
+        }
+        else
+        {
+            Material.Diffuse = D3DXVECTOR4( 1.f, 1.f, 1.f, 1.f );
+        }
+          
+        pColor = pMaterial->FindParameter( "AmbientColor" );
+        if( pColor )
+        {
+            Material.Ambient = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
+        }
+        else
+        {
+            Material.Ambient = D3DXVECTOR4( 0.f, 0.f, 0.f, 0.f );
+        }
+
+        pColor = pMaterial->FindParameter( "EmissiveColor" );
+        if( pColor )
+        {
+            Material.Emissive = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
+        }
+        else
+        {
+            Material.Emissive = D3DXVECTOR4( 0.f, 0.f, 0.f, 0.f );
+        }
+
+        pColor = pMaterial->FindParameter( "SpecularColor" );
+        if( pColor )
+        {
+            Material.Specular  = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
+
+            auto pPower = pMaterial->FindParameter( "SpecularPower" );
+            Material.Power = (pPower) ? pPower->ValueFloat[0] : 16.f;
+        }
+        else
+        {
+            Material.Specular = D3DXVECTOR4( 0.f, 0.f, 0.f, 0.f );
+            Material.Power = 1.f;
+        }
+
         ExportMaterialParameter* pDiffuse = pMaterial->FindParameter( "DiffuseTexture" );
         if( pDiffuse )
         {

@@ -155,6 +155,104 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
     pMaterial->SetDCCObject( pFbxMaterial );
     pMaterial->SetDefaultMaterialName( g_pScene->Settings().strDefaultMaterialName );
 
+    auto pFbxLambert = FbxCast<FbxSurfaceLambert>(pFbxMaterial);
+    if ( pFbxLambert )
+    {
+        // Diffuse Color
+        {
+            FbxDouble3 color = pFbxLambert->Diffuse.Get();
+            double factor = pFbxLambert->DiffuseFactor.Get();
+
+            ExportMaterialParameter OutputParam;
+            OutputParam.Name = "DiffuseColor";
+            OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
+            OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
+            OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+            OutputParam.ValueFloat[3] = static_cast<float>( 1.0 - pFbxLambert->TransparencyFactor.Get() );
+            OutputParam.ParamType = MPT_FLOAT4;
+            OutputParam.bInstanceParam = true;
+            OutputParam.Flags = 0;
+            pMaterial->AddParameter( OutputParam );
+
+            ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f %f\"", OutputParam.Name.SafeString(),
+                               OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2], OutputParam.ValueFloat[3] );
+        }
+
+        // Ambient Color
+        {
+            FbxDouble3 color = pFbxLambert->Ambient.Get();
+            double factor = pFbxLambert->AmbientFactor.Get();
+
+            ExportMaterialParameter OutputParam;
+            OutputParam.Name = "AmbientColor";
+            OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
+            OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
+            OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+            OutputParam.ParamType = MPT_FLOAT3;
+            OutputParam.bInstanceParam = true;
+            OutputParam.Flags = 0;
+            pMaterial->AddParameter( OutputParam );
+
+            ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
+                               OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2] );
+        }
+
+        // Emissive Color
+        {
+            FbxDouble3 color = pFbxLambert->Emissive.Get();
+            double factor = pFbxLambert->EmissiveFactor.Get();
+
+            ExportMaterialParameter OutputParam;
+            OutputParam.Name = "EmissiveColor";
+            OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
+            OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
+            OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+            OutputParam.ParamType = MPT_FLOAT3;
+            OutputParam.bInstanceParam = true;
+            OutputParam.Flags = 0;
+            pMaterial->AddParameter( OutputParam );
+
+            ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
+                               OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2] );
+        }
+
+        auto pFbxPhong = FbxCast<FbxSurfacePhong>(pFbxLambert);
+        if (pFbxPhong)
+        {
+            // Specular Color
+            {
+                FbxDouble3 color = pFbxPhong->Specular.Get();
+                double factor = pFbxPhong->SpecularFactor.Get();
+
+                ExportMaterialParameter OutputParam;
+                OutputParam.Name = "SpecularColor";
+                OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
+                OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
+                OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+                OutputParam.ParamType = MPT_FLOAT3;
+                OutputParam.bInstanceParam = true;
+                OutputParam.Flags = 0;
+                pMaterial->AddParameter( OutputParam );
+
+                ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
+                                   OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2] );
+            }
+
+            // Specular Power
+            {
+                ExportMaterialParameter OutputParam;
+                OutputParam.Name = "SpecularPower";
+                OutputParam.ValueFloat[0] = static_cast<float>( pFbxPhong->Shininess.Get() );
+                OutputParam.ParamType = MPT_FLOAT;
+                OutputParam.bInstanceParam = true;
+                OutputParam.Flags = 0;
+                pMaterial->AddParameter( OutputParam );
+
+                ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f\"", OutputParam.Name.SafeString(), OutputParam.ValueFloat[0] );
+            }
+        }
+    }
+
     enum ParameterPostOperations
     {
         PPO_Nothing = 0,
