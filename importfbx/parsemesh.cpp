@@ -312,6 +312,30 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
 
     DWORD dwNonConformingSubDPolys = 0;
 
+    // Compute total transformation
+    FbxAMatrix vertMatrix;
+    {
+        auto trans = pNode->GetGeometricTranslation( FbxNode::eSourcePivot );
+        auto rot = pNode->GetGeometricRotation( FbxNode::eSourcePivot );
+        auto scale = pNode->GetGeometricScaling( FbxNode::eSourcePivot );
+
+        FbxAMatrix geom;
+        geom.SetT( trans );
+        geom.SetR( rot );
+        geom.SetS( scale );
+
+        if ( g_pScene->Settings().bExportAnimations )
+        {
+            vertMatrix = geom;
+        }
+        else
+        {
+            // When not using animation, need to do this...
+            auto global = pNode->EvaluateGlobalTransform();
+            vertMatrix = global * geom;
+        }
+    }
+
     // Loop over polygons.
     for( DWORD dwPolyIndex = 0; dwPolyIndex < dwPolyCount; ++dwPolyIndex )
     {
@@ -383,9 +407,11 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                 pTriangle->Vertex[dwCornerIndex].DCCVertexIndex = dwDCCIndex;
 
                 // Store vertex position
-                pTriangle->Vertex[dwCornerIndex].Position.x = (float)pVertexPositions[dwDCCIndex].mData[0];
-                pTriangle->Vertex[dwCornerIndex].Position.y = (float)pVertexPositions[dwDCCIndex].mData[1];
-                pTriangle->Vertex[dwCornerIndex].Position.z = (float)pVertexPositions[dwDCCIndex].mData[2];
+                auto finalPos = vertMatrix.MultT( pVertexPositions[dwDCCIndex] );
+
+                pTriangle->Vertex[dwCornerIndex].Position.x = (float)finalPos.mData[0];
+                pTriangle->Vertex[dwCornerIndex].Position.y = (float)finalPos.mData[1];
+                pTriangle->Vertex[dwCornerIndex].Position.z = (float)finalPos.mData[2];
 
                 // Store vertex normal
                 pTriangle->Vertex[dwCornerIndex].Normal.x = (float)vNormals[dwCornerIndex].mData[0];
