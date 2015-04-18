@@ -13,12 +13,10 @@
 //-------------------------------------------------------------------------------------
 
 #include "stdafx.h"
-
-#include <d3d9.h>
-#include <d3dx9.h>
-
 #include "ExportManifest.h"
 #include "ExportObjects.h"
+
+#include "DirectXTex.h"
 
 extern ExportPath g_CurrentInputFileName;
 extern ExportPath g_CurrentOutputFileName;
@@ -26,6 +24,8 @@ extern ExportPath g_CurrentOutputFileName;
 ExportPath g_TextureSubPath;
 bool g_bIntermediateDDSFormat = true;
 extern ATG::ExportScene* g_pScene;
+
+using namespace DirectX;
 
 namespace ATG
 {
@@ -203,14 +203,14 @@ namespace ATG
         pParameter->ValueString = (const CHAR*)ResourceFileName;
 
         // Determine the proper texture compression format.
-        D3DFORMAT CompressedTextureFormat = D3DFMT_DXT1;
+        DXGI_FORMAT CompressedTextureFormat = DXGI_FORMAT_BC1_UNORM;
         if( pParameter->Flags & ExportMaterialParameter::EMPF_ALPHACHANNEL )
         {
-            CompressedTextureFormat = D3DFMT_DXT5;
+            CompressedTextureFormat = DXGI_FORMAT_BC3_UNORM;
         }
         if( !g_pScene->Settings().bTextureCompression )
         {
-            CompressedTextureFormat = D3DFMT_A8R8G8B8;
+            CompressedTextureFormat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
         }
 
         // Build the export file record for the manifest.
@@ -240,11 +240,15 @@ namespace ATG
         pManifest->AddFile( fr );
     }
 
-    void ConvertImageFormat( LPDIRECT3DDEVICE9 pd3dDevice, const CHAR* strSourceFileName, const CHAR* strDestFileName, D3DFORMAT CompressedFormat )
+    void ConvertImageFormat( const CHAR* strSourceFileName, const CHAR* strDestFileName, DXGI_FORMAT CompressedFormat, bool bNormalMap )
     {
-        assert( pd3dDevice != nullptr );
+        bool iscompressed = IsCompressed( CompressedFormat );
 
-        if( CompressedFormat != D3DFMT_A8R8G8B8 )
+        if ( bNormalMap )
+        {
+            ExportLog::LogMsg( 4, "Converting bump map file \"%s\" to normal map file %s.", strSourceFileName, strDestFileName );
+        }
+        else if( iscompressed )
         {
             ExportLog::LogMsg( 4, "Compressing and converting file \"%s\" to file \"%s\".", strSourceFileName, strDestFileName );
         }
@@ -253,119 +257,149 @@ namespace ATG
             ExportLog::LogMsg( 4, "Converting file \"%s\" to file \"%s\".", strSourceFileName, strDestFileName );
         }
 
-        DWORD dwMipCount = 1;
-        if( g_pScene->Settings().bGenerateTextureMipMaps )
+        // Load texture image
+        WCHAR wSource[MAX_PATH];
+        if ( !MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, strSourceFileName, -1, wSource, MAX_PATH) )
+            *wSource = 0;
+
+        WCHAR wDest[MAX_PATH];
+        if ( !MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED, strDestFileName, -1, wDest, MAX_PATH ) )
+            *wDest = 0;
+
+        char ext[_MAX_EXT];
+        _splitpath_s( strSourceFileName, nullptr, 0, nullptr, 0, nullptr, 0, ext, _MAX_EXT );
+
+        TexMetadata info;
+        std::unique_ptr<ScratchImage> image( new ScratchImage );
+
+        bool isdds = false;
+        if ( _stricmp( ext, ".dds" ) == 0 )
         {
-            dwMipCount = 0;
-        }
-
-        // Load texture from source file.
-        LPDIRECT3DTEXTURE9 pTexture = nullptr;
-        HRESULT hr = D3DXCreateTextureFromFileEx( pd3dDevice, 
-            strSourceFileName, 
-            D3DX_DEFAULT_NONPOW2, 
-            D3DX_DEFAULT_NONPOW2,
-            dwMipCount,
-            0,
-            CompressedFormat,
-            D3DPOOL_MANAGED,
-            D3DX_FILTER_NONE,
-            D3DX_DEFAULT,
-            0,
-            nullptr,
-            nullptr,
-            &pTexture );
-
-        if( FAILED( hr ) || !pTexture )
-        {
-            ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
-            return;
-        }
-
-        D3DXIMAGE_FILEFORMAT FileFormat = D3DXIFF_DDS;
-        if( strstr( strDestFileName, ".tga" ) )
-        {
-            FileFormat = D3DXIFF_TGA;
-        }
-
-        // Save texture to destination file.
-        hr = D3DXSaveTextureToFile( strDestFileName, FileFormat, pTexture, nullptr );
-        if( FAILED( hr ) )
-        {
-            ExportLog::LogError( "Could not write texture to file \"%s\".", strDestFileName );
-        }
-        pTexture->Release();
-    }
-
-
-    void CreateNormalMapFromBumpMap( LPDIRECT3DDEVICE9 pd3dDevice, const CHAR* strSourceFileName, const CHAR* strDestFileName, D3DFORMAT CompressedFormat )
-    {
-        assert( pd3dDevice != nullptr );
-
-        ExportLog::LogMsg( 4, "Converting bump map file \"%s\" to normal map file %s.", strSourceFileName, strDestFileName );
-
-        DWORD dwMipCount = 1;
-        if( g_pScene->Settings().bGenerateTextureMipMaps )
-        {
-            dwMipCount = 0;
-        }
-
-        // Load texture from source file.
-        LPDIRECT3DTEXTURE9 pTexture = nullptr;
-        D3DXCreateTextureFromFileEx( pd3dDevice, 
-            strSourceFileName, 
-            D3DX_DEFAULT_NONPOW2, 
-            D3DX_DEFAULT_NONPOW2,
-            1,
-            0,
-            D3DFMT_A8R8G8B8,
-            D3DPOOL_MANAGED,
-            D3DX_FILTER_NONE,
-            D3DX_DEFAULT,
-            0,
-            nullptr,
-            nullptr,
-            &pTexture );
-
-        if( !pTexture )
-        {
-            ExportLog::LogError( "Could not load texture \"%s\".", strSourceFileName );
-            return;
-        }
-
-        D3DSURFACE_DESC SurfDesc;
-        pTexture->GetLevelDesc( 0, &SurfDesc );
-        LPDIRECT3DTEXTURE9 pDestTexture = nullptr;
-        D3DXCreateTexture( pd3dDevice, SurfDesc.Width, SurfDesc.Height, dwMipCount, 0, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pDestTexture );
-
-        HRESULT hr = D3DXComputeNormalMap( pDestTexture, pTexture, nullptr, 0, D3DX_CHANNEL_LUMINANCE, 10.0f );
-        if( FAILED( hr ) )
-        {
-            ExportLog::LogError( "Could not compute normal map." );
-        }
-
-        if( g_pScene->Settings().bGenerateTextureMipMaps )
-        {
-            hr = D3DXFilterTexture( pDestTexture, nullptr, 0, D3DX_DEFAULT );
-            if( FAILED(hr) )
+            isdds = true;
+            HRESULT hr = LoadFromDDSFile( wSource, DDS_FLAGS_NONE, &info, *image );
+            if ( FAILED(hr) )
             {
-                ExportLog::LogError( "Could not create normal map mip maps." );
+                ExportLog::LogError( "Could not load texture \"%s\" (DDS: %08X).", strSourceFileName, hr );
+                return;
+            }
+        }
+        else if ( _stricmp( ext, ".tga" ) == 0 )
+        {
+            HRESULT hr = LoadFromTGAFile( wSource, &info, *image );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Could not load texture \"%s\" (TGA: %08X).", strSourceFileName, hr );
+                return;
+            }
+        }
+        else
+        {
+            HRESULT hr = LoadFromWICFile( wSource, TEX_FILTER_DEFAULT, &info, *image );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Could not load texture \"%s\" (WIC: %08X).", strSourceFileName, hr );
+                return;
             }
         }
 
-        // Save texture to destination file.
-        D3DXSaveTextureToFile( strDestFileName, D3DXIFF_DDS, pDestTexture, nullptr );
-        pTexture->Release();
-        pDestTexture->Release();
-    }
+        // Handle normal maps
+        if ( bNormalMap )
+        {
+            std::unique_ptr<ScratchImage> timage;
 
-extern IDirect3DDevice9* g_pd3dDevice;
+            DXGI_FORMAT tformat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
+
+            HRESULT hr = ComputeNormalMap( image->GetImages(), image->GetImageCount(), image->GetMetadata(),
+                                           CNMAP_CHANNEL_LUMINANCE, 10.f, tformat, *timage );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Could not compute normal map for \"%s\" (%08X).", strSourceFileName, hr );
+            }
+            else
+            {
+                image.swap( timage );
+                info.format = tformat;
+            }
+        }
+        // Handle conversions
+        else if ( !isdds
+                  && !iscompressed
+                  && info.format != CompressedFormat )
+        {
+            std::unique_ptr<ScratchImage> timage;
+
+            HRESULT hr = Convert( image->GetImages(), image->GetImageCount(), image->GetMetadata(),
+                                  CompressedFormat, TEX_FILTER_DEFAULT, 0.5f, *timage );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Could not convert \"%s\" (%08X).", strSourceFileName, hr );
+            }
+            else
+            {
+                image.swap( timage );
+                info.format = CompressedFormat;
+            }
+        }
+
+        // Handle mipmaps
+        if( g_pScene->Settings().bGenerateTextureMipMaps
+            && ( info.mipLevels == 1 ) )
+        {
+            std::unique_ptr<ScratchImage> timage;
+
+            HRESULT hr = GenerateMipMaps( image->GetImages(), image->GetImageCount(), image->GetMetadata(), TEX_FILTER_DEFAULT, 0, *timage );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Failing generating mimaps for \"%s\" (WIC: %08X).", strSourceFileName, hr );
+            }
+            else
+            {
+                image.swap( timage );
+            }
+        }
+
+        // Handle compression
+        if ( iscompressed
+             && info.format != CompressedFormat )
+        {
+            std::unique_ptr<ScratchImage> timage;
+
+            HRESULT hr = Compress( image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Failing compressing \"%s\" (WIC: %08X).", strSourceFileName, hr );
+            }
+            else
+            {
+                image.swap( timage );
+            }
+        }
+
+        // Save DDS
+        _splitpath_s( strDestFileName, nullptr, 0, nullptr, 0, nullptr, 0, ext, _MAX_EXT );
+
+        HRESULT hr;
+        if ( _stricmp( ext, ".tga" ) == 0 )
+        {
+            auto img = image->GetImage( 0, 0, 0 );
+            if ( img )
+                hr = SaveToTGAFile( *img, wDest );
+            else
+                hr = E_FAIL;
+        }
+        else
+        {
+            hr = SaveToDDSFile( image->GetImages(), image->GetImageCount(), image->GetMetadata(), DDS_FLAGS_NONE, wDest );
+        }
+
+        if( FAILED( hr ) )
+        {
+            ExportLog::LogError( "Could not write texture to file \"%s\" (%08X).", strDestFileName, hr );
+        }
+    }
 
     void ExportTextureConverter::PerformTextureFileOperations( ExportManifest* pManifest )
     {
-        if ( !g_pd3dDevice )
-            return;
-
         if( g_pScene->Settings().bForceTextureOverwrite )
         {
             ExportLog::LogMsg( 4, "Reprocessing and overwriting all destination textures." );
@@ -398,11 +432,11 @@ extern IDirect3DDevice9* g_pd3dDevice;
                 break;
             case ETO_CONVERTFORMAT:
                 // Convert source file to intermediate location.
-                ConvertImageFormat( g_pd3dDevice, File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat );
+                ConvertImageFormat( File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat, false );
                 break;
             case ETO_BUMPMAP_TO_NORMALMAP:
                 // Convert source file to a normal map, copy to intermediate file location.
-                CreateNormalMapFromBumpMap( g_pd3dDevice, File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat );
+                ConvertImageFormat( File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat, true );
                 break;
             }
         }

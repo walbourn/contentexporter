@@ -1193,17 +1193,19 @@ void WriteBinaryBlobData( BYTE* pData, size_t dwDataSizeBytes )
 }
 
 
-const CHAR* GetCompressedTextureFormatString( D3DFORMAT format )
+const CHAR* GetCompressedTextureFormatString( DXGI_FORMAT format )
 {
     switch( format )
     {
-    case D3DFMT_DXT1:
+    case DXGI_FORMAT_BC1_UNORM:
         return "D3DFMT_DXT1";
-    case D3DFMT_DXT5:
+    case DXGI_FORMAT_BC3_UNORM:
         return "D3DFMT_DXT5";
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+        return "D3DFMT_A8B8G8R8";
+    default:
+        return "D3DFMT_A8R8G8B8";
     }
-
-    return "D3DFMT_A8R8G8B8";
 }
 
 void BundleTextures()

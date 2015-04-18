@@ -170,6 +170,7 @@ bool MacroWindowsD3D9( const CHAR* strArgument )
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
+    g_pScene->Settings().bBGRvsRGB = false;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return false;
 }
@@ -181,6 +182,7 @@ bool MacroWindowsD3D10( const CHAR* strArgument )
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_pScene->Settings().bBGRvsRGB = false;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return false;
 }
@@ -192,6 +194,7 @@ bool MacroWindowsD3D11( const CHAR* strArgument )
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_pScene->Settings().bBGRvsRGB = true;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return false;
 }
@@ -204,6 +207,7 @@ bool MacroXbox360( const CHAR* strArgument )
     g_XATGSettings.bUseExistingBundle = true;
     g_pScene->Settings().bCompressVertexData = true;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
+    g_pScene->Settings().bBGRvsRGB = true;
     g_ExportFileFormat = FILEFORMAT_XATG;
     return false;
 }

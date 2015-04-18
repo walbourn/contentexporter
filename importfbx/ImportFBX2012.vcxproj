@@ -258,6 +258,9 @@
     <ResourceCompile Include="ContentExporter.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DirectXTex\DirectXTex_Desktop_2012.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ExportObjects\ExportObjects2012.vcxproj">
       <Project>{6afa24fb-37b3-49d3-9832-f7ea3de3ca2e}</Project>
     </ProjectReference>
