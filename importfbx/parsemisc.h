@@ -16,12 +16,12 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-void ParseNode( FbxNode* pNode, ATG::ExportFrame* pParentFrame, CXMMATRIX matParentWorld );
+void ParseNode( FbxNode* pNode, ATG::ExportFrame* pParentFrame, DirectX::CXMMATRIX matParentWorld );
 
 void ParseCamera( FbxCamera* pFbxCamera, ATG::ExportFrame* pParentFrame );
 void ParseLight( FbxLight* pFbxLight, ATG::ExportFrame* pParentFrame );
 
-void FixupNode( ATG::ExportFrame* pFrame, CXMMATRIX matParentWorld );
+void FixupNode( ATG::ExportFrame* pFrame, DirectX::CXMMATRIX matParentWorld );
 
 typedef std::hash_map<FbxNode*,FbxMatrix> PoseMap;
 extern PoseMap g_BindPoseMap;

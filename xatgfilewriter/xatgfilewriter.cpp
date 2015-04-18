@@ -20,6 +20,9 @@
 extern ATG::ExportScene*     g_pScene;
 extern ExportPath g_CurrentInputFileName;
 
+using namespace DirectX;
+using namespace DirectX::PackedVector;
+
 namespace ATG
 {
 
@@ -610,7 +613,7 @@ void WriteVertexData( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexElements, s
     g_pXMLWriter->EndElement();
 }
 
-void WriteSphereBound( const Sphere& sphere )
+void WriteSphereBound( const BoundingSphere& sphere )
 {
     g_pXMLWriter->StartElement( "SphereBound" );
     g_pXMLWriter->AddAttribute( "Center", WriteVec3( sphere.Center ) );
@@ -618,7 +621,7 @@ void WriteSphereBound( const Sphere& sphere )
     g_pXMLWriter->EndElement();
 }
 
-void WriteAxisAlignedBoxBound( const AxisAlignedBox& aabb )
+void WriteAxisAlignedBoxBound( const BoundingBox& aabb )
 {
     g_pXMLWriter->StartElement( "AxisAlignedBoxBound" );
     g_pXMLWriter->AddAttribute( "Center", WriteVec3( aabb.Center ) );
@@ -626,7 +629,7 @@ void WriteAxisAlignedBoxBound( const AxisAlignedBox& aabb )
     g_pXMLWriter->EndElement();
 }
 
-void WriteOrientedBoxBound( const OrientedBox& obb )
+void WriteOrientedBoxBound( const BoundingOrientedBox& obb )
 {
     g_pXMLWriter->StartElement( "OrientedBoxBound" );
     g_pXMLWriter->AddAttribute( "Center", WriteVec3( obb.Center ) );

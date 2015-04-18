@@ -18,6 +18,7 @@
 #include "ParseAnimation.h"
 
 using namespace ATG;
+using namespace DirectX;
 
 FbxManager* g_pSDKManager = nullptr;
 FbxImporter* g_pImporter = nullptr;

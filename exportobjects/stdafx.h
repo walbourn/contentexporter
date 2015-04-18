@@ -33,15 +33,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
+#include <dxgiformat.h>
 
-#pragma warning(push)
-#pragma warning(disable : 4005 4668)
-#include <stdint.h>
-#pragma warning(pop)
+#include <DirectXMath.h>
+#include <DirectXCollision.h>
+#include <DirectXPackedVector.h>
 
-#include <xnamath.h>
-
-#include "collision.h"
 #include "ExportXmlParser.h"
 #include "ExportPath.h"
 #include "ExportMaterial.h"

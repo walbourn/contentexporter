@@ -22,9 +22,9 @@ namespace ATG
     public:
         ExportCamera( ExportString strName );
 
-        XMFLOAT3            LocalPosition;
-        XMFLOAT3            Direction;
-        XMFLOAT3            Up;
+        DirectX::XMFLOAT3   LocalPosition;
+        DirectX::XMFLOAT3   Direction;
+        DirectX::XMFLOAT3   Up;
         float               fFocalLength;
         float               fFieldOfView;
         float               fNearClip;

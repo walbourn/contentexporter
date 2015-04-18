@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="collision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ExportAnimation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,9 +80,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="collision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ExportAnimation.h">
       <Filter>Header Files</Filter>
     </ClInclude>

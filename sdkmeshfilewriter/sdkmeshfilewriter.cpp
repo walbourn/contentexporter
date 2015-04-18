@@ -16,6 +16,8 @@
 
 extern ATG::ExportScene*     g_pScene;
 
+using namespace DirectX;
+
 namespace ATG
 {
     std::vector<ExportFrame*>                       g_FrameArray;

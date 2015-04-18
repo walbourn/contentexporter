@@ -131,8 +131,8 @@ struct SDKMESH_MESH
     UINT NumSubsets;
     UINT NumFrameInfluences; //aka bones
 
-    XMFLOAT3 BoundingBoxCenter;
-    XMFLOAT3 BoundingBoxExtents;
+    DirectX::XMFLOAT3 BoundingBoxCenter;
+    DirectX::XMFLOAT3 BoundingBoxExtents;
 
     union
     {
@@ -164,7 +164,7 @@ struct SDKMESH_FRAME
     UINT ParentFrame;
     UINT ChildFrame;
     UINT SiblingFrame;
-    XMFLOAT4X4 Matrix;
+    DirectX::XMFLOAT4X4 Matrix;
     UINT AnimationDataIndex;		//Used to index which set of keyframes transforms this frame
 };
 
@@ -180,10 +180,10 @@ struct SDKMESH_MATERIAL
     char		NormalTexture[MAX_TEXTURE_NAME];
     char		SpecularTexture[MAX_TEXTURE_NAME];
 
-    XMFLOAT4 Diffuse;
-    XMFLOAT4 Ambient;
-    XMFLOAT4 Specular;
-    XMFLOAT4 Emissive;
+    DirectX::XMFLOAT4 Diffuse;
+    DirectX::XMFLOAT4 Ambient;
+    DirectX::XMFLOAT4 Specular;
+    DirectX::XMFLOAT4 Emissive;
     float		Power;
 
     union
@@ -228,9 +228,9 @@ struct SDKANIMATION_FILE_HEADER
 
 struct SDKANIMATION_DATA
 {
-    XMFLOAT3 Translation;
-    XMFLOAT4 Orientation;
-    XMFLOAT3 Scaling;
+    DirectX::XMFLOAT3 Translation;
+    DirectX::XMFLOAT4 Orientation;
+    DirectX::XMFLOAT3 Scaling;
 };
 
 struct SDKANIMATION_FRAME_DATA

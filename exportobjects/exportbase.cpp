@@ -16,6 +16,8 @@
 #include "exportbase.h"
 #include "ExportScene.h"
 
+using namespace DirectX;
+
 extern ATG::ExportScene* g_pScene;
 
 namespace ATG

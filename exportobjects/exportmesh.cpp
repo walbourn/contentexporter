@@ -15,6 +15,9 @@
 #include "stdafx.h"
 #include "exportmesh.h"
 
+using namespace DirectX;
+using namespace DirectX::PackedVector;
+
 #define SAFE_RELEASE(x) { if( (x) != nullptr ) { (x)->Release(); (x) = nullptr; } }
 
 extern ATG::ExportScene* g_pScene;
@@ -1225,18 +1228,15 @@ void ExportMesh::ComputeBounds()
     if( !m_pVB )
         return;
 
-    ComputeBoundingSphereFromPoints( &m_BoundingSphere, static_cast<UINT>( m_pVB->GetVertexCount() ), 
-        reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
 
-    ComputeBoundingAxisAlignedBoxFromPoints( &m_BoundingAABB,
-                                             static_cast<UINT>( m_pVB->GetVertexCount() ),
-                                             reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ),
-                                             m_pVB->GetVertexSize() );
+    BoundingSphere::CreateFromPoints( m_BoundingSphere,
+                                      m_pVB->GetVertexCount(), reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
 
-    ComputeBoundingOrientedBoxFromPoints( &m_BoundingOBB,
-                                          static_cast<UINT>( m_pVB->GetVertexCount() ),
-                                          reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ),
-                                          m_pVB->GetVertexSize() );
+    BoundingBox::CreateFromPoints( m_BoundingAABB,
+                                   m_pVB->GetVertexCount(), reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
+
+    BoundingOrientedBox::CreateFromPoints( m_BoundingOBB,
+                                           m_pVB->GetVertexCount(), reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
 
     float fVolumeSphere = XM_PI * ( 4.0f / 3.0f ) * 
                           m_BoundingSphere.Radius * 

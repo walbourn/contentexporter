@@ -75,7 +75,7 @@ namespace ATG
 
         std::vector< Triangle >             m_Triangles;
         std::vector< Quad >                 m_Quads;
-        std::vector< XMFLOAT3 >    m_Positions;
+        std::vector< DirectX::XMFLOAT3 >    m_Positions;
         std::vector< INT >                  m_MeshVertexToPositionMapping;
         std::vector< INT >                  m_PositionToMeshVertexMapping;
         std::vector< INT >                  m_PositionToDegeneratePositionMapping;
@@ -111,7 +111,7 @@ namespace ATG
 
     protected:
         void BuildMesh();
-        INT CreateOrAddPosition( const XMFLOAT3& vPosition, INT iMeshVertexIndex );
+        INT CreateOrAddPosition( const DirectX::XMFLOAT3& vPosition, INT iMeshVertexIndex );
         void AddTriangle( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
         void AddQuad( INT iPolyIndex,  INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
 
@@ -135,7 +135,7 @@ namespace ATG
 
         void RemoveValenceTwoQuads( std::deque<INT>& BadQuads );
 
-        XMFLOAT3 GetQuadCenter( INT iQuadIndex );
+        DirectX::XMFLOAT3 GetQuadCenter( INT iQuadIndex );
 
         void SortPatches();
 

@@ -17,6 +17,8 @@
 #include "stdafx.h"
 #include "ExportSubD.h"
 
+using namespace DirectX;
+
 extern ATG::ExportScene* g_pScene;
 
 namespace ATG

@@ -15,6 +15,8 @@
 #include "stdafx.h"
 #include "exportanimation.h"
 
+using namespace DirectX;
+
 namespace ATG
 {
     float g_fPositionExportTolerance = 0.99f;

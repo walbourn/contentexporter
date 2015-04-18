@@ -24,24 +24,24 @@ class ExportTransform
 {
 public:
     void SetIdentity();
-    bool Initialize( CXMMATRIX matrix );
-    bool Initialize( XMFLOAT4X4 matrix );
-    const XMFLOAT4X4& Matrix() const { return m_Matrix; }
-    XMFLOAT4X4& Matrix() { return m_Matrix; }
-    void Multiply( const XMFLOAT4X4& Matrix );
+    bool Initialize( DirectX::CXMMATRIX matrix );
+    bool Initialize( DirectX::XMFLOAT4X4 matrix );
+    const DirectX::XMFLOAT4X4& Matrix() const { return m_Matrix; }
+    DirectX::XMFLOAT4X4& Matrix() { return m_Matrix; }
+    void Multiply( const DirectX::XMFLOAT4X4& Matrix );
     void Normalize();
-    const XMFLOAT3& Position() const { return m_Position; }
-    const XMFLOAT4& Orientation() const { return m_Orientation; }
-    const XMFLOAT3& Scale() const { return m_Scale; }
+    const DirectX::XMFLOAT3& Position() const { return m_Position; }
+    const DirectX::XMFLOAT4& Orientation() const { return m_Orientation; }
+    const DirectX::XMFLOAT3& Scale() const { return m_Scale; }
 
 protected:
     bool DecomposeMatrix();
 
 protected:
-    XMFLOAT4X4 m_Matrix;
-    XMFLOAT3   m_Position;
-    XMFLOAT4   m_Orientation;
-    XMFLOAT3   m_Scale;
+    DirectX::XMFLOAT4X4 m_Matrix;
+    DirectX::XMFLOAT3   m_Position;
+    DirectX::XMFLOAT4   m_Orientation;
+    DirectX::XMFLOAT3   m_Scale;
 };
 
 class ExportBase

@@ -34,15 +34,12 @@
 #include <stdio.h>
 #include <time.h>
 #include <shellapi.h>
+#include <dxgiformat.h>
 
-#pragma warning(push)
-#pragma warning(disable : 4005 4668)
-#include <stdint.h>
-#pragma warning(pop)
+#include <DirectXMath.h>
+#include <DirectXCollision.h>
+#include <DirectXPackedVector.h>
 
-#include <xnamath.h>
-
-#include "..\ExportObjects\collision.h"
 #include "..\ExportObjects\ExportXmlParser.h"
 #include "..\ExportObjects\ExportPath.h"
 #include "..\ExportObjects\ExportMaterial.h"

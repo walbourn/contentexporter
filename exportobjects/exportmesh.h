@@ -158,15 +158,15 @@ public:
         BoneWeights.x = 1.0f;
     }
     UINT                            DCCVertexIndex;
-    XMFLOAT3                        Position;
-    XMFLOAT3                        Normal;
-    XMFLOAT3                        SmoothNormal;
-    XMFLOAT3                        Tangent;
-    XMFLOAT3                        Binormal;
-    XMUBYTE4                        BoneIndices;
-    XMFLOAT4                        BoneWeights;
-    XMFLOAT4                        TexCoords[8];
-    XMFLOAT4                        Color;
+    DirectX::XMFLOAT3               Position;
+    DirectX::XMFLOAT3               Normal;
+    DirectX::XMFLOAT3               SmoothNormal;
+    DirectX::XMFLOAT3               Tangent;
+    DirectX::XMFLOAT3               Binormal;
+    DirectX::PackedVector::XMUBYTE4 BoneIndices;
+    DirectX::XMFLOAT4               BoneWeights;
+    DirectX::XMFLOAT4               TexCoords[8];
+    DirectX::XMFLOAT4               Color;
     ExportMeshVertex*               pNextDuplicateVertex;
 
     bool Equals( const ExportMeshVertex* pOtherVertex ) const;
@@ -278,9 +278,9 @@ public:
     ExportIBSubset* GetSubset( size_t uIndex ) { return m_vSubsets[ uIndex ]; }
     ExportIBSubset* FindSubset( const ExportString Name );
 
-    Sphere& GetBoundingSphere() { return m_BoundingSphere; }
-    AxisAlignedBox& GetBoundingAABB() { return m_BoundingAABB; }
-    OrientedBox& GetBoundingOBB() { return m_BoundingOBB; }
+    DirectX::BoundingSphere& GetBoundingSphere() { return m_BoundingSphere; }
+    DirectX::BoundingBox& GetBoundingAABB() { return m_BoundingAABB; }
+    DirectX::BoundingOrientedBox& GetBoundingOBB() { return m_BoundingOBB; }
     BoundsType GetSmallestBound() const { return m_SmallestBound; }
 
     virtual void AddInfluence( ExportString InfluenceName ) { m_InfluenceNames.push_back( InfluenceName ); }
@@ -288,9 +288,9 @@ public:
     ExportString GetInfluence( size_t uIndex ) const { return m_InfluenceNames[uIndex]; }
 
 protected:
-    Sphere                          m_BoundingSphere;
-    AxisAlignedBox                  m_BoundingAABB;
-    OrientedBox                     m_BoundingOBB;
+    DirectX::BoundingSphere         m_BoundingSphere;
+    DirectX::BoundingBox            m_BoundingAABB;
+    DirectX::BoundingOrientedBox    m_BoundingOBB;
     BoundsType                      m_SmallestBound;
     std::vector< ExportIBSubset* >  m_vSubsets;
     std::vector< ExportString >     m_InfluenceNames;
@@ -402,7 +402,7 @@ protected:
     bool                                m_bReceivesShadows;
 };
 
-DWORD MakeCompressedVector( const XMFLOAT3& Vec3 );
+DWORD MakeCompressedVector( const DirectX::XMFLOAT3& Vec3 );
 void NormalizeBoneWeights( BYTE* pWeights );
 
 };

@@ -17,6 +17,7 @@
 #include "ParseMesh.h"
 
 using namespace ATG;
+using namespace DirectX;
 
 extern ATG::ExportScene* g_pScene;
 

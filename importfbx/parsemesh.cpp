@@ -18,6 +18,7 @@
 #include "ParseMisc.h"
 
 using namespace ATG;
+using namespace DirectX;
 
 extern ATG::ExportScene* g_pScene;
 
@@ -493,7 +494,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                 // Store skin weights
                 if( bSkinnedMesh )
                 {
-                    memcpy( &pTriangle->Vertex[dwCornerIndex].BoneIndices, skindata.GetIndices( dwDCCIndex ), sizeof(XMUBYTE4) );
+                    memcpy( &pTriangle->Vertex[dwCornerIndex].BoneIndices, skindata.GetIndices( dwDCCIndex ), sizeof(PackedVector::XMUBYTE4) );
                     memcpy( &pTriangle->Vertex[dwCornerIndex].BoneWeights, skindata.GetWeights( dwDCCIndex ), sizeof(XMFLOAT4) );
                 }
             }

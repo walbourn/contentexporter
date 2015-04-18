@@ -48,15 +48,19 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Windows81SDK_x86.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Windows81SDK_x64.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Windows81SDK_x86.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Windows81SDK_x64.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -93,16 +97,12 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DXSDK_DIR)Utilities\bin\x64;$(ExecutablePath)</ExecutablePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2010\x64\release;$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
-    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DXSDK_DIR)Utilities\bin\x64;$(ExecutablePath)</ExecutablePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2010\x64\debug;$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
-    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(FBX_SDK)\lib\vs2010\x86\debug;$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
-    <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(FBX_SDK)\lib\vs2010\x86\release;$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ContentExporter</TargetName>
@@ -266,6 +266,9 @@
       <Project>{3f3d7892-a3f4-43a9-87bf-b9c28e9069e8}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="settings.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

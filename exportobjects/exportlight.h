@@ -38,9 +38,9 @@ namespace ATG
         };
 
         LightType           Type;
-        XMFLOAT3            LocalPosition;
-        XMFLOAT4            Color;
-        XMFLOAT3            Direction;
+        DirectX::XMFLOAT3   LocalPosition;
+        DirectX::XMFLOAT4   Color;
+        DirectX::XMFLOAT3   Direction;
         float               fRange;
         LightFalloff        Falloff;
         LightFalloff        SpotFalloff;
