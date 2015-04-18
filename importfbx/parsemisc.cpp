@@ -20,16 +20,16 @@ using namespace ATG;
 
 extern ATG::ExportScene* g_pScene;
 
-static D3DXMATRIX ConvertMatrix( const FbxMatrix& matFbx )
+static XMMATRIX ConvertMatrix( const FbxMatrix& matFbx )
 {
-    D3DXMATRIX matConverted;
-    float* pFloats = (float*)&matConverted;
-    const DOUBLE* pDoubles = (const DOUBLE*)matFbx.mData;
+    XMFLOAT4X4 matConverted;
+    auto pFloats = reinterpret_cast<float*>( &matConverted );
+    auto pDoubles = reinterpret_cast<const DOUBLE*>( matFbx.mData );
     for( DWORD i = 0; i < 16; ++i )
     {
         pFloats[i] = (float)pDoubles[i];
     }
-    return matConverted;
+    return XMLoadFloat4x4( &matConverted );
 }
 
 inline bool IsEqual( float A, float B )
@@ -37,10 +37,10 @@ inline bool IsEqual( float A, float B )
     return fabs( A - B ) <= 1e-5f;
 }
 
-D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX& matParentWorld, const bool bWarnings = true )
+XMMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, CXMMATRIX matParentWorld, const bool bWarnings = true )
 {
-    D3DXMATRIX matWorld;
-    D3DXMATRIX matLocal;
+    XMMATRIX matWorld;
+    XMMATRIX matLocal;
     bool bProcessDefaultTransform = true;
 
     if( !g_BindPoseMap.empty() )
@@ -50,9 +50,8 @@ D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX
         {
             FbxMatrix PoseMatrix = iter->second;
             matWorld = ConvertMatrix( PoseMatrix );
-            D3DXMATRIX matInvParentWorld;
-            D3DXMatrixInverse( &matInvParentWorld, nullptr, &matParentWorld );
-            D3DXMatrixMultiply( &matLocal, &matWorld, &matInvParentWorld );
+            XMMATRIX matInvParentWorld = XMMatrixInverse( nullptr, matParentWorld );
+            matLocal = XMMatrixMultiply( matWorld, matInvParentWorld );
             bProcessDefaultTransform = false;
         }
     }
@@ -73,12 +72,12 @@ D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX
 
         FbxMatrix matTransform( Translation, Rotation, Scale );
         matLocal = ConvertMatrix( matTransform );
-        D3DXMatrixMultiply( &matWorld, &matParentWorld, &matLocal );
+        matWorld = XMMatrixMultiply( matParentWorld, matLocal );
     }
 
-    pFrame->Transform().InitializeFromFloats( (float*)&matLocal );
+    pFrame->Transform().Initialize( matLocal );
 
-    const D3DXVECTOR3& Scale = pFrame->Transform().Scale();
+    const XMFLOAT3& Scale = pFrame->Transform().Scale();
     if( bWarnings && 
         ( !IsEqual( Scale.x, Scale.y ) ||
           !IsEqual( Scale.y, Scale.z ) ||
@@ -104,13 +103,13 @@ D3DXMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, const D3DXMATRIX
     return matWorld;
 }
 
-void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& matParentWorld )
+void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, CXMMATRIX matParentWorld )
 {
     ExportLog::LogMsg( 2, "Parsing node \"%s\".", pNode->GetName() );
 
     auto pFrame = new ExportFrame( pNode->GetName() );
     pFrame->SetDCCObject( pNode );
-    D3DXMATRIX matWorld = ParseTransform( pNode, pFrame, matParentWorld );
+    XMMATRIX matWorld = ParseTransform( pNode, pFrame, matParentWorld );
     pParentFrame->AddChild( pFrame );
 
     if( pNode->GetSubdiv() )
@@ -131,11 +130,11 @@ void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, const D3DXMATRIX& mat
     }
 }
 
-void FixupNode( ExportFrame* pFrame, const D3DXMATRIX& matParentWorld )
+void FixupNode( ExportFrame* pFrame, CXMMATRIX matParentWorld )
 {
     auto pNode = reinterpret_cast<FbxNode*>( pFrame->GetDCCObject() );
 
-    D3DXMATRIX matWorld;
+    XMMATRIX matWorld;
     if( pNode )
     {
         ExportLog::LogMsg( 4, "Fixing up frame \"%s\".", pFrame->GetName().SafeString() );
@@ -203,8 +202,7 @@ void ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
     float fIntensity = (float)pFbxLight->Intensity.Get();
     fIntensity *= 0.01f;
 
-    D3DXCOLOR Color( (float)colorRGB[0], (float)colorRGB[1], (float)colorRGB[2], 1.0f );
-    Color *= fIntensity;
+    XMFLOAT4 Color( (float)colorRGB[0] * fIntensity, (float)colorRGB[1] * fIntensity, (float)colorRGB[2] * fIntensity, 1.0f );
     pLight->Color = Color;
 
     switch( pFbxLight->DecayType.Get() )
@@ -234,7 +232,7 @@ void ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
 
     pLight->fRange *= g_pScene->Settings().fLightRangeScale;
 
-    ExportLog::LogMsg( 4, "Light color (multiplied by intensity): <%0.2f %0.2f %0.2f> intensity: %0.2f falloff: %0.2f", Color.r, Color.g, Color.b, fIntensity, pLight->fRange );
+    ExportLog::LogMsg( 4, "Light color (multiplied by intensity): <%0.2f %0.2f %0.2f> intensity: %0.2f falloff: %0.2f", Color.x, Color.y, Color.z, fIntensity, pLight->fRange );
 
     switch( pFbxLight->LightType.Get() )
     {

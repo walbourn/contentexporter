@@ -25,7 +25,7 @@ struct AnimationScanNode
     FbxNode* pNode;
     ExportAnimationTrack* pTrack;
     DWORD dwFlags;
-    D3DXMATRIX matGlobal;
+    XMFLOAT4X4 matGlobal;
 };
 
 typedef std::vector<AnimationScanNode> ScanList;
@@ -62,11 +62,11 @@ void ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIn
     }
 }
 
-static D3DXMATRIX ConvertMatrix( const FbxMatrix& matrix )
+static XMFLOAT4X4 ConvertMatrix( const FbxMatrix& matrix )
 {
-    D3DXMATRIX matResult;
-    float* fData = (float*)&matResult;
-    DOUBLE* pSrcData = (DOUBLE*)&matrix;
+    XMFLOAT4X4 matResult;
+    auto fData = reinterpret_cast<float*>( &matResult );
+    auto pSrcData = reinterpret_cast<const DOUBLE*>( &matrix );
     for( DWORD i = 0; i < 16; ++i )
     {
         fData[i] = (float)pSrcData[i];
@@ -77,27 +77,38 @@ static D3DXMATRIX ConvertMatrix( const FbxMatrix& matrix )
 
 void AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatrix& matFBXGlobal, float fTime )
 {
-    D3DXMATRIX matGlobal = ConvertMatrix( matFBXGlobal );
+    XMFLOAT4X4 matGlobal = ConvertMatrix( matFBXGlobal );
     asn.matGlobal = matGlobal;
-    D3DXMATRIX matLocal = matGlobal;
+    XMFLOAT4X4 matLocal = matGlobal;
     if( pParent )
     {
-        D3DXMATRIX matInvParentGlobal;
-        D3DXMatrixInverse( &matInvParentGlobal, nullptr, &pParent->matGlobal );
+        XMMATRIX m = XMLoadFloat4x4( &pParent->matGlobal );
+        XMMATRIX matInvParentGlobal = XMMatrixInverse( nullptr, m );
 
-        D3DXMatrixMultiply( &matLocal, &matGlobal, &matInvParentGlobal );
+        m = XMLoadFloat4x4( &matGlobal );
+        m = XMMatrixMultiply( m, matInvParentGlobal );
+
+        XMStoreFloat4x4( &matLocal, m );
     }
 
-    D3DXMATRIX matLocalFinal;
-    g_pScene->GetDCCTransformer()->TransformMatrix( &matLocalFinal, &matLocal );
+    XMMATRIX matLocalFinal;
+    g_pScene->GetDCCTransformer()->TransformMatrix( reinterpret_cast<XMFLOAT4X4*>( &matLocalFinal ), &matLocal );
 
     XMVECTOR vScale;
     XMVECTOR qRotation;
     XMVECTOR vTranslation;
+    XMMatrixDecompose( &vScale, &qRotation, &vTranslation, matLocalFinal );
 
-    XMMatrixDecompose( &vScale, &qRotation, &vTranslation, (XMMATRIX)matLocalFinal );
+    XMFLOAT3 scale;
+    XMStoreFloat3( &scale, vScale );
 
-    asn.pTrack->TransformTrack.AddKey( fTime, *(D3DXVECTOR3*)&vTranslation, *(D3DXQUATERNION*)&qRotation, *(D3DXVECTOR3*)&vScale );
+    XMFLOAT4 rot;
+    XMStoreFloat4( &rot, qRotation );
+
+    XMFLOAT3 trans;
+    XMStoreFloat3( &trans, vTranslation );
+
+    asn.pTrack->TransformTrack.AddKey( fTime, trans, rot, scale );
 }
 
 void CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFbxScene )

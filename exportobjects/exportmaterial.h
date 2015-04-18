@@ -70,9 +70,6 @@ public:
     void SetTransparent( bool bTransparent ) { m_bTransparent = bTransparent; }
     bool IsTransparent() const { return m_bTransparent; }
 
-    static LPDIRECT3DDEVICE9 GetDirect3DDevice();
-    static void ReleaseDirect3DDevice();
-
     static ExportString GetDefaultDiffuseMapTextureName();
     static ExportString GetDefaultNormalMapTextureName();
 

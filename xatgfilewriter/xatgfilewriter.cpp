@@ -169,7 +169,7 @@ bool WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest )
 }
 
 CHAR g_strBuffer[512];
-const CHAR* WriteMatrix( const D3DXMATRIX& m )
+const CHAR* WriteMatrix( const XMFLOAT4X4& m )
 {
     sprintf_s( g_strBuffer, "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f",
         m._11, m._12, m._13, m._14,
@@ -179,19 +179,19 @@ const CHAR* WriteMatrix( const D3DXMATRIX& m )
     return g_strBuffer;
 }
 
-const CHAR* WriteVec3( const D3DXVECTOR3& vec3 )
+const CHAR* WriteVec3( const XMFLOAT3& vec3 )
 {
     sprintf_s( g_strBuffer, "%f, %f, %f", vec3.x, vec3.y, vec3.z );
     return g_strBuffer;
 }
 
-const CHAR* WriteColor( const D3DXCOLOR& color )
+const CHAR* WriteColor( const XMFLOAT4& color )
 {
-    sprintf_s( g_strBuffer, "%f, %f, %f, %f", color.a, color.r, color.g, color.b );
+    sprintf_s( g_strBuffer, "%f, %f, %f, %f", color.w, color.x, color.y, color.z );
     return g_strBuffer;
 }
 
-const CHAR* WriteQuaternion( const D3DXQUATERNION& quat )
+const CHAR* WriteQuaternion( const XMFLOAT4& quat )
 {
     sprintf_s( g_strBuffer, "%f, %f, %f, %f", quat.x, quat.y, quat.z, quat.w );
     return g_strBuffer;
@@ -472,10 +472,10 @@ void WriteVertexElement( const D3DVERTEXELEMENT9& Element )
 }
 
 
-D3DXVECTOR3 CrackCompressedVector( DWORD dwCompressedVector )
+XMFLOAT3 CrackCompressedVector( DWORD dwCompressedVector )
 {
     XMXDECN4 DecN4( dwCompressedVector );
-    D3DXVECTOR3 Vec3;
+    XMFLOAT3 Vec3;
     Vec3.x = (float)DecN4.x / 511.0f;
     Vec3.y = (float)DecN4.y / 511.0f;
     Vec3.z = (float)DecN4.z / 511.0f;
@@ -532,7 +532,7 @@ void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
                 break;
             case D3DDECLTYPE_DEC3N:
                 {
-                    D3DXVECTOR3 Vec3 = CrackCompressedVector( *reinterpret_cast<DWORD*>( pVertexData ) );
+                    XMFLOAT3 Vec3 = CrackCompressedVector( *reinterpret_cast<DWORD*>( pVertexData ) );
                     g_pXMLWriter->WriteStringFormat( "%f, %f, %f%s", 
                         Vec3.x, Vec3.y, Vec3.z, strComma );
                     break;
@@ -540,14 +540,14 @@ void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
             case D3DDECLTYPE_FLOAT16_2:
                 {
                     float fData[2];
-                    D3DXFloat16To32Array( fData, reinterpret_cast<D3DXFLOAT16*>( pVertexData ), 2 );
+                    XMConvertHalfToFloatStream( fData, sizeof(float), reinterpret_cast<HALF*>(pVertexData), sizeof(HALF), 2 );
                     g_pXMLWriter->WriteStringFormat( "%f, %f%s", fData[0], fData[1], strComma );
                     break;
                 }
             case D3DDECLTYPE_FLOAT16_4:
                 {
                     float fData[4];
-                    D3DXFloat16To32Array( fData, reinterpret_cast<D3DXFLOAT16*>( pVertexData ), 4 );
+                    XMConvertHalfToFloatStream( fData, sizeof(float), reinterpret_cast<HALF*>(pVertexData), sizeof(HALF), 4 );
                     g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", 
                         fData[0], fData[1], fData[2], fData[3], strComma );
                     break;
@@ -613,7 +613,7 @@ void WriteVertexData( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexElements, s
 void WriteSphereBound( const Sphere& sphere )
 {
     g_pXMLWriter->StartElement( "SphereBound" );
-    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &sphere.Center ) ) );
+    g_pXMLWriter->AddAttribute( "Center", WriteVec3( sphere.Center ) );
     g_pXMLWriter->AddAttribute( "Radius", sphere.Radius );
     g_pXMLWriter->EndElement();
 }
@@ -621,17 +621,17 @@ void WriteSphereBound( const Sphere& sphere )
 void WriteAxisAlignedBoxBound( const AxisAlignedBox& aabb )
 {
     g_pXMLWriter->StartElement( "AxisAlignedBoxBound" );
-    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &aabb.Center ) ) );
-    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &aabb.Extents ) ) );
+    g_pXMLWriter->AddAttribute( "Center", WriteVec3( aabb.Center ) );
+    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( aabb.Extents ) );
     g_pXMLWriter->EndElement();
 }
 
 void WriteOrientedBoxBound( const OrientedBox& obb )
 {
     g_pXMLWriter->StartElement( "OrientedBoxBound" );
-    g_pXMLWriter->AddAttribute( "Center", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &obb.Center ) ) );
-    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( *reinterpret_cast<const D3DXVECTOR3*>( &obb.Extents ) ) );
-    g_pXMLWriter->AddAttribute( "Orientation", WriteQuaternion( *reinterpret_cast<const D3DXQUATERNION*>( &obb.Orientation ) ) );
+    g_pXMLWriter->AddAttribute( "Center", WriteVec3( obb.Center ) );
+    g_pXMLWriter->AddAttribute( "Extents", WriteVec3( obb.Extents ) );
+    g_pXMLWriter->AddAttribute( "Orientation", WriteQuaternion( obb.Orientation ) );
     g_pXMLWriter->EndElement();
 }
 

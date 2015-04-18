@@ -493,8 +493,8 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                 // Store skin weights
                 if( bSkinnedMesh )
                 {
-                    memcpy( &pTriangle->Vertex[dwCornerIndex].BoneIndices, skindata.GetIndices( dwDCCIndex ), sizeof(ByteVector4) );
-                    memcpy( &pTriangle->Vertex[dwCornerIndex].BoneWeights, skindata.GetWeights( dwDCCIndex ), sizeof(D3DXVECTOR4) );
+                    memcpy( &pTriangle->Vertex[dwCornerIndex].BoneIndices, skindata.GetIndices( dwDCCIndex ), sizeof(XMUBYTE4) );
+                    memcpy( &pTriangle->Vertex[dwCornerIndex].BoneWeights, skindata.GetWeights( dwDCCIndex ), sizeof(XMFLOAT4) );
                 }
             }
 

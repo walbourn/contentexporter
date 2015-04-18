@@ -13,6 +13,10 @@
 //-------------------------------------------------------------------------------------
 
 #include "stdafx.h"
+
+#include <d3d9.h>
+#include <d3dx9.h>
+
 #include "ExportManifest.h"
 #include "ExportObjects.h"
 
@@ -355,10 +359,12 @@ namespace ATG
         pDestTexture->Release();
     }
 
+extern IDirect3DDevice9* g_pd3dDevice;
 
     void ExportTextureConverter::PerformTextureFileOperations( ExportManifest* pManifest )
     {
-        LPDIRECT3DDEVICE9 pd3dDevice = ExportMaterial::GetDirect3DDevice();
+        if ( !g_pd3dDevice )
+            return;
 
         if( g_pScene->Settings().bForceTextureOverwrite )
         {
@@ -392,16 +398,14 @@ namespace ATG
                 break;
             case ETO_CONVERTFORMAT:
                 // Convert source file to intermediate location.
-                ConvertImageFormat( pd3dDevice, File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat );
+                ConvertImageFormat( g_pd3dDevice, File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat );
                 break;
             case ETO_BUMPMAP_TO_NORMALMAP:
                 // Convert source file to a normal map, copy to intermediate file location.
-                CreateNormalMapFromBumpMap( pd3dDevice, File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat );
+                CreateNormalMapFromBumpMap( g_pd3dDevice, File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat );
                 break;
             }
         }
-
-        ExportMaterial::ReleaseDirect3DDevice();
     }
 }
 

@@ -21,22 +21,22 @@ namespace ATG
 
 struct ExportAnimationPositionKey
 {
-    float           fTime;
-    D3DXVECTOR3     Position;
+    float               fTime;
+    XMFLOAT3            Position;
 };
 typedef std::vector<ExportAnimationPositionKey> PositionKeyList;
 
 struct ExportAnimationOrientationKey
 {
-    float           fTime;
-    D3DXQUATERNION  Orientation;
+    float               fTime;
+    XMFLOAT4            Orientation;
 };
 typedef std::vector<ExportAnimationOrientationKey> OrientationKeyList;
 
 struct ExportAnimationScaleKey
 {
-    float           fTime;
-    D3DXVECTOR3     Scale;
+    float               fTime;
+    XMFLOAT3            Scale;
 };
 typedef std::vector<ExportAnimationScaleKey> ScaleKeyList;
 
@@ -50,8 +50,8 @@ public:
     {
     }
     void AddKey( float fTime, const ExportTransform& Transform );
-    void AddKey( float fTime, const D3DXMATRIX& matTransform );
-    void AddKey( float fTime, const D3DXVECTOR3& Position, const D3DXQUATERNION& Orientation, const D3DXVECTOR3& Scale );
+    void AddKey( float fTime, const XMFLOAT4X4& matTransform );
+    void AddKey( float fTime, const XMFLOAT3& Position, const XMFLOAT4& Orientation, const XMFLOAT3& Scale );
     void OptimizeKeys();
     void SortKeys();
     void EndianSwap();

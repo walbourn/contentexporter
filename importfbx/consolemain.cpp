@@ -732,7 +732,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         return 0;
     }
 
-    ExportMaterial::GetDirect3DDevice();
+    ExportMesh::Initialize();
 
     for( size_t i = 0; i < dwInputFileCount; ++i )
     {
@@ -799,7 +799,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         }
     }
 
-    ExportMaterial::ReleaseDirect3DDevice();
+    ExportMesh::Terminate();
 
     return 0;
 }

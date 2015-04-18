@@ -16,6 +16,8 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
+#include <d3dx9.h>
+
 namespace ATG
 {
 
@@ -141,15 +143,6 @@ protected:
     PrimitiveType   m_PrimitiveType;
 };
 
-struct ByteVector4
-{
-public:
-    BYTE    x;
-    BYTE    y;
-    BYTE    z;
-    BYTE    w;
-};
-
 class ExportMaterial;
 
 struct ExportMeshVertex
@@ -164,18 +157,19 @@ public:
         ZeroMemory( this, sizeof( ExportMeshVertex ) );
         BoneWeights.x = 1.0f;
     }
-    UINT            DCCVertexIndex;
-    D3DXVECTOR3     Position;
-    D3DXVECTOR3     Normal;
-    D3DXVECTOR3     SmoothNormal;
-    D3DXVECTOR3     Tangent;
-    D3DXVECTOR3     Binormal;
-    ByteVector4     BoneIndices;
-    D3DXVECTOR4     BoneWeights;
-    D3DXVECTOR4     TexCoords[8];
-    D3DXVECTOR4     Color;
-    ExportMeshVertex* pNextDuplicateVertex;
-    bool            Equals( const ExportMeshVertex* pOtherVertex ) const;
+    UINT                            DCCVertexIndex;
+    XMFLOAT3                        Position;
+    XMFLOAT3                        Normal;
+    XMFLOAT3                        SmoothNormal;
+    XMFLOAT3                        Tangent;
+    XMFLOAT3                        Binormal;
+    XMUBYTE4                        BoneIndices;
+    XMFLOAT4                        BoneWeights;
+    XMFLOAT4                        TexCoords[8];
+    XMFLOAT4                        Color;
+    ExportMeshVertex*               pNextDuplicateVertex;
+
+    bool Equals( const ExportMeshVertex* pOtherVertex ) const;
 };
 
 typedef std::vector< ExportMeshVertex* > ExportMeshVertexArray;
@@ -343,6 +337,9 @@ public:
 
     virtual void AddInfluence( ExportString InfluenceName ) override { m_InfluenceNames.push_back( InfluenceName ); m_VertexFormat.m_bSkinData = true; }
 
+    static void Initialize();
+    static void Terminate();
+    
 protected:
     void BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags );
     void ClearRawTriangles();
@@ -405,7 +402,7 @@ protected:
     bool                                m_bReceivesShadows;
 };
 
-DWORD MakeCompressedVector( const D3DXVECTOR3& Vec3 );
+DWORD MakeCompressedVector( const XMFLOAT3& Vec3 );
 void NormalizeBoneWeights( BYTE* pWeights );
 
 };

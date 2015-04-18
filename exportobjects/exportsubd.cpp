@@ -155,7 +155,7 @@ namespace ATG
                 for( DWORD dwCornerIndex = 0; dwCornerIndex < 3; ++dwCornerIndex )
                 {
                     INT iMeshIndex = static_cast<INT>( m_pPolyMesh->GetIB()->GetIndex( dwBaseIndex + dwCornerIndex ) );
-                    auto pPosition = reinterpret_cast<const D3DXVECTOR3*>( m_pPolyMesh->GetVB()->GetVertex( iMeshIndex ) );
+                    auto pPosition = reinterpret_cast<const XMFLOAT3*>( m_pPolyMesh->GetVB()->GetVertex( iMeshIndex ) );
 
                     INT iPositionIndex = CreateOrAddPosition( *pPosition, iMeshIndex );
                     iTriangleIndices[dwCornerIndex] = iPositionIndex;
@@ -212,16 +212,19 @@ namespace ATG
         ExportLog::LogMsg( 3, "Subdivision surface control mesh complete; %Iu triangles and %Iu quads found, %Iu unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
     }
 
-    INT ExportSubDProcessMesh::CreateOrAddPosition( const D3DXVECTOR3& vPosition, INT iMeshVertexIndex )
+    INT ExportSubDProcessMesh::CreateOrAddPosition( const XMFLOAT3& vPosition, INT iMeshVertexIndex )
     {
         assert( iMeshVertexIndex >= 0 && iMeshVertexIndex < static_cast<INT>( m_pPolyMesh->GetVB()->GetVertexCount() ) );
         INT iCurrentIndex = m_MeshVertexToPositionMapping[iMeshVertexIndex];
         if( iCurrentIndex == -1 )
         {
+            XMVECTOR p0 = XMLoadFloat3( &vPosition );
+
             size_t dwPositionCount = m_Positions.size();
             for( size_t i = 0; i < dwPositionCount; ++i )
             {
-                if( vPosition == m_Positions[i] )
+                XMVECTOR pi = XMLoadFloat3( &m_Positions[i] );
+                if ( XMVector3Equal( p0, pi ) )
                 {
                     iCurrentIndex = static_cast<INT>( i );
                     m_MeshVertexToPositionMapping[iMeshVertexIndex] = iCurrentIndex;
@@ -386,7 +389,7 @@ namespace ATG
         {
             if( m_IncidentBoundaryEdgesPerPosition[i] > 2 )
             {
-                D3DXVECTOR3 vPos = m_Positions[i];
+                XMFLOAT3 vPos = m_Positions[i];
                 ExportLog::LogWarning( "Detected %d incident boundary edges on position %u, which will result in invalid adjacency data.  Location: <%0.3f %0.3f %0.3f>", m_IncidentBoundaryEdgesPerPosition[i], i, vPos.x, vPos.y, vPos.z );
                 bInvalidData = true;
             }
@@ -792,25 +795,30 @@ namespace ATG
 
         if( iValence <= 2 && iStartQuadIndex != -1 )
         {
-            D3DXVECTOR3 vQuadCenter = GetQuadCenter( iStartQuadIndex );
+            XMFLOAT3 vQuadCenter = GetQuadCenter( iStartQuadIndex );
             ExportLog::LogWarning( "Valence of 2 encountered in quad %d.  This indicates neighboring quads sharing 2 edges.  Quad will be merged with the adjacent quad.  Quad center: <%0.3f %0.3f %0.3f>", iStartQuadIndex, vQuadCenter.x, vQuadCenter.y, vQuadCenter.z );
         }
 
         return iValence;
     }
 
-    D3DXVECTOR3 ExportSubDProcessMesh::GetQuadCenter( INT iQuadIndex )
+    XMFLOAT3 ExportSubDProcessMesh::GetQuadCenter( INT iQuadIndex )
     {
         const Quad& CurrentQuad = m_Quads[iQuadIndex];
         
-        D3DXVECTOR3 vCenter( 0, 0, 0 );
+        XMVECTOR vCenter = XMVectorZero();
+
         for( DWORD i = 0; i < 4; ++i )
         {
-            vCenter += m_Positions[ CurrentQuad.iIndices[i] ];
+            XMVECTOR pi = XMLoadFloat3( &m_Positions[ CurrentQuad.iIndices[i] ] );
+            vCenter = XMVectorAdd( vCenter, pi );
         }
 
         vCenter *= 0.25f;
-        return vCenter;
+
+        XMFLOAT3 v;
+        XMStoreFloat3( &v, vCenter );
+        return v;
     }
 
     INT ExportSubDProcessMesh::FindTriangleWithEdge( INT iStartPositionIndex, INT iEndPositionIndex, INT iExcludeThisTriangle )

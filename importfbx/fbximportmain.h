@@ -24,9 +24,9 @@ public:
 
     void Initialize( FbxScene* pScene );
 
-    virtual void TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX* pSrcMatrix ) const override;
-    virtual void TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVECTOR3* pSrcPosition ) const override;
-    virtual void TransformDirection( D3DXVECTOR3* pDestDirection, const D3DXVECTOR3* pSrcDirection ) const override;
+    virtual void TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4* pSrcMatrix ) const override;
+    virtual void TransformPosition( XMFLOAT3* pDestPosition, const XMFLOAT3* pSrcPosition ) const override;
+    virtual void TransformDirection( XMFLOAT3* pDestDirection, const XMFLOAT3* pSrcDirection ) const override;
     virtual float TransformLength( float fInputLength ) const override;
 
     // Sets unit scale for exporting all geometry - works with characters too.

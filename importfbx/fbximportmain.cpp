@@ -55,15 +55,15 @@ void FBXTransformer::Initialize( FbxScene* pScene )
     SetUnitScale( (float)g_pScene->Settings().fExportScale );
 }
 
-void FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX* pSrcMatrix ) const
+void FBXTransformer::TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4* pSrcMatrix ) const
 {
-    D3DXMATRIX SrcMatrix;
+    XMFLOAT4X4 SrcMatrix;
     if( pSrcMatrix == pDestMatrix )
     {
-        memcpy( &SrcMatrix, pSrcMatrix, sizeof( D3DXMATRIX ) );
+        memcpy( &SrcMatrix, pSrcMatrix, sizeof( XMFLOAT4X4 ) );
         pSrcMatrix = &SrcMatrix;
     }
-    memcpy( pDestMatrix, pSrcMatrix, sizeof( D3DXMATRIX ) );
+    memcpy( pDestMatrix, pSrcMatrix, sizeof( XMFLOAT4X4 ) );
 
     // What we're doing here is premultiplying by a left hand -> right hand matrix,
     // and then postmultiplying by a right hand -> left hand matrix.
@@ -85,9 +85,9 @@ void FBXTransformer::TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX*
     pDestMatrix->_43 *= m_fUnitScale;
 }
 
-void FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVECTOR3* pSrcPosition ) const
+void FBXTransformer::TransformPosition( XMFLOAT3* pDestPosition, const XMFLOAT3* pSrcPosition ) const
 {
-    D3DXVECTOR3 SrcVector;
+    XMFLOAT3 SrcVector;
     if( pSrcPosition == pDestPosition )
     {
         SrcVector = *pSrcPosition;
@@ -108,9 +108,9 @@ void FBXTransformer::TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVE
     }
 }
 
-void FBXTransformer::TransformDirection( D3DXVECTOR3* pDestDirection, const D3DXVECTOR3* pSrcDirection ) const
+void FBXTransformer::TransformDirection( XMFLOAT3* pDestDirection, const XMFLOAT3* pSrcDirection ) const
 {
-    D3DXVECTOR3 SrcVector;
+    XMFLOAT3 SrcVector;
     if( pSrcDirection == pDestDirection )
     {
         SrcVector = *pSrcDirection;
@@ -273,8 +273,7 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
     g_bBindPoseFixupRequired = false;
 
     assert( g_pFBXScene->GetRootNode() != nullptr );
-    D3DXMATRIX matIdentity;
-    D3DXMatrixIdentity( &matIdentity );
+    XMMATRIX matIdentity = XMMatrixIdentity();
     ParseNode( g_pFBXScene->GetRootNode(), g_pScene, matIdentity );
 
     if( g_bBindPoseFixupRequired )

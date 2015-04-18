@@ -21,6 +21,8 @@ namespace ATG
     float g_fOrientationExportTolerance = 0.99f;
     float g_fScaleExportTolerance = 0.99f;
 
+    static const XMVECTORF32 g_NewSlopeTolerance = { 1e-4f, 1e-4f, 1e-4f, 1e-4f };
+
     float ConvertToleranceValue( INT iValue )
     {
         float fExponent = (float)iValue / 15.0f;
@@ -35,7 +37,7 @@ namespace ATG
         g_fScaleExportTolerance = ConvertToleranceValue( iScale );
     }
 
-    void ExportAnimationTransformTrack::AddKey( float fTime, const D3DXVECTOR3& Position, const D3DXQUATERNION& Orientation, const D3DXVECTOR3& Scale )
+    void ExportAnimationTransformTrack::AddKey( float fTime, const XMFLOAT3& Position, const XMFLOAT4& Orientation, const XMFLOAT3& Scale )
     {
         ExportAnimationPositionKey PositionKey;
         ExportAnimationOrientationKey OrientationKey;
@@ -85,10 +87,10 @@ namespace ATG
         AddKey( fTime, Transform.Position(), Transform.Orientation(), Transform.Scale() );
     }
 
-    void ExportAnimationTransformTrack::AddKey( float fTime, const D3DXMATRIX& matTransform )
+    void ExportAnimationTransformTrack::AddKey( float fTime, const XMFLOAT4X4& matTransform )
     {
         ExportTransform Transform;
-        Transform.InitializeFromFloats( (float*)&matTransform );
+        Transform.Initialize( matTransform );
         AddKey( fTime, Transform );
     }
 
@@ -96,27 +98,43 @@ namespace ATG
     {
         if( PositionKeys.size() < 2 )
             return true;
-        const ExportAnimationPositionKey& pk1 = PositionKeys[ PositionKeys.size() - 1 ];
-        const ExportAnimationPositionKey& pk2 = PositionKeys[ PositionKeys.size() - 2 ];
-        return ( pk1.Position != pk.Position || pk2.Position != pk.Position );
+
+        XMVECTOR pk0 = XMLoadFloat3( &pk.Position );
+
+        size_t nkeys = PositionKeys.size();
+        XMVECTOR pk1 = XMLoadFloat3( &PositionKeys[ nkeys - 1 ].Position );
+        XMVECTOR pk2 = XMLoadFloat3( &PositionKeys[ nkeys - 2 ].Position );
+
+        return ( XMVector3NotEqual( pk1, pk0 ) || XMVector3NotEqual( pk2, pk0 ) );
     }
 
     bool ExportAnimationTransformTrack::OrientationChangedFromLastTwoKeys( const ExportAnimationOrientationKey& pk )
     {
         if( OrientationKeys.size() < 2 )
             return true;
-        const ExportAnimationOrientationKey& pk1 = OrientationKeys[ OrientationKeys.size() - 1 ];
-        const ExportAnimationOrientationKey& pk2 = OrientationKeys[ OrientationKeys.size() - 2 ];
-        return ( pk1.Orientation != pk.Orientation || pk2.Orientation != pk.Orientation );
+
+        XMVECTOR pk0 = XMLoadFloat4( &pk.Orientation );
+
+        size_t nkeys = OrientationKeys.size();
+        XMVECTOR pk1 = XMLoadFloat4( &OrientationKeys[ nkeys - 1 ].Orientation );
+        XMVECTOR pk2 = XMLoadFloat4( &OrientationKeys[ nkeys - 2 ].Orientation );
+
+        return ( XMVector4NotEqual( pk1, pk0 ) || XMVector4NotEqual( pk2, pk0 ) );
     }
 
     bool ExportAnimationTransformTrack::ScaleChangedFromLastTwoKeys( const ExportAnimationScaleKey& pk )
     {
         if( ScaleKeys.size() < 2 )
             return true;
-        const ExportAnimationScaleKey& pk1 = ScaleKeys[ ScaleKeys.size() - 1 ];
-        const ExportAnimationScaleKey& pk2 = ScaleKeys[ ScaleKeys.size() - 2 ];
-        return ( pk1.Scale != pk.Scale || pk2.Scale != pk.Scale );
+
+        XMVECTOR pk0 = XMLoadFloat3( &pk.Scale );
+
+        size_t nkeys = ScaleKeys.size();
+
+        XMVECTOR pk1 = XMLoadFloat3( &ScaleKeys[ nkeys - 1 ].Scale );
+        XMVECTOR pk2 = XMLoadFloat3( &ScaleKeys[ nkeys - 2 ].Scale );
+
+        return ( XMVector3NotEqual( pk1, pk0 ) || XMVector3NotEqual( pk2, pk0 ) );
     }
 
     void ExportAnimationTransformTrack::OptimizeKeys()
@@ -128,77 +146,93 @@ namespace ATG
         OptimizeScaleKeys();
     }
 
-    D3DXVECTOR3 ComputeSlope( const ExportAnimationPositionKey& KeyA, const ExportAnimationPositionKey& KeyB )
+    XMVECTOR ComputeSlope( const ExportAnimationPositionKey& KeyA, const ExportAnimationPositionKey& KeyB )
     {
-        D3DXVECTOR3 vDelta = KeyB.Position - KeyA.Position;
+        XMVECTOR pk1 = XMLoadFloat3( &KeyA.Position );
+        XMVECTOR pk2 = XMLoadFloat3( &KeyB.Position );
+        XMVECTOR vDelta = pk2 - pk1;
         float fTimeDelta = KeyB.fTime - KeyA.fTime;
         assert( fTimeDelta > 0.0f );
         return vDelta / fTimeDelta;
     }
 
-    D3DXVECTOR4 ComputeSlope( const ExportAnimationOrientationKey& KeyA, const ExportAnimationOrientationKey& KeyB )
+    XMVECTOR ComputeSlope( const ExportAnimationOrientationKey& KeyA, const ExportAnimationOrientationKey& KeyB )
     {
-        D3DXVECTOR4 vDelta = (D3DXVECTOR4)KeyB.Orientation - (D3DXVECTOR4)KeyA.Orientation;
+        XMVECTOR pk1 = XMLoadFloat4( &KeyA.Orientation );
+        XMVECTOR pk2 = XMLoadFloat4( &KeyB.Orientation );
+        XMVECTOR vDelta = pk2 - pk1;
         float fTimeDelta = KeyB.fTime - KeyA.fTime;
         assert( fTimeDelta > 0.0f );
         return vDelta / fTimeDelta;
     }
 
-    D3DXVECTOR3 ComputeSlope( const ExportAnimationScaleKey& KeyA, const ExportAnimationScaleKey& KeyB )
+    XMVECTOR ComputeSlope( const ExportAnimationScaleKey& KeyA, const ExportAnimationScaleKey& KeyB )
     {
-        D3DXVECTOR3 vDelta = KeyB.Scale - KeyA.Scale;
+        XMVECTOR pk1 = XMLoadFloat3( &KeyA.Scale );
+        XMVECTOR pk2 = XMLoadFloat3( &KeyB.Scale);
+        XMVECTOR vDelta = pk2 - pk1;
         float fTimeDelta = KeyB.fTime - KeyA.fTime;
         assert( fTimeDelta > 0.0f );
         return vDelta / fTimeDelta;
     }
 
-    bool NewSlopeEncountered( const D3DXVECTOR3& vSlopeRef, const D3DXVECTOR3& vSlopeNew, const float fThreshold )
+    bool NewSlopeEncountered3( FXMVECTOR vSlopeRef, FXMVECTOR vSlopeNew, const float fThreshold )
     {
-        D3DXVECTOR3 vRefNormalized;
-        if( D3DXVec3LengthSq( &vSlopeRef ) < 1e-4f )
+        XMVECTOR len = XMVector3LengthSq( vSlopeRef );
+
+        XMVECTOR vRefNormalized;
+        if ( XMVector3Less( len, g_NewSlopeTolerance ) )
         {
-            vRefNormalized = D3DXVECTOR3( 1, 0, 0 );
+            vRefNormalized = g_XMIdentityR0; // [1 0 0]
         }
         else
         {
-            D3DXVec3Normalize( &vRefNormalized, &vSlopeRef );
+            vRefNormalized = XMVector3Normalize( vSlopeRef );
         }
-        D3DXVECTOR3 vNewNormalized;
-        if( D3DXVec3LengthSq( &vSlopeNew ) < 1e-4f )
+
+        len = XMVector3LengthSq( vSlopeNew );
+
+        XMVECTOR vNewNormalized;
+        if ( XMVector3Less( len, g_NewSlopeTolerance ) )
         {
-            vNewNormalized = D3DXVECTOR3( 1, 0, 0 );
+            vNewNormalized = g_XMIdentityR0; // [1 0 0]
         }
         else
         {
-            D3DXVec3Normalize( &vNewNormalized, &vSlopeNew );
+            vNewNormalized = XMVector3Normalize( vSlopeNew );
         }
 
-        float fDot = D3DXVec3Dot( &vRefNormalized, &vNewNormalized );
+        float fDot = XMVectorGetX( XMVector3Dot( vRefNormalized, vNewNormalized ) );
         return( fDot <= fThreshold );
     }
 
-    bool NewSlopeEncountered( const D3DXVECTOR4& vSlopeRef, const D3DXVECTOR4& vSlopeNew, const float fThreshold )
+    bool NewSlopeEncountered4( FXMVECTOR vSlopeRef, FXMVECTOR vSlopeNew, const float fThreshold )
     {
-        D3DXVECTOR4 vRefNormalized;
-        if( D3DXVec4LengthSq( &vSlopeRef ) < 1e-4f )
+        XMVECTOR len = XMVector4LengthSq( vSlopeRef );
+
+        XMVECTOR vRefNormalized;
+        if ( XMVector4Less( len, g_NewSlopeTolerance ) )
         {
-            vRefNormalized = D3DXVECTOR4( 1, 0, 0, 0 );
+            vRefNormalized = g_XMIdentityR0; // [1 0 0 0]
         }
         else
         {
-            D3DXVec4Normalize( &vRefNormalized, &vSlopeRef );
-        }
-        D3DXVECTOR4 vNewNormalized;
-        if( D3DXVec4LengthSq( &vSlopeNew ) < 1e-4f )
-        {
-            vNewNormalized = D3DXVECTOR4( 1, 0, 0, 0 );
-        }
-        else
-        {
-            D3DXVec4Normalize( &vNewNormalized, &vSlopeNew );
+            vRefNormalized = XMVector4Normalize( vSlopeRef );
         }
 
-        float fDot = D3DXVec4Dot( &vRefNormalized, &vNewNormalized );
+        len = XMVector4LengthSq( vSlopeNew );
+
+        XMVECTOR vNewNormalized;
+        if ( XMVector4Less( len, g_NewSlopeTolerance ) )
+        {
+            vNewNormalized = g_XMIdentityR0; // [1 0 0 0]
+        }
+        else
+        {
+            vNewNormalized = XMVector4Normalize( vSlopeNew );
+        }
+
+        float fDot = XMVectorGetX( XMVector4Dot( vRefNormalized, vNewNormalized ) );
         return( fDot <= fThreshold );
     }
 
@@ -207,14 +241,14 @@ namespace ATG
         if( PositionKeys.size() < 2 )
             return;
 
-        D3DXVECTOR3 vCurrentSlope( 0, 0, 0 );
+        XMVECTOR vCurrentSlope = XMVectorZero();
         PositionKeyList NewKeyList;
         NewKeyList.push_back( PositionKeys[0] );
 
         for( size_t i = 1; i < PositionKeys.size(); ++i )
         {
-            D3DXVECTOR3 vSlope = ComputeSlope( PositionKeys[i - 1], PositionKeys[i] );
-            if( NewSlopeEncountered( vCurrentSlope, vSlope, g_fPositionExportTolerance ) )
+            XMVECTOR vSlope = ComputeSlope( PositionKeys[i - 1], PositionKeys[i] );
+            if( NewSlopeEncountered3( vCurrentSlope, vSlope, g_fPositionExportTolerance ) )
             {
                 if( i > 1 )
                 {
@@ -224,8 +258,10 @@ namespace ATG
             }
         }
 
-        D3DXVECTOR3 vFinalSlope = ComputeSlope( NewKeyList.back(), PositionKeys.back() );
-        if( D3DXVec3LengthSq( &vFinalSlope ) > 1e-4f )
+        XMVECTOR vFinalSlope = ComputeSlope( NewKeyList.back(), PositionKeys.back() );
+        XMVECTOR len = XMVector3LengthSq( vFinalSlope );
+
+        if ( XMVector3Greater( len, g_NewSlopeTolerance ) )
         {
             NewKeyList.push_back( PositionKeys.back() );
         }
@@ -238,14 +274,14 @@ namespace ATG
         if( OrientationKeys.size() < 2 )
             return;
 
-        D3DXVECTOR4 vCurrentSlope( 0, 0, 0, 0 );
+        XMVECTOR vCurrentSlope = XMVectorZero();
         OrientationKeyList NewKeyList;
         NewKeyList.push_back( OrientationKeys[0] );
 
         for( size_t i = 1; i < OrientationKeys.size(); ++i )
         {
-            D3DXVECTOR4 vSlope = ComputeSlope( OrientationKeys[i - 1], OrientationKeys[i] );
-            if( NewSlopeEncountered( vCurrentSlope, vSlope, g_fOrientationExportTolerance ) )
+            XMVECTOR vSlope = ComputeSlope( OrientationKeys[i - 1], OrientationKeys[i] );
+            if( NewSlopeEncountered4( vCurrentSlope, vSlope, g_fOrientationExportTolerance ) )
             {
                 if( i > 1 )
                 {
@@ -255,8 +291,10 @@ namespace ATG
             }
         }
 
-        D3DXVECTOR4 vFinalSlope = ComputeSlope( NewKeyList.back(), OrientationKeys.back() );
-        if( D3DXVec4LengthSq( &vFinalSlope ) > 1e-4f )
+        XMVECTOR vFinalSlope = ComputeSlope( NewKeyList.back(), OrientationKeys.back() );
+        XMVECTOR len = XMVector4LengthSq( vFinalSlope );
+
+        if ( XMVector4Greater( len, g_NewSlopeTolerance ) )
         {
             NewKeyList.push_back( OrientationKeys.back() );
         }
@@ -269,14 +307,14 @@ namespace ATG
         if( ScaleKeys.size() < 2 )
             return;
 
-        D3DXVECTOR3 vCurrentSlope( 0, 0, 0 );
+        XMVECTOR vCurrentSlope = XMVectorZero();
         ScaleKeyList NewKeyList;
         NewKeyList.push_back( ScaleKeys[0] );
 
         for( size_t i = 1; i < ScaleKeys.size(); ++i )
         {
-            D3DXVECTOR3 vSlope = ComputeSlope( ScaleKeys[i - 1], ScaleKeys[i] );
-            if( NewSlopeEncountered( vCurrentSlope, vSlope, g_fScaleExportTolerance ) )
+            XMVECTOR vSlope = ComputeSlope( ScaleKeys[i - 1], ScaleKeys[i] );
+            if( NewSlopeEncountered3( vCurrentSlope, vSlope, g_fScaleExportTolerance ) )
             {
                 if( i > 1 )
                 {
@@ -286,8 +324,10 @@ namespace ATG
             }
         }
 
-        D3DXVECTOR3 vFinalSlope = ComputeSlope( NewKeyList.back(), ScaleKeys.back() );
-        if( D3DXVec3LengthSq( &vFinalSlope ) > 1e-4f )
+        XMVECTOR vFinalSlope = ComputeSlope( NewKeyList.back(), ScaleKeys.back() );
+        XMVECTOR len = XMVector3LengthSq( vFinalSlope );
+
+        if ( XMVector3Greater( len, g_NewSlopeTolerance ) )
         {
             NewKeyList.push_back( ScaleKeys.back() );
         }
@@ -360,7 +400,10 @@ namespace ATG
             // Check for an orientation that is different from the scene position
             if( OrientationKeys.size() == 1 )
             {
-                if( OrientationKeys[0].Orientation != pSourceFrame->Transform().Orientation() )
+                XMVECTOR scene = XMLoadFloat4( &pSourceFrame->Transform().Orientation() );
+                XMVECTOR key = XMLoadFloat4( &OrientationKeys[0].Orientation );
+
+                if ( XMVector4NotEqual( key, scene ) )
                 {
                     bResult = false;
                 }
@@ -368,7 +411,10 @@ namespace ATG
             // Check for a position that is different from the scene position
             if( PositionKeys.size() == 1 )
             {
-                if( PositionKeys[0].Position != pSourceFrame->Transform().Position() )
+                XMVECTOR scene = XMLoadFloat3( &pSourceFrame->Transform().Position() );
+                XMVECTOR key = XMLoadFloat3( &PositionKeys[0].Position );
+
+                if ( XMVector3NotEqual( key, scene ) )
                 {
                     bResult = false;
                 }
@@ -376,7 +422,10 @@ namespace ATG
             // Check for a scale that is different from the scene scale
             if( ScaleKeys.size() == 1 )
             {
-                if( ScaleKeys[0].Scale != pSourceFrame->Transform().Scale() )
+                XMVECTOR scene = XMLoadFloat3( &pSourceFrame->Transform().Scale() );
+                XMVECTOR key = XMLoadFloat3( &ScaleKeys[0].Scale );
+
+                if ( XMVector3NotEqual( key, scene ) )
                 {
                     bResult = false;
                 }

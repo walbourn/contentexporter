@@ -88,44 +88,44 @@ namespace ATG
         auto pColor = pMaterial->FindParameter( "DiffuseColor" );
         if( pColor )
         {
-            Material.Diffuse = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], pColor->ValueFloat[3] );
+            Material.Diffuse = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], pColor->ValueFloat[3] );
         }
         else
         {
-            Material.Diffuse = D3DXVECTOR4( 1.f, 1.f, 1.f, 1.f );
+            Material.Diffuse = XMFLOAT4( 1.f, 1.f, 1.f, 1.f );
         }
           
         pColor = pMaterial->FindParameter( "AmbientColor" );
         if( pColor )
         {
-            Material.Ambient = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
+            Material.Ambient = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
         }
         else
         {
-            Material.Ambient = D3DXVECTOR4( 0.f, 0.f, 0.f, 0.f );
+            Material.Ambient = XMFLOAT4( 0.f, 0.f, 0.f, 0.f );
         }
 
         pColor = pMaterial->FindParameter( "EmissiveColor" );
         if( pColor )
         {
-            Material.Emissive = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
+            Material.Emissive = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
         }
         else
         {
-            Material.Emissive = D3DXVECTOR4( 0.f, 0.f, 0.f, 0.f );
+            Material.Emissive = XMFLOAT4( 0.f, 0.f, 0.f, 0.f );
         }
 
         pColor = pMaterial->FindParameter( "SpecularColor" );
         if( pColor )
         {
-            Material.Specular  = D3DXVECTOR4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
+            Material.Specular  = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
 
             auto pPower = pMaterial->FindParameter( "SpecularPower" );
             Material.Power = (pPower) ? pPower->ValueFloat[0] : 16.f;
         }
         else
         {
-            Material.Specular = D3DXVECTOR4( 0.f, 0.f, 0.f, 0.f );
+            Material.Specular = XMFLOAT4( 0.f, 0.f, 0.f, 0.f );
             Material.Power = 1.f;
         }
 
@@ -253,18 +253,18 @@ namespace ATG
         {
         case ExportMeshBase::SphereBound:
             {
-                MeshHeader.BoundingBoxCenter = *reinterpret_cast<D3DXVECTOR3*>( &pMeshBase->GetBoundingSphere().Center );
+                MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingSphere().Center;
                 float fSize = pMeshBase->GetBoundingSphere().Radius;
-                MeshHeader.BoundingBoxExtents = D3DXVECTOR3( fSize, fSize, fSize );
+                MeshHeader.BoundingBoxExtents = XMFLOAT3( fSize, fSize, fSize );
                 break;
             }
         case ExportMeshBase::AxisAlignedBoxBound:
-            MeshHeader.BoundingBoxCenter = *reinterpret_cast<D3DXVECTOR3*>( &pMeshBase->GetBoundingAABB().Center );
-            MeshHeader.BoundingBoxExtents = *reinterpret_cast<D3DXVECTOR3*>( &pMeshBase->GetBoundingAABB().Extents );
+            MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingAABB().Center;
+            MeshHeader.BoundingBoxExtents = pMeshBase->GetBoundingAABB().Extents;
             break;
         case ExportMeshBase::OrientedBoxBound:
-            MeshHeader.BoundingBoxCenter = *reinterpret_cast<D3DXVECTOR3*>( &pMeshBase->GetBoundingOBB().Center );
-            MeshHeader.BoundingBoxExtents = *reinterpret_cast<D3DXVECTOR3*>( &pMeshBase->GetBoundingOBB().Extents );
+            MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingOBB().Center;
+            MeshHeader.BoundingBoxExtents = pMeshBase->GetBoundingOBB().Extents;
             break;
         }
 
@@ -668,7 +668,13 @@ namespace ATG
                 assert( fTime <= EndKey.fTime );
                 float fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
                 fLerpFactor = std::min( std::max( 0.0f, fLerpFactor ), 1.0f );
-                D3DXVec3Lerp( &pDestKeys[i].Translation, &StartKey.Position, &EndKey.Position, fLerpFactor );
+
+                XMVECTOR v = XMLoadFloat3( &StartKey.Position );
+                XMVECTOR vEnd = XMLoadFloat3( &EndKey.Position );
+
+                v = XMVectorLerp( v, vEnd, fLerpFactor );
+
+                XMStoreFloat3( &pDestKeys[i].Translation, v );
             }
             fTime += fKeyInterval;
         }
@@ -704,14 +710,20 @@ namespace ATG
             }
             if( !bEndKey )
             {
-                pDestKeys[i].Orientation = (D3DXVECTOR4)StartKey.Orientation;
+                pDestKeys[i].Orientation = (XMFLOAT4)StartKey.Orientation;
             }
             else
             {
                 assert( fTime <= EndKey.fTime );
                 float fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
                 fLerpFactor = std::min( std::max( 0.0f, fLerpFactor ), 1.0f );
-                D3DXVec4Lerp( &pDestKeys[i].Orientation, (D3DXVECTOR4*)&StartKey.Orientation, (D3DXVECTOR4*)&EndKey.Orientation, fLerpFactor );
+
+                XMVECTOR v = XMLoadFloat4( &StartKey.Orientation );
+                XMVECTOR vEnd = XMLoadFloat4( &EndKey.Orientation );
+
+                v = XMVectorLerp( v, vEnd, fLerpFactor );
+
+                XMStoreFloat4( &pDestKeys[i].Orientation, v );
             }
             fTime += fKeyInterval;
         }
@@ -754,7 +766,13 @@ namespace ATG
                 assert( fTime <= EndKey.fTime );
                 float fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
                 fLerpFactor = std::min( std::max( 0.0f, fLerpFactor ), 1.0f );
-                D3DXVec3Lerp( &pDestKeys[i].Scaling, &StartKey.Scale, &EndKey.Scale, fLerpFactor );
+
+                XMVECTOR v = XMLoadFloat3( &StartKey.Scale );
+                XMVECTOR vEnd = XMLoadFloat3( &EndKey.Scale );
+
+                v = XMVectorLerp( v, vEnd, fLerpFactor );
+
+                XMStoreFloat3( &pDestKeys[i].Scaling, v );
             }
             fTime += fKeyInterval;
         }

@@ -24,24 +24,24 @@ class ExportTransform
 {
 public:
     void SetIdentity();
-    bool InitializeFromFloatsTransposed( float* pSixteenFloats );
-    bool InitializeFromFloats( float* pSixteenFloats );
-    const D3DXMATRIX& Matrix() const { return m_Matrix; }
-    D3DXMATRIX& Matrix() { return m_Matrix; }
-    void Multiply( const D3DXMATRIX& Matrix );
+    bool Initialize( CXMMATRIX matrix );
+    bool Initialize( XMFLOAT4X4 matrix );
+    const XMFLOAT4X4& Matrix() const { return m_Matrix; }
+    XMFLOAT4X4& Matrix() { return m_Matrix; }
+    void Multiply( const XMFLOAT4X4& Matrix );
     void Normalize();
-    const D3DXVECTOR3& Position() const { return m_Position; }
-    const D3DXQUATERNION& Orientation() const { return m_Orientation; }
-    const D3DXVECTOR3& Scale() const { return m_Scale; }
+    const XMFLOAT3& Position() const { return m_Position; }
+    const XMFLOAT4& Orientation() const { return m_Orientation; }
+    const XMFLOAT3& Scale() const { return m_Scale; }
 
 protected:
     bool DecomposeMatrix();
 
 protected:
-    D3DXMATRIX      m_Matrix;
-    D3DXVECTOR3     m_Position;
-    D3DXQUATERNION  m_Orientation;
-    D3DXVECTOR3     m_Scale;
+    XMFLOAT4X4 m_Matrix;
+    XMFLOAT3   m_Position;
+    XMFLOAT4   m_Orientation;
+    XMFLOAT3   m_Scale;
 };
 
 class ExportBase

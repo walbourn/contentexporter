@@ -73,14 +73,14 @@ namespace ATG
         };
         typedef std::hash_map< UINT64, Edge > EdgeMap;
 
-        std::vector< Triangle >     m_Triangles;
-        std::vector< Quad >         m_Quads;
-        std::vector< D3DXVECTOR3 >  m_Positions;
-        std::vector< INT >          m_MeshVertexToPositionMapping;
-        std::vector< INT >          m_PositionToMeshVertexMapping;
-        std::vector< INT >          m_PositionToDegeneratePositionMapping;
-        std::vector< INT >          m_IncidentBoundaryEdgesPerPosition;
-        EdgeMap                     m_BoundaryEdges;
+        std::vector< Triangle >             m_Triangles;
+        std::vector< Quad >                 m_Quads;
+        std::vector< XMFLOAT3 >    m_Positions;
+        std::vector< INT >                  m_MeshVertexToPositionMapping;
+        std::vector< INT >                  m_PositionToMeshVertexMapping;
+        std::vector< INT >                  m_PositionToDegeneratePositionMapping;
+        std::vector< INT >                  m_IncidentBoundaryEdgesPerPosition;
+        EdgeMap                             m_BoundaryEdges;
 
         ExportMesh*             m_pPolyMesh;
         ExportIB*               m_pQuadPatchIB;
@@ -111,7 +111,7 @@ namespace ATG
 
     protected:
         void BuildMesh();
-        INT CreateOrAddPosition( const D3DXVECTOR3& vPosition, INT iMeshVertexIndex );
+        INT CreateOrAddPosition( const XMFLOAT3& vPosition, INT iMeshVertexIndex );
         void AddTriangle( INT iPolyIndex, INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
         void AddQuad( INT iPolyIndex,  INT iSubsetIndex, const INT* pIndices, const INT* pMeshIndices );
 
@@ -135,7 +135,7 @@ namespace ATG
 
         void RemoveValenceTwoQuads( std::deque<INT>& BadQuads );
 
-        D3DXVECTOR3 GetQuadCenter( INT iQuadIndex );
+        XMFLOAT3 GetQuadCenter( INT iQuadIndex );
 
         void SortPatches();
 

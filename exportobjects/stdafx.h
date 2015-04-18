@@ -22,8 +22,6 @@
 #include <tchar.h>
 #include <windows.h>
 #include <WindowsX.h>
-#include <d3d9.h>
-#include <d3dx9.h>
 #include <list>
 #include <vector>
 #include <hash_map>

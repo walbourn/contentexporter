@@ -69,9 +69,9 @@ public:
 class IDCCTransformer
 {
 public:
-    virtual void TransformMatrix( D3DXMATRIX* pDestMatrix, const D3DXMATRIX* pSrcMatrix ) const = 0;
-    virtual void TransformPosition( D3DXVECTOR3* pDestPosition, const D3DXVECTOR3* pSrcPosition ) const = 0;
-    virtual void TransformDirection( D3DXVECTOR3* pDestDirection, const D3DXVECTOR3* pSrcDirection ) const = 0;
+    virtual void TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4* pSrcMatrix ) const = 0;
+    virtual void TransformPosition( XMFLOAT3* pDestPosition, const XMFLOAT3* pSrcPosition ) const = 0;
+    virtual void TransformDirection( XMFLOAT3* pDestDirection, const  XMFLOAT3* pSrcDirection ) const = 0;
     virtual float TransformLength( float fInputLength ) const = 0;
 };
 

@@ -22,8 +22,6 @@ extern ATG::ExportScene* g_pScene;
 namespace ATG
 {
 
-extern IDirect3DDevice9* g_pd3dDevice;
-
 INT GetElementSizeFromDeclType(DWORD Type);
 
 ExportMeshTriangleAllocator g_MeshTriangleAllocator;
@@ -265,15 +263,30 @@ bool ExportMeshVertex::Equals( const ExportMeshVertex* pOtherVertex ) const
 
     if( pOtherVertex == this )
         return true;
-    if( pOtherVertex->Position != Position )
+
+    XMVECTOR v0 = XMLoadFloat3( &Position );
+    XMVECTOR v1 = XMLoadFloat3( &pOtherVertex->Position );
+    if ( XMVector3NotEqual( v0, v1 ) )
         return false;
-    if( pOtherVertex->Normal != Normal )
+
+    v0 = XMLoadFloat3( &Normal );
+    v1 = XMLoadFloat3( &pOtherVertex->Normal );
+    if ( XMVector3NotEqual( v0, v1 ) )
         return false;
-    for( UINT i = 0; i < 8; i++ )
-        if( pOtherVertex->TexCoords[i] != TexCoords[i] )
+
+    for( size_t i = 0; i < 8; i++ )
+    {
+        v0 = XMLoadFloat4( &TexCoords[i] );
+        v1 = XMLoadFloat4( &pOtherVertex->TexCoords[i] );
+        if ( XMVector4NotEqual( v0, v1 ) )
             return false;
-    if( pOtherVertex->Color != Color )
+    }
+
+    v0 = XMLoadFloat4( &Color );
+    v1 = XMLoadFloat4( &pOtherVertex->Color );
+    if ( XMVector4NotEqual( v0, v1 ) )
         return false;
+
     return true;
 }
 
@@ -527,11 +540,59 @@ void ExportMesh::Optimize( DWORD dwFlags )
     }
 }
 
+IDirect3DDevice9* g_pd3dDevice = nullptr;
+
+void ExportMesh::Initialize()
+{
+    if ( g_pd3dDevice )
+        return;
+
+    ExportLog::LogMsg( 5, "Initializing D3D device..." );
+
+    IDirect3D9* pD3D = Direct3DCreate9( D3D_SDK_VERSION );
+    if( !pD3D )
+        return;
+
+    D3DDISPLAYMODE Mode;
+    pD3D->GetAdapterDisplayMode(0, &Mode);
+
+    HWND hDCCWindow = GetDesktopWindow();
+
+    D3DPRESENT_PARAMETERS pp;
+    ZeroMemory( &pp, sizeof(D3DPRESENT_PARAMETERS) );
+    pp.BackBufferWidth  = 1;
+    pp.BackBufferHeight = 1;
+    pp.BackBufferFormat = Mode.Format;
+    pp.BackBufferCount  = 1;
+    pp.SwapEffect       = D3DSWAPEFFECT_COPY;
+    pp.Windowed         = true;
+
+    HRESULT hr;
+    hr = pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, hDCCWindow, 
+                             D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_PUREDEVICE | D3DCREATE_FPU_PRESERVE, &pp, &g_pd3dDevice );
+
+    pD3D->Release();
+
+    assert( SUCCEEDED( hr ) );
+
+    ExportLog::LogMsg( 5, "D3D device initialized." );
+}
+
+void ExportMesh::Terminate()
+{
+    if( !g_pd3dDevice )
+        return;
+
+    g_pd3dDevice->Release();
+    g_pd3dDevice = nullptr;
+    ExportLog::LogMsg( 5, "D3D device released." );
+}
 
 ID3DXMesh* ExportMesh::CreateD3DXMesh()
 {
     // D3DXMesh requires a valid D3D device...
-    assert( g_pd3dDevice != nullptr );
+    if ( !g_pd3dDevice )
+        return nullptr;
 
     D3DXDebugMute( false );
 
@@ -783,23 +844,6 @@ HRESULT ExportMesh::ComputeUVAtlas( ID3DXMesh** ppMesh )
     return hr;
 }
 
-
-DWORD MakeCompressedVector( const D3DXVECTOR3& Vec3 )
-{
-    XMXDECN4 DecN4( Vec3.x, Vec3.y, Vec3.z, 1 );
-    return DecN4.v;
-}
-
-
-DWORD MakeCompressedVectorUByte4N( const D3DXVECTOR3& Vec3 )
-{
-    D3DXVECTOR3 Biased( Vec3 * 0.5f );
-    Biased += D3DXVECTOR3( 0.5f, 0.5f, 0.5f );
-    XMUBYTEN4 UB4( Biased.x, Biased.y, Biased.z, 1 );
-    return UB4.v;
-}
-
-
 void NormalizeBoneWeights( BYTE* pWeights )
 {
     DWORD dwSum = static_cast<DWORD>( pWeights[0] ) + static_cast<DWORD>( pWeights[1] ) + static_cast<DWORD>( pWeights[2] ) + static_cast<DWORD>( pWeights[3] );
@@ -877,25 +921,33 @@ __inline INT GetElementSizeFromDeclType(DWORD Type)
 }
 
 
-void TransformAndWriteVector( BYTE* pDest, const D3DXVECTOR3& Src, DWORD dwDestFormat )
+void TransformAndWriteVector( BYTE* pDest, const XMFLOAT3& Src, DWORD dwDestFormat )
 {
-    D3DXVECTOR3 SrcTransformed;
+    XMFLOAT3 SrcTransformed;
     g_pScene->GetDCCTransformer()->TransformDirection( &SrcTransformed, &Src );
     switch( dwDestFormat )
     {
     case D3DDECLTYPE_FLOAT3:
         {
-            *reinterpret_cast<D3DXVECTOR3*>(pDest) = SrcTransformed;
+            *reinterpret_cast<XMFLOAT3*>(pDest) = SrcTransformed;
             break;
         }
     case D3DDECLTYPE_DEC3N:
         {
-            *reinterpret_cast<DWORD*>(pDest) = MakeCompressedVector( SrcTransformed );
+            *reinterpret_cast<XMXDECN4*>(pDest) = XMXDECN4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
             break;
         }
     case D3DDECLTYPE_UBYTE4N:
         {
-            *reinterpret_cast<DWORD*>(pDest) = MakeCompressedVectorUByte4N( SrcTransformed );
+            XMVECTOR v = XMLoadFloat3( &SrcTransformed );
+            v = v * g_XMOneHalf;
+            v += g_XMOneHalf;
+            v = XMVectorSelect( g_XMOne, v, g_XMSelect1110 );
+
+            XMUBYTEN4 UB4;
+            XMStoreUByteN4( &UB4, v );
+            
+            *reinterpret_cast<XMUBYTEN4*>(pDest) = UB4;
             break;
         }
     case D3DDECLTYPE_SHORT4N:
@@ -1073,7 +1125,7 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
         if( iPositionOffset != -1 )
         {
-            auto pDest = reinterpret_cast<D3DXVECTOR3*>( pDestVertex + iPositionOffset );
+            auto pDest = reinterpret_cast<XMFLOAT3*>( pDestVertex + iPositionOffset );
             g_pScene->GetDCCTransformer()->TransformPosition( pDest, &pSrcVertex->Position );
         }
         if( iNormalOffset != -1 )
@@ -1128,23 +1180,23 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
                         }
                     case 2:
                         {
-                            auto pFloat16 = reinterpret_cast<D3DXFLOAT16*>( pDest );
-                            D3DXFloat32To16Array( pFloat16, (float*)&pSrcVertex->TexCoords[t], 2 );
+                            auto pFloat16 = reinterpret_cast<HALF*>(pDest);
+                            XMConvertFloatToHalfStream( pFloat16, sizeof(HALF), reinterpret_cast<const float*>( &pSrcVertex->TexCoords[t] ), sizeof(float), 2 );
                             pDest++;
                             break;
                         }
                     case 3:
                         {
                             pDest[1] = 0;
-                            auto pFloat16 = reinterpret_cast<D3DXFLOAT16*>( pDest );
-                            D3DXFloat32To16Array( pFloat16, (float*)&pSrcVertex->TexCoords[t], 3 );
+                            auto pFloat16 = reinterpret_cast<HALF*>(pDest);
+                            XMConvertFloatToHalfStream( pFloat16, sizeof(HALF), reinterpret_cast<const float*>( &pSrcVertex->TexCoords[t] ), sizeof(float), 3 );
                             pDest += 2;
                             break;
                         }
                     case 4:
                         {
-                            auto pFloat16 = reinterpret_cast<D3DXFLOAT16*>( pDest );
-                            D3DXFloat32To16Array( pFloat16, (float*)&pSrcVertex->TexCoords[t], 4 );
+                            auto pFloat16 = reinterpret_cast<HALF*>(pDest);
+                            XMConvertFloatToHalfStream( pFloat16, sizeof(HALF), reinterpret_cast<const float*>( &pSrcVertex->TexCoords[t] ), sizeof(float), 4 );
                             pDest += 2;
                             break;
                         }
