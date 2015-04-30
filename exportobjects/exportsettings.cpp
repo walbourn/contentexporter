@@ -50,7 +50,7 @@ namespace ATG
             if( m_DefaultValue.m_Type == ExportVariant::VT_STRING )
                 strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, m_DefaultValue.m_strValue );
             else if( m_DefaultValue.m_Type == ExportVariant::VT_BOOL )
-                *reinterpret_cast<bool*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_iValue ? true : false;
+                *reinterpret_cast<bool*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_bValue ? true : false;
             else
                 *reinterpret_cast<INT*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_iValue;
         }
