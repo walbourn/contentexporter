@@ -329,13 +329,12 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
         geom.SetR( rot );
         geom.SetS( scale );
 
-        if ( g_pScene->Settings().bExportAnimations )
+        if ( g_pScene->Settings().bExportAnimations || !g_pScene->Settings().bApplyGlobalTrans )
         {
             vertMatrix = geom;
         }
         else
         {
-            // When not using animation, need to do this...
             auto global = pNode->EvaluateGlobalTransform();
             vertMatrix = global * geom;
         }
