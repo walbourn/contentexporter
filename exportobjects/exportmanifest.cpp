@@ -305,7 +305,7 @@ namespace ATG
         // Handle normal maps
         if ( bNormalMap )
         {
-            std::unique_ptr<ScratchImage> timage;
+            std::unique_ptr<ScratchImage> timage( new ScratchImage );
 
             DXGI_FORMAT tformat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -326,7 +326,7 @@ namespace ATG
                   && !iscompressed
                   && info.format != CompressedFormat )
         {
-            std::unique_ptr<ScratchImage> timage;
+            std::unique_ptr<ScratchImage> timage( new ScratchImage );
 
             HRESULT hr = Convert( image->GetImages(), image->GetImageCount(), image->GetMetadata(),
                                   CompressedFormat, TEX_FILTER_DEFAULT, 0.5f, *timage );
@@ -345,7 +345,7 @@ namespace ATG
         if( g_pScene->Settings().bGenerateTextureMipMaps
             && ( info.mipLevels == 1 ) )
         {
-            std::unique_ptr<ScratchImage> timage;
+            std::unique_ptr<ScratchImage> timage( new ScratchImage );
 
             HRESULT hr = GenerateMipMaps( image->GetImages(), image->GetImageCount(), image->GetMetadata(), TEX_FILTER_DEFAULT, 0, *timage );
             if ( FAILED(hr) )
@@ -362,7 +362,7 @@ namespace ATG
         if ( iscompressed
              && info.format != CompressedFormat )
         {
-            std::unique_ptr<ScratchImage> timage;
+            std::unique_ptr<ScratchImage> timage( new ScratchImage );
 
             HRESULT hr = Compress( image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage );
             if ( FAILED(hr) )
