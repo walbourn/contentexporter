@@ -845,10 +845,12 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         if( FAILED(hr) )
         {
             ExportLog::LogError( "Could not load file \"%s\".", (const CHAR*)InputFileName );
-            continue;
+            return 1;
         }
 
         g_pScene->Statistics().StartSave();
+
+        bool bExportMaterials = g_pScene->Settings().bExportMaterials;
 
         if( SUCCEEDED(hr) )
         {
@@ -856,11 +858,14 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
             {
                 ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "", true );
                 WriteSDKMeshFile( g_CurrentOutputFileName, &g_Manifest );
-                ExportTextureConverter::PerformTextureFileOperations( &g_Manifest );
+                if (bExportMaterials)
+                {
+                    ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
+                }
             }
             else
             {
-                if( g_XATGSettings.bBundleTextures )
+                if( g_XATGSettings.bBundleTextures && bExportMaterials )
                 {
                     ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "textures\\", false );
                     WriteXATGFile( g_CurrentOutputFileName, &g_Manifest );
@@ -871,7 +876,10 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
                 {
                     ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "textures\\", true );
                     WriteXATGFile( g_CurrentOutputFileName, &g_Manifest );
-                    ExportTextureConverter::PerformTextureFileOperations( &g_Manifest );
+                    if (bExportMaterials)
+                    {
+                        ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
+                    }
                 }
             }
         }
