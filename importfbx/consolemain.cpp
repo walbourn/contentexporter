@@ -169,7 +169,7 @@ bool MacroWindowsD3D9( const CHAR* strArgument )
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = false;
-    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = false;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return false;
@@ -206,7 +206,7 @@ bool MacroXbox360( const CHAR* strArgument )
     g_XATGSettings.bBundleTextures = true;
     g_XATGSettings.bUseExistingBundle = true;
     g_pScene->Settings().bCompressVertexData = true;
-    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DEC3N;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = true;
     g_ExportFileFormat = FILEFORMAT_XATG;
     return false;
@@ -736,8 +736,6 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         return 0;
     }
 
-    ExportMesh::Initialize();
-
     for( size_t i = 0; i < dwInputFileCount; ++i )
     {
         ExportPath InputFileName = g_InputFileNames[i];
@@ -802,8 +800,6 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
             ExportLog::ResetCounters();
         }
     }
-
-    ExportMesh::Terminate();
 
     return 0;
 }

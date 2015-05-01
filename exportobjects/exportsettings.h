@@ -173,6 +173,7 @@ namespace ATG
         bool        bExportSkinWeights;
         bool        bForceExportSkinWeights;
         bool        bComputeVertexTangentSpace;
+        INT         iTangentSpaceIndex;
         bool        bExportBinormal;
         bool        bSetBindPoseBeforeSceneParse;
         INT         iAnimSampleCountPerFrame;
@@ -191,6 +192,7 @@ namespace ATG
         bool        bGenerateTextureMipMaps;
         bool        bForceTextureOverwrite;
         bool        bConvertMeshesToSubD;
+        bool        bGeometricAdjacency;
         INT         iGenerateUVAtlasOnTexCoordIndex;
         float       fUVAtlasMaxStretch;
         float       fUVAtlasGutter;

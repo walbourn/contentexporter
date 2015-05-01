@@ -17,9 +17,9 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-#define CONTENT_EXPORTER_MAJOR_VERSION 2
-#define CONTENT_EXPORTER_MINOR_VERSION 6
-#define CONTENT_EXPORTER_REVISION 1
+#define CONTENT_EXPORTER_MAJOR_VERSION 3
+#define CONTENT_EXPORTER_MINOR_VERSION 0
+#define CONTENT_EXPORTER_REVISION 0
 #define MAKEVERSION(major, minor, rev) "" #major "." #minor "." #rev
 #define CONTENT_EXPORTER_VERSION MAKEVERSION( CONTENT_EXPORTER_MAJOR_VERSION, CONTENT_EXPORTER_MINOR_VERSION, CONTENT_EXPORTER_REVISION )
 

@@ -161,7 +161,7 @@ namespace ATG
         VBHeader.StrideBytes = pVB->GetVertexSize();
         VBHeader.NumVertices = pVB->GetVertexCount();
         memcpy( VBHeader.Decl, pElements, dwElementCount * sizeof( D3DVERTEXELEMENT9 ) );
-        static D3DVERTEXELEMENT9 EndElement = D3DDECL_END();
+        static D3DVERTEXELEMENT9 EndElement = { 0xFF, 0, D3DDECLTYPE_UNUSED, 0, 0, 0 };
         VBHeader.Decl[ dwElementCount ] = EndElement;
         g_VBArray.push_back( pVB );
         g_VBHeaderArray.push_back( VBHeader );

@@ -462,7 +462,7 @@ void WriteVertexElement( const D3DVERTEXELEMENT9& Element )
     g_pXMLWriter->StartElement( "VertexDecl" );
     g_pXMLWriter->AddAttributeFormat( "Offset", "%d", Element.Offset );
     g_pXMLWriter->AddAttribute( "Type", s_strVertexDeclType[ Element.Type ] );
-    if( Element.Method != D3DDECLMETHOD_DEFAULT )
+    if( Element.Method != 0 )
     {
         g_pXMLWriter->AddAttribute( "Method", s_strVertexDeclMethod[ Element.Method ] );
     }
@@ -533,13 +533,6 @@ void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
             case D3DDECLTYPE_UBYTE4N:
                 g_pXMLWriter->WriteStringFormat( "0x%08x%s", *reinterpret_cast<DWORD*>( pVertexData ), strComma );
                 break;
-            case D3DDECLTYPE_DEC3N:
-                {
-                    XMFLOAT3 Vec3 = CrackCompressedVector( *reinterpret_cast<DWORD*>( pVertexData ) );
-                    g_pXMLWriter->WriteStringFormat( "%f, %f, %f%s", 
-                        Vec3.x, Vec3.y, Vec3.z, strComma );
-                    break;
-                }
             case D3DDECLTYPE_FLOAT16_2:
                 {
                     float fData[2];
@@ -553,24 +546,6 @@ void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
                     XMConvertHalfToFloatStream( fData, sizeof(float), reinterpret_cast<HALF*>(pVertexData), sizeof(HALF), 4 );
                     g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", 
                         fData[0], fData[1], fData[2], fData[3], strComma );
-                    break;
-                }
-            case D3DDECLTYPE_SHORT2:
-                {
-                    auto pWords = reinterpret_cast<WORD*>( pVertexData );
-                    g_pXMLWriter->WriteStringFormat( "%hd, %hd%s", pWords[0], pWords[1], strComma );
-                    break;
-                }
-            case D3DDECLTYPE_SHORT4:
-                {
-                    auto pWords = reinterpret_cast<WORD*>( pVertexData );
-                    g_pXMLWriter->WriteStringFormat( "%hd, %hd, %hd, %hd%s", pWords[0], pWords[1], pWords[2], pWords[3], strComma );
-                    break;
-                }
-            case D3DDECLTYPE_SHORT2N:
-                {
-                    auto pWords = reinterpret_cast<short*>( pVertexData );
-                    g_pXMLWriter->WriteStringFormat( "%f, %f%s", (float)pWords[0] / 32767.0f, (float)pWords[1] / 32767.0f, strComma );
                     break;
                 }
             case D3DDECLTYPE_SHORT4N:

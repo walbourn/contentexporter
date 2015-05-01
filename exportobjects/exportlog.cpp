@@ -29,7 +29,7 @@ namespace ATG
     StringList      g_WarningsList;
     StringList      g_ErrorsList;
 
-    CHAR g_strBuf[500];
+    CHAR g_strBuf[4096];
     void BroadcastMessage( UINT uMessageType, const CHAR* strMsg );
 
     void ExportLog::AddListener( ILogListener* pListener )

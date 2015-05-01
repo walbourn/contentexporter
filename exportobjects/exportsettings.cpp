@@ -594,10 +594,10 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes );
         g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", false, &bCompressVertexData );
         g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", true, &bComputeVertexTangentSpace );
+        g_SettingsManager.AddIntBounded( pCategoryMeshes, "Generate Tangents on Texture Coordinate Index", "tangentsindex", 0, 0, 7, &iTangentSpaceIndex );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Binormals", "exportbinormals", true, &bExportBinormal );
         static const ExportEnumValue VertexNormalTypes[] = {
             { "FLOAT3 (12 bytes)", "float3", D3DDECLTYPE_FLOAT3 },
-            { "DEC3N (4 bytes)", "dec3n", D3DDECLTYPE_DEC3N },
             { "UBYTE4N Biased (4 bytes)", "ubyte4n", D3DDECLTYPE_UBYTE4N },
             { "SHORT4N (8 bytes)", "short4n", D3DDECLTYPE_SHORT4N },
             { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
@@ -612,6 +612,7 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMeshes, "Apply global transformation (if not animated)", "applyglobaltrans", false, &bApplyGlobalTrans );
         g_SettingsManager.AddBool( pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", true, &bInvertTexVCoord );
         g_SettingsManager.AddString( pCategoryMeshes, "Mesh Name Decoration, applied as a prefix to mesh names", "meshnamedecoration", "Mesh", strMeshNameDecoration );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Use geometric rather than topographic adjacency", "gadjacency", false, &bGeometricAdjacency );
 
         ExportSettingsEntry* pCategoryUVAtlas = g_SettingsManager.AddCategory( pCategoryMeshes, "UV Atlas Generation" );
         g_SettingsManager.AddIntBounded( pCategoryUVAtlas, "Generate UV Atlas on Texture Coordinate Index", "generateuvatlas", -1, -1, 7, &iGenerateUVAtlasOnTexCoordIndex );
