@@ -68,7 +68,7 @@ public:
     static void AddListener( ILogListener* pListener );
     static void ClearListeners();
 
-    static void GenerateLogReport( bool bEchoWarningsAndErrors = true );
+    static bool GenerateLogReport( bool bEchoWarningsAndErrors = true );
     static void ResetCounters();
 
     static void LogCommand( DWORD dwCommand, void* pData = nullptr );

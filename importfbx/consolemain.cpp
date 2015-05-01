@@ -89,7 +89,7 @@ enum ExportFileFormat
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
 
-typedef bool MacroCommandCallback( const CHAR* strArgument );
+typedef bool MacroCommandCallback( const CHAR* strArgument, bool& bUsedArgument );
 
 struct MacroCommand
 {
@@ -99,20 +99,33 @@ struct MacroCommand
     MacroCommandCallback* pCallback;
 };
 
-bool MacroDisplayHelp( const CHAR* strArgument )
+bool MacroDisplayHelp( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     PrintHelp();
-    return false;
+    return true;
 }
 
-bool MacroSetOutputPath( const CHAR* strArgument )
+bool MacroSetOutputPath( const CHAR* strArgument, bool& bUsedArgument )
 {
+    if (!strArgument)
+    {
+        ExportLog::LogError( "Missing output path" );
+        return false;
+    }
+    bUsedArgument = true;
+
     g_OutputFilePath.SetPathOnly( strArgument );
     return true;
 }
 
-bool MacroCollisionMesh( const CHAR* strArgument )
+bool MacroCollisionMesh( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bExportAnimations = false;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().bComputeVertexTangentSpace = false;
@@ -127,11 +140,14 @@ bool MacroCollisionMesh( const CHAR* strArgument )
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
     strcpy_s( g_pScene->Settings().strMeshNameDecoration, "CollisionMesh" );
-    return false;
+    return true;
 }
 
-bool MacroAnimation( const CHAR* strArgument )
+bool MacroAnimation( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bExportAnimations = true;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().bComputeVertexTangentSpace = false;
@@ -149,22 +165,28 @@ bool MacroAnimation( const CHAR* strArgument )
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bRenameAnimationsToFileName = true;
-    return false;
+    return true;
 }
 
-bool MacroCharacter( const CHAR* strArgument )
+bool MacroCharacter( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bExportAnimations = false;
     g_pScene->Settings().bExportCameras = false;
     g_pScene->Settings().bExportLights = false;
     g_pScene->Settings().bExportMaterials = true;
     g_pScene->Settings().bExportMeshes = true;
     g_pScene->Settings().bExportScene = true;
-    return false;
+    return true;
 }
 
-bool MacroWindowsD3D9( const CHAR* strArgument )
+bool MacroWindowsD3D9( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -172,11 +194,14 @@ bool MacroWindowsD3D9( const CHAR* strArgument )
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = false;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return false;
+    return true;
 }
 
-bool MacroWindowsD3D10( const CHAR* strArgument )
+bool MacroWindowsD3D10( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -184,11 +209,14 @@ bool MacroWindowsD3D10( const CHAR* strArgument )
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = false;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return false;
+    return true;
 }
 
-bool MacroWindowsD3D11( const CHAR* strArgument )
+bool MacroWindowsD3D11( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -196,11 +224,14 @@ bool MacroWindowsD3D11( const CHAR* strArgument )
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = true;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return false;
+    return true;
 }
 
-bool MacroXbox360( const CHAR* strArgument )
+bool MacroXbox360( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_pScene->Settings().bLittleEndian = false;
     g_XATGSettings.bBinaryBlobExport = true;
     g_XATGSettings.bBundleTextures = true;
@@ -209,104 +240,146 @@ bool MacroXbox360( const CHAR* strArgument )
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = true;
     g_ExportFileFormat = FILEFORMAT_XATG;
-    return false;
+    return true;
 }
 
-bool MacroSDKMesh( const CHAR* strArgument )
+bool MacroSDKMesh( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
-    return false;
+    return true;
 }
 
-bool MacroXATG( const CHAR* strArgument )
+bool MacroXATG( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     g_ExportFileFormat = FILEFORMAT_XATG;
-    return false;
+    return true;
 }
 
-bool MacroSubD11( const CHAR* strArgument )
+bool MacroSubD11( const CHAR* strArgument, bool& bUsedArgument )
 {
-    MacroWindowsD3D11( nullptr );
-    MacroSDKMesh( nullptr );
+    UNREFERENCED_PARAMETER(strArgument);
+
+    MacroWindowsD3D11( nullptr, bUsedArgument );
+    MacroSDKMesh( nullptr, bUsedArgument );
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().bConvertMeshesToSubD = true;
     g_pScene->Settings().bExportBinormal = false;
     g_pScene->Settings().bForceExportSkinWeights = true;
     g_pScene->Settings().iMaxUVSetCount = 1;
     g_pScene->Settings().bOptimizeAnimations = false;
-    return false;
+    return true;
 }
 
-bool MacroSubDXbox( const CHAR* strArgument )
+bool MacroSubDXbox( const CHAR* strArgument, bool& bUsedArgument )
 {
-    MacroXbox360( nullptr );
+    UNREFERENCED_PARAMETER(strArgument);
+
+    MacroXbox360( nullptr, bUsedArgument );
     g_pScene->Settings().bCompressVertexData = true;
     g_pScene->Settings().bConvertMeshesToSubD = true;
     g_pScene->Settings().bExportBinormal = false;
     g_pScene->Settings().bForceExportSkinWeights = true;
     g_pScene->Settings().iMaxUVSetCount = 1;
-    return false;
+    return true;
 }
 
-bool MacroSetLogLevel( const CHAR* strArgument )
+bool MacroSetLogLevel( const CHAR* strArgument, bool& bUsedArgument )
 {
+    if (!strArgument)
+    {
+        ExportLog::LogError( "Missing log level to set" );
+        return false;
+    }
+    bUsedArgument = true;
+
     INT iValue = atoi( strArgument );
     iValue = std::min( 10, std::max( 0, iValue ) );
     ExportLog::SetLogLevel( static_cast<UINT>( iValue ) );
     return true;
 }
 
-bool MacroSetVerbose( const CHAR* strArgument )
+bool MacroSetVerbose( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
     ExportLog::SetLogLevel( 4 );
-    return false;
+    return true;
 }
 
-bool MacroAttach( const CHAR* strArgument )
+bool MacroAttach( const CHAR* strArgument, bool& bUsedArgument )
 {
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
 #ifdef _DEBUG
     ExportLog::LogMsg( 0, "!!! Attach debugger NOW and then press any key..." );
     (void)_getch();
 #endif
-    return false;
+    return true;
 }
 
-bool MacroSaveSettings( const CHAR* strArgument )
+bool MacroSaveSettings( const CHAR* strArgument, bool& bUsedArgument )
 {
+    if (!strArgument)
+    {
+        ExportLog::LogError( "Missing settings file to save" );
+        return false;
+    }
+    bUsedArgument = true;
+
     bool bResult = g_SettingsManager.SaveSettings( strArgument );
     if( !bResult )
     {
         ExportLog::LogError( "Could not save settings to file \"%s\".", strArgument );
+        return false;
     }
-    else
-    {
-        ExportLog::LogMsg( 1, "Saved settings to file \"%s\".", strArgument );
-    }
+
+    ExportLog::LogMsg( 1, "Saved settings to file \"%s\".", strArgument );
     return true;
 }
 
-bool MacroLoadSettings( const CHAR* strArgument )
+bool MacroLoadSettings( const CHAR* strArgument, bool& bUsedArgument )
 {
+    if (!strArgument)
+    {
+        ExportLog::LogError( "Missing settings file to load" );
+        return false;
+    }
+    bUsedArgument = true;
+
     bool bResult = g_SettingsManager.LoadSettings( strArgument );
     if( !bResult )
     {
         ExportLog::LogError( "Could not load settings from file \"%s\".", strArgument );
+        return false;
     }
-    else
-    {
-        ExportLog::LogMsg( 1, "Loaded settings from file \"%s\".", strArgument );
-    }
+
+    ExportLog::LogMsg( 1, "Loaded settings from file \"%s\".", strArgument );
     return true;
 }
 
-bool MacroLoadFileList( const CHAR* strArgument )
+bool MacroLoadFileList( const CHAR* strArgument, bool& bUsedArgument )
 {
+    if (!strArgument)
+    {
+        ExportLog::LogError( "Missing file list name to load" );
+        return false;
+    }
+    bUsedArgument = true;
+
     FILE* fp = nullptr;
     fopen_s( &fp, strArgument, "r" );
     if( !fp )
     {
         ExportLog::LogError( "Could not load file list from file \"%s\".", strArgument );
-        return true;
+        return false;
     }
 
     size_t dwCount = 0;
@@ -339,7 +412,7 @@ MacroCommand g_MacroCommands[] = {
     { "?", "", "Display help", MacroDisplayHelp },
     { "outputpath", " <path>", "Sets the output root path; files will appear in scenes/ and textures/ subdirectories", MacroSetOutputPath },
     { "verbose", "", "Displays more detailed output, equivalent to -loglevel 4", MacroSetVerbose },
-    { "xatg", "", "Use the XATG output file format (default), equivalent to -fileformat xatg", MacroXATG },
+    { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
@@ -391,20 +464,20 @@ ExportSettingsEntry* FindCommand( const CHAR* strCommand )
     return nullptr;
 }
 
-bool ParseMacroCommand( const CHAR* strCommand, const CHAR* strArgument, bool* pMacroFound )
+bool ParseMacroCommand( const CHAR* strCommand, const CHAR* strArgument, bool& pMacroFound, bool& bUsedArgument )
 {
-    *pMacroFound = false;
-    size_t dwCount = ARRAYSIZE( g_MacroCommands );
+    pMacroFound = false;
+    size_t dwCount = _countof( g_MacroCommands );
     for( size_t i = 0; i < dwCount; ++i )
     {
         MacroCommand& Command = g_MacroCommands[i];
         if( _stricmp( strCommand, Command.strCommandLine ) == 0 )
         {
-            *pMacroFound = true;
-            return (Command.pCallback)( strArgument );
+            pMacroFound = true;
+            return (Command.pCallback)( strArgument, bUsedArgument );
         }
     }
-    return false;
+    return true;
 }
 
 bool ParseEnum( ExportSettingsEntry* pEntry, const CHAR* strArgument )
@@ -421,25 +494,27 @@ bool ParseEnum( ExportSettingsEntry* pEntry, const CHAR* strArgument )
     return false;
 }
 
-bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
+bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument, bool& bUsedArgument )
 {
     CHAR strCommand[128];
     strcpy_s( strCommand, strOriginalCommand );
     _strlwr_s( strCommand );
 
-    bool bUsedArgument = false;
+    bUsedArgument = false;
 
     ExportSettingsEntry* pEntry = FindCommand( strCommand );
     if( !pEntry )
     {
         bool bMacro = false;
-        bUsedArgument = ParseMacroCommand( strCommand, strArgument, &bMacro );
+        if (!ParseMacroCommand(strCommand, strArgument, bMacro, bUsedArgument))
+            return false;
+
         if( !bMacro )
         {
-            ExportLog::LogWarning( "Unknown command line option \"%s\"", strCommand );
+            ExportLog::LogError( "Unknown command line option \"%s\"", strCommand );
             return false;
         }
-        return bUsedArgument;
+        return true;
     }
 
     const CHAR* strCommandName = pEntry->m_CommandLineOptionName.SafeString();
@@ -459,7 +534,8 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
             }
             else
             {
-                ExportLog::LogWarning( "Could not parse command \"%s\".", strCommandName );
+                ExportLog::LogError( "Missing + or - for option \"%s\".", strCommandName );
+                return false;
             }
             break;
         }
@@ -467,8 +543,8 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
         {
             if( !strArgument )
             {
-                ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
-                break;
+                ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
+                return false;
             }
             INT iValue = atoi( strArgument );
             pEntry->SetValue( iValue );
@@ -479,8 +555,8 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
         {
             if( !strArgument )
             {
-                ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
-                break;
+                ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
+                return false;
             }
             float fValue = (float)atof( strArgument );
             pEntry->SetValue( fValue );
@@ -491,13 +567,14 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
         {
             if( !strArgument )
             {
-                ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
-                break;
+                ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
+                return false;
             }
             bool bValid = ParseEnum( pEntry, strArgument );
             if( !bValid )
             {
-                ExportLog::LogWarning( "Invalid value given for command \"%s\".", strCommand );
+                ExportLog::LogError( "Invalid parameter value (\"%s\") given for option \"%s\".", strArgument, strCommand );
+                return false;
             }
             bUsedArgument = true;
             break;
@@ -506,15 +583,19 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument )
         {
             if( !strArgument )
             {
-                ExportLog::LogWarning( "No parameter passed for command \"%s\".", strCommandName );
-                break;
+                ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
+                return false;
             }
             pEntry->SetValue( strArgument );
             bUsedArgument = true;
             break;
         }
+    default:
+        ExportLog::LogError( "Unknown type for option \"%s\".", strCommandName );
+        return false;
     }
-    return bUsedArgument;
+
+    return true;
 }
 
 void PrintEntryHelp( ExportSettingsEntry* pEntry )
@@ -607,7 +688,7 @@ void ParseInputFileName( const CHAR* strFileName )
 
 std::vector<CHAR*> g_CommandStrings;
 
-void ParseCommandLine( INT argc, CHAR* argv[] )
+bool ParseCommandLine( INT argc, CHAR* argv[] )
 {
     assert( argc >= 1 );
 
@@ -628,7 +709,11 @@ void ParseCommandLine( INT argc, CHAR* argv[] )
             {
                 strArgument = g_CommandStrings[i + 1];
             }
-            bool bCommandWithParameter = ParseCommand( strCommand + 1, strArgument );
+
+            bool bCommandWithParameter;
+            if (!ParseCommand(strCommand + 1, strArgument, bCommandWithParameter))
+                return false;
+
             if( bCommandWithParameter )
             {
                 ++i;
@@ -639,6 +724,8 @@ void ParseCommandLine( INT argc, CHAR* argv[] )
             ParseInputFileName( strCommand );
         }
     }
+
+    return true;
 }
 
 void BuildOutputFileName( const ExportPath& InputFileName )
@@ -702,12 +789,15 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     g_SettingsManager.AddEnum( g_SettingsManager.GetRootCategory( 0 ), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE( FileFormatEnums ), &g_ExportFileFormat );
 
     XATGInitializeSettings();
-    ParseCommandLine( argc, argv );
+    if ( !ParseCommandLine(argc, argv) )
+    {
+        return 1;
+    }
 
     ExportLog::LogMsg( 9, "Microsoft C++ compiler version %d", _MSC_VER );
+    ExportLog::LogMsg( 9, "FBX SDK version %s", FBXSDK_VERSION_STRING );
 
-    size_t dwInputFileCount = g_InputFileNames.size();
-    if( dwInputFileCount == 0 )
+    if( g_InputFileNames.empty() )
     {
         ExportLog::LogError( "No input filename(s) provided." );
         PrintHelp();
@@ -716,12 +806,15 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
     ExportCoreSettings InitialSettings = g_pScene->Settings();
 
-    ExportLog::LogMsg( 4, "Initializing FBX..." );
-    FBXImport::Initialize();
+    HRESULT hr = FBXImport::Initialize();
+    if (FAILED(hr))
+    {
+        ExportLog::LogError( "Failed to initialize FBX (%08X)\n", hr );
+        return 1;
+    }
     ExportLog::LogMsg( 4, "FBX has been initialized." );
 
     // Initialize COM (needed for WIC)
-    HRESULT hr;
     if( FAILED( hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED) ) )
     {
         ExportLog::LogError( "Failed to initialize COM (%08X)\n", hr );
@@ -730,11 +823,9 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
     ExportLog::LogMsg( 4, "COM has been initialized." );
 
-    if( dwInputFileCount == 0 )
-    {
-        ExportLog::LogError( "No input filenames were specified." );
-        return 0;
-    }
+    size_t dwInputFileCount = g_InputFileNames.size();
+
+    bool bFoundErrors = false;
 
     for( size_t i = 0; i < dwInputFileCount; ++i )
     {
@@ -787,7 +878,8 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
         g_pScene->Statistics().EndExport();
         g_pScene->Statistics().FinalReport();
-        ExportLog::GenerateLogReport();
+        if ( ExportLog::GenerateLogReport() )
+            bFoundErrors = true;
 
         if( ( i + 1 ) < dwInputFileCount )
         {
@@ -801,6 +893,6 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         }
     }
 
-    return 0;
+    return (bFoundErrors) ? 1 : 0;
 }
 

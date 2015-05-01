@@ -156,8 +156,13 @@ HRESULT FBXImport::Initialize()
     if( !g_pImporter )
     {
         g_pImporter = FbxImporter::Create( g_pSDKManager, "" );
+        if ( !g_pImporter )
+            return E_FAIL;
     }
+
     g_pFBXScene = FbxScene::Create( g_pSDKManager, "" );
+    if ( !g_pFBXScene )
+        return E_FAIL;
 
     return S_OK;
 }

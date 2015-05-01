@@ -57,11 +57,11 @@ namespace ATG
         return g_uLogLevel;
     }
 
-    void ExportLog::GenerateLogReport( bool bEchoWarningsAndErrors )
+    bool ExportLog::GenerateLogReport( bool bEchoWarningsAndErrors )
     {
         LogMsg( 0, "%Iu warning(s), %Iu error(s).", g_dwWarningCount, g_dwErrorCount );
         if( !bEchoWarningsAndErrors )
-            return;
+            return (g_dwErrorCount > 0);
 
         StringList::iterator iter = g_WarningsList.begin();
         StringList::iterator end = g_WarningsList.end();
@@ -78,6 +78,8 @@ namespace ATG
             BroadcastMessage( 2, *iter );
             ++iter;
         }
+
+        return (g_dwErrorCount > 0);
     }
 
     void ExportLog::ResetCounters()
