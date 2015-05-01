@@ -242,7 +242,7 @@ namespace ATG
 
     void ConvertImageFormat( const CHAR* strSourceFileName, const CHAR* strDestFileName, DXGI_FORMAT CompressedFormat, bool bNormalMap )
     {
-        bool iscompressed = IsCompressed( CompressedFormat );
+        bool iscompressed = IsCompressed( CompressedFormat ) && g_bIntermediateDDSFormat;
 
         if ( bNormalMap )
         {
@@ -303,11 +303,11 @@ namespace ATG
         }
 
         // Handle normal maps
+        DXGI_FORMAT tformat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
+
         if ( bNormalMap )
         {
             std::unique_ptr<ScratchImage> timage( new ScratchImage );
-
-            DXGI_FORMAT tformat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
 
             HRESULT hr = ComputeNormalMap( image->GetImages(), image->GetImageCount(), image->GetMetadata(),
                                            CNMAP_CHANNEL_LUMINANCE, 10.f, tformat, *timage );
@@ -324,12 +324,12 @@ namespace ATG
         // Handle conversions
         else if ( !isdds
                   && !iscompressed
-                  && info.format != CompressedFormat )
+                  && info.format != tformat )
         {
             std::unique_ptr<ScratchImage> timage( new ScratchImage );
 
             HRESULT hr = Convert( image->GetImages(), image->GetImageCount(), image->GetMetadata(),
-                                  CompressedFormat, TEX_FILTER_DEFAULT, 0.5f, *timage );
+                                  tformat, TEX_FILTER_DEFAULT, 0.5f, *timage );
             if ( FAILED(hr) )
             {
                 ExportLog::LogError( "Could not convert \"%s\" (%08X).", strSourceFileName, hr );
@@ -337,13 +337,14 @@ namespace ATG
             else
             {
                 image.swap( timage );
-                info.format = CompressedFormat;
+                info.format = tformat;
             }
         }
 
         // Handle mipmaps
         if( g_pScene->Settings().bGenerateTextureMipMaps
-            && ( info.mipLevels == 1 ) )
+            && ( info.mipLevels == 1 )
+            && ( !IsCompressed( info.format ) ) )
         {
             std::unique_ptr<ScratchImage> timage( new ScratchImage );
 
