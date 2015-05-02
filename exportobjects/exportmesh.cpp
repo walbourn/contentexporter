@@ -420,9 +420,26 @@ void ExportMesh::Optimize( DWORD dwFlags )
         pCurrentIBSubset->IncrementIndexCount( 3 );
     }
     ExportLog::LogMsg( 3, "Triangle list mesh: %Iu verts, %Iu indices, %Iu subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
-    if( VertexData.size() > 16777215 )
+
+    size_t nVerts = VertexData.size();
+    if ( nVerts > 4294967295 )
     {
-        ExportLog::LogError( "Mesh \"%s\" has more than 16777215 vertices.  Index buffer is invalid.", GetName().SafeString() );
+        ExportLog::LogError( "Mesh \"%s\" has more than 2^32-1 vertices.  Index buffer is invalid.", GetName().SafeString() );
+    }
+    else if ( !g_pScene->Settings().bLittleEndian )
+    {
+        if ( nVerts > 16777215 )
+        {
+            ExportLog::LogError( "Mesh \"%s\" has more than 16777215 vertices.  Index buffer is invalid for Xbox 360.", GetName().SafeString() );
+        }
+    }
+    else if ( nVerts > 1048575 )
+    {
+        ExportLog::LogWarning("Mesh \"%s\" has more than 1048575 vertices.  Index buffer is invalid for Feature Level 9.1 or 9.2.", GetName().SafeString());
+    }
+    else if ( nVerts > 65534 )
+    {
+        ExportLog::LogWarning("Mesh \"%s\" has more than 65534 vertices.  Index buffer is invalid for Feature Level 9.1.", GetName().SafeString());
     }
 
     // Create real index buffer from index list
