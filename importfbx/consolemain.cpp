@@ -18,6 +18,10 @@
 #include "stdafx.h"
 #include <conio.h>
 
+#include <DirectXMesh.h>
+#include <DirectXTex.h>
+#include <UVAtlas.h>
+
 #include "FBXImportMain.h"
 
 CHAR g_strExporterName[100];
@@ -796,6 +800,11 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
     ExportLog::LogMsg( 9, "Microsoft C++ compiler version %d", _MSC_VER );
     ExportLog::LogMsg( 9, "FBX SDK version %s", FBXSDK_VERSION_STRING );
+
+    ExportLog::LogMsg( 9, "DirectXMath version %d", DIRECTX_MATH_VERSION );
+    ExportLog::LogMsg( 9, "DirectXMesh version %d", DIRECTX_MESH_VERSION );
+    ExportLog::LogMsg( 9, "DirectXTex version %d", DIRECTX_TEX_VERSION );
+    ExportLog::LogMsg( 9, "UVAtlas version %d", UVATLAS_VERSION );
 
     if( g_InputFileNames.empty() )
     {
