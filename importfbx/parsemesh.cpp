@@ -212,17 +212,6 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
 
     pMesh->SetVertexColorCount( 0 );
 
-    FbxLayerElementArrayTemplate<FbxVector4> *pNormals = nullptr;
-    pFbxMesh->GetNormals( &pNormals );
-    if( !pNormals )
-    {
-        pFbxMesh->InitNormals();
-#if (FBXSDK_VERSION_MAJOR >= 2015)
-        pFbxMesh->GenerateNormals();
-#else
-        pFbxMesh->ComputeVertexNormals();
-#endif
-    }
     // Vertex normals and tangent spaces
     if( !g_pScene->Settings().bExportNormals )
     {
@@ -242,6 +231,16 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
 
     DWORD dwLayerCount = pFbxMesh->GetLayerCount();
     ExportLog::LogMsg( 4, "%u layers in FBX mesh", dwLayerCount );
+
+    if (!dwLayerCount || !pFbxMesh->GetLayer(0)->GetNormals())
+    {
+        pFbxMesh->InitNormals();
+#if (FBXSDK_VERSION_MAJOR >= 2015)
+        pFbxMesh->GenerateNormals();
+#else
+        pFbxMesh->ComputeVertexNormals();
+#endif
+    }
 
     DWORD dwVertexColorCount = 0;
     FbxLayerElementVertexColor* pVertexColorSet = nullptr;
