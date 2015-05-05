@@ -201,6 +201,10 @@ namespace ATG
         CHAR        strMeshNameDecoration[SETTINGS_STRING_LENGTH];
         CHAR        strAnimationRootNodeName[SETTINGS_STRING_LENGTH];
         bool        bOptimizeAnimations;
+        bool        bCleanMeshes;
+        bool        bOptimizeVCache;
+        INT         iVcacheSize;
+        INT         iStripRestart;
         float       fExportScale;
     };
 

@@ -356,6 +356,8 @@ public:
         COMPRESS_VERTEX_DATA = 1,
         FLIP_TRIANGLES = 2,
         FORCE_SUBD_CONVERSION = 4,
+        CLEAN_MESHES = 8,
+        VCACHE_OPT = 16,
     };
 
     ExportMesh( ExportString name );
@@ -388,9 +390,11 @@ public:
 protected:
     void BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags );
     void ClearRawTriangles();
+    void CleanMesh( bool breakBowTies );
     void ComputeVertexTangentSpaces();
     void ComputeAdjacency();
     void ComputeUVAtlas();
+    void OptimizeVcache();
     void ComputeBoneSubsetGroups();
     void SortRawTrianglesBySubsetIndex();
     void ComputeBounds();
@@ -402,6 +406,7 @@ protected:
     std::unique_ptr<DirectX::XMFLOAT3[]>        m_pVBNormals;
     std::unique_ptr<DirectX::XMFLOAT2[]>        m_pVBTexCoords;
     std::unique_ptr<uint32_t[]>                 m_pAdjacency;
+    std::unique_ptr<uint32_t[]>                 m_pAttributes;
     ExportMeshTriangleArray                     m_RawTriangles;
     std::vector< INT >                          m_TriangleToPolygonMapping;
     ExportVertexFormat                          m_VertexFormat;

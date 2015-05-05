@@ -572,7 +572,7 @@ namespace ATG
 
     ExportCoreSettings::ExportCoreSettings()
     {
-        ExportSettingsEntry* pCategoryPlatform = g_SettingsManager.AddRootCategory( "Target Platform" );
+        auto pCategoryPlatform = g_SettingsManager.AddRootCategory( "Target Platform" );
         static const ExportEnumValue EndianEnums[] = {
             { "Big-Endian (PowerPC)", "ppc", 0 },
             { "Little-Endian (Intel)", "intel", 1 },
@@ -580,7 +580,7 @@ namespace ATG
         g_SettingsManager.AddEnum( pCategoryPlatform, "Data Endianness", "endian", 1, EndianEnums, ARRAYSIZE( EndianEnums ), &bLittleEndian );
         pCategoryPlatform->ReverseChildOrder();
         
-        ExportSettingsEntry* pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
+        auto pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
         g_SettingsManager.AddBool( pCategoryScene, "Export Hidden Objects", "exporthiddenobjects", false, &bExportHiddenObjects );
         g_SettingsManager.AddBool( pCategoryScene, "Export Frames", "exportframes", true, &bExportScene );
         g_SettingsManager.AddBool( pCategoryScene, "Export Lights", "exportlights", true, &bExportLights );
@@ -590,7 +590,7 @@ namespace ATG
         g_SettingsManager.AddFloatBounded( pCategoryScene, "Export Scene Scale (1.0 = default)", "exportscale", 1.0f, 0.0f, 1000000.f, &fExportScale );
         pCategoryScene->ReverseChildOrder();
 
-        ExportSettingsEntry* pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );
+        auto pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes );
         g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", false, &bCompressVertexData );
         g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", true, &bComputeVertexTangentSpace );
@@ -612,22 +612,29 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMeshes, "Apply global transformation (if not animated)", "applyglobaltrans", false, &bApplyGlobalTrans );
         g_SettingsManager.AddBool( pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", true, &bInvertTexVCoord );
         g_SettingsManager.AddString( pCategoryMeshes, "Mesh Name Decoration, applied as a prefix to mesh names", "meshnamedecoration", "Mesh", strMeshNameDecoration );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Use geometric rather than topographic adjacency", "gadjacency", false, &bGeometricAdjacency );
 
-        ExportSettingsEntry* pCategoryUVAtlas = g_SettingsManager.AddCategory( pCategoryMeshes, "UV Atlas Generation" );
+        auto pCategoryOpt = g_SettingsManager.AddCategory( pCategoryMeshes, "Mesh optimization" );
+        g_SettingsManager.AddBool( pCategoryOpt, "Use geometric rather than topographic adjacency", "gadjacency", false, &bGeometricAdjacency );
+        g_SettingsManager.AddBool( pCategoryOpt, "Perform vertex cache optimization of meshes", "optimizemeshes", false, &bOptimizeVCache );
+        g_SettingsManager.AddIntBounded( pCategoryOpt, "Vertex cache size for optimizemesh", "vcache", 12, 0, 64, &iVcacheSize );
+        g_SettingsManager.AddIntBounded( pCategoryOpt, "Strip restart length for optimizemesh", "restart", 7, 0, 64, &iStripRestart );
+        g_SettingsManager.AddBool( pCategoryOpt, "Clean up meshes (implied by optimizemeshes)", "cleanmeshes", false, &bCleanMeshes );
+        pCategoryOpt->ReverseChildOrder();
+
+        auto pCategoryUVAtlas = g_SettingsManager.AddCategory( pCategoryMeshes, "UV Atlas Generation" );
         g_SettingsManager.AddIntBounded( pCategoryUVAtlas, "Generate UV Atlas on Texture Coordinate Index", "generateuvatlas", -1, -1, 7, &iGenerateUVAtlasOnTexCoordIndex );
         g_SettingsManager.AddFloatBounded( pCategoryUVAtlas, "UV Atlas Max Stretch Factor", "uvatlasstretch", 0.75f, 0.0f, 1.0f, &fUVAtlasMaxStretch );
         g_SettingsManager.AddFloatBounded( pCategoryUVAtlas, "UV Atlas Gutter Size", "uvatlasgutter", 2.5f, 0.0f, 10.0f, &fUVAtlasGutter );
         g_SettingsManager.AddIntBounded( pCategoryUVAtlas, "UV Atlas Texture Size", "uvatlastexturesize", 1024, 64, 4096, &iUVAtlasTextureSize );
         pCategoryUVAtlas->ReverseChildOrder();
 
-        ExportSettingsEntry* pCategorySubD = g_SettingsManager.AddCategory( pCategoryMeshes, "Subdivision Surfaces" );
+        auto pCategorySubD = g_SettingsManager.AddCategory( pCategoryMeshes, "Subdivision Surfaces" );
         g_SettingsManager.AddBool( pCategorySubD, "Convert Poly Meshes to Subdivision Surfaces", "convertmeshtosubd", false, &bConvertMeshesToSubD );
         pCategorySubD->ReverseChildOrder();
 
         pCategoryMeshes->ReverseChildOrder();
 
-        ExportSettingsEntry* pCategoryMaterials = g_SettingsManager.AddRootCategory( "Materials" );
+        auto pCategoryMaterials = g_SettingsManager.AddRootCategory( "Materials" );
         g_SettingsManager.AddBool( pCategoryMaterials, "Export Materials", "exportmaterials", true, &bExportMaterials );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Material Name", "defaultmaterialname", "Default", strDefaultMaterialName );
         g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression );
@@ -638,7 +645,7 @@ namespace ATG
         g_SettingsManager.AddString( pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "default-normalmap.dds", strDefaultNormalMapTextureName );
         pCategoryMaterials->ReverseChildOrder();
 
-        ExportSettingsEntry* pCategoryAnimation = g_SettingsManager.AddRootCategory( "Animation" );
+        auto pCategoryAnimation = g_SettingsManager.AddRootCategory( "Animation" );
         g_SettingsManager.AddBool( pCategoryAnimation, "Export Animations", "exportanimations", true, &bExportAnimations );
         g_SettingsManager.AddBool( pCategoryAnimation, "Optimize Animations", "optimizeanimations", true, &bOptimizeAnimations );
         g_SettingsManager.AddBool( pCategoryAnimation, "Rename Animations To Match Output File Name", "renameanimations", true, &bRenameAnimationsToFileName );

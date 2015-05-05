@@ -367,6 +367,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
 
     ExportLog::LogMsg( 4, "Optimizing mesh \"%s\" with %Iu triangles.", GetName().SafeString(), m_RawTriangles.size() );
     
+    // Apply a AttributeSort optimization
     SortRawTrianglesBySubsetIndex();
 
     ExportIBSubset* pCurrentIBSubset = nullptr;
@@ -385,6 +386,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
     m_TriangleToPolygonMapping.clear();
     m_TriangleToPolygonMapping.reserve( dwTriangleCount );
 
+    m_pAttributes.reset( new uint32_t[ dwTriangleCount ] );
     for( size_t i = 0; i < dwTriangleCount; i++ )
     {
         ExportMeshTriangle* pTriangle = m_RawTriangles[i];
@@ -416,6 +418,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
             IndexData.push_back( uIndexB );
             IndexData.push_back( uIndexC );
         }
+        m_pAttributes[i] = static_cast<uint32_t>( iCurrentSubsetIndex );
         m_TriangleToPolygonMapping.push_back( pTriangle->PolygonIndex );
         pCurrentIBSubset->IncrementIndexCount( 3 );
     }
@@ -496,7 +499,11 @@ void ExportMesh::Optimize( DWORD dwFlags )
         }
     }
 
-    // Compute vertex tangent space data (if requested)
+    if (dwFlags & CLEAN_MESHES)
+    {
+        CleanMesh(bComputeUVAtlas);
+    }
+
     if( m_VertexFormat.m_bTangent || m_VertexFormat.m_bBinormal )
     {
         ComputeVertexTangentSpaces();
@@ -505,18 +512,20 @@ void ExportMesh::Optimize( DWORD dwFlags )
     m_pVBNormals.reset();
     m_pVBTexCoords.reset();
 
-    // TODO - clean mesh (if requested)
-
-    // Compute UVAtlas packing (if requested)
     if (bComputeUVAtlas)
     {
         ComputeUVAtlas();
     }
 
-    // TODO - vcache optimization (if requested)
-
-    m_pAdjacency.reset();
     m_pVBPositions.reset();
+
+    if ( dwFlags & VCACHE_OPT )
+    {
+        OptimizeVcache();
+    }
+
+    m_pAttributes.reset();
+    m_pAdjacency.reset();
     ClearRawTriangles();
     ComputeBounds();
 
@@ -547,12 +556,126 @@ void ExportMesh::Optimize( DWORD dwFlags )
     }
 }
 
+void ExportMesh::CleanMesh(bool breakBowTies)
+{
+    assert(m_pIB != 0);
+    assert(m_pVB != 0);
+
+    ExportLog::LogMsg(4, "Cleaning up mesh...");
+
+    if (m_pVBPositions)
+    {
+        ComputeAdjacency();
+    }
+
+    size_t nFaces = m_pIB->GetIndexCount() / 3;
+    size_t nVerts = m_pVB->GetVertexCount();
+
+    HRESULT hr = E_FAIL; 
+    std::vector<uint32_t> dups;
+    if (m_pIB->GetIndexSize() == 2)
+    {
+        hr = Clean( reinterpret_cast<uint16_t*>(m_pIB->GetIndexData()), nFaces, nVerts, m_pAdjacency.get(), m_pAttributes.get(), dups, breakBowTies );
+    }
+    else
+    {
+        hr = Clean( reinterpret_cast<uint32_t*>(m_pIB->GetIndexData()), nFaces, nVerts, m_pAdjacency.get(), m_pAttributes.get(), dups, breakBowTies );
+    }
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Mesh \"%s\" failed to clean (%08X).", GetName().SafeString(), hr );
+        return;
+    }
+
+    if (dups.empty())
+    {
+        ExportLog::LogMsg( 4, "Mesh cleanup did not duplicate any vertices" );
+        return;
+    }
+
+    size_t nNewVerts = nVerts + dups.size();
+
+    ExportLog::LogMsg( 4, "Mesh cleanup increased vertex count from %Iu to %Iu.", nVerts, nNewVerts );
+
+    std::unique_ptr<XMFLOAT3[]> pos;
+    if (m_pVBPositions)
+    {
+        pos.reset(new XMFLOAT3[nNewVerts]);
+
+        hr = FinalizeVB( m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, &dups.front(), dups.size(), nullptr, pos.get() );
+        if (FAILED(hr))
+        {
+            ExportLog::LogError("Mesh \"%s\" failed clean of positions (%08X).", GetName().SafeString(), hr );
+            return;
+        }
+    }
+
+    std::unique_ptr<XMFLOAT3[]> normals;
+    if (m_pVBNormals)
+    {
+        normals.reset(new XMFLOAT3[nNewVerts]);
+
+        hr = FinalizeVB( m_pVBNormals.get(), sizeof(XMFLOAT3), nVerts, &dups.front(), dups.size(), nullptr, normals.get() );
+        if (FAILED(hr))
+        {
+            ExportLog::LogError("Mesh \"%s\" failed clean of normals (%08X).", GetName().SafeString(), hr );
+            return;
+        }
+    }
+
+    std::unique_ptr<XMFLOAT2[]> texcoords;
+    if (m_pVBTexCoords)
+    {
+        texcoords.reset(new XMFLOAT2[nNewVerts]);
+
+        hr = FinalizeVB( m_pVBTexCoords.get(), sizeof(XMFLOAT2), nVerts, &dups.front(), dups.size(), nullptr, texcoords.get() );
+        if (FAILED(hr))
+        {
+            ExportLog::LogError("Mesh \"%s\" failed clean of texcoords (%08X).", GetName().SafeString(), hr );
+            return;
+        }
+    }
+
+    DWORD stride = m_pVB->GetVertexSize();
+
+    std::unique_ptr<ExportVB> newVB(new ExportVB);
+    newVB->SetVertexCount( nNewVerts );
+    newVB->SetVertexSize( stride );
+    newVB->Allocate();
+
+    hr = FinalizeVB( m_pVB->GetVertexData(), stride, nVerts, &dups.front(), dups.size(), nullptr, newVB->GetVertexData() );
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Mesh \"%s\" failed clean of vertices (%08X).", GetName().SafeString(), hr );
+        return;
+    }
+
+    // Commit changes
+    m_pVB.swap(newVB);
+    m_pVBPositions.swap(pos);
+    m_pVBNormals.swap(normals);
+    m_pVBTexCoords.swap(texcoords);
+}
+
 void ExportMesh::ComputeVertexTangentSpaces()
 {
-    assert( m_VertexFormat.m_bPosition );
-    assert( m_VertexFormat.m_bNormal );
+    assert( m_pIB != 0 );
+    assert( m_pVB != 0 );
 
-    if ( m_VertexFormat.m_uUVSetCount <= static_cast<UINT>( g_pScene->Settings().iTangentSpaceIndex ) )
+    if ( !m_pVBPositions )
+    {
+        ExportLog::LogError("Mesh \"%s\" missing positions needed for tangent space computation.", GetName().SafeString() );
+        return;
+    }
+
+    if ( !m_pVBNormals )
+    {
+        ExportLog::LogError("Mesh \"%s\" missing normals needed for tangent space computation.", GetName().SafeString() );
+        return;
+    }
+
+    if ( m_VertexFormat.m_uUVSetCount <= static_cast<UINT>( g_pScene->Settings().iTangentSpaceIndex )
+         || !m_pVBTexCoords )
     {
         ExportLog::LogError("Mesh \"%s\" missing texture coordinate %d needed for tangent space computation.", GetName().SafeString(), g_pScene->Settings().iTangentSpaceIndex );
         return;
@@ -565,8 +688,6 @@ void ExportMesh::ComputeVertexTangentSpaces()
     }
 
     size_t nVerts = m_pVB->GetVertexCount();
-    if ( !nVerts )
-        return;
 
     std::unique_ptr<XMFLOAT3 []> tan1(new XMFLOAT3[nVerts]);
     std::unique_ptr<XMFLOAT3 []> tan2(new XMFLOAT3[nVerts]);
@@ -624,8 +745,17 @@ void ExportMesh::ComputeVertexTangentSpaces()
 
 void ExportMesh::ComputeAdjacency()
 {
+    assert( m_pIB != 0 );
+    assert( m_pVB != 0 );
+
     if (m_pAdjacency)
         return;
+
+    if (!m_pVBPositions)
+    {
+        ExportLog::LogError("Mesh \"%s\" failed to compute adjacency; requires positions", GetName().SafeString());
+        return;
+    }
 
     size_t nFaces = m_pIB->GetIndexCount() / 3;
     size_t nVerts = m_pVB->GetVertexCount();
@@ -679,7 +809,16 @@ static HRESULT __cdecl UVAtlasCallback( float fPercentDone  )
 
 void ExportMesh::ComputeUVAtlas()
 {
+    assert( m_pIB != 0 );
+    assert( m_pVB != 0 );
+
     ExportLog::LogMsg( 4, "Generating UV atlas..." );
+
+    if (!m_pVBPositions)
+    {
+        ExportLog::LogError("UV atlas creation failed for mesh \"%s\"; requires position data.", GetName().SafeString());
+        return;
+    }
 
     ComputeAdjacency();
 
@@ -790,8 +929,6 @@ void ExportMesh::ComputeUVAtlas()
     // Commit changes
     m_pVBPositions.swap(pos);
     m_pVB.swap(newVB);
-    m_pVBNormals.reset();
-    m_pVBTexCoords.reset();
 
     if (indexFormat == DXGI_FORMAT_R16_UINT)
     {
@@ -803,6 +940,174 @@ void ExportMesh::ComputeUVAtlas()
         assert((ib.size() / sizeof(uint32_t)) == nFaces * 3);
         memcpy(m_pIB->GetIndexData(), &ib.front(), sizeof(uint32_t) * 3 * nFaces);
     }
+
+    // Invalidate other data
+    m_pVBNormals.reset();
+    m_pVBTexCoords.reset();
+}
+
+void ExportMesh::OptimizeVcache()
+{
+    assert( m_pIB != 0 );
+    assert( m_pVB != 0 );
+
+    uint32_t vertexCache = static_cast<uint32_t>( g_pScene->Settings().iVcacheSize );
+    uint32_t restart = std::min<uint32_t>( vertexCache, g_pScene->Settings().iStripRestart );
+
+    if (!vertexCache)
+    {
+        ExportLog::LogMsg( 4, "Optimize mesh for strip order..." );
+    }
+    else
+    {
+        ExportLog::LogMsg( 4, "Optimize mesh for vertex cache (vcache: %u, restart: %u)...", vertexCache, restart );
+    }
+
+    if (!m_pAttributes)
+    {
+        ExportLog::LogError("Optimize mesh for vertex cache failed for mesh \"%s\"; requires attributes.", GetName().SafeString());
+        return;
+    }
+
+    ComputeAdjacency();
+
+    if (!m_pAdjacency)
+    {
+        ExportLog::LogError("Optimize mesh for vertex cache failed for mesh \"%s\"; requires adjacency.", GetName().SafeString());
+        return;
+    }
+
+    size_t nFaces = m_pIB->GetIndexCount() / 3;
+    size_t nVerts = m_pVB->GetVertexCount();
+    DWORD indexSize = m_pIB->GetIndexSize();
+
+    // Compute stats before optimization
+    float acmr, atvr;
+    if (indexSize == 2)
+    {
+        ComputeVertexCacheMissRate(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, nVerts, vertexCache, acmr, atvr);
+    }
+    else
+    {
+        ComputeVertexCacheMissRate(reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, nVerts, vertexCache, acmr, atvr);
+    }
+
+    ExportLog::LogMsg( 4, "Vcache miss rate before optimization - ACMR %f, ATVR %f", acmr, atvr );
+
+    // Optimize faces for pre-transform vertex cache
+    HRESULT hr = S_OK;
+    std::unique_ptr<uint32_t[]> faceRemap( new uint32_t[ nFaces ] );
+    if (indexSize == 2)
+    {
+        hr = OptimizeFacesEx( reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, m_pAdjacency.get(), m_pAttributes.get(),
+                              faceRemap.get(), vertexCache, restart );
+    }
+    else
+    {
+        hr = OptimizeFacesEx( reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, m_pAdjacency.get(), m_pAttributes.get(),
+                              faceRemap.get(), vertexCache, restart );
+    }
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Optimize mesh for pre-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr );
+        return;
+    }
+
+    std::unique_ptr<ExportIB> newIB( new ExportIB );
+    newIB->SetIndexSize( indexSize );
+    newIB->SetIndexCount( nFaces * 3 );
+    newIB->Allocate();
+
+    if (indexSize == 2)
+    {
+        hr = ReorderIB( reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, faceRemap.get(), reinterpret_cast<uint16_t*>(newIB->GetIndexData()) );
+    }
+    else
+    {
+        hr = ReorderIB( reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, faceRemap.get(), reinterpret_cast<uint32_t*>(newIB->GetIndexData()) );
+    }
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Reorder IB for pre-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr );
+        return;
+    }
+
+    // Optimize vertices for post-transform vertex cache
+    std::unique_ptr<uint32_t> vertRemap( new uint32_t[ nVerts ] );
+    if (indexSize == 2)
+    {
+        hr = OptimizeVertices( reinterpret_cast<const uint16_t*>(newIB->GetIndexData()), nFaces, nVerts,
+                               vertRemap.get() );
+    }
+    else
+    {
+        hr = OptimizeVertices( reinterpret_cast<const uint32_t*>(newIB->GetIndexData()), nFaces, nVerts,
+                               vertRemap.get() );
+    }
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Optimize mesh for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr );
+        return;
+    }
+
+    if (indexSize == 2)
+    {
+        hr = FinalizeIB( reinterpret_cast<uint16_t*>(newIB->GetIndexData()), nFaces, vertRemap.get(), nVerts );
+    }
+    else
+    {
+        hr = FinalizeIB( reinterpret_cast<uint32_t*>(newIB->GetIndexData()), nFaces, vertRemap.get(), nVerts );
+    }
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Finalize IB for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr );
+        return;
+    }
+
+    DWORD stride = m_pVB->GetVertexSize();
+
+    std::unique_ptr<ExportVB> newVB(new ExportVB);
+    newVB->SetVertexCount( nVerts );
+    newVB->SetVertexSize( stride );
+    newVB->Allocate();
+
+    hr = FinalizeVB( m_pVB->GetVertexData(), stride, nVerts, nullptr, 0, vertRemap.get(), newVB->GetVertexData() );
+    if (FAILED(hr))
+    {
+        ExportLog::LogError("Finalize VB for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr );
+        return;
+    }
+
+    // Compute stats after optimization
+    float acmr2, atvr2;
+    if (indexSize == 2)
+    {
+        ComputeVertexCacheMissRate(reinterpret_cast<const uint16_t*>(newIB->GetIndexData()), nFaces, nVerts, vertexCache, acmr2, atvr2);
+    }
+    else
+    {
+        ComputeVertexCacheMissRate(reinterpret_cast<const uint32_t*>(newIB->GetIndexData()), nFaces, nVerts, vertexCache, acmr2, atvr2);
+    }
+
+    ExportLog::LogMsg( 4, "Vcache miss rate after optimization - ACMR %f, ATVR %f", acmr2, atvr2 );
+
+    if ( ( (acmr2 > acmr) && fabs (acmr2 - acmr) > 0.0001f )
+         || ( (atvr2 > atvr) && fabs (atvr2 - atvr) > 0.0001f ) )
+    {
+        ExportLog::LogWarning("Vertex cache optimization resulted in worse ACMR/ATVR for mesh \"%s\"; ignored results", GetName().SafeString());
+        return;
+    }
+
+    // Commit changes
+    m_pIB.swap( newIB );
+    m_pVB.swap( newVB );
+
+    // Invalidate other data
+    m_pVBPositions.reset();
+    m_pVBNormals.reset();
+    m_pVBTexCoords.reset();
+    m_pAttributes.reset();
+    m_pAdjacency.reset();
 }
 
 void NormalizeBoneWeights( BYTE* pWeights )
@@ -1148,9 +1453,23 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     m_pVB->SetVertexSize( uVertexSize );
     m_pVB->Allocate();
 
-    m_pVBPositions.reset(new XMFLOAT3[nVerts]);
-    m_pVBNormals.reset(new XMFLOAT3[nVerts]);
-    m_pVBTexCoords.reset(new XMFLOAT2[nVerts]);
+    if (iPositionOffset != -1)
+    {
+        m_pVBPositions.reset(new XMFLOAT3[nVerts]);
+        memset(m_pVBPositions.get(), 0, sizeof(XMFLOAT3) * nVerts);
+    }
+
+    if (iNormalOffset != -1)
+    {
+        m_pVBNormals.reset(new XMFLOAT3[nVerts]);
+        memset(m_pVBNormals.get(), 0, sizeof(XMFLOAT3) * nVerts);
+    }
+
+    if (iUVOffset != -1)
+    {
+        m_pVBTexCoords.reset(new XMFLOAT2[nVerts]);
+        memset(m_pVBTexCoords.get(), 0, sizeof(XMFLOAT2) * nVerts);
+    }
 
     // copy raw vertex data into the packed vertex buffer
     for( size_t i = 0; i < nVerts; i++ )

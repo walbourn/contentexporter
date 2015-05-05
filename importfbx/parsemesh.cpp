@@ -508,6 +508,16 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
         dwMeshOptimizationFlags |= ExportMesh::FORCE_SUBD_CONVERSION;
     }
 
+    if ( g_pScene->Settings().bCleanMeshes )
+    {
+        dwMeshOptimizationFlags |= ExportMesh::CLEAN_MESHES;
+    }
+
+    if ( g_pScene->Settings().bOptimizeVCache )
+    {
+        dwMeshOptimizationFlags |= ExportMesh::CLEAN_MESHES | ExportMesh::VCACHE_OPT;
+    }
+
     pMesh->Optimize( dwMeshOptimizationFlags );
 
     ExportModel* pModel = new ExportModel( pMesh );
