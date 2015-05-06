@@ -274,6 +274,7 @@ namespace ATG
 
         ExportSubDProcessMesh* pSubDMesh = nullptr;
         size_t dwMaxVertexCount = 0;
+        size_t dwMaxIndexCount = 0;
         MeshHeader.IndexBuffer = static_cast<UINT>( g_IBArray.size() );
         switch( pMeshBase->GetMeshType() )
         {
@@ -294,6 +295,7 @@ namespace ATG
                 }
                 CapturePolyMesh( pMesh );
                 dwMaxVertexCount = pMesh->GetVB()->GetVertexCount();
+                dwMaxIndexCount = pMesh->GetIB()->GetIndexCount();
             }
             break;
         }
@@ -310,6 +312,24 @@ namespace ATG
             {
                 CaptureSubset( pMeshBase, pModel->GetBinding( i ), dwMaxVertexCount );
             }
+        }
+
+        if ( !MeshHeader.NumSubsets )
+        {
+            MeshHeader.NumSubsets = 1;
+
+            ExportLog::LogWarning( "No model binding for mesh \"%s\" so creating a default subset", pMeshBase->GetName().SafeString() );
+
+            g_SubsetIndexArray.push_back( static_cast<UINT>( g_SubsetArray.size() ) );
+                
+            SDKMESH_SUBSET Subset = {0};
+            Subset.IndexStart = 0;
+            Subset.IndexCount = static_cast<UINT64>( dwMaxIndexCount );
+            Subset.MaterialID = 0;
+            Subset.VertexStart = 0;
+            Subset.VertexCount = static_cast<UINT64>( dwMaxVertexCount );
+            Subset.PrimitiveType = PT_TRIANGLE_LIST;
+            g_SubsetArray.push_back( Subset );
         }
 
         g_MeshHeaderArray.push_back( MeshHeader );
@@ -391,6 +411,12 @@ namespace ATG
                 ExportString InfluenceName = pMeshBase->GetInfluence( j );
                 DWORD dwFrameIndex = FindFrame( InfluenceName );
                 g_FrameInfluenceArray.push_back( static_cast<UINT>( dwFrameIndex ) );
+            }
+
+            if ( !Mesh.NumFrameInfluences )
+            {
+                Mesh.NumFrameInfluences = 1;
+                g_FrameInfluenceArray.push_back( 0 );
             }
         }
     }
@@ -532,6 +558,28 @@ namespace ATG
 
         CaptureScene( g_pScene, INVALID_FRAME );
         CaptureSecondPass();
+
+        if ( !g_SubsetArray.empty() && g_MaterialArray.empty() )
+        {
+            ExportLog::LogWarning( "No materials defined, so creating a default material" );
+            SDKMESH_MATERIAL defMaterial = {0};
+            defMaterial.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.f);
+            defMaterial.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.f);
+            defMaterial.Power = 1.f;
+            g_MaterialArray.push_back( defMaterial );
+        }
+
+        if ( !g_SubsetArray.empty() && g_FrameHeaderArray.empty() )
+        {
+            ExportLog::LogWarning( "No frames defined, so creating root frame" );
+            SDKMESH_FRAME defFrame = {0};
+            strcpy_s( defFrame.Name, "root");
+            defFrame.ParentFrame = defFrame.ChildFrame = defFrame.SiblingFrame = DWORD(-1);
+            defFrame.AnimationDataIndex = INVALID_ANIMATION_DATA;
+            XMMATRIX id = XMMatrixIdentity();
+            XMStoreFloat4x4( &defFrame.Matrix, id );
+            g_FrameHeaderArray.push_back( defFrame );
+        }
 
         HANDLE hFile = CreateFileA( strFileName, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr );
         if( hFile == INVALID_HANDLE_VALUE )
