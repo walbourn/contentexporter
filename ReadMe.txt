@@ -65,6 +65,12 @@ Install the Autodesk FBX SDK 2011.3.1 or later (latest tested version is 2016.0)
 
     http://autodesk.com/fbx
 
+Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK (such as "C:\Program Files\Autodesk\FBX\FbxSdk\2016.0")
+
+For VS 2010 users, install the standalone Windows 8.1 SDK
+
+   http://go.microsoft.com/fwlink/?LinkID=323507
+
 Open the ContentExporter_2010.sln, ContentExporter_2012.sln, or ContentExporter_2013.sln file from Visual Studio.
 
 Build the solution
@@ -91,7 +97,7 @@ RELEASE HISTORY
 
 May 6, 2015
     Added command-line options:
-    -optimizemeshes (default-) applies a vertex cache optimization to the VB/IB controlled by -vache/-restart
+    -optimizemeshes (default-) applies a vertex cache optimization to the VB/IB controlled by -vcache/-restart
     -cleanmeshes (default+ if using optimizemeshes, otherwise -) performs back-facing and/or bowtie cleanup
     -applyglobaltrans (default-) applies the global transformation matrix on vertex data if not exporting animations
     -tangentsindex (default 0) controls which set of texture coordinates are used when computing tangents & binormals
@@ -99,7 +105,7 @@ May 6, 2015
     -texturebgra (default-) controls how uncompressed processed textures are written (BGRA vs. RGBA)
     -exportcolors (default+) controls export of per vertex colors
     Removed support for -compressednormaltype dec3n as there is no DXGI equivalent (i.e. legacy Direct3D 9 only)
-    Removed all dependancies on the legacy DirectX SDK and D3DX9
+    Removed all dependencies on the legacy DirectX SDK and D3DX9
     - Makes use of DirectXMath, DirectXMesh, DirectXTex, and UVAtlas instead
 
 April 16, 2015
@@ -108,10 +114,11 @@ April 16, 2015
 
 April 30, 2012
     Updated support using the Autodesk FBX SDK 2011.3.1
+    Updated with VS 2010 toolset support
     Last version to support VS 2008
 
 DirectX SDK (June 2010)
-    Updated with VS 2010 support using the Autodesk FBX SDK 2010.x
+    Updated with VS 2010 support (still uses VS 2008 toolset) using the Autodesk FBX SDK 2010.2
 
 DirectX SDK (February 2010)
     Minor bug fixes
