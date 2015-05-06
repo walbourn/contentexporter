@@ -562,7 +562,8 @@ namespace ATG
         if ( !g_SubsetArray.empty() && g_MaterialArray.empty() )
         {
             ExportLog::LogWarning( "No materials defined, so creating a default material" );
-            SDKMESH_MATERIAL defMaterial = {0};
+            SDKMESH_MATERIAL defMaterial;
+            memset(&defMaterial, 0, sizeof(SDKMESH_MATERIAL));
             defMaterial.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.f);
             defMaterial.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.f);
             defMaterial.Power = 1.f;
@@ -572,7 +573,8 @@ namespace ATG
         if ( !g_SubsetArray.empty() && g_FrameHeaderArray.empty() )
         {
             ExportLog::LogWarning( "No frames defined, so creating root frame" );
-            SDKMESH_FRAME defFrame = {0};
+            SDKMESH_FRAME defFrame;
+            memset(&defFrame, 0, sizeof(SDKMESH_FRAME));
             strcpy_s( defFrame.Name, "root");
             defFrame.ParentFrame = defFrame.ChildFrame = defFrame.SiblingFrame = DWORD(-1);
             defFrame.AnimationDataIndex = INVALID_ANIMATION_DATA;

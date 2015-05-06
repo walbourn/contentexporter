@@ -235,6 +235,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
 
     if (!dwLayerCount || !pFbxMesh->GetLayer(0)->GetNormals())
     {
+        ExportLog::LogMsg( 4, "Generating normals..." );
         pFbxMesh->InitNormals();
 #if (FBXSDK_VERSION_MAJOR >= 2015)
         pFbxMesh->GenerateNormals();
