@@ -604,6 +604,7 @@ namespace ATG
         };
         g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Export Vertex Colors", "exportcolors", true, &bExportColors );
         g_SettingsManager.AddBool( pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", false, &bForceIndex32Format );
         g_SettingsManager.AddIntBounded( pCategoryMeshes, "Max UV Set Count", "maxuvsetcount", 8, 0, 8, &iMaxUVSetCount );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Bone Weights & Indices for Skinned Meshes", "exportboneweights", true, &bExportSkinWeights );

@@ -138,6 +138,7 @@ bool MacroCollisionMesh( const CHAR* strArgument, bool& bUsedArgument )
     g_pScene->Settings().bExportLights = false;
     g_pScene->Settings().bExportMaterials = false;
     g_pScene->Settings().bExportNormals = false;
+    g_pScene->Settings().bExportColors = false;
     g_pScene->Settings().bExportSkinWeights = false;
     g_pScene->Settings().bForceIndex32Format = true;
     g_pScene->Settings().iMaxUVSetCount = 0;
@@ -160,6 +161,7 @@ bool MacroAnimation( const CHAR* strArgument, bool& bUsedArgument )
     g_pScene->Settings().bExportLights = false;
     g_pScene->Settings().bExportMaterials = false;
     g_pScene->Settings().bExportNormals = false;
+    g_pScene->Settings().bExportColors = false;
     g_pScene->Settings().bExportSkinWeights = false;
     g_pScene->Settings().bForceIndex32Format = false;
     g_pScene->Settings().bExportMeshes = false;

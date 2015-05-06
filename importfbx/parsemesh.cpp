@@ -210,6 +210,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
         }
     }
 
+    bool bExportColors = g_pScene->Settings().bExportColors;
     pMesh->SetVertexColorCount( 0 );
 
     // Vertex normals and tangent spaces
@@ -249,7 +250,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
     std::vector<FbxLayerElementUV*> VertexUVSets;
     for( DWORD dwLayerIndex = 0; dwLayerIndex < dwLayerCount; ++dwLayerIndex )
     {
-        if( pFbxMesh->GetLayer(dwLayerIndex)->GetVertexColors() )
+        if( pFbxMesh->GetLayer(dwLayerIndex)->GetVertexColors() && bExportColors )
         {
             if( dwVertexColorCount == 0 )
             {
@@ -455,7 +456,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                 if( dwVertexColorCount > 0 && pVertexColorSet )
                 {
                     // Crack apart the FBX dereferencing system for Color coordinates
-                    FbxColor Value( 0, 0, 0, 1 );
+                    FbxColor Value( 1, 1, 1, 1 );
                     switch( pVertexColorSet->GetMappingMode() )
                     {
                     case FbxLayerElement::eByControlPoint:

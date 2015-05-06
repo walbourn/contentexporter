@@ -168,6 +168,7 @@ namespace ATG
         bool        bExportAnimations;
         BOOL        bLittleEndian;
         bool        bExportNormals;
+        bool        bExportColors;
         bool        bForceIndex32Format;
         INT         iMaxUVSetCount;
         bool        bExportSkinWeights;
