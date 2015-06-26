@@ -72,6 +72,7 @@ public:
 
     static ExportString GetDefaultDiffuseMapTextureName();
     static ExportString GetDefaultNormalMapTextureName();
+    static ExportString GetDefaultSpecularMapTextureName();
 
 protected:
     const ExportMaterialDefinition*     m_pMaterialDefinition;

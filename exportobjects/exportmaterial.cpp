@@ -60,5 +60,10 @@ ExportString ExportMaterial::GetDefaultNormalMapTextureName()
     return ExportString( g_ExportCoreSettings.strDefaultNormalMapTextureName );
 }
 
+ExportString ExportMaterial::GetDefaultSpecularMapTextureName()
+{
+    return ExportString( g_ExportCoreSettings.strDefaultSpecMapTextureName );
+}
+
 };
 

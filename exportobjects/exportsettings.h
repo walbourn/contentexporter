@@ -184,6 +184,7 @@ namespace ATG
         CHAR        strDefaultMaterialName[SETTINGS_STRING_LENGTH];
         CHAR        strDefaultDiffuseMapTextureName[SETTINGS_STRING_LENGTH];
         CHAR        strDefaultNormalMapTextureName[SETTINGS_STRING_LENGTH];
+        CHAR        strDefaultSpecMapTextureName[SETTINGS_STRING_LENGTH];
         bool        bCompressVertexData;
         DWORD       dwNormalCompressedType;
         DWORD       dwTexCoordCompressedType;
@@ -192,6 +193,7 @@ namespace ATG
         bool        bBGRvsRGB;
         bool        bGenerateTextureMipMaps;
         bool        bForceTextureOverwrite;
+        bool        bUseEmissiveTexture;
         bool        bConvertMeshesToSubD;
         bool        bGeometricAdjacency;
         INT         iGenerateUVAtlasOnTexCoordIndex;

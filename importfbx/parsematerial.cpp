@@ -34,21 +34,55 @@ void FixupGenericMaterial( ExportMaterial* pMaterial )
     OutputParam.bInstanceParam = true;
 
     ExportMaterialParameter* pParam = pMaterial->FindParameter( "DiffuseTexture" );
-    if( !pParam )
+    if (!pParam)
     {
-        ExportLog::LogWarning( "Material \"%s\" has no diffuse texture.  Assigning a default diffuse texture.", pMaterial->GetName().SafeString() );
-        OutputParam.Name = "DiffuseTexture";
         OutputParam.ValueString = ExportMaterial::GetDefaultDiffuseMapTextureName();
-        pMaterial->AddParameter( OutputParam );
+        if (*OutputParam.ValueString)
+        {
+            ExportLog::LogMsg(2, "Material \"%s\" has no diffuse texture.  Assigning a default diffuse texture.", pMaterial->GetName().SafeString());
+            OutputParam.Name = "DiffuseTexture";
+            pMaterial->AddParameter(OutputParam);
+        }
     }
 
     pParam = pMaterial->FindParameter( "NormalMapTexture" );
-    if( !pParam )
+    if (!pParam)
     {
-        ExportLog::LogWarning( "Material \"%s\" has no normal map texture.  Assigning a default normal map texture.", pMaterial->GetName().SafeString() );
-        OutputParam.Name = "NormalMapTexture";
         OutputParam.ValueString = ExportMaterial::GetDefaultNormalMapTextureName();
-        pMaterial->AddParameter( OutputParam );
+        if (*OutputParam.ValueString)
+        {
+            ExportLog::LogMsg(2, "Material \"%s\" has no normal map texture.  Assigning a default normal map texture.", pMaterial->GetName().SafeString());
+            OutputParam.Name = "NormalMapTexture";
+            pMaterial->AddParameter(OutputParam);
+        }
+    }
+
+    pParam = pMaterial->FindParameter( "SpecularMapTexture" );
+    if (!pParam)
+    {
+        if (g_ExportCoreSettings.bUseEmissiveTexture)
+        {
+            pParam = pMaterial->FindParameter( "EmissiveMapTexture" );
+            if (pParam)
+            {
+                // Copy emissive to specular (SDKMESH's material doesn't have an emissive texture slot)
+                ExportLog::LogMsg( 4, "EmissiveMapTexture encoded as SpecularMapTexture in material \"%s\".",  pMaterial->GetName().SafeString() );
+                OutputParam.Name = "SpecularMapTexture";
+                OutputParam.ValueString = pParam->ValueString;
+                pMaterial->AddParameter(OutputParam);
+            }
+        }
+
+        if (!pParam)
+        {
+            OutputParam.ValueString = ExportMaterial::GetDefaultSpecularMapTextureName();
+            if (*OutputParam.ValueString)
+            {
+                ExportLog::LogMsg(2, "Material \"%s\" has no specular map texture.  Assigning a default specular map texture.", pMaterial->GetName().SafeString());
+                OutputParam.Name = "SpecularMapTexture";
+                pMaterial->AddParameter(OutputParam);
+            }
+        }
     }
 
     auto pParamList = pMaterial->GetParameterList();
