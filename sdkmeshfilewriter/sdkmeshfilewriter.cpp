@@ -131,17 +131,17 @@ namespace ATG
             Material.Power = 1.f;
         }
 
-        ExportMaterialParameter* pDiffuse = pMaterial->FindParameter( "DiffuseTexture" );
+        auto pDiffuse = pMaterial->FindParameter( "DiffuseTexture" );
         if( pDiffuse )
         {
             ProcessTexture( Material.DiffuseTexture, MAX_MATERIAL_NAME, pDiffuse->ValueString.SafeString() );
         }
-        ExportMaterialParameter* pNormal = pMaterial->FindParameter( "NormalMapTexture" );
+        auto pNormal = pMaterial->FindParameter( "NormalMapTexture" );
         if( pNormal )
         {
             ProcessTexture( Material.NormalTexture, MAX_MATERIAL_NAME, pNormal->ValueString.SafeString() );
         }
-        ExportMaterialParameter* pSpecular = pMaterial->FindParameter( "SpecularMapTexture" );
+        auto pSpecular = pMaterial->FindParameter( "SpecularMapTexture" );
         if( pSpecular )
         {
             ProcessTexture( Material.SpecularTexture, MAX_MATERIAL_NAME, pSpecular->ValueString.SafeString() );
