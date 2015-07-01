@@ -111,6 +111,30 @@ void AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, D
     pMaterial->AddParameter( OutputParam );
 }
 
+static void CheckUVSettings(FbxFileTexture* texture, ExportMaterial* pMaterial)
+{
+    if (texture->GetSwapUV())
+    {
+        ExportLog::LogWarning( "Material \"%s\" has swapped UVs which are not exported as such", pMaterial->GetName().SafeString() );
+    }
+   
+    if ( texture->GetWrapModeU() != FbxTexture::eRepeat
+         || texture->GetWrapModeV() != FbxTexture::eRepeat )
+    {
+        ExportLog::LogWarning( "Material \"%s\" has set to clamp wrap U/V mode which is not exported", pMaterial->GetName().SafeString() );
+    }
+
+    auto& uvScaling = texture->GetUVScaling();
+    auto& uvTrans = texture->GetUVTranslation();
+    if ( uvScaling[0] != 1.0
+         || uvScaling[1] != 1.0
+         || uvTrans[0] != 0
+         || uvTrans[1] != 0 )
+    {
+        ExportLog::LogWarning( "Material \"%s\" has UV transforms which are not exported", pMaterial->GetName().SafeString() );
+    }
+}
+
 bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
 {
     bool bResult = false;
@@ -128,6 +152,8 @@ bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
                 if( !pFbxTexture )
                     continue;
 
+                CheckUVSettings(pFbxTexture, pMaterial);
+
                 AddTextureParameter( pMaterial, strParameterName, dwTextureIndex, pFbxTexture->GetFileName(), dwFlags );
                 ++dwTextureIndex;
                 bResult = true;
@@ -142,6 +168,8 @@ bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
             auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject( FbxFileTexture::ClassId, i ) );
             if( !pFbxTexture )
                 continue;
+
+            CheckUVSettings(pFbxTexture, pMaterial);
 
             AddTextureParameter( pMaterial, strParameterName, i, pFbxTexture->GetFileName(), dwFlags );
             bResult = true;
