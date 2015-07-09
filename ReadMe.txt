@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-May 6, 2015
+July 8, 2015
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
@@ -94,6 +94,22 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+July 8, 2015
+    Added command-line options:
+    -materialcolors (default+) to control export of material lambert/phong colors
+    -lightmaps macro to set up for exporting meshes using lightmap textures
+    Fixed problems with export of multiple uv sets and per-vertex colors
+    Added some more warnings related to uv sets
+    Updated DirectXTex, UVAtlas, DirectXMesh libraries    
+
+June 25, 2015
+    Added new command-line options:
+    -useemissivetexture[+|-] Use EmissiveMapTexture as SpecularMapTexture 
+    -defaultspecmap [name] Sets the default specular map texture name
+    Changed defaults for -defaultdiffusemap and -defaultnormalmap to blank
+    The  .SDKMESH  writer now fills in the SpecularTexture string in the material
+    Change the log messages about applying the default texture names to log level 2 messages rather than warnings
 
 May 6, 2015
     Added command-line options:
