@@ -342,6 +342,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
     }
 
     // Loop over polygons.
+    DWORD basePolyIndex = 0;
     for( DWORD dwPolyIndex = 0; dwPolyIndex < dwPolyCount; ++dwPolyIndex )
     {
         // Triangulate each polygon into one or more triangles.
@@ -371,8 +372,6 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                     dwMaterialIndex = pMaterialSet->GetIndexArray().GetAt( dwPolyIndex );
                     break;
                 }
-            case FbxLayerElement::eAllSame:
-                break;
             }
         }
 
@@ -429,17 +428,50 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                     // Crack apart the FBX dereferencing system for UV coordinates
                     FbxLayerElementUV* pUVSet = VertexUVSets[dwUVIndex];
                     FbxVector2 Value( 0, 0 );
-                    INT iUVIndex = 0;
                     switch( pUVSet->GetMappingMode() )
                     {
                     case FbxLayerElement::eByControlPoint:
-                        iUVIndex = pFbxMesh->GetPolygonVertex( iPolyIndex, iVertIndex[dwCornerIndex] );
+                        switch (pUVSet->GetReferenceMode())
+                        {
+                        case FbxLayerElement::eDirect:
+                            Value = pUVSet->GetDirectArray().GetAt(dwDCCIndex);
+                            break;
+
+                        case FbxLayerElement::eIndex:
+                        case FbxLayerElement::eIndexToDirect:
+                            {
+                                int iUVIndex = pUVSet->GetIndexArray().GetAt(dwDCCIndex);
+                                Value = pUVSet->GetDirectArray().GetAt(iUVIndex);
+                            }
+                            break;
+                        }
                         break;
+
                     case FbxLayerElement::eByPolygonVertex:
-                        iUVIndex = pFbxMesh->GetTextureUVIndex( iPolyIndex, iVertIndex[dwCornerIndex] );
+                        switch (pUVSet->GetReferenceMode())
+                        {
+                        case FbxLayerElement::eDirect:
+                            Value = pUVSet->GetDirectArray().GetAt( basePolyIndex + iVertIndex[dwCornerIndex] );
+                            break;
+
+                        case FbxLayerElement::eIndex:
+                        case FbxLayerElement::eIndexToDirect:
+                            {
+                                int iUVIndex = pUVSet->GetIndexArray().GetAt( basePolyIndex + iVertIndex[dwCornerIndex] );
+#ifdef _DEBUG
+                                if (!dwUVIndex)
+                                {
+                                    // Warning: pFbxMesh->GetTextureUVIndex only works for the first layer of the mesh
+                                    int iUVIndex2 = pFbxMesh->GetTextureUVIndex(iPolyIndex, iVertIndex[dwCornerIndex]);
+                                    assert(iUVIndex == iUVIndex2);
+                                }
+#endif
+                                Value = pUVSet->GetDirectArray().GetAt( iUVIndex );
+                            }
+                            break;
+                        }
                         break;
                     }
-                    Value = pUVSet->GetDirectArray().GetAt( iUVIndex );
 
                     // Store a single UV set
                     pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].x = (float)Value.mData[0];
@@ -466,19 +498,28 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                         case FbxLayerElement::eDirect:
                             Value = pVertexColorSet->GetDirectArray().GetAt( dwDCCIndex );
                             break;
+                        case FbxLayerElement::eIndex:
                         case FbxLayerElement::eIndexToDirect:
-                            Value = pVertexColorSet->GetDirectArray().GetAt( pVertexColorSet->GetIndexArray().GetAt( dwDCCIndex ) );
+                            {
+                                int iColorIndex = pVertexColorSet->GetIndexArray().GetAt(dwDCCIndex);
+                                Value = pVertexColorSet->GetDirectArray().GetAt(iColorIndex);
+                            }
                             break;
                         }
                         break;
+
                     case FbxLayerElement::eByPolygonVertex:
                         switch( pVertexColorSet->GetReferenceMode() )
                         {
                         case FbxLayerElement::eDirect:
-                            Value = pVertexColorSet->GetDirectArray().GetAt( iVertIndex[dwCornerIndex] );
+                            Value = pVertexColorSet->GetDirectArray().GetAt( basePolyIndex + iVertIndex[dwCornerIndex] );
                             break;
+                        case FbxLayerElement::eIndex:
                         case FbxLayerElement::eIndexToDirect:
-                            Value = pVertexColorSet->GetDirectArray().GetAt( pVertexColorSet->GetIndexArray().GetAt( iVertIndex[dwCornerIndex] ) );
+                            {
+                                int iColorIndex = pVertexColorSet->GetIndexArray().GetAt( basePolyIndex + iVertIndex[dwCornerIndex] );
+                                Value = pVertexColorSet->GetDirectArray().GetAt(iColorIndex);
+                            }
                             break;
                         }
                         break;
@@ -502,6 +543,8 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
             // Add raw triangle to the mesh.
             pMesh->AddRawTriangle( pTriangle );
         }
+
+        basePolyIndex += dwPolySize;
     }
 
     if( bSubDProcess )
