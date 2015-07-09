@@ -638,6 +638,7 @@ namespace ATG
         auto pCategoryMaterials = g_SettingsManager.AddRootCategory( "Materials" );
         g_SettingsManager.AddBool( pCategoryMaterials, "Export Materials", "exportmaterials", true, &bExportMaterials );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Material Name", "defaultmaterialname", "Default", strDefaultMaterialName );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Export material colors", "materialcolors", true, &bMaterialColors );
         g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression );
         g_SettingsManager.AddBool( pCategoryMaterials, "Use BGRA texture format", "texturebgra", false, &bBGRvsRGB );
         g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", true, &bGenerateTextureMipMaps );

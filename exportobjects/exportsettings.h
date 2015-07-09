@@ -190,6 +190,7 @@ namespace ATG
         DWORD       dwTexCoordCompressedType;
         DWORD       dwPositionCompressedType;
         bool        bTextureCompression;
+        bool        bMaterialColors;
         bool        bBGRvsRGB;
         bool        bGenerateTextureMipMaps;
         bool        bForceTextureOverwrite;
