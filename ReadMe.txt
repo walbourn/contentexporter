@@ -3,17 +3,14 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-July 8, 2015
+July 29, 2015
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
 by the DirectX Tool Kit and DXUT, and is used in the Windows 8 Store app sample Marble Maze.
 
-The source is written for Visual Studio 2010, 2012, or 2013. It is recommended that you make use of the Windows 8.1 SDK
+The source is written for Visual Studio 2012 or 2013. It is recommended that you make use of the Windows 8.1 SDK
 and Windows 7 Service Pack 1 or later.
-
-Details on using the Windows 8.1 SDK with VS 2010 are described on the Visual C++ Team Blog:
-<http://blogs.msdn.com/b/vcblog/archive/2012/11/23/using-the-windows-8-sdk-with-visual-studio-2010-configuring-multiple-projects.aspx>
 
 These components are designed to work without requiring any content from the DirectX SDK. For details,
 see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee663275.aspx>.
@@ -61,17 +58,13 @@ http://go.microsoft.com/fwlink/?LinkId=226208
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2011.3.1 or later (latest tested version is 2016.0) for Windows VS 2010, VS 2012, or VS 2013
+Install the Autodesk FBX SDK 2011.3.1 or later (latest tested version is 2016.0) for Windows VS 2012 or VS 2013
 
     http://autodesk.com/fbx
 
 Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK (such as "C:\Program Files\Autodesk\FBX\FbxSdk\2016.0")
 
-For VS 2010 users, install the standalone Windows 8.1 SDK
-
-   http://go.microsoft.com/fwlink/?LinkID=323507
-
-Open the ContentExporter_2010.sln, ContentExporter_2012.sln, or ContentExporter_2013.sln file from Visual Studio.
+Open the ContentExporter_2012.sln or ContentExporter_2013.sln file from Visual Studio.
 
 Build the solution
 
@@ -94,6 +87,9 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+July 29, 2015
+    Retired VS 2010 projects
 
 July 8, 2015
     Added command-line options:
