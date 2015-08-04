@@ -34,7 +34,7 @@ namespace ATG
     std::vector<UINT>                               g_FrameInfluenceArray;
     std::vector<SDKMESH_MATERIAL>                   g_MaterialArray;
 
-    typedef std::hash_map<ExportMaterial*,DWORD> MaterialLookupMap;
+    typedef std::unordered_map<ExportMaterial*,DWORD> MaterialLookupMap;
     MaterialLookupMap                               g_ExportMaterialToSDKMeshMaterialMap;
 
     BYTE g_Padding4K[4096] = { 0 };

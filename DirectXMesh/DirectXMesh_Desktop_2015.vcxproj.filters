@@ -2,27 +2,19 @@
 <Project ToolsVersion="4.0" xmlns:atg="http://atg.xbox.com" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{f60f9092-aad3-4a54-8ca6-8d1bc004aa51}</UniqueIdentifier>
+      <UniqueIdentifier>{d76fe36f-16db-490a-9ba9-13d02e13a65b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{a3ab26f8-7304-4b45-9a72-898794779b70}</UniqueIdentifier>
+      <UniqueIdentifier>{d4f97b15-a8e2-4223-a242-ca68b901e1fb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CLInclude Include="DirectXMesh.h">
-      <Filter>Header Files</Filter>
-    </CLInclude>
     <CLInclude Include="DirectXMesh.inl">
       <Filter>Header Files</Filter>
     </CLInclude>
-    <CLInclude Include="DirectXMeshP.h">
-      <Filter>Source Files</Filter>
+    <CLInclude Include="DirectXMesh.h">
+      <Filter>Header Files</Filter>
     </CLInclude>
-    <CLInclude Include="scoped.h">
-      <Filter>Source Files</Filter>
-    </CLInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="DirectXMeshRemap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +30,9 @@
     <ClCompile Include="DirectXMeshVBReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <CLInclude Include="scoped.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectXMeshAdjacency.cpp">
@@ -60,6 +55,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CLInclude Include="DirectXMeshP.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

@@ -24,7 +24,7 @@
 #include <WindowsX.h>
 #include <list>
 #include <vector>
-#include <hash_map>
+#include <unordered_map>
 #include <algorithm>
 #include <memory>
 #include <commctrl.h>

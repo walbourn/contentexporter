@@ -54,9 +54,8 @@ namespace ATG
         ICEX.dwICC = ICC_WIN95_CLASSES | ICC_COOL_CLASSES | ICC_USEREX_CLASSES;
         InitCommonControlsEx( &ICEX );
         InitCommonControls();
-        HMODULE g_hRichEdit = LoadLibrary( TEXT( "Riched32.dll" ) );
+        g_hRichEdit = LoadLibrary( TEXT( "Riched32.dll" ) );
         assert( g_hRichEdit != nullptr );
-        UNREFERENCED_PARAMETER(g_hRichEdit);
 
         ExportLog::AddListener( &g_ConsoleDlg );
         g_pProgress = &g_ConsoleDlg;

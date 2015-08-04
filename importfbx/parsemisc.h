@@ -23,7 +23,7 @@ void ParseLight( FbxLight* pFbxLight, ATG::ExportFrame* pParentFrame );
 
 void FixupNode( ATG::ExportFrame* pFrame, DirectX::CXMMATRIX matParentWorld );
 
-typedef std::hash_map<FbxNode*,FbxMatrix> PoseMap;
+typedef std::unordered_map<FbxNode*,FbxMatrix> PoseMap;
 extern PoseMap g_BindPoseMap;
 extern bool g_bBindPoseFixupRequired;
 
