@@ -602,7 +602,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
     {
         pos.reset(new XMFLOAT3[nNewVerts]);
 
-        hr = FinalizeVB( m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, &dups.front(), dups.size(), nullptr, pos.get() );
+        hr = FinalizeVB( m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, dups.data(), dups.size(), nullptr, pos.get() );
         if (FAILED(hr))
         {
             ExportLog::LogError("Mesh \"%s\" failed clean of positions (%08X).", GetName().SafeString(), hr );
@@ -615,7 +615,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
     {
         normals.reset(new XMFLOAT3[nNewVerts]);
 
-        hr = FinalizeVB( m_pVBNormals.get(), sizeof(XMFLOAT3), nVerts, &dups.front(), dups.size(), nullptr, normals.get() );
+        hr = FinalizeVB( m_pVBNormals.get(), sizeof(XMFLOAT3), nVerts, dups.data(), dups.size(), nullptr, normals.get() );
         if (FAILED(hr))
         {
             ExportLog::LogError("Mesh \"%s\" failed clean of normals (%08X).", GetName().SafeString(), hr );
@@ -628,7 +628,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
     {
         texcoords.reset(new XMFLOAT2[nNewVerts]);
 
-        hr = FinalizeVB( m_pVBTexCoords.get(), sizeof(XMFLOAT2), nVerts, &dups.front(), dups.size(), nullptr, texcoords.get() );
+        hr = FinalizeVB( m_pVBTexCoords.get(), sizeof(XMFLOAT2), nVerts, dups.data(), dups.size(), nullptr, texcoords.get() );
         if (FAILED(hr))
         {
             ExportLog::LogError("Mesh \"%s\" failed clean of texcoords (%08X).", GetName().SafeString(), hr );
@@ -643,7 +643,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
     newVB->SetVertexSize( stride );
     newVB->Allocate();
 
-    hr = FinalizeVB( m_pVB->GetVertexData(), stride, nVerts, &dups.front(), dups.size(), nullptr, newVB->GetVertexData() );
+    hr = FinalizeVB( m_pVB->GetVertexData(), stride, nVerts, dups.data(), dups.size(), nullptr, newVB->GetVertexData() );
     if (FAILED(hr))
     {
         ExportLog::LogError("Mesh \"%s\" failed clean of vertices (%08X).", GetName().SafeString(), hr );
@@ -710,7 +710,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
     }
 
     std::unique_ptr<VBWriter> writer( new VBWriter() );
-    hr = writer->Initialize( &m_InputLayout.front(), m_InputLayout.size() );
+    hr = writer->Initialize( m_InputLayout.data(), m_InputLayout.size() );
     if (FAILED(hr))
     {
         ExportLog::LogError("Mesh \"%s\" failed to create VBWriter (%08X).", GetName().SafeString(), hr );
@@ -871,7 +871,7 @@ void ExportMesh::ComputeUVAtlas()
     }
 
     std::unique_ptr<XMFLOAT3[]> pos(new XMFLOAT3[nNewVerts]);
-    hr = UVAtlasApplyRemap(m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, nNewVerts, &vertexRemapArray.front(), pos.get());
+    hr = UVAtlasApplyRemap(m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, nNewVerts, vertexRemapArray.data(), pos.get());
     if (FAILED(hr))
     {
         ExportLog::LogError( "UV atlas remap failed for mesh \"%s\" (%08X).", GetName().SafeString(), hr );
@@ -885,7 +885,7 @@ void ExportMesh::ComputeUVAtlas()
     newVB->SetVertexSize( stride );
     newVB->Allocate();
 
-    hr = UVAtlasApplyRemap( m_pVB->GetVertexData(), stride, nVerts, nNewVerts, &vertexRemapArray.front(), newVB->GetVertexData() );
+    hr = UVAtlasApplyRemap( m_pVB->GetVertexData(), stride, nVerts, nNewVerts, vertexRemapArray.data(), newVB->GetVertexData() );
     if (FAILED(hr))
     {
         ExportLog::LogError( "UV atlas remap failed for mesh \"%s\" (%08X).", GetName().SafeString(), hr );
@@ -894,7 +894,7 @@ void ExportMesh::ComputeUVAtlas()
 
     // Update UVs
     std::unique_ptr<VBWriter> writer( new VBWriter() );
-    hr = writer->Initialize( &m_InputLayout.front(), m_InputLayout.size() );
+    hr = writer->Initialize( m_InputLayout.data(), m_InputLayout.size() );
     if (FAILED(hr))
     {
         ExportLog::LogError("Mesh \"%s\" failed to create VBWriter (%08X).", GetName().SafeString(), hr );
@@ -933,12 +933,12 @@ void ExportMesh::ComputeUVAtlas()
     if (indexFormat == DXGI_FORMAT_R16_UINT)
     {
         assert((ib.size() / sizeof(uint16_t)) == nFaces * 3);
-        memcpy(m_pIB->GetIndexData(), &ib.front(), sizeof(uint16_t) * 3 * nFaces);
+        memcpy(m_pIB->GetIndexData(), ib.data(), sizeof(uint16_t) * 3 * nFaces);
     }
     else
     {
         assert((ib.size() / sizeof(uint32_t)) == nFaces * 3);
-        memcpy(m_pIB->GetIndexData(), &ib.front(), sizeof(uint32_t) * 3 * nFaces);
+        memcpy(m_pIB->GetIndexData(), ib.data(), sizeof(uint32_t) * 3 * nFaces);
     }
 
     // Invalidate other data

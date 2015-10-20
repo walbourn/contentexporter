@@ -55,17 +55,17 @@ public:
     void OptimizeKeys();
     void SortKeys();
     void EndianSwap();
-    float* GetPositionData() const { return (float*)( &PositionKeys.front() ); }
-    float* GetOrientationData() const { return (float*)( &OrientationKeys.front() ); }
-    float* GetScaleData() const { return (float*)( &ScaleKeys.front() ); }
+    float* GetPositionData() const { return (float*)( PositionKeys.data() ); }
+    float* GetOrientationData() const { return (float*)( OrientationKeys.data() ); }
+    float* GetScaleData() const { return (float*)( ScaleKeys.data() ); }
     size_t GetPositionDataSize() const { return PositionKeys.size() * 4 * sizeof( float ); }
     size_t GetOrientationDataSize() const { return OrientationKeys.size() * 5 * sizeof( float ); }
     size_t GetScaleDataSize() const { return ScaleKeys.size() * 4 * sizeof( float ); }
-    ExportAnimationPositionKey* GetPositionKeys() { return &PositionKeys.front(); }
+    ExportAnimationPositionKey* GetPositionKeys() { return PositionKeys.data(); }
     size_t GetPositionKeyCount() const { return PositionKeys.size(); }
-    ExportAnimationOrientationKey* GetOrientationKeys() { return &OrientationKeys.front(); }
+    ExportAnimationOrientationKey* GetOrientationKeys() { return OrientationKeys.data(); }
     size_t GetOrientationKeyCount() const { return OrientationKeys.size(); }
-    ExportAnimationScaleKey* GetScaleKeys() { return &ScaleKeys.front(); }
+    ExportAnimationScaleKey* GetScaleKeys() { return ScaleKeys.data(); }
     size_t GetScaleKeyCount() const { return ScaleKeys.size(); }
     bool IsTrackEmpty();
 protected:
