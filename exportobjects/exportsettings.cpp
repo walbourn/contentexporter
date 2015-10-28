@@ -612,6 +612,7 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMeshes, "Flip Triangle Winding", "fliptriangles", true, &bFlipTriangles );
         g_SettingsManager.AddBool( pCategoryMeshes, "Apply global transformation (if not animated)", "applyglobaltrans", false, &bApplyGlobalTrans );
         g_SettingsManager.AddBool( pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", true, &bInvertTexVCoord );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Invert Z Coordinates", "flipz", true, &bFlipZ );
         g_SettingsManager.AddString( pCategoryMeshes, "Mesh Name Decoration, applied as a prefix to mesh names", "meshnamedecoration", "Mesh", strMeshNameDecoration );
 
         auto pCategoryOpt = g_SettingsManager.AddCategory( pCategoryMeshes, "Mesh optimization" );

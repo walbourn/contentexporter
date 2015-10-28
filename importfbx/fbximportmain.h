@@ -19,7 +19,8 @@ class FBXTransformer : public ATG::IDCCTransformer
 {
 public:
     FBXTransformer()
-        : m_fUnitScale( 1.0f )
+        : m_fUnitScale( 1.0f ),
+          m_bFlipZ( true )
     { }
 
     void Initialize( FbxScene* pScene );
@@ -35,9 +36,15 @@ public:
         m_fUnitScale = fScale;
     }
 
+    void SetZFlip( const bool bFlip )
+    {
+        m_bFlipZ = bFlip;
+    }
+
 protected:
     float m_fUnitScale;
     bool  m_bMaxConversion;
+    bool  m_bFlipZ;
 };
 
 class FBXImport

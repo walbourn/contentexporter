@@ -158,6 +158,7 @@ namespace ATG
     public:
         bool        bFlipTriangles;
         bool        bInvertTexVCoord;
+        bool        bFlipZ;
         bool        bApplyGlobalTrans;
         bool        bExportScene;
         bool        bExportLights;

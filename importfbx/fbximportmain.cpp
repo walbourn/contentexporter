@@ -54,6 +54,7 @@ void FBXTransformer::Initialize( FbxScene* pScene )
     }
 
     SetUnitScale( (float)g_pScene->Settings().fExportScale );
+    SetZFlip( g_pScene->Settings().bFlipZ );
 }
 
 void FBXTransformer::TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4* pSrcMatrix ) const
@@ -72,13 +73,16 @@ void FBXTransformer::TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4*
     // column are negated (so element _33 is left alone).  So instead of actually
     // carrying out the multiplication, we just negate the 6 matrix elements.
 
-    pDestMatrix->_13 = -pSrcMatrix->_13;
-    pDestMatrix->_23 = -pSrcMatrix->_23;
-    pDestMatrix->_43 = -pSrcMatrix->_43;
+    if ( m_bFlipZ )
+    {
+        pDestMatrix->_13 = -pSrcMatrix->_13;
+        pDestMatrix->_23 = -pSrcMatrix->_23;
+        pDestMatrix->_43 = -pSrcMatrix->_43;
 
-    pDestMatrix->_31 = -pSrcMatrix->_31;
-    pDestMatrix->_32 = -pSrcMatrix->_32;
-    pDestMatrix->_34 = -pSrcMatrix->_34;
+        pDestMatrix->_31 = -pSrcMatrix->_31;
+        pDestMatrix->_32 = -pSrcMatrix->_32;
+        pDestMatrix->_34 = -pSrcMatrix->_34;
+    }
 
     // Apply the global unit scale to the translation components of the matrix.
     pDestMatrix->_41 *= m_fUnitScale;
@@ -103,9 +107,11 @@ void FBXTransformer::TransformPosition( XMFLOAT3* pDestPosition, const XMFLOAT3*
     }
     else
     {
+        const float flipZ = m_bFlipZ ? -1.0f : 1.0f;
+
         pDestPosition->x = pSrcPosition->x * m_fUnitScale;
         pDestPosition->y = pSrcPosition->y * m_fUnitScale;
-        pDestPosition->z = -pSrcPosition->z * m_fUnitScale;
+        pDestPosition->z = pSrcPosition->z * m_fUnitScale * flipZ;
     }
 }
 
@@ -126,9 +132,11 @@ void FBXTransformer::TransformDirection( XMFLOAT3* pDestDirection, const XMFLOAT
     }
     else
     {
+        const float flipZ = m_bFlipZ ? -1.0f : 1.0f;
+
         pDestDirection->x = pSrcDirection->x;
         pDestDirection->y = pSrcDirection->y;
-        pDestDirection->z = -pSrcDirection->z;
+        pDestDirection->z = pSrcDirection->z * flipZ;
     }
 }
 
