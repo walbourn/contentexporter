@@ -320,6 +320,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
 
     // Compute total transformation
     FbxAMatrix vertMatrix;
+    FbxAMatrix normMatrix;
     {
         auto trans = pNode->GetGeometricTranslation( FbxNode::eSourcePivot );
         auto rot = pNode->GetGeometricRotation( FbxNode::eSourcePivot );
@@ -339,6 +340,11 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
             auto global = pNode->EvaluateGlobalTransform();
             vertMatrix = global * geom;
         }
+
+        // Calculate the normal transform matrix (inverse-transpose)
+        normMatrix = vertMatrix;
+        normMatrix = normMatrix.Inverse();
+        normMatrix = normMatrix.Transpose();
     }
 
     // Loop over polygons.
@@ -418,9 +424,14 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                 pTriangle->Vertex[dwCornerIndex].Position.z = (float)finalPos.mData[2];
 
                 // Store vertex normal
-                pTriangle->Vertex[dwCornerIndex].Normal.x = (float)vNormals[dwCornerIndex].mData[0];
-                pTriangle->Vertex[dwCornerIndex].Normal.y = (float)vNormals[dwCornerIndex].mData[1];
-                pTriangle->Vertex[dwCornerIndex].Normal.z = (float)vNormals[dwCornerIndex].mData[2];
+                auto finalNorm = vNormals[dwCornerIndex];
+                finalNorm.mData[3] = 0.0;
+                finalNorm = normMatrix.MultT( finalNorm );
+                finalNorm.Normalize();
+
+                pTriangle->Vertex[dwCornerIndex].Normal.x = (float)finalNorm.mData[0];
+                pTriangle->Vertex[dwCornerIndex].Normal.y = (float)finalNorm.mData[1];
+                pTriangle->Vertex[dwCornerIndex].Normal.z = (float)finalNorm.mData[2];
 
                 // Store UV sets
                 for( DWORD dwUVIndex = 0; dwUVIndex < dwUVSetCount; ++dwUVIndex )
