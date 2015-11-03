@@ -168,6 +168,7 @@ namespace ATG
         bool        bExportHiddenObjects;
         bool        bExportAnimations;
         BOOL        bLittleEndian;
+        DWORD       dwFeatureLevel;
         bool        bExportNormals;
         bool        bExportColors;
         bool        bForceIndex32Format;

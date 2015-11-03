@@ -836,6 +836,11 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
     ExportCoreSettings InitialSettings = g_pScene->Settings();
 
+    if ( InitialSettings.bForceIndex32Format && (InitialSettings.dwFeatureLevel <= D3D_FEATURE_LEVEL_9_1) )
+    {
+        ExportLog::LogWarning("32-bit index buffers not supported on Feature Level 9.1");
+    }
+
     HRESULT hr = FBXImport::Initialize();
     if (FAILED(hr))
     {

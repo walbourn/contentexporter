@@ -302,6 +302,39 @@ namespace ATG
             }
         }
 
+        switch( g_pScene->Settings().dwFeatureLevel )
+        {
+        default: // 11.0 or greater
+            if ( info.width > 16384 || info.height > 16384 )
+            {
+                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 11.0 or later (16384) \"%s\".", info.width, info.height, strSourceFileName );
+            }
+            break;
+
+        case D3D_FEATURE_LEVEL_10_1:
+        case D3D_FEATURE_LEVEL_10_0:
+            if ( info.width > 8192 || info.height > 8192 )
+            {
+                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 10.0 or 10.1 (8192) \"%s\".", info.width, info.height, strSourceFileName );
+            }
+            break;
+
+        case D3D_FEATURE_LEVEL_9_3:
+            if ( info.width > 4096 || info.height > 4096 )
+            {
+                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 9.3 (4096) \"%s\".", info.width, info.height, strSourceFileName );
+            }
+            break;
+
+        case D3D_FEATURE_LEVEL_9_2:
+        case D3D_FEATURE_LEVEL_9_1:
+            if ( info.width > 2048 || info.height > 2048 )
+            {
+                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 9.1 or 9.2 (2048) \"%s\".", info.width, info.height, strSourceFileName );
+            }
+            break;
+        }
+
         // Handle normal maps
         DXGI_FORMAT tformat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
 

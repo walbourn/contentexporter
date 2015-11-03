@@ -438,11 +438,17 @@ void ExportMesh::Optimize( DWORD dwFlags )
     }
     else if ( nVerts > 1048575 )
     {
-        ExportLog::LogWarning("Mesh \"%s\" has more than 1048575 vertices.  Index buffer is invalid for Feature Level 9.1 or 9.2.", GetName().SafeString());
+        if ( g_pScene->Settings().dwFeatureLevel <= D3D_FEATURE_LEVEL_9_2 )
+        {
+            ExportLog::LogWarning("Mesh \"%s\" has more than 1048575 vertices.  Index buffer is invalid for Feature Level 9.1 or 9.2.", GetName().SafeString());
+        }
     }
     else if ( nVerts > 65534 )
     {
-        ExportLog::LogWarning("Mesh \"%s\" has more than 65534 vertices.  Index buffer is invalid for Feature Level 9.1.", GetName().SafeString());
+        if ( g_pScene->Settings().dwFeatureLevel <= D3D_FEATURE_LEVEL_9_1 )
+        {
+            ExportLog::LogWarning("Mesh \"%s\" has more than 65534 vertices.  Index buffer is invalid for Feature Level 9.1.", GetName().SafeString());
+        }
     }
 
     // Create real index buffer from index list
