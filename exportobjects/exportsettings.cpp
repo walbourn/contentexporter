@@ -655,7 +655,7 @@ namespace ATG
         g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression );
         g_SettingsManager.AddBool( pCategoryMaterials, "Use BGRA texture format", "texturebgra", false, &bBGRvsRGB );
         g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", true, &bGenerateTextureMipMaps );
-        g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", false, &bForceTextureOverwrite );
+        g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", true, &bForceTextureOverwrite );
         g_SettingsManager.AddBool( pCategoryMaterials, "Use emissive texture as specular texture", "useemissivetexture", true, &bUseEmissiveTexture );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Diffuse Map Texture Filename", "defaultdiffusemap", "", strDefaultDiffuseMapTextureName );
         g_SettingsManager.AddString( pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "", strDefaultNormalMapTextureName );
