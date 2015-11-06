@@ -396,16 +396,23 @@ namespace ATG
         if ( iscompressed
              && info.format != CompressedFormat )
         {
-            std::unique_ptr<ScratchImage> timage( new ScratchImage );
-
-            HRESULT hr = Compress( image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage );
-            if ( FAILED(hr) )
+            if ( (info.width % 4) != 0 || (info.height % 4) != 0 )
             {
-                ExportLog::LogError( "Failing compressing \"%s\" (WIC: %08X).", strSourceFileName, hr );
+                ExportLog::LogWarning( "Texture size (%Iux%Iu) not a multiple of 4 \"%s\", so skipping compress", info.width, info.height, strSourceFileName );
             }
             else
             {
-                image.swap( timage );
+                std::unique_ptr<ScratchImage> timage( new ScratchImage );
+
+                HRESULT hr = Compress( image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage );
+                if ( FAILED(hr) )
+                {
+                    ExportLog::LogError( "Failing compressing \"%s\" (WIC: %08X).", strSourceFileName, hr );
+                }
+                else
+                {
+                    image.swap( timage );
+                }
             }
         }
 
