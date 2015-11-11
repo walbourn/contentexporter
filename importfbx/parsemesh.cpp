@@ -347,6 +347,9 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
         normMatrix = normMatrix.Transpose();
     }
 
+    const bool bInvertTexVCoord = g_pScene->Settings().bInvertTexVCoord;
+    bool tiledTexVCoord = false;
+
     // Loop over polygons.
     DWORD basePolyIndex = 0;
     for( DWORD dwPolyIndex = 0; dwPolyIndex < dwPolyCount; ++dwPolyIndex )
@@ -380,8 +383,6 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                 }
             }
         }
-
-        const bool bInvertTexVCoord = g_pScene->Settings().bInvertTexVCoord;
 
         DWORD dwCornerIndices[3];
         // Loop over triangles in the polygon.
@@ -488,7 +489,18 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
                     pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].x = (float)Value.mData[0];
                     if( bInvertTexVCoord )
                     {
-                        pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = 1.0f - (float)Value.mData[1];
+                        if (Value.mData[1] > 1.0)
+                        {
+                            tiledTexVCoord = true;
+
+                            // Flip for tiled texture coordinates
+                            double f = floor(Value.mData[1]);
+                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = static_cast<float>( ( 1.0f - ( Value.mData[1] - f ) ) + f );
+                        }
+                        else
+                        {
+                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = 1.0f - (float) Value.mData[1];
+                        }
                     }
                     else
                     {
@@ -556,6 +568,11 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
         }
 
         basePolyIndex += dwPolySize;
+    }
+
+    if (tiledTexVCoord)
+    {
+        ExportLog::LogMsg( 1, "Found tiled texture v coordinates in mesh \"%s\" when using -invertvtexcoord+", pMesh->GetName().SafeString() );
     }
 
     if( bSubDProcess )
