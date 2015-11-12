@@ -44,6 +44,15 @@ void FixupGenericMaterial( ExportMaterial* pMaterial )
             pMaterial->AddParameter(OutputParam);
         }
     }
+    else if ( g_ExportCoreSettings.bMaterialColors )
+    {
+        auto pColor = pMaterial->FindParameter( "DiffuseColor" );
+
+        if (pColor && pColor->ValueFloat[0] == 0 && pColor->ValueFloat[1] == 0 && pColor->ValueFloat[2] == 0)
+        {
+            ExportLog::LogWarning( "Material \"%s\" has a black DiffuseColor which will modulate a DiffuseTexture to black. Set a DiffuseColor or use -materialcolors-.", pMaterial->GetName().SafeString());
+        }
+    }
 
     pParam = pMaterial->FindParameter( "NormalMapTexture" );
     if (!pParam)
