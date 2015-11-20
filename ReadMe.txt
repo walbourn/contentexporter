@@ -90,7 +90,7 @@ RELEASE HISTORY
 
 November 5, 2015
     Add warning if attempting to convert non-multiple-of-4 images to compressed DDS
-    Changed ``-forcetextureoverwite`` default to true
+    Changed -forcetextureoverwite default to true
 
 October 30, 2015
     Updated with VS 2015 support using the Autodesk FBX SDK 2016.1 or later

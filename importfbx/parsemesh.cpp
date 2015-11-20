@@ -495,11 +495,19 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
 
                             // Flip for tiled texture coordinates
                             double f = floor(Value.mData[1]);
-                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = static_cast<float>( ( 1.0f - ( Value.mData[1] - f ) ) + f );
+                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = static_cast<float>( ( 1.0 - ( Value.mData[1] - f ) ) + f );
+                        }
+                        else if ( Value.mData[1] >= 0.0 )
+                        {
+                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = 1.0f - (float) Value.mData[1];
                         }
                         else
                         {
-                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = 1.0f - (float) Value.mData[1];
+                            tiledTexVCoord = true;
+
+                            // Flip for tiled texture coordinates
+                            double c = ceil(Value.mData[1]);
+                            pTriangle->Vertex[dwCornerIndex].TexCoords[dwUVIndex].y = static_cast<float>( c - ( 1.0 + ( Value.mData[1] - c ) ) );
                         }
                     }
                     else
