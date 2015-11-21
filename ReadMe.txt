@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-November 5, 2015
+November 20, 2015
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
@@ -87,6 +87,9 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+November 20, 2015
+    Added warning if using -materialcolors+ with black diffuse colors
 
 November 5, 2015
     Add warning if attempting to convert non-multiple-of-4 images to compressed DDS
