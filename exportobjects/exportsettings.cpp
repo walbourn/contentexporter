@@ -605,7 +605,7 @@ namespace ATG
         auto pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes );
         g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", false, &bCompressVertexData );
-        g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", true, &bComputeVertexTangentSpace );
+        g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", false, &bComputeVertexTangentSpace );
         g_SettingsManager.AddIntBounded( pCategoryMeshes, "Generate Tangents on Texture Coordinate Index", "tangentsindex", 0, 0, 7, &iTangentSpaceIndex );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Binormals", "exportbinormals", true, &bExportBinormal );
         static const ExportEnumValue VertexNormalTypes[] = {
