@@ -452,7 +452,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
     }
 
     // Create real index buffer from index list
-    m_pIB.reset(new ExportIB);
+    m_pIB = std::make_unique<ExportIB>();
     m_pIB->SetIndexCount( IndexData.size() );
     if( VertexData.size() > 65535 || g_pScene->Settings().bForceIndex32Format )
     {
@@ -1454,7 +1454,7 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     // create vertex buffer and allocate storage
     size_t nVerts = VertexArray.size();
 
-    m_pVB.reset( new ExportVB );
+    m_pVB = std::make_unique<ExportVB>();
     m_pVB->SetVertexCount( nVerts );
     m_pVB->SetVertexSize( uVertexSize );
     m_pVB->Allocate();
