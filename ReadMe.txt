@@ -3,14 +3,13 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-November 20, 2015
+April 27, 2016
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
 by the DirectX Tool Kit and DXUT, and is used in the Windows 8 Store app sample Marble Maze.
 
-The source is written for Visual Studio 2012 or 2013. It is recommended that you make use of the Windows 8.1 SDK
-and Windows 7 Service Pack 1 or later.
+The source is written for Visual Studio 2013 or 2015.
 
 These components are designed to work without requiring any content from the DirectX SDK. For details,
 see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee663275.aspx>.
@@ -58,13 +57,13 @@ http://go.microsoft.com/fwlink/?LinkId=226208
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2011.3.1 or later (latest tested version is 2016.0) for Windows VS 2012 or VS 2013
+Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2017.0.1) for Windows VS 2013 or VS 2015
 
     http://autodesk.com/fbx
 
-Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK (such as "C:\Program Files\Autodesk\FBX\FbxSdk\2016.0")
+Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK (such as "C:\Program Files\Autodesk\FBX\FbxSdk\2017.0.1")
 
-Open the ContentExporter_2012.sln or ContentExporter_2013.sln file from Visual Studio.
+Open the ContentExporter_2013.sln or ContentExporter_2015.sln file from Visual Studio.
 
 Build the solution
 
@@ -87,6 +86,10 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+April 27, 2016
+    Updated DirectXTex, UVAtlas, DirectXMesh libraries
+    Updated for Autodesk FBX SDK 2017
 
 November 20, 2015
     Added warning if using -materialcolors+ with black diffuse colors
