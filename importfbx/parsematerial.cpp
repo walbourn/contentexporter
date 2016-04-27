@@ -147,17 +147,17 @@ static void CheckUVSettings(FbxFileTexture* texture, ExportMaterial* pMaterial)
 bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
 {
     bool bResult = false;
-    DWORD dwLayeredTextureCount = Property.GetSrcObjectCount( FbxLayeredTexture::ClassId );
+    DWORD dwLayeredTextureCount = Property.GetSrcObjectCount<FbxLayeredTexture>();
     if( dwLayeredTextureCount > 0 )
     {
         DWORD dwTextureIndex = 0;
         for( DWORD i = 0; i < dwLayeredTextureCount; ++i )
         {
-            auto pFbxLayeredTexture = FbxCast<FbxLayeredTexture>( Property.GetSrcObject( FbxLayeredTexture::ClassId, i ) );
-            DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount( FbxFileTexture::ClassId );
+            auto pFbxLayeredTexture = FbxCast<FbxLayeredTexture>( Property.GetSrcObject<FbxLayeredTexture>( i ) );
+            DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount<FbxFileTexture>();
             for( DWORD j = 0; j < dwTextureCount; ++j )
             {
-                auto pFbxTexture = FbxCast<FbxFileTexture>( pFbxLayeredTexture->GetSrcObject( FbxFileTexture::ClassId, j ) );
+                auto pFbxTexture = FbxCast<FbxFileTexture>( pFbxLayeredTexture->GetSrcObject<FbxFileTexture>( j ) );
                 if( !pFbxTexture )
                     continue;
 
@@ -171,10 +171,10 @@ bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
     }
     else
     {
-        DWORD dwTextureCount = Property.GetSrcObjectCount( FbxFileTexture::ClassId );
+        DWORD dwTextureCount = Property.GetSrcObjectCount<FbxFileTexture>();
         for( DWORD i = 0; i < dwTextureCount; ++i )
         {
-            auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject( FbxFileTexture::ClassId, i ) );
+            auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject<FbxFileTexture>( i ) );
             if( !pFbxTexture )
                 continue;
 
