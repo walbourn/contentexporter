@@ -17,7 +17,12 @@
 
 #pragma warning( disable : 4100 4296 4481 4505 4512 4996 )
 
+#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#define NOMCX
+#define NOSERVICE
+#define NOHELP
+
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
