@@ -206,6 +206,24 @@ bool MacroLightmaps( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
+bool MacroNormalMaps(const CHAR* strArgument, bool& bUsedArgument)
+{
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
+    g_pScene->Settings().bExportAnimations = false;
+    g_pScene->Settings().bExportMeshes = true;
+    g_pScene->Settings().bExportMaterials = true;
+    g_pScene->Settings().bExportScene = true;
+    g_pScene->Settings().bComputeVertexTangentSpace = true;
+    g_pScene->Settings().bExportBinormal = false;
+    g_pScene->Settings().bExportNormals = true;
+    g_pScene->Settings().iMaxUVSetCount = 1;
+    g_pScene->Settings().bMaterialColors = true;
+    g_pScene->Settings().bUseEmissiveTexture = false;
+    return true;
+}
+
 bool MacroWindowsD3D9( const CHAR* strArgument, bool& bUsedArgument )
 {
     UNREFERENCED_PARAMETER(strArgument);
@@ -446,6 +464,7 @@ MacroCommand g_MacroCommands[] = {
     { "animation", "", "Sets export options for animation track export", MacroAnimation },
     { "character", "", "Sets export options for character (mesh & skeleton) export", MacroCharacter },
     { "lightmaps", "", "Sets export options for light-mapped mesh export", MacroLightmaps },
+    { "normalmaps", "", "Sets export otions for normal-mapped mesh export", MacroNormalMaps },
     { "subd11", "", "Sets export options for subdivision surface processing for SubD11 sample", MacroSubD11 },
     { "subdxbox", "", "Sets export options for subdivision surface processing for Xbox SubD sample", MacroSubDXbox },
     { "savesettings", " <filename>", "Saves all settings to the specified filename", MacroSaveSettings },
