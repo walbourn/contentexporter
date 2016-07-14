@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-April 27, 2016
+July 13, 2016
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
@@ -86,6 +86,10 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+July 13, 2016
+    Updated DirectXTex, UVAtlas, DirectXMesh libraries
+    Added -normalmaps macro to set up for exporting meshes using normal mapping
 
 April 27, 2016
     Updated DirectXTex, UVAtlas, DirectXMesh libraries
