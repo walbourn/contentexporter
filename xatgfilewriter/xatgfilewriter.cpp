@@ -808,9 +808,6 @@ void WriteModel( ExportModel* pModel )
     case ExportMesh::AxisAlignedBoxBound:
         WriteAxisAlignedBoxBound( pModel->GetMesh()->GetBoundingAABB() );
         break;
-    case ExportMesh::OrientedBoxBound:
-        WriteOrientedBoxBound( pModel->GetMesh()->GetBoundingOBB() );
-        break;
     }
     for( UINT i = 0; i < pModel->GetBindingCount(); i++ )
     {

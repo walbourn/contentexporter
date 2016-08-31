@@ -316,7 +316,6 @@ public:
     {
         SphereBound = 0,
         AxisAlignedBoxBound = 1,
-        OrientedBoxBound = 2
     };
 
     virtual MeshType GetMeshType() const = 0;
@@ -328,7 +327,6 @@ public:
 
     DirectX::BoundingSphere& GetBoundingSphere() { return m_BoundingSphere; }
     DirectX::BoundingBox& GetBoundingAABB() { return m_BoundingAABB; }
-    DirectX::BoundingOrientedBox& GetBoundingOBB() { return m_BoundingOBB; }
     BoundsType GetSmallestBound() const { return m_SmallestBound; }
 
     virtual void AddInfluence( ExportString InfluenceName ) { m_InfluenceNames.push_back( InfluenceName ); }
@@ -338,7 +336,6 @@ public:
 protected:
     DirectX::BoundingSphere         m_BoundingSphere;
     DirectX::BoundingBox            m_BoundingAABB;
-    DirectX::BoundingOrientedBox    m_BoundingOBB;
     BoundsType                      m_SmallestBound;
     std::vector< ExportIBSubset* >  m_vSubsets;
     std::vector< ExportString >     m_InfluenceNames;

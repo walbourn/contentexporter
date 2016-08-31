@@ -1606,9 +1606,6 @@ void ExportMesh::ComputeBounds()
     BoundingBox::CreateFromPoints( m_BoundingAABB,
                                    m_pVB->GetVertexCount(), reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
 
-    BoundingOrientedBox::CreateFromPoints( m_BoundingOBB,
-                                           m_pVB->GetVertexCount(), reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
-
     float fVolumeSphere = XM_PI * ( 4.0f / 3.0f ) * 
                           m_BoundingSphere.Radius * 
                           m_BoundingSphere.Radius * 
@@ -1618,14 +1615,8 @@ void ExportMesh::ComputeBounds()
                         m_BoundingAABB.Extents.y * 
                         m_BoundingAABB.Extents.z * 8.0f;
 
-    float fVolumeOBB = m_BoundingOBB.Extents.x *
-                       m_BoundingOBB.Extents.y *
-                       m_BoundingOBB.Extents.z * 8.0f;
-
-    if( fVolumeAABB <= fVolumeSphere && fVolumeAABB <= fVolumeOBB )
+    if( fVolumeAABB <= fVolumeSphere)
         m_SmallestBound = AxisAlignedBoxBound;
-    else if( fVolumeOBB <= fVolumeAABB && fVolumeOBB <= fVolumeSphere )
-        m_SmallestBound = OrientedBoxBound;
     else
         m_SmallestBound = SphereBound;
 }

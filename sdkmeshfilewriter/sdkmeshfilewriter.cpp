@@ -264,10 +264,6 @@ namespace ATG
             MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingAABB().Center;
             MeshHeader.BoundingBoxExtents = pMeshBase->GetBoundingAABB().Extents;
             break;
-        case ExportMeshBase::OrientedBoxBound:
-            MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingOBB().Center;
-            MeshHeader.BoundingBoxExtents = pMeshBase->GetBoundingOBB().Extents;
-            break;
         }
 
         MeshHeader.NumFrameInfluences = static_cast<UINT>( pMeshBase->GetInfluenceCount() );
