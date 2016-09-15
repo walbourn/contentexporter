@@ -292,6 +292,15 @@ namespace ATG
                 return;
             }
         }
+        else if ( _stricmp( ext, ".hdr" ) == 0 )
+        {
+            HRESULT hr = LoadFromHDRFile( wSource, &info, *image );
+            if ( FAILED(hr) )
+            {
+                ExportLog::LogError( "Could not load texture \"%s\" (HDR: %08X).", strSourceFileName, hr );
+                return;
+            }
+        }
         else
         {
             HRESULT hr = LoadFromWICFile( wSource, TEX_FILTER_DEFAULT, &info, *image );
@@ -425,6 +434,14 @@ namespace ATG
             auto img = image->GetImage( 0, 0, 0 );
             if ( img )
                 hr = SaveToTGAFile( *img, wDest );
+            else
+                hr = E_FAIL;
+        }
+        else if ( _stricmp( ext, ".hdr" ) == 0 )
+        {
+            auto img = image->GetImage( 0, 0, 0 );
+            if ( img )
+                hr = SaveToHDRFile( *img, wDest );
             else
                 hr = E_FAIL;
         }
