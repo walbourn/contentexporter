@@ -589,7 +589,7 @@ namespace ATG
             { "Feature Level 9.2",  "9.2",  D3D_FEATURE_LEVEL_9_2 },
             { "Feature Level 9.1",  "9.1",  D3D_FEATURE_LEVEL_9_1 },
         };
-        g_SettingsManager.AddEnum( pCategoryPlatform, "Target Feature Level", "fl", D3D_FEATURE_LEVEL_9_3, FLTypes, ARRAYSIZE( FLTypes ), (INT*)&dwFeatureLevel );
+        g_SettingsManager.AddEnum( pCategoryPlatform, "Target Feature Level", "featurelevel", D3D_FEATURE_LEVEL_9_3, FLTypes, ARRAYSIZE( FLTypes ), (INT*)&dwFeatureLevel );
         pCategoryPlatform->ReverseChildOrder();
         
         auto pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
