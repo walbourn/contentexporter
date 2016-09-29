@@ -589,7 +589,7 @@ namespace ATG
             { "Feature Level 9.2",  "9.2",  D3D_FEATURE_LEVEL_9_2 },
             { "Feature Level 9.1",  "9.1",  D3D_FEATURE_LEVEL_9_1 },
         };
-        g_SettingsManager.AddEnum( pCategoryPlatform, "Target Feature Level", "featurelevel", D3D_FEATURE_LEVEL_9_3, FLTypes, ARRAYSIZE( FLTypes ), (INT*)&dwFeatureLevel );
+        g_SettingsManager.AddEnum( pCategoryPlatform, "Target Feature Level", "featurelevel", D3D_FEATURE_LEVEL_11_0, FLTypes, ARRAYSIZE( FLTypes ), (INT*)&dwFeatureLevel );
         pCategoryPlatform->ReverseChildOrder();
         
         auto pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
@@ -613,10 +613,20 @@ namespace ATG
             { "UBYTE4N Biased (4 bytes)", "ubyte4n", D3DDECLTYPE_UBYTE4N },
             { "SHORT4N (8 bytes)", "short4n", D3DDECLTYPE_SHORT4N },
             { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
+            { "R11G11B10 Biased (4 bytes)", "r11g11b10", D3DDECLTYPE_DXGI_R11G11B10_FLOAT },
         };
         g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Vertex Colors", "exportcolors", true, &bExportColors );
+        static const ExportEnumValue VertexColorTypes[] = {
+            { "D3DCOLOR (4 bytes)", "bgra", D3DDECLTYPE_D3DCOLOR },
+            { "UBYTE4N (4 bytes)", "rgba", D3DDECLTYPE_UBYTE4N },
+            { "FLOAT4 (16 bytes)", "float4", D3DDECLTYPE_FLOAT4 },
+            { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
+            { "10:10:10:2 (4 byts)", "rgba_10", D3DDECLTYPE_DXGI_R10G10B10A2_UNORM },
+            { "R11G11B10 (4 bytes)", "r11g11b10", D3DDECLTYPE_DXGI_R11G11B10_FLOAT },
+        };
+        g_SettingsManager.AddEnum(pCategoryMeshes, "Type for Vertex Colors", "vertexcolortype", D3DDECLTYPE_D3DCOLOR, VertexColorTypes, ARRAYSIZE(VertexColorTypes), (INT*)&dwVertexColorType);
         g_SettingsManager.AddBool( pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", false, &bForceIndex32Format );
         g_SettingsManager.AddIntBounded( pCategoryMeshes, "Max UV Set Count", "maxuvsetcount", 8, 0, 8, &iMaxUVSetCount );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Bone Weights & Indices for Skinned Meshes", "exportboneweights", true, &bExportSkinWeights );

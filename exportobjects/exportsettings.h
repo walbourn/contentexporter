@@ -171,6 +171,7 @@ namespace ATG
         DWORD       dwFeatureLevel;
         bool        bExportNormals;
         bool        bExportColors;
+        DWORD       dwVertexColorType;
         bool        bForceIndex32Format;
         INT         iMaxUVSetCount;
         bool        bExportSkinWeights;
@@ -189,8 +190,6 @@ namespace ATG
         CHAR        strDefaultSpecMapTextureName[SETTINGS_STRING_LENGTH];
         bool        bCompressVertexData;
         DWORD       dwNormalCompressedType;
-        DWORD       dwTexCoordCompressedType;
-        DWORD       dwPositionCompressedType;
         bool        bTextureCompression;
         bool        bMaterialColors;
         bool        bBGRvsRGB;

@@ -27,10 +27,171 @@ using namespace DirectX::PackedVector;
 
 extern ATG::ExportScene* g_pScene;
 
+namespace
+{
+    void NormalizeBoneWeights(BYTE* pWeights)
+    {
+        DWORD dwSum = static_cast<DWORD>(pWeights[0]) + static_cast<DWORD>(pWeights[1]) + static_cast<DWORD>(pWeights[2]) + static_cast<DWORD>(pWeights[3]);
+        if (dwSum == 255)
+            return;
+
+        INT iDifference = 255 - static_cast<INT>(dwSum);
+        for (DWORD i = 0; i < 4; ++i)
+        {
+            if (pWeights[i] == 0)
+                continue;
+            INT iValue = static_cast<INT>(pWeights[i]);
+            if (iValue + iDifference > 255)
+            {
+                iDifference -= (255 - iValue);
+                iValue = 255;
+            }
+            else
+            {
+                iValue += iDifference;
+                iDifference = 0;
+            }
+            pWeights[i] = static_cast<BYTE>(iValue);
+        }
+
+        dwSum = static_cast<DWORD>(pWeights[0]) + static_cast<DWORD>(pWeights[1]) + static_cast<DWORD>(pWeights[2]) + static_cast<DWORD>(pWeights[3]);
+        assert(dwSum == 255);
+    }
+
+
+    inline INT GetElementSizeFromDeclType(DWORD Type)
+    {
+        switch (Type)
+        {
+        case D3DDECLTYPE_FLOAT1:
+        case D3DDECLTYPE_D3DCOLOR:
+        case D3DDECLTYPE_UBYTE4:
+        case D3DDECLTYPE_UBYTE4N:
+        case D3DDECLTYPE_FLOAT16_2:
+        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:
+            return 4;
+
+        case D3DDECLTYPE_FLOAT2:
+        case D3DDECLTYPE_SHORT4N:
+        case D3DDECLTYPE_FLOAT16_4:
+            return 8;
+
+        case D3DDECLTYPE_FLOAT3:
+            return 12;
+
+        case D3DDECLTYPE_FLOAT4:
+            return 16;
+
+        case D3DDECLTYPE_UNUSED:
+            return 0;
+
+        default:
+            assert(false);
+            return 0;
+        }
+    }
+
+
+    void TransformAndWriteVector(BYTE* pDest, XMFLOAT3* normal, const XMFLOAT3& Src, DWORD dwDestFormat)
+    {
+        XMFLOAT3 SrcTransformed;
+        g_pScene->GetDCCTransformer()->TransformDirection(&SrcTransformed, &Src);
+
+        if (normal)
+        {
+            memcpy(normal, &SrcTransformed, sizeof(XMFLOAT3));
+        }
+
+        switch (dwDestFormat)
+        {
+        case D3DDECLTYPE_FLOAT3:
+        {
+            *reinterpret_cast<XMFLOAT3*>(pDest) = SrcTransformed;
+            break;
+        }
+        case D3DDECLTYPE_UBYTE4N: // Biased to get normals into range [-1,1]
+        {
+            XMVECTOR v = XMLoadFloat3(&SrcTransformed);
+            v = v * g_XMOneHalf;
+            v += g_XMOneHalf;
+            v = XMVectorSelect(g_XMOne, v, g_XMSelect1110);
+            XMStoreUByteN4(reinterpret_cast<XMUBYTEN4*>(pDest), v);
+            break;
+        }
+        case D3DDECLTYPE_SHORT4N:
+        {
+            *reinterpret_cast<XMSHORTN4*>(pDest) = XMSHORTN4(SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1);
+            break;
+        }
+        case D3DDECLTYPE_FLOAT16_4:
+        {
+            *reinterpret_cast<XMHALF4*>(pDest) = XMHALF4(SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1);
+            break;
+        }
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT: // Biased to get normals into range [-1,1]
+        {
+            XMVECTOR v = XMLoadFloat3(&SrcTransformed);
+            v = v * g_XMOneHalf;
+            v += g_XMOneHalf;
+
+            XMStoreFloat3PK(reinterpret_cast<XMFLOAT3PK*>(pDest), v);
+            break;
+        }
+        default:
+            assert(false);
+            break;
+        }
+    }
+
+
+    void WriteColor(BYTE* pDest, const XMFLOAT4& Src, DWORD dwDestFormat)
+    {
+        static const XMVECTORF32 s_8BitBias = { 0.5f / 255.f, 0.5f / 255.f, 0.5f / 255.f, 0.5f / 255.f };
+
+        switch (dwDestFormat)
+        {
+        case D3DDECLTYPE_D3DCOLOR:
+        {
+            XMVECTOR clr = XMLoadFloat4(&Src);
+            clr = XMVectorAdd(clr, s_8BitBias);
+            XMStoreColor(reinterpret_cast<XMCOLOR*>(pDest), clr);
+            break;
+        }
+        case D3DDECLTYPE_UBYTE4N:
+        {
+            XMVECTOR clr = XMLoadFloat4(&Src);
+            clr = XMVectorAdd(clr, s_8BitBias);
+            XMStoreUByteN4(reinterpret_cast<XMUBYTEN4*>(pDest), clr);
+            break;
+        }
+        case D3DDECLTYPE_FLOAT4:
+            *reinterpret_cast<XMFLOAT4*>(pDest) = Src;
+            break;
+        case D3DDECLTYPE_FLOAT16_4:
+            *reinterpret_cast<XMHALF4*>(pDest) = XMHALF4(Src.x, Src.y, Src.z, Src.z);
+            break;
+        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:
+        {
+            XMVECTOR clr = XMLoadFloat4(&Src);
+            XMStoreUDecN4(reinterpret_cast<XMUDECN4*>(pDest), clr);
+            break;
+        }
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:
+        {
+            XMVECTOR clr = XMLoadFloat4(&Src);
+            XMStoreFloat3PK(reinterpret_cast<XMFLOAT3PK*>(pDest), clr);
+            break;
+        }
+        default:
+            assert(false);
+            break;
+        }
+    }
+}
+
 namespace ATG
 {
-
-INT GetElementSizeFromDeclType(DWORD Type);
 
 ExportMeshTriangleAllocator g_MeshTriangleAllocator;
 
@@ -136,6 +297,8 @@ void ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const size_t 
             case D3DDECLTYPE_D3DCOLOR:
             case D3DDECLTYPE_UBYTE4:
             case D3DDECLTYPE_UBYTE4N:
+            case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:
+            case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:
                 *pElement = _byteswap_ulong( *pElement );
                 break;
             case D3DDECLTYPE_SHORT4N:
@@ -548,7 +711,18 @@ void ExportMesh::Optimize( DWORD dwFlags )
         {
             const D3DVERTEXELEMENT9& Element = GetVertexDeclElement( i );
 
-            ExportLog::LogMsg( 4, "Element %2Iu Stream %2u Offset %2u: %12s.%-2u Type %s (%d bytes)", i, Element.Stream, Element.Offset, strDeclUsages[Element.Usage], Element.UsageIndex, strDeclTypes[Element.Type], GetElementSizeFromDeclType( Element.Type ) );
+            const char* declType = (Element.Type < ARRAYSIZE(strDeclTypes)) ? strDeclTypes[Element.Type] : nullptr;
+            if (!declType)
+            {
+                switch (Element.Type)
+                {
+                case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:    declType = "RGBA10Bit"; break;
+                case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:      declType = "R11G11B10"; break;
+                default:                                    declType = "*UNKNOWN*"; break;
+                }
+            }
+
+            ExportLog::LogMsg( 4, "Element %2Iu Stream %2u Offset %2u: %12s.%-2u Type %s (%d bytes)", i, Element.Stream, Element.Offset, strDeclUsages[Element.Usage], Element.UsageIndex, declType, GetElementSizeFromDeclType( Element.Type ) );
         }
     }
 
@@ -1116,113 +1290,6 @@ void ExportMesh::OptimizeVcache()
     m_pAdjacency.reset();
 }
 
-void NormalizeBoneWeights( BYTE* pWeights )
-{
-    DWORD dwSum = static_cast<DWORD>( pWeights[0] ) + static_cast<DWORD>( pWeights[1] ) + static_cast<DWORD>( pWeights[2] ) + static_cast<DWORD>( pWeights[3] );
-    if( dwSum == 255 )
-        return;
-
-    INT iDifference = 255 - static_cast<INT>( dwSum );
-    for( DWORD i = 0; i < 4; ++i )
-    {
-        if( pWeights[i] == 0 )
-            continue;
-        INT iValue = static_cast<INT>( pWeights[i] );
-        if( iValue + iDifference > 255 )
-        {
-            iDifference -= ( 255 - iValue );
-            iValue = 255;
-        }
-        else
-        {
-            iValue += iDifference;
-            iDifference = 0;
-        }
-        pWeights[i] = static_cast<BYTE>( iValue );
-    }
-
-    dwSum = static_cast<DWORD>( pWeights[0] ) + static_cast<DWORD>( pWeights[1] ) + static_cast<DWORD>( pWeights[2] ) + static_cast<DWORD>( pWeights[3] );
-    assert( dwSum == 255 );
-}
-
-
-__inline INT GetElementSizeFromDeclType(DWORD Type)
-{
-    switch (Type)
-    {
-    case D3DDECLTYPE_FLOAT1:
-        return 4;
-    case D3DDECLTYPE_FLOAT2:
-        return 8;
-    case D3DDECLTYPE_FLOAT3:
-        return 12;
-    case D3DDECLTYPE_FLOAT4:
-        return 16;
-    case D3DDECLTYPE_D3DCOLOR:
-        return 4;
-    case D3DDECLTYPE_UBYTE4:
-        return 4;
-    case D3DDECLTYPE_UBYTE4N:
-        return 4;
-    case D3DDECLTYPE_SHORT4N:
-        return 8;
-    case D3DDECLTYPE_FLOAT16_2:
-        return 4;
-    case D3DDECLTYPE_FLOAT16_4:
-        return 8;
-    case D3DDECLTYPE_UNUSED:
-        return 0;
-    default:
-        assert(false);
-        return 0;
-    }
-}
-
-
-void TransformAndWriteVector( BYTE* pDest, XMFLOAT3* normal, const XMFLOAT3& Src, DWORD dwDestFormat )
-{
-    XMFLOAT3 SrcTransformed;
-    g_pScene->GetDCCTransformer()->TransformDirection( &SrcTransformed, &Src );
-
-    if (normal)
-    {
-        memcpy(normal, &SrcTransformed, sizeof(XMFLOAT3));
-    }
-
-    switch( dwDestFormat )
-    {
-    case D3DDECLTYPE_FLOAT3:
-        {
-            *reinterpret_cast<XMFLOAT3*>(pDest) = SrcTransformed;
-            break;
-        }
-    case D3DDECLTYPE_UBYTE4N:
-        {
-            XMVECTOR v = XMLoadFloat3( &SrcTransformed );
-            v = v * g_XMOneHalf;
-            v += g_XMOneHalf;
-            v = XMVectorSelect( g_XMOne, v, g_XMSelect1110 );
-
-            XMUBYTEN4 UB4;
-            XMStoreUByteN4( &UB4, v );
-            
-            *reinterpret_cast<XMUBYTEN4*>(pDest) = UB4;
-            break;
-        }
-    case D3DDECLTYPE_SHORT4N:
-        {
-            *reinterpret_cast<XMSHORTN4*>(pDest) = XMSHORTN4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
-            break;
-        }
-    case D3DDECLTYPE_FLOAT16_4:
-        {
-            *reinterpret_cast<XMHALF4*>(pDest) = XMHALF4( SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1 );
-            break;
-        }
-    }
-}
-
-
 void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags )
 {
     UINT uVertexSize = 0;
@@ -1244,18 +1311,33 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
     bool bCompressVertexData = ( dwFlags & COMPRESS_VERTEX_DATA );
 
+    DWORD dwColorType = g_pScene->Settings().dwVertexColorType;
+    DXGI_FORMAT dwColorTypeDXGI = DXGI_FORMAT_B8G8R8A8_UNORM;
+
+    switch(dwColorType)
+    {
+    case D3DDECLTYPE_FLOAT4:                    dwColorTypeDXGI = DXGI_FORMAT_R32G32B32A32_FLOAT;   break;
+    case D3DDECLTYPE_D3DCOLOR:                  break;
+    case D3DDECLTYPE_UBYTE4N:                   dwColorTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;       break;
+    case D3DDECLTYPE_FLOAT16_4:                 dwColorTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;   break;
+    case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:    dwColorTypeDXGI = DXGI_FORMAT_R10G10B10A2_UNORM;    break;
+    case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:      dwColorTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;      break;
+    default:                                    assert(false);                                      break;
+    }
+
     DWORD dwNormalType = D3DDECLTYPE_FLOAT3;
     DXGI_FORMAT dwNormalTypeDXGI = DXGI_FORMAT_R32G32B32_FLOAT;
-    if( bCompressVertexData )
+    if (bCompressVertexData)
     {
         dwNormalType = g_pScene->Settings().dwNormalCompressedType;
 
-        switch(dwNormalType)
+        switch (dwNormalType)
         {
-        case D3DDECLTYPE_UBYTE4N:   dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
-        case D3DDECLTYPE_SHORT4N:   dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
-        case D3DDECLTYPE_FLOAT16_4: dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
-        default:                    assert(false);                                      break;
+        case D3DDECLTYPE_UBYTE4N:               dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
+        case D3DDECLTYPE_SHORT4N:               dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
+        case D3DDECLTYPE_FLOAT16_4:             dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:  dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     break;
+        default:                                assert(false);                                      break;
         }
     }
 
@@ -1329,11 +1411,11 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
         VertexElement.Offset = static_cast<WORD>( iCurrentVertexOffset );
         VertexElement.Usage = D3DDECLUSAGE_COLOR;
-        VertexElement.Type = D3DDECLTYPE_D3DCOLOR;
+        VertexElement.Type = static_cast<BYTE>( dwColorType );
         m_VertexElements.push_back( VertexElement );
 
         InputElement.SemanticName = "COLOR";
-        InputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        InputElement.Format = dwColorTypeDXGI;
         InputElement.AlignedByteOffset = static_cast<UINT>( iCurrentVertexOffset );
         m_InputLayout.push_back( InputElement );
 
@@ -1522,12 +1604,7 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
         }
         if( iColorOffset != -1 )
         {
-            UINT uColor = 0;
-            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.w * 255.0f ) ) << 24;
-            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.x * 255.0f ) ) << 16;
-            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.y * 255.0f ) ) << 8;
-            uColor |= ( static_cast<BYTE>( pSrcVertex->Color.z * 255.0f ) );
-            memcpy( pDestVertex + iColorOffset, &uColor, 4 );
+            WriteColor( pDestVertex + iColorOffset, pSrcVertex->Color, dwColorType );
         }
         if( iUVOffset != -1 )
         {

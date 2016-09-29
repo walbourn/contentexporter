@@ -235,6 +235,7 @@ bool MacroWindowsD3D9( const CHAR* strArgument, bool& bUsedArgument )
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = false;
+    g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_9_3;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return true;
 }
@@ -250,6 +251,7 @@ bool MacroWindowsD3D10( const CHAR* strArgument, bool& bUsedArgument )
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = false;
+    g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_10_0;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return true;
 }
@@ -265,6 +267,7 @@ bool MacroWindowsD3D11( const CHAR* strArgument, bool& bUsedArgument )
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = true;
+    g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_11_0;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return true;
 }
@@ -281,7 +284,24 @@ bool MacroXbox360( const CHAR* strArgument, bool& bUsedArgument )
     g_pScene->Settings().bCompressVertexData = true;
     g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
     g_pScene->Settings().bBGRvsRGB = true;
+    g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_9_3;
     g_ExportFileFormat = FILEFORMAT_XATG;
+    return true;
+}
+
+bool MacroXboxOne(const CHAR* strArgument, bool& bUsedArgument)
+{
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
+    g_pScene->Settings().bLittleEndian = true;
+    g_XATGSettings.bBundleTextures = false;
+    g_XATGSettings.bUseExistingBundle = false;
+    g_pScene->Settings().bCompressVertexData = true;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_pScene->Settings().bBGRvsRGB = true;
+    g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_11_1;
+    g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return true;
 }
 
@@ -457,6 +477,7 @@ MacroCommand g_MacroCommands[] = {
     { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
+    { "xboxone", "", "Sets export options for an Xbox One target", MacroXboxOne },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
     { "windowsd3d10", "", "Sets export options for a Windows Direct3D 10 target", MacroWindowsD3D10 },
     { "windowsd3d11", "", "Sets export options for a Windows Direct3D 11 target", MacroWindowsD3D11 },
@@ -858,6 +879,20 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     if ( InitialSettings.bForceIndex32Format && (InitialSettings.dwFeatureLevel <= D3D_FEATURE_LEVEL_9_1) )
     {
         ExportLog::LogWarning("32-bit index buffers not supported on Feature Level 9.1");
+    }
+
+    if ( InitialSettings.bCompressVertexData
+         && (InitialSettings.dwNormalCompressedType == D3DDECLTYPE_DXGI_R11G11B10_FLOAT)
+         && (InitialSettings.dwFeatureLevel < D3D_FEATURE_LEVEL_10_0) )
+    {
+        ExportLog::LogWarning("R11G11B10_FLOAT in vertex normals not supported on Feature Level 9.x");
+    }
+
+    if ( InitialSettings.bExportColors
+         && (InitialSettings.dwVertexColorType == D3DDECLTYPE_DXGI_R10G10B10A2_UNORM || InitialSettings.dwVertexColorType == D3DDECLTYPE_DXGI_R11G11B10_FLOAT)
+         && (InitialSettings.dwFeatureLevel < D3D_FEATURE_LEVEL_10_0))
+    {
+        ExportLog::LogWarning("R11G11B10_FLOAT/10:10:10:2 vertex colors not supported on Feature Level 9.x");
     }
 
     HRESULT hr = FBXImport::Initialize();
