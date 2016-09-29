@@ -554,6 +554,17 @@ void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
                     g_pXMLWriter->WriteStringFormat( "%f, %f, %f, %f%s", (float)pWords[0] / 32767.0f, (float)pWords[1] / 32767.0f, (float)pWords[2] / 32767.0f, (float)pWords[3] / 32767.0f, strComma );
                     break;
                 }
+            case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM: // Debias to get back into normal range [-1, 1]
+                {
+                    XMVECTOR v = XMLoadUDecN4(reinterpret_cast<const XMUDECN4*>(pVertexData));
+                    v = XMVectorMultiply(v, g_XMTwo);
+                    v = XMVectorSubtract(v, g_XMOne);
+
+                    XMFLOAT3 fData;
+                    XMStoreFloat3(&fData, v);
+                    g_pXMLWriter->WriteStringFormat("%f, %f, %f%s",fData.x, fData.y, fData.z, strComma);
+                    break;
+                }
             case D3DDECLTYPE_DXGI_R11G11B10_FLOAT: // Debias to get back into normal range [-1, 1]
                 {
                     XMVECTOR v = XMLoadFloat3PK(reinterpret_cast<const XMFLOAT3PK*>(pVertexData));
@@ -561,7 +572,7 @@ void WriteVertexBufferVerbose( ExportVB* pVB, const D3DVERTEXELEMENT9* pVertexEl
                     v = XMVectorSubtract(v, g_XMOne);
 
                     XMFLOAT3 fData;
-                    XMStoreFloat3(&fData, v);                   
+                    XMStoreFloat3(&fData, v);
                     g_pXMLWriter->WriteStringFormat("%f, %f, %f%s",fData.x, fData.y, fData.z, strComma);
                     break;
                 }

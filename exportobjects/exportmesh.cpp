@@ -110,7 +110,7 @@ namespace
             *reinterpret_cast<XMFLOAT3*>(pDest) = SrcTransformed;
             break;
         }
-        case D3DDECLTYPE_UBYTE4N: // Biased to get normals into range [-1,1]
+        case D3DDECLTYPE_UBYTE4N: // Biased to get normals [-1,1] into range
         {
             XMVECTOR v = XMLoadFloat3(&SrcTransformed);
             v = v * g_XMOneHalf;
@@ -129,7 +129,16 @@ namespace
             *reinterpret_cast<XMHALF4*>(pDest) = XMHALF4(SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1);
             break;
         }
-        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT: // Biased to get normals into range [-1,1]
+        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM: // Biased to get normals [-1,1] into range
+        {
+            XMVECTOR v = XMLoadFloat3(&SrcTransformed);
+            v = v * g_XMOneHalf;
+            v += g_XMOneHalf;
+
+            XMStoreUDecN4(reinterpret_cast<XMUDECN4*>(pDest), v);
+            break;
+        }
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT: // Biased to get normals [-1,1] into range
         {
             XMVECTOR v = XMLoadFloat3(&SrcTransformed);
             v = v * g_XMOneHalf;
@@ -1333,11 +1342,12 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
         switch (dwNormalType)
         {
-        case D3DDECLTYPE_UBYTE4N:               dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
-        case D3DDECLTYPE_SHORT4N:               dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
-        case D3DDECLTYPE_FLOAT16_4:             dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
-        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:  dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     break;
-        default:                                assert(false);                                      break;
+        case D3DDECLTYPE_UBYTE4N:                dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
+        case D3DDECLTYPE_SHORT4N:                dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
+        case D3DDECLTYPE_FLOAT16_4:              dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
+        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM: dwNormalTypeDXGI = DXGI_FORMAT_R10G10B10A2_UNORM;   break;
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:   dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     break;
+        default:                                 assert(false);                                      break;
         }
     }
 

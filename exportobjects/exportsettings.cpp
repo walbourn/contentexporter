@@ -613,6 +613,7 @@ namespace ATG
             { "UBYTE4N Biased (4 bytes)", "ubyte4n", D3DDECLTYPE_UBYTE4N },
             { "SHORT4N (8 bytes)", "short4n", D3DDECLTYPE_SHORT4N },
             { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
+            { "10:10:10:2 Biased (4 bytes)", "rgba_10", D3DDECLTYPE_DXGI_R10G10B10A2_UNORM },
             { "R11G11B10 Biased (4 bytes)", "r11g11b10", D3DDECLTYPE_DXGI_R11G11B10_FLOAT },
         };
         g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );

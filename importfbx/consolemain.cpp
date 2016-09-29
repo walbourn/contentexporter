@@ -882,10 +882,10 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     }
 
     if ( InitialSettings.bCompressVertexData
-         && (InitialSettings.dwNormalCompressedType == D3DDECLTYPE_DXGI_R11G11B10_FLOAT)
+         && (InitialSettings.dwVertexColorType == D3DDECLTYPE_DXGI_R10G10B10A2_UNORM || InitialSettings.dwVertexColorType == D3DDECLTYPE_DXGI_R11G11B10_FLOAT)
          && (InitialSettings.dwFeatureLevel < D3D_FEATURE_LEVEL_10_0) )
     {
-        ExportLog::LogWarning("R11G11B10_FLOAT in vertex normals not supported on Feature Level 9.x");
+        ExportLog::LogWarning("R11G11B10_FLOAT/10:10:10:2 in vertex normals not supported on Feature Level 9.x");
     }
 
     if ( InitialSettings.bExportColors
