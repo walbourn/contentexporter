@@ -15,32 +15,53 @@
 #include "stdafx.h"
 #include "exportmaterialdatabase.h"
 
-namespace ATG
+namespace
 {
+    CHAR g_strMaterialDBFileName[MAX_PATH] = { 0 };
 
-ExportMaterialDefinitionVector  g_Materials;
-CHAR g_strMaterialDBFileName[ MAX_PATH ] = {0};
+    const CHAR* ConvertString(const WCHAR* strData, DWORD dwLength = 0)
+    {
+        static CHAR strText[256] = {};
+        if (!strData)
+        {
+            *strText = 0;
+        }
+        else
+        {
+            int length = (dwLength == 0) ? -1 : static_cast<int>(dwLength);
+            int result = WideCharToMultiByte(CP_ACP, 0, strData, length, strText, 255, nullptr, nullptr);
+            if (result <= 0)
+            {
+                *strText = 0;
+            }
+            else if (result < 256)
+            {
+                strText[result] = 0;
+            }
+        }
+        return strText;
+    }
+
+    bool ConvertBool(const WCHAR* strBool, bool bDefaultValue)
+    {
+        if (!strBool)
+            return bDefaultValue;
+        WCHAR FirstChar = strBool[0];
+        return (FirstChar == L'T' || FirstChar == L't' || FirstChar == L'1');
+    }
+
+    void CopyString(const WCHAR* strData, size_t dwLength, WCHAR* strDest, size_t dwDestLength)
+    {
+        wcsncpy_s(strDest, dwDestLength, strData, dwLength);
+        strDest[dwLength] = L'\0';
+    }
+}
 
 #define MATCH_ELEMENT_NAME(x) ( _wcsicmp( m_strCurrentElementName, x ) == 0 )
 
-const CHAR* ConvertString( const WCHAR* strData, DWORD dwLength = 0 )
+namespace ATG
 {
-    static CHAR strText[256];
-    if( !strData )
-        strData = L"";
-    if( dwLength == 0 )
-        dwLength = static_cast<DWORD>( wcslen( strData ) );
-    assert( dwLength < 255 );
-    WideCharToMultiByte( CP_ACP, 0, strData, dwLength, strText, 256, nullptr, nullptr );
-    strText[ dwLength ] = '\0';
-    return strText;
-}
-
-void CopyString( const WCHAR* strData, size_t dwLength, WCHAR* strDest, size_t dwDestLength )
-{
-    wcsncpy_s( strDest, dwDestLength, strData, dwLength );
-    strDest[ dwLength ] = L'\0';
-}
+ExportMaterialDefinitionVector  g_Materials;
 
 HRESULT MaterialDatabaseReader::ElementBegin( const WCHAR* strName, UINT NameLen, const XMLAttribute *pAttributes, UINT NumAttributes )
 {
@@ -128,14 +149,6 @@ ExportMaterialParameterType ConvertType( const WCHAR* strType )
         return MPT_TEXTURE2D;
 
     return MPT_STRING;
-}
-
-bool ConvertBool( const WCHAR* strBool, bool bDefaultValue )
-{
-    if( !strBool )
-        return bDefaultValue;
-    WCHAR FirstChar = strBool[0];
-    return ( FirstChar == L'T' || FirstChar == L't' || FirstChar == L'1' );
 }
 
 void MaterialDatabaseReader::ProcessElementBeginContent()
