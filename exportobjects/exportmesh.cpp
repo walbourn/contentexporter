@@ -70,6 +70,8 @@ namespace
         case D3DDECLTYPE_FLOAT16_2:
         case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:
         case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:
+        case D3DDECLTYPE_DXGI_R8G8B8A8_SNORM:
+        case D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM:
             return 4;
 
         case D3DDECLTYPE_FLOAT2:
@@ -145,6 +147,17 @@ namespace
             v += g_XMOneHalf;
 
             XMStoreFloat3PK(reinterpret_cast<XMFLOAT3PK*>(pDest), v);
+            break;
+        }
+        case D3DDECLTYPE_DXGI_R8G8B8A8_SNORM:
+        {
+            *reinterpret_cast<XMBYTEN4*>(pDest) = XMBYTEN4(SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1);
+            break;
+        }
+        case D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM:
+        {
+            // Xbox One specific format
+            *reinterpret_cast<XMXDECN4*>(pDest) = XMXDECN4(SrcTransformed.x, SrcTransformed.y, SrcTransformed.z, 1);
             break;
         }
         default:
@@ -308,6 +321,8 @@ void ExportVB::ByteSwap( const D3DVERTEXELEMENT9* pVertexElements, const size_t 
             case D3DDECLTYPE_UBYTE4N:
             case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:
             case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:
+            case D3DDECLTYPE_DXGI_R8G8B8A8_SNORM:
+            case D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM:
                 *pElement = _byteswap_ulong( *pElement );
                 break;
             case D3DDECLTYPE_SHORT4N:
@@ -725,9 +740,11 @@ void ExportMesh::Optimize( DWORD dwFlags )
             {
                 switch (Element.Type)
                 {
-                case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:    declType = "RGBA10Bit"; break;
-                case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:      declType = "R11G11B10"; break;
-                default:                                    declType = "*UNKNOWN*"; break;
+                case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:        declType = "RGBA10Bit"; break;
+                case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:          declType = "R11G11B10"; break;
+                case D3DDECLTYPE_DXGI_R8G8B8A8_SNORM:           declType = "R8G8B8A8_SNORM"; break;
+                case D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM: declType = "R10G10B10_SNORM_A2_UNORM"; break;
+                default:                                        assert(false); break;
                 }
             }
 
@@ -1342,12 +1359,14 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
         switch (dwNormalType)
         {
-        case D3DDECLTYPE_UBYTE4N:                dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
-        case D3DDECLTYPE_SHORT4N:                dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
-        case D3DDECLTYPE_FLOAT16_4:              dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
-        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM: dwNormalTypeDXGI = DXGI_FORMAT_R10G10B10A2_UNORM;   break;
-        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:   dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     break;
-        default:                                 assert(false);                                      break;
+        case D3DDECLTYPE_UBYTE4N:                       dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
+        case D3DDECLTYPE_SHORT4N:                       dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
+        case D3DDECLTYPE_FLOAT16_4:                     dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
+        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:        dwNormalTypeDXGI = DXGI_FORMAT_R10G10B10A2_UNORM;   break;
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:          dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     break;
+        case D3DDECLTYPE_DXGI_R8G8B8A8_SNORM:           dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_SNORM;      break;
+        case D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM: dwNormalTypeDXGI = DXGI_FORMAT(189);                break;
+        default:                                        assert(false);                                      break;
         }
     }
 

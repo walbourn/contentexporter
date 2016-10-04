@@ -615,6 +615,8 @@ namespace ATG
             { "FLOAT16_4 (8 bytes)", "float16_4", D3DDECLTYPE_FLOAT16_4 },
             { "10:10:10:2 Biased (4 bytes)", "rgba_10", D3DDECLTYPE_DXGI_R10G10B10A2_UNORM },
             { "R11G11B10 Biased (4 bytes)", "r11g11b10", D3DDECLTYPE_DXGI_R11G11B10_FLOAT },
+            { "R8G8B8A8 Signed (4 bytes)", "rgba_snorm", D3DDECLTYPE_DXGI_R8G8B8A8_SNORM },
+            { "10:10:10 Signed A2 (4 bytes, Xbox)", "rgba_s10", D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM },
         };
         g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
         g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals );

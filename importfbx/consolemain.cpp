@@ -249,7 +249,7 @@ bool MacroWindowsD3D10( const CHAR* strArgument, bool& bUsedArgument )
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = false;
-    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DXGI_R10G10B10A2_UNORM;
     g_pScene->Settings().bBGRvsRGB = false;
     g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_10_0;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -265,7 +265,7 @@ bool MacroWindowsD3D11( const CHAR* strArgument, bool& bUsedArgument )
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = false;
-    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_DXGI_R10G10B10A2_UNORM;
     g_pScene->Settings().bBGRvsRGB = true;
     g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_11_0;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -298,7 +298,7 @@ bool MacroXboxOne(const CHAR* strArgument, bool& bUsedArgument)
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
     g_pScene->Settings().bCompressVertexData = true;
-    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_FLOAT16_4;
+    g_pScene->Settings().dwNormalCompressedType = D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM;
     g_pScene->Settings().bBGRvsRGB = true;
     g_pScene->Settings().dwFeatureLevel = D3D_FEATURE_LEVEL_11_1;
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -882,10 +882,19 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     }
 
     if ( InitialSettings.bCompressVertexData
-         && (InitialSettings.dwVertexColorType == D3DDECLTYPE_DXGI_R10G10B10A2_UNORM || InitialSettings.dwVertexColorType == D3DDECLTYPE_DXGI_R11G11B10_FLOAT)
+         && (InitialSettings.dwNormalCompressedType == D3DDECLTYPE_DXGI_R10G10B10A2_UNORM
+             || InitialSettings.dwNormalCompressedType == D3DDECLTYPE_DXGI_R11G11B10_FLOAT
+             || InitialSettings.dwNormalCompressedType == D3DDECLTYPE_DXGI_R8G8B8A8_SNORM)
          && (InitialSettings.dwFeatureLevel < D3D_FEATURE_LEVEL_10_0) )
     {
-        ExportLog::LogWarning("R11G11B10_FLOAT/10:10:10:2 in vertex normals not supported on Feature Level 9.x");
+        ExportLog::LogWarning("R11G11B10_FLOAT/10:10:10:2/R8G8B8A8 Signed in vertex normals not supported on Feature Level 9.x");
+    }
+
+    if (InitialSettings.bCompressVertexData
+        && (InitialSettings.dwNormalCompressedType == D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM)
+        && (InitialSettings.dwFeatureLevel < D3D_FEATURE_LEVEL_11_1))
+    {
+        ExportLog::LogWarning("10:10:10 Signed A2 only supported on Xbox One");
     }
 
     if ( InitialSettings.bExportColors
