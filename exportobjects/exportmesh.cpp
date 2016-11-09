@@ -239,7 +239,8 @@ ExportIBSubset* ExportMeshBase::FindSubset( const ExportString Name )
 ExportMesh::ExportMesh( ExportString name )
 : ExportMeshBase( name ),
   m_uDCCVertexCount( 0 ),
-  m_pSubDMesh( nullptr )
+  m_pSubDMesh( nullptr ),
+  m_x2Bias(false)
 {
     m_BoundingSphere.Center = XMFLOAT3( 0, 0, 0 );
     m_BoundingSphere.Radius = 0;
@@ -915,7 +916,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
         return;
     }
 
-    std::unique_ptr<VBWriter> writer( new VBWriter() );
+    auto writer = std::make_unique<VBWriter>();
     hr = writer->Initialize( m_InputLayout.data(), m_InputLayout.size() );
     if (FAILED(hr))
     {
@@ -932,7 +933,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
 
     if ( m_VertexFormat.m_bTangent )
     {
-        hr = writer->Write( tan1.get(), "TANGENT", 0, nVerts );
+        hr = writer->Write( tan1.get(), "TANGENT", 0, nVerts, m_x2Bias );
         if (FAILED(hr))
         {
             ExportLog::LogError("Mesh \"%s\" failed to write tangents (%08X).", GetName().SafeString(), hr );
@@ -941,7 +942,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
 
     if ( m_VertexFormat.m_bBinormal )
     {
-        hr = writer->Write( tan2.get(), "BINORMAL", 0, nVerts );
+        hr = writer->Write( tan2.get(), "BINORMAL", 0, nVerts, m_x2Bias );
         if (FAILED(hr))
         {
             ExportLog::LogError("Mesh \"%s\" failed to write bi-normals (%08X).", GetName().SafeString(), hr );
@@ -1353,17 +1354,18 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
 
     DWORD dwNormalType = D3DDECLTYPE_FLOAT3;
     DXGI_FORMAT dwNormalTypeDXGI = DXGI_FORMAT_R32G32B32_FLOAT;
+    m_x2Bias = false;
     if (bCompressVertexData)
     {
         dwNormalType = g_pScene->Settings().dwNormalCompressedType;
 
         switch (dwNormalType)
         {
-        case D3DDECLTYPE_UBYTE4N:                       dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      break;
+        case D3DDECLTYPE_UBYTE4N:                       dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_UNORM;      m_x2Bias = true;  break;
         case D3DDECLTYPE_SHORT4N:                       dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_SNORM;  break;
         case D3DDECLTYPE_FLOAT16_4:                     dwNormalTypeDXGI = DXGI_FORMAT_R16G16B16A16_FLOAT;  break;
-        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:        dwNormalTypeDXGI = DXGI_FORMAT_R10G10B10A2_UNORM;   break;
-        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:          dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     break;
+        case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:        dwNormalTypeDXGI = DXGI_FORMAT_R10G10B10A2_UNORM;   m_x2Bias = true; break;
+        case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:          dwNormalTypeDXGI = DXGI_FORMAT_R11G11B10_FLOAT;     m_x2Bias = true; break;
         case D3DDECLTYPE_DXGI_R8G8B8A8_SNORM:           dwNormalTypeDXGI = DXGI_FORMAT_R8G8B8A8_SNORM;      break;
         case D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM: dwNormalTypeDXGI = DXGI_FORMAT(189);                break;
         default:                                        assert(false);                                      break;

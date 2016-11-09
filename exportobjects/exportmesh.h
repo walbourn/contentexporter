@@ -417,6 +417,7 @@ protected:
     std::vector< D3D11_INPUT_ELEMENT_DESC  >    m_InputLayout;
     UINT                                        m_uDCCVertexCount;
     ExportSubDProcessMesh*                      m_pSubDMesh;
+    bool                                        m_x2Bias;
 };
 
 class ExportMaterialSubsetBinding
