@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-September 14, 2016
+November 9, 2016
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
@@ -91,6 +91,13 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+November 9, 2016
+    Renamed -fl switch to -featurelevel
+    Added -vertexcolortype switch to control vertex color format
+    Added rgba_snorm, rgba_10, r11g11b10, and rgba_s10 (Xbox One only) to -compressedvertextype 
+    Updated DirectXTex, DirectXMesh libraries
+    Code cleanup
 
 September 14, 2016
     Updated DirectXTex, UVAtlas, DirectXMesh libraries

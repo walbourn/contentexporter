@@ -845,7 +845,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
 
     DWORD stride = m_pVB->GetVertexSize();
 
-    std::unique_ptr<ExportVB> newVB(new ExportVB);
+    auto newVB = std::make_unique<ExportVB>();
     newVB->SetVertexCount( nNewVerts );
     newVB->SetVertexSize( stride );
     newVB->Allocate();
@@ -1273,7 +1273,7 @@ void ExportMesh::OptimizeVcache()
 
     DWORD stride = m_pVB->GetVertexSize();
 
-    std::unique_ptr<ExportVB> newVB(new ExportVB);
+    auto newVB = std::make_unique<ExportVB>();
     newVB->SetVertexCount( nVerts );
     newVB->SetVertexSize( stride );
     newVB->Allocate();
