@@ -3,13 +3,13 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-November 9, 2016
+April 25, 2017
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
 by the DirectX Tool Kit and DXUT, and is used in the Windows 8 Store app sample Marble Maze.
 
-The source is written for Visual Studio 2013 or 2015.
+The source is written for Visual Studio 2013 Update 5, Visual Studio 2015 Update 3, or Visual Studio 2017.
 
 These components are designed to work without requiring any content from the DirectX SDK. For details,
 see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee663275.aspx>.
@@ -68,7 +68,7 @@ Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2017.0.1)
 
 Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK (such as "C:\Program Files\Autodesk\FBX\FbxSdk\2017.0.1")
 
-Open the ContentExporter_2013.sln or ContentExporter_2015.sln file from Visual Studio.
+Open the ContentExporter_201?.sln from Visual Studio.
 
 Build the solution
 
@@ -91,6 +91,10 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+April 25, 2017
+    Updated DirectXTex, UVAtlas, DirectXMesh libraries
+    Added VS 2017 projects
 
 November 9, 2016
     Renamed -fl switch to -featurelevel
