@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-April 25, 2017
+June x, 2017
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
 to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
@@ -91,6 +91,11 @@ http://go.microsoft.com/fwlink/?LinkID=324981
 ---------------
 RELEASE HISTORY
 ---------------
+
+June x, 2017
+    Added support for OpenEXR (via NuGet) to VS 2015 project
+    Removed x86 configurations for VS 2015 / VS 2017 projects
+    Fixed texture conversion format choice for .hdr file format
 
 April 25, 2017
     Updated DirectXTex, UVAtlas, DirectXMesh libraries
