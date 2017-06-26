@@ -969,11 +969,11 @@ void WriteInformation()
     g_pXMLWriter->EndComment();
 
     g_pXMLWriter->StartComment();
-    g_pXMLWriter->WriteStringFormat( "Exporter: %s", g_pScene->Information().ExporterName );
+    g_pXMLWriter->WriteStringFormat( "Exporter: %s", g_pScene->Information().ExporterName.SafeString() );
     g_pXMLWriter->EndComment();
 
     g_pXMLWriter->StartComment();
-    g_pXMLWriter->WriteStringFormat( "DCC: %s", g_pScene->Information().DCCNameAndVersion );
+    g_pXMLWriter->WriteStringFormat( "DCC: %s", g_pScene->Information().DCCNameAndVersion.SafeString());
     g_pXMLWriter->EndComment();
 
     /*

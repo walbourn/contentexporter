@@ -40,7 +40,7 @@ inline bool IsEqual( float A, float B )
 
 XMMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, CXMMATRIX matParentWorld, const bool bWarnings = true )
 {
-    XMMATRIX matWorld;
+    XMMATRIX matWorld = {};
     XMMATRIX matLocal;
     bool bProcessDefaultTransform = true;
 

@@ -18,6 +18,11 @@
 
 #include "DirectXTex.h"
 
+#ifdef USE_OPENEXR
+// See <https://github.com/Microsoft/DirectXTex/wiki/Adding-OpenEXR> for details
+#include "..\ImportFBX\DirectXTexEXR.h"
+#endif
+
 extern ExportPath g_CurrentInputFileName;
 extern ExportPath g_CurrentOutputFileName;
 
@@ -204,13 +209,19 @@ namespace ATG
 
         // Determine the proper texture compression format.
         DXGI_FORMAT CompressedTextureFormat = DXGI_FORMAT_BC1_UNORM;
+        DXGI_FORMAT HDRTextureFormat = DXGI_FORMAT_R11G11B10_FLOAT;
         if( pParameter->Flags & ExportMaterialParameter::EMPF_ALPHACHANNEL )
         {
             CompressedTextureFormat = DXGI_FORMAT_BC3_UNORM;
+            HDRTextureFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
         }
         if( !g_pScene->Settings().bTextureCompression )
         {
             CompressedTextureFormat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
+        }
+        if (g_pScene->Settings().dwFeatureLevel < D3D_FEATURE_LEVEL_10_0)
+        {
+            HDRTextureFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
         }
 
         // Build the export file record for the manifest.
@@ -220,6 +231,7 @@ namespace ATG
         fr.strResourceName = ResourceFileName;
         fr.TextureOperation = TexOperation;
         fr.CompressedTextureFormat = CompressedTextureFormat;
+        fr.HDRTextureFormat = HDRTextureFormat;
         ExportPath DevKitFileName( g_TextureSubPath );
         DevKitFileName.ChangeFileNameWithExtension( ResourceFileName );
         fr.strDevKitFileName = DevKitFileName;
@@ -240,7 +252,7 @@ namespace ATG
         pManifest->AddFile( fr );
     }
 
-    void ConvertImageFormat( const CHAR* strSourceFileName, const CHAR* strDestFileName, DXGI_FORMAT CompressedFormat, bool bNormalMap )
+    void ConvertImageFormat( const CHAR* strSourceFileName, const CHAR* strDestFileName, DXGI_FORMAT CompressedFormat, DXGI_FORMAT HDRFormat, bool bNormalMap )
     {
         bool iscompressed = IsCompressed( CompressedFormat ) && g_bIntermediateDDSFormat;
 
@@ -273,6 +285,7 @@ namespace ATG
         std::unique_ptr<ScratchImage> image( new ScratchImage );
 
         bool isdds = false;
+        bool ishdr = false;
         if ( _stricmp( ext, ".dds" ) == 0 )
         {
             isdds = true;
@@ -294,12 +307,28 @@ namespace ATG
         }
         else if ( _stricmp( ext, ".hdr" ) == 0 )
         {
+            ishdr = true;
             HRESULT hr = LoadFromHDRFile( wSource, &info, *image );
             if ( FAILED(hr) )
             {
                 ExportLog::LogError( "Could not load texture \"%s\" (HDR: %08X).", strSourceFileName, hr );
                 return;
             }
+        }
+        else if (_stricmp(ext, ".exr") == 0)
+        {
+#ifdef USE_OPENEXR
+            ishdr = true;
+            HRESULT hr = LoadFromEXRFile(wSource, &info, *image);
+            if (FAILED(hr))
+            {
+                ExportLog::LogError("Could not load texture \"%s\" (EXR: %08X).", strSourceFileName, hr);
+                return;
+            }
+#else
+            ExportLog::LogError("OpenEXR not supported for this build of the content exporter\n");
+            return;
+#endif
         }
         else
         {
@@ -346,6 +375,11 @@ namespace ATG
 
         // Handle normal maps
         DXGI_FORMAT tformat = g_pScene->Settings().bBGRvsRGB ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
+
+        if (ishdr)
+        {
+            tformat = HDRFormat;
+        }
 
         if ( bNormalMap )
         {
@@ -402,7 +436,8 @@ namespace ATG
         }
 
         // Handle compression
-        if ( iscompressed
+        if ( !ishdr
+             && iscompressed
              && info.format != CompressedFormat )
         {
             if ( (info.width % 4) != 0 || (info.height % 4) != 0 )
@@ -490,11 +525,11 @@ namespace ATG
                 break;
             case ETO_CONVERTFORMAT:
                 // Convert source file to intermediate location.
-                ConvertImageFormat( File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat, false );
+                ConvertImageFormat( File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat, File.HDRTextureFormat, false);
                 break;
             case ETO_BUMPMAP_TO_NORMALMAP:
                 // Convert source file to a normal map, copy to intermediate file location.
-                ConvertImageFormat( File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat, true );
+                ConvertImageFormat( File.strSourceFileName, File.strIntermediateFileName, File.CompressedTextureFormat, File.HDRTextureFormat, true );
                 break;
             }
         }
