@@ -93,6 +93,7 @@ RELEASE HISTORY
 ---------------
 
 June x, 2017
+    Added -ignoresrgb switch to control handling of sRGB metadata in jpg, png, etc.
     Added support for OpenEXR (via NuGet) to VS 2015 project
     Removed x86 configurations for VS 2015 / VS 2017 projects
     Fixed texture conversion format choice for .hdr file format

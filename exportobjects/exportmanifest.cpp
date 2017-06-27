@@ -332,7 +332,11 @@ namespace ATG
         }
         else
         {
-            HRESULT hr = LoadFromWICFile( wSource, TEX_FILTER_DEFAULT, &info, *image );
+            DWORD wicFlags = TEX_FILTER_DEFAULT;
+            if (g_pScene->Settings().bIgnoreSRGB)
+                wicFlags |= WIC_FLAGS_IGNORE_SRGB;
+
+            HRESULT hr = LoadFromWICFile( wSource, wicFlags, &info, *image );
             if ( FAILED(hr) )
             {
                 ExportLog::LogError( "Could not load texture \"%s\" (WIC: %08X).", strSourceFileName, hr );

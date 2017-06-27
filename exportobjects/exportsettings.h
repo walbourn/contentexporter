@@ -193,6 +193,7 @@ namespace ATG
         bool        bTextureCompression;
         bool        bMaterialColors;
         bool        bBGRvsRGB;
+        bool        bIgnoreSRGB;
         bool        bGenerateTextureMipMaps;
         bool        bForceTextureOverwrite;
         bool        bUseEmissiveTexture;
