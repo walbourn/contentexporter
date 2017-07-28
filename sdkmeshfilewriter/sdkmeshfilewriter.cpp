@@ -786,7 +786,7 @@ namespace ATG
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationScaleKey StartKey = pKeys[dwCurrentSrcKey];
-        ExportAnimationScaleKey EndKey;
+        ExportAnimationScaleKey EndKey = {};
         if( dwKeyCount > 1 )
         {
             bEndKey = true;
