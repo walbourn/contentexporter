@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-June 30, 2017
+July 28, 2017
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes
 use of the Autodesk FBX SDK to import an FBX file and then export the data as an SDKMESH. The SDKMESH
@@ -50,7 +50,7 @@ All content and source code for this package are subject to the terms of the MIT
 <http://opensource.org/licenses/MIT>.
 
 Use of OpenEXR is subject to it's own license terms, and requires the ZLIB library as well. Use of
-OpenEXR can be removed by undefining USE_OPENEXR from the VS 2015 project and removing
+OpenEXR can be removed by undefining USE_OPENEXR from the VS 2015/2017 project and removing
 the NuGet packages.
 
     <https://github.com/openexr/openexr/blob/develop/OpenEXR/LICENSE>
@@ -108,8 +108,8 @@ RELEASE NOTES
   x64 native (x64) use is wide-spread for content creation tools and provides much greater
   memory flexiblity. The VS 2013 project retains the x86 configuration if needed.
 
-* OpenEXR support for textures is included in the VS 2015 build only due to limitations in the
-  OpenEXR and ZLIB NuGet packages. Other projects can still build the exporter, but will throw
+* OpenEXR support for textures is not supported in the VS 2013 build due to limitations in the
+  OpenEXR and ZLIB NuGet packages. VS 2013 projects can still build the exporter, but will throw
   an error if you attempt to export an FBX that contains an .exr texture.
 
 * The VS 2017 project uses the VS 2015 version of the Autodesk FBX SDK libraries. VS 2017 C/C++
@@ -119,6 +119,10 @@ RELEASE NOTES
 ---------------
 RELEASE HISTORY
 ---------------
+
+July 28, 2017
+    Added support for OpenEXR (via NuGet) to VS 2017 project
+    Updated DirectXTex library
 
 June 30, 2017
     Added -ignoresrgb switch to control handling of sRGB metadata in jpg, png, etc.
