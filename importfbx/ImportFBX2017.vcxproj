@@ -15,7 +15,7 @@
     <ProjectGuid>{A831840E-93D9-48E4-866C-1F024B3D44FC}</ProjectGuid>
     <RootNamespace>ImportFBX</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -162,7 +162,7 @@
     <ProjectReference Include="..\SDKMeshFileWriter\SDKMeshFileWriter2017.vcxproj">
       <Project>{85495119-fc0e-4f85-8357-8823b6164f9e}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\UVAtlas\UVAtlas_2017.vcxproj">
+    <ProjectReference Include="..\UVAtlas\UVAtlas_2017_Win10.vcxproj">
       <Project>{10359e70-6a7f-4433-8ef1-b0fb688d830e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\XATGFileWriter\XATGFileWriter2017.vcxproj">
