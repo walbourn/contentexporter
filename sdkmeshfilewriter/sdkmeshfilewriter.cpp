@@ -688,7 +688,7 @@ namespace ATG
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationPositionKey StartKey = pKeys[dwCurrentSrcKey];
-        ExportAnimationPositionKey EndKey;
+        ExportAnimationPositionKey EndKey = {};
         if( dwKeyCount > 1 )
         {
             bEndKey = true;
@@ -737,7 +737,7 @@ namespace ATG
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationOrientationKey StartKey = pKeys[dwCurrentSrcKey];
-        ExportAnimationOrientationKey EndKey;
+        ExportAnimationOrientationKey EndKey = {};
         if( dwKeyCount > 1 )
         {
             bEndKey = true;
@@ -786,7 +786,7 @@ namespace ATG
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationScaleKey StartKey = pKeys[dwCurrentSrcKey];
-        ExportAnimationScaleKey EndKey;
+        ExportAnimationScaleKey EndKey = {};
         if( dwKeyCount > 1 )
         {
             bEndKey = true;

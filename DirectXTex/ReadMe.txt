@@ -3,7 +3,7 @@ DIRECTX TEXTURE LIBRARY (DirectXTex)
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-January 31, 2017
+November 1, 2017
 
 This package contains DirectXTex, a shared source library for reading and writing DDS
 files, and performing various texture content processing operations including
@@ -13,8 +13,10 @@ use of the Windows Image Component (WIC) APIs. It also includes simple .TGA and 
 readers and writers since these image file formats are commonly used for texture content
 processing pipelines, but are not currently supported by a built-in WIC codec.
 
-The source is written for Visual Studio 2013 or 2015. It is recommended that you
-make use of VS 2013 Update 5 or VS 2015 Update 3 and Windows 7 Service Pack 1 or later.
+This code is designed to build with Visual Studio 2013 Update 5, Visual Studio 2015 Update 3,
+or Visual Studio 2017. It is recommended that you make use of VS 2015 Update 3, Windows Tools
+1.4.1, and the Windows 10 Anniversary Update SDK (14393) or VS 2017 with the Windows 10
+Fall Creators Update SDK (16299).
 
 DirectXTex\
     This contains the DirectXTex library. This includes a full-featured DDS reader and writer
@@ -31,15 +33,24 @@ Texconv\
     from the DirectX SDK utilizing DirectXTex rather than D3DX.
 
     It supports the same arguments as the Texture Conversion Tool Extended (texconvex.exe) DirectX
-    SDK utility. See <http://msdn.microsoft.com/en-us/library/ee422506.aspx>. The primary differences
-    are the -10 and -11 arguments are not applicable and the filter names (POINT, LINEAR, CUBIC,
-    FANT or BOX, TRIANGLE, *_DITHER, *_DITHER_DIFFUSION). This also includes support for the JPEG XR
-    (HD Photo) bitmap format.
+    SDK utility. The primary differences are the -10 and -11 arguments are not applicable and the
+    filter names (POINT, LINEAR, CUBIC, FANT or BOX, TRIANGLE, *_DITHER, *_DITHER_DIFFUSION).
+    This also includes support for the JPEG XR (HD Photo) bitmap format.
     (see <http://blogs.msdn.com/b/chuckw/archive/2011/01/19/known-issue-texconvex.aspx>)
+
+    See <https://github.com/Microsoft/DirectXTex/wiki/Texconv> for details.
 
 Texassemble\
     This DirectXTex sample is a command-line utility for creating cubemaps, volume maps, or
     texture arrays from a set of individual input image files.
+
+    See <https://github.com/Microsoft/DirectXTex/wiki/Texassemble> for details.
+
+Texdiag\
+    This DirectXTex sample is a command-line utility for analyzing image contents, primarily for
+    debugging purposes.
+
+    See <https://github.com/Microsoft/DirectXTex/wiki/Texdiag>
     
 DDSView\
     This DirectXTex sample is a simple Direct3D 11-based viewer for DDS files. For array textures
@@ -109,9 +120,38 @@ RELEASE NOTES
 * Loading of 96bpp floating-point TIFF files results in a corrupted image prior to Windows 8. This fix is available
   on Windows 7 SP1 with KB 2670838 installed.
 
+* The VS 2017 projects make use of /permissive- for improved C++ standard conformance. Use of a Windows 10 SDK prior to
+  the Fall Creators Update (16299) or an Xbox One XDK prior to June 2017 QFE 4 may result in failures due to problems
+  with the system headers. You can work around these by deleting /permissive- from the project files which is found
+  in the <AdditionalOptions> element.
+
 
 ------------------------------------
 RELEASE HISTORY
+
+November 1, 2017
+    VS 2017 updated for Windows 10 Fall Creators Update SDK (16299)
+
+September 22, 2017
+    Updated for VS 2017 15.3 update /permissive- changes
+    WIC writer and ScreenGrab updated to use non-sRGB metadata for PNG
+    texassemble, texconv, texdiag: added -flist option
+
+July 26, 2017
+    Support for reading non-standard DDS files written by nVidia Texture Tools (NVTT)
+    Fix for ComputeMSE when using CMSE_IMAGE2_X2_BIAS
+    Fix for WIC writer then codec target format requires a palette    
+    Code cleanup
+
+April 24, 2017
+    VS 2017 project updates
+    Regenerated shaders using Windows 10 Creators Update SDK (15063)
+    Updated D3DX12 internal copy to latest version
+
+April 7, 2017
+    VS 2017 updated for Windows Creators Update SDK (15063)
+    texassemble: -tonemap switch
+    texconv: -wicmulti switch
 
 January 31, 2017
     DirectX 12 versions of IsSupported, CreateTexture (PrepareUpload), and CaptureTexture

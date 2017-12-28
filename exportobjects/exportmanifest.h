@@ -44,6 +44,7 @@ namespace ATG
         ExportString            strDevKitFileName;
         ExportFileType          FileType;
         DXGI_FORMAT             CompressedTextureFormat;
+        DXGI_FORMAT             HDRTextureFormat;
         ExportTextureOperation  TextureOperation;
     };
     typedef std::vector<ExportFileRecord> ExportFileRecordVector;

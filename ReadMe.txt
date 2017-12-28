@@ -3,19 +3,21 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-November 9, 2016
+November 2, 2017
 
-The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes use of the Autodesk FBX SDK
-to import an FBX file and then export the data as an SDKMESH. The SDKMESH format is a runtime geometry format supported
-by the DirectX Tool Kit and DXUT, and is used in the Windows 8 Store app sample Marble Maze.
+The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes
+use of the Autodesk FBX SDK to import an FBX file and then export the data as an SDKMESH. The SDKMESH
+format is a runtime geometry format supported by the DirectX Tool Kit and DXUT, and is used in the
+Windows 8 Store app sample Marble Maze.
 
-The source is written for Visual Studio 2013 or 2015.
+The source is written for Visual Studio 2013 Update 5, Visual Studio 2015 Update 3, or Visual Studio 2017.
 
 These components are designed to work without requiring any content from the DirectX SDK. For details,
 see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee663275.aspx>.
 
     ImportFBX\
-        Contains the main entry point for the command-line exporter tool and code for capturing data from FBX files.
+        Contains the main entry point for the command-line exporter tool and code for capturing data
+        from FBX files.
 
     ExportObjects\
         Contains a library of support code for the exporter.
@@ -27,14 +29,14 @@ see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee66327
         Contains a library of code for writing out a .XATG file from data captured as export objects.
 
     DirectXMesh\
-        This contains the DirectXMesh geometry processing library that is used instead of legacy D3DX9 for computing
-        tangent frames and face adjacency.
+        This contains the DirectXMesh geometry processing library that is used instead of legacy D3DX9
+        for computing tangent frames and face adjacency.
 
         http://go.microsoft.com/fwlink/?LinkID=324981
 
     DirectXTex\
-        This contains the DirectXTex texture processing library that is used instead of legacy D3DX9 for loading textures,
-        generating mipmaps, and writing DDS files.
+        This contains the DirectXTex texture processing library that is used instead of legacy D3DX9
+        for loading textures, generating mipmaps, and writing DDS files.
 
         http://go.microsoft.com/fwlink/?LinkId=248926
 
@@ -47,8 +49,15 @@ see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee66327
 All content and source code for this package are subject to the terms of the MIT License.
 <http://opensource.org/licenses/MIT>.
 
-For the latest version of the Samples Content Exporter, more detailed documentation, bug reports and feature requests, 
-please visit the GitHub project.
+Use of OpenEXR is subject to it's own license terms, and requires the ZLIB library as well. Use of
+OpenEXR can be removed by undefining USE_OPENEXR from the VS 2015/2017 project and removing
+the NuGet packages.
+
+    <https://github.com/openexr/openexr/blob/develop/OpenEXR/LICENSE>
+    <http://zlib.net/zlib_license.html>
+
+For the latest version of the Samples Content Exporter, more detailed documentation, bug reports
+and feature requests, please visit the GitHub project.
 
 http://go.microsoft.com/fwlink/?LinkId=226208
 
@@ -62,13 +71,14 @@ https://opensource.microsoft.com/codeofconduct/
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2017.0.1) for Windows VS 2013 or VS 2015
+Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2018.1.1) forWindows VS 2013 and/or VS 2015
 
     http://autodesk.com/fbx
 
-Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK (such as "C:\Program Files\Autodesk\FBX\FbxSdk\2017.0.1")
+Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK
+(such as "C:\Program Files\Autodesk\FBX\FbxSdk\2018.1.1")
 
-Open the ContentExporter_2013.sln or ContentExporter_2015.sln file from Visual Studio.
+Open the ContentExporter_201?.sln from Visual Studio.
 
 Build the solution
 
@@ -81,16 +91,55 @@ Usage: ContentExporter [options] <filename.fbx>
 DISCLAIMER
 ----------
 
-.SDKMESH has a long-time samples runtime geometry format for Microsoft since the retiring of the legacy .X file format. It has a number of
-limitations, and we don't recommend using it as a your production solution for meshes. It is, however, very useful for samples and itself
-serves as an example of such file containers. The documentation on the format can be found in the DirectXMesh project wiki.
+.SDKMESH has a long-time samples runtime geometry format for Microsoft since the retiring of the
+legacy .X file format. It has a number of limitations, and we don't recommend using it as a your
+production solution for meshes. It is, however, very useful for samples and itself serves as an
+example of such file containers. The documentation on the format can be found in the DirectXMesh
+project wiki.
 
 http://go.microsoft.com/fwlink/?LinkID=324981
+
+
+-------------
+RELEASE NOTES
+-------------
+
+* The VS 2015 and later projects do not support building a 32-bit (x86) version of the exporter.
+  x64 native (x64) use is wide-spread for content creation tools and provides much greater
+  memory flexiblity. The VS 2013 project retains the x86 configuration if needed.
+
+* OpenEXR support for textures is not supported in the VS 2013 build due to limitations in the
+  OpenEXR and ZLIB NuGet packages. VS 2013 projects can still build the exporter, but will throw
+  an error if you attempt to export an FBX that contains an .exr texture.
+
+* The VS 2017 project uses the VS 2015 version of the Autodesk FBX SDK libraries. VS 2017 C/C++
+  Runtime is binary-compatible with VS 2015 so this links successfully.
 
 
 ---------------
 RELEASE HISTORY
 ---------------
+
+November 2, 2017
+    VS 2017 updated for Windows 10 Fall Creators Update SDK (16299)
+    Updated DirectXMesh, DirectXTex, and UVAtlas libraries
+
+September 22, 2017
+    Updated DirectXMesh, DirectXTex, and UVAtlas for VS 2017 15.3 update /permissive- changes
+
+July 28, 2017
+    Added support for OpenEXR (via NuGet) to VS 2017 project
+    Updated DirectXTex library
+
+June 30, 2017
+    Added -ignoresrgb switch to control handling of sRGB metadata in jpg, png, etc.
+    Added support for OpenEXR (via NuGet) to VS 2015 project
+    Removed x86 configurations for VS 2015 / VS 2017 projects
+    Fixed texture conversion format choice for .hdr file format
+
+April 25, 2017
+    Updated DirectXTex, UVAtlas, DirectXMesh libraries
+    Added VS 2017 projects
 
 November 9, 2016
     Renamed -fl switch to -featurelevel

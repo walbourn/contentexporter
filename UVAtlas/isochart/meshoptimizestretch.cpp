@@ -99,9 +99,9 @@ namespace Isochart
             fBarToStopOptAll(0),
             fAverageEdgeLength(0),
             fTolerance(0),
+            pHeapItems(nullptr),
             pfVertStretch(nullptr),
             pfFaceStretch(nullptr),
-            pHeapItems(nullptr),
             fPreveMaxFaceStretch(0),
             fInfiniteStretch(0),
             dwInfinitStretchVertexCount(0),
@@ -435,6 +435,8 @@ HRESULT CIsochartMesh::OptimizeWholeChart(
 {
     HRESULT hr = S_OK;
 
+    float fNewGeoL2Stretch = 0.f;
+
     // 1. Check if parameterized
     assert(m_bIsParameterized);
 
@@ -486,7 +488,7 @@ HRESULT CIsochartMesh::OptimizeWholeChart(
         CHART_MAX_SCALE_FACTOR,
         matrix);
 
-    float fNewGeoL2Stretch 
+    fNewGeoL2Stretch 
         = static_cast<float>(
         (dGeoM[0] * (matrix[0]*matrix[0] + matrix[2]*matrix[2])
         + dGeoM[2] * (matrix[1]*matrix[1] + matrix[3]*matrix[3])
@@ -1792,7 +1794,7 @@ bool CIsochartMesh::OptimizeVertexStretchAroundCenter(
 {
     ISOCHARTVERTEX* pOptimizeVertex = vertInfo.pOptimizeVertex;
 
-    XMFLOAT2 originalStart = vertInfo.start;
+    XMFLOAT2 originalStart = vertInfo.start; // -Wunused-variable
     float fOriginalStartStretch = vertInfo.fStartStretch;
 
     XMFLOAT2 originalEnd = vertInfo.end;

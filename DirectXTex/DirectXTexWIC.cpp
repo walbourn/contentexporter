@@ -34,9 +34,16 @@
 
 #else
 
+#pragma warning(push)
+#pragma warning(disable : 4619 5038)
     #include <wrl\client.h>
     #include <wrl\wrappers\corewrappers.h>
+#pragma warning(pop)
+
+#pragma warning(push)
+#pragma warning(disable : 4471)
     #include <windows.storage.streams.h>
+#pragma warning(pop)
 
     static inline HRESULT CreateMemoryStream( _Outptr_ IStream** stream )
     {
@@ -230,6 +237,10 @@ namespace
                 if (pConvert)
                     memcpy(pConvert, &GUID_WICPixelFormat8bppGray, sizeof(WICPixelFormatGUID));
             }
+            break;
+
+        default:
+            break;
         }
 
         return format;
@@ -408,7 +419,7 @@ namespace
                 return E_UNEXPECTED;
             }
 
-            hr = FC->Initialize(frame, convertGUID, _GetWICDither(flags), 0, 0, WICBitmapPaletteTypeCustom);
+            hr = FC->Initialize(frame, convertGUID, _GetWICDither(flags), nullptr, 0, WICBitmapPaletteTypeMedianCut);
             if (FAILED(hr))
                 return hr;
 
@@ -490,7 +501,7 @@ namespace
                         return E_UNEXPECTED;
                     }
 
-                    hr = FC->Initialize(frame.Get(), sourceGUID, _GetWICDither(flags), 0, 0, WICBitmapPaletteTypeCustom);
+                    hr = FC->Initialize(frame.Get(), sourceGUID, _GetWICDither(flags), nullptr, 0, WICBitmapPaletteTypeMedianCut);
                     if (FAILED(hr))
                         return hr;
 
@@ -538,7 +549,7 @@ namespace
                         return E_UNEXPECTED;
                     }
 
-                    hr = FC->Initialize(scaler.Get(), sourceGUID, _GetWICDither(flags), 0, 0, WICBitmapPaletteTypeCustom);
+                    hr = FC->Initialize(scaler.Get(), sourceGUID, _GetWICDither(flags), nullptr, 0, WICBitmapPaletteTypeMedianCut);
                     if (FAILED(hr))
                         return hr;
 
@@ -587,6 +598,16 @@ namespace
                     value.vt = VT_UI1;
                     value.bVal = 0;
                     (void)metawriter->SetMetadataByName(L"/sRGB/RenderingIntent", &value);
+                }
+                else
+                {
+                    // add gAMA chunk with gamma 1.0
+                    value.vt = VT_UI4;
+                    value.uintVal = 100000; // gama value * 100,000 -- i.e. gamma 1.0
+                    (void)metawriter->SetMetadataByName(L"/gAMA/ImageGamma", &value);
+
+                    // remove sRGB chunk which is added by default.
+                    (void)metawriter->RemoveMetadataByName(L"/sRGB/RenderingIntent");
                 }
             }
 #if defined(_XBOX_ONE) && defined(_TITLE)
@@ -720,7 +741,7 @@ namespace
                 return E_UNEXPECTED;
             }
 
-            hr = FC->Initialize(source.Get(), targetGuid, _GetWICDither(flags), 0, 0, WICBitmapPaletteTypeCustom);
+            hr = FC->Initialize(source.Get(), targetGuid, _GetWICDither(flags), nullptr, 0, WICBitmapPaletteTypeMedianCut);
             if (FAILED(hr))
                 return hr;
 
@@ -1149,7 +1170,7 @@ HRESULT DirectX::SaveToWICMemory(
     if (FAILED(hr))
         return hr;
 
-    LARGE_INTEGER li = { 0 };
+    LARGE_INTEGER li = { { 0 } };
     hr = stream->Seek(li, STREAM_SEEK_SET, 0);
     if (FAILED(hr))
         return hr;
@@ -1206,7 +1227,7 @@ HRESULT DirectX::SaveToWICMemory(
     if (FAILED(hr))
         return hr;
 
-    LARGE_INTEGER li = { 0 };
+    LARGE_INTEGER li = { { 0 } };
     hr = stream->Seek(li, STREAM_SEEK_SET, 0);
     if (FAILED(hr))
         return hr;

@@ -28,7 +28,7 @@ namespace
     }
 
 
-    size_t _CountMips(_In_ size_t width, _In_ size_t height)
+    size_t CountMips(_In_ size_t width, _In_ size_t height)
     {
         size_t mipLevels = 1;
 
@@ -47,7 +47,7 @@ namespace
     }
 
 
-    size_t _CountMips3D(_In_ size_t width, _In_ size_t height, _In_ size_t depth)
+    size_t CountMips3D(_In_ size_t width, _In_ size_t height, _In_ size_t depth)
     {
         size_t mipLevels = 1;
 
@@ -108,7 +108,7 @@ namespace
 
                 if (SUCCEEDED(hr))
                 {
-                    hr = converter->Initialize(src, desiredPixelFormat, _GetWICDither(filter), 0, 0, WICBitmapPaletteTypeCustom);
+                    hr = converter->Initialize(src, desiredPixelFormat, _GetWICDither(filter), nullptr, 0, WICBitmapPaletteTypeMedianCut);
                 }
 
                 if (SUCCEEDED(hr))
@@ -129,13 +129,13 @@ namespace DirectX
     {
         if (mipLevels > 1)
         {
-            size_t maxMips = _CountMips(width, height);
+            size_t maxMips = CountMips(width, height);
             if (mipLevels > maxMips)
                 return false;
         }
         else if (mipLevels == 0)
         {
-            mipLevels = _CountMips(width, height);
+            mipLevels = CountMips(width, height);
         }
         else
         {
@@ -148,13 +148,13 @@ namespace DirectX
     {
         if (mipLevels > 1)
         {
-            size_t maxMips = _CountMips3D(width, height, depth);
+            size_t maxMips = CountMips3D(width, height, depth);
             if (mipLevels > maxMips)
                 return false;
         }
         else if (mipLevels == 0)
         {
-            mipLevels = _CountMips3D(width, height, depth);
+            mipLevels = CountMips3D(width, height, depth);
         }
         else
         {
@@ -571,7 +571,7 @@ namespace
                         return E_UNEXPECTED;
                     }
 
-                    hr = FC->Initialize(scaler.Get(), pfGUID, _GetWICDither(filter), 0, 0, WICBitmapPaletteTypeCustom);
+                    hr = FC->Initialize(scaler.Get(), pfGUID, _GetWICDither(filter), nullptr, 0, WICBitmapPaletteTypeMedianCut);
                     if (FAILED(hr))
                         return hr;
 
@@ -1294,7 +1294,7 @@ namespace
                         {
                             // Need to slightly bias results for floating-point error accumulation which can
                             // be visible with harshly quantized values
-                            static const XMVECTORF32 Bias = { 0.f, 0.f, 0.f, 0.1f };
+                            static const XMVECTORF32 Bias = { { { 0.f, 0.f, 0.f, 0.1f } } };
 
                             XMVECTOR* ptr = pAccSrc;
                             for (size_t i = 0; i < dest->width; ++i, ++ptr)
@@ -1303,6 +1303,9 @@ namespace
                             }
                         }
                         break;
+
+                        default:
+                            break;
                         }
 
                         // This performs any required clamping
@@ -2474,7 +2477,7 @@ namespace
                             {
                                 // Need to slightly bias results for floating-point error accumulation which can
                                 // be visible with harshly quantized values
-                                static const XMVECTORF32 Bias = { 0.f, 0.f, 0.f, 0.1f };
+                                static const XMVECTORF32 Bias = { { { 0.f, 0.f, 0.f, 0.1f } } };
 
                                 XMVECTOR* ptr = pAccSrc;
                                 for (size_t i = 0; i < dest->width; ++i, ++ptr)
@@ -2483,6 +2486,9 @@ namespace
                                 }
                             }
                             break;
+
+                            default:
+                                break;
                             }
 
                             // This performs any required clamping
