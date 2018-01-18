@@ -214,7 +214,7 @@ namespace ATG
         for( DWORD i = 0; i < pData->m_dwEnumValueCount; ++i )
         {
             const ExportEnumValue* pEnumValue = &pData->m_pEnumValues[i];
-            COMBOBOXEXITEMA CBItem = {0};
+            COMBOBOXEXITEMA CBItem = {};
             CBItem.mask = CBEIF_TEXT;
             CBItem.pszText = const_cast<LPSTR>( pEnumValue->strLabel );
             CBItem.iItem = static_cast<INT>( i );

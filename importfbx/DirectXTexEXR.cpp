@@ -52,7 +52,7 @@ namespace
         {
             if (m_handle)
             {
-                FILE_DISPOSITION_INFO info = { 0 };
+                FILE_DISPOSITION_INFO info = {};
                 info.DeleteFile = TRUE;
                 (void)SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
             }
@@ -91,7 +91,7 @@ namespace
         InputStream(HANDLE hFile, const char fileName[]) :
             IStream(fileName), m_hFile(hFile)
         {
-            LARGE_INTEGER dist = { 0 };
+            LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_END))
             {
@@ -117,7 +117,7 @@ namespace
                 throw com_exception(HRESULT_FROM_WIN32(GetLastError()));
             }
 
-            LARGE_INTEGER dist = { 0 };
+            LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_CURRENT))
             {
@@ -129,7 +129,7 @@ namespace
 
         virtual Imf::Int64 tellg() override
         {
-            LARGE_INTEGER dist = { 0 };
+            LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_CURRENT))
             {
@@ -178,7 +178,7 @@ namespace
 
         virtual Imf::Int64 tellp() override
         {
-            LARGE_INTEGER dist = { 0 };
+            LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_CURRENT))
             {

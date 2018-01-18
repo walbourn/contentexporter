@@ -346,7 +346,7 @@ namespace ATG
                         iValue = pRoot->GetValueBool();
                     else
                         iValue = pRoot->GetValueInt();
-                    CHAR strValue[32] = {0};
+                    CHAR strValue[32] = {};
                     _itoa_s( iValue, strValue, 10 );
                     size_t dwValueLen = strlen( strValue );
                     if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )

@@ -37,7 +37,7 @@ namespace ATG
     typedef std::unordered_map<ExportMaterial*,DWORD> MaterialLookupMap;
     MaterialLookupMap                               g_ExportMaterialToSDKMeshMaterialMap;
 
-    BYTE g_Padding4K[4096] = { 0 };
+    BYTE g_Padding4K[4096] = {};
 
     bool WriteSDKMeshAnimationFile( const CHAR* strFileName, ExportManifest* pManifest );
 
@@ -318,7 +318,7 @@ namespace ATG
 
             g_SubsetIndexArray.push_back( static_cast<UINT>( g_SubsetArray.size() ) );
                 
-            SDKMESH_SUBSET Subset = {0};
+            SDKMESH_SUBSET Subset = {};
             Subset.IndexStart = 0;
             Subset.IndexCount = static_cast<UINT64>( dwMaxIndexCount );
             Subset.MaterialID = 0;

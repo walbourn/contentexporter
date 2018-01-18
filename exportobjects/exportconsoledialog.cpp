@@ -102,7 +102,7 @@ namespace ATG
         if( rgb != CLR_INVALID )
         {
             // Set whatever colors, etc. they want
-            CHARFORMAT cf = {0};
+            CHARFORMAT cf = {};
             cf.cbSize = sizeof(cf);
             cf.dwMask = CFM_COLOR;
             cf.dwEffects = 0;

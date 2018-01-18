@@ -49,7 +49,7 @@ void ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIn
         iCurrentIndex = static_cast<INT>( scanlist.size() );
 
         // add node to anim list
-        AnimationScanNode asn = { 0 };
+        AnimationScanNode asn = {};
         asn.iParentIndex = iParentIndex;
         asn.pNode = pNode;
         asn.dwFlags = dwFlags;

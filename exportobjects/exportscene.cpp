@@ -50,7 +50,7 @@ ExportScene::ExportScene()
     BufferSize = ARRAYSIZE(strComputerName);
     getenv_s( &BufferSize, strComputerName, ARRAYSIZE(strComputerName), "COMPUTERNAME" );
     m_Information.MachineName = strComputerName;
-    OSVERSIONINFO OSVersion = { 0 };
+    OSVERSIONINFO OSVersion = {};
     OSVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 #pragma prefast (disable : 28159)
 #pragma warning (suppress : 4996)

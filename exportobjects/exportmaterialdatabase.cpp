@@ -17,7 +17,7 @@
 
 namespace
 {
-    CHAR g_strMaterialDBFileName[MAX_PATH] = { 0 };
+    CHAR g_strMaterialDBFileName[MAX_PATH] = {};
 
     const CHAR* ConvertString(const WCHAR* strData, DWORD dwLength = 0)
     {

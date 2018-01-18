@@ -960,7 +960,7 @@ size_t GetFrameCount( ATG::ExportFrame* pFrame )
 void WriteInformation()
 {
     g_pXMLWriter->StartComment();
-    CHAR strTime[200] = {0};
+    CHAR strTime[200] = {};
     _ctime64_s( strTime, &g_pScene->Information().ExportTime );
     CHAR* pLF = strchr( strTime, '\n' );
     if( pLF )

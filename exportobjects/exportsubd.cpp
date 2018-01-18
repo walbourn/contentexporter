@@ -151,8 +151,8 @@ namespace ATG
                 assert( iCurrentPolySize == 1 || iCurrentPolySize == 2 );
 
                 // iterate through triangle corners
-                INT iTriangleIndices[3] = { 0 };
-                INT iTriangleMeshIndices[3] = { 0 };
+                INT iTriangleIndices[3] = {};
+                INT iTriangleMeshIndices[3] = {};
                 DWORD dwBaseIndex = dwTriangleIndex * 3;
                 for( DWORD dwCornerIndex = 0; dwCornerIndex < 3; ++dwCornerIndex )
                 {
@@ -425,7 +425,7 @@ namespace ATG
         if( iter == m_BoundaryEdges.end() )
         {
             // we did not find the edge; add a new edge data structure to the table
-            Edge e = { 0 };
+            Edge e = {};
             e.iTriangleIndex = iTriangleIndex;
             e.iQuadIndex = iQuadIndex;
             e.iLocalIndex = iLocalIndex;
@@ -1241,7 +1241,7 @@ namespace ATG
     {
         size_t dwQuadCount = m_Quads.size();
 
-        ExportSubDPatchSubset CurrentSubset = { 0 };
+        ExportSubDPatchSubset CurrentSubset = {};
         CurrentSubset.bQuadPatches = true;
         CurrentSubset.iOriginalMeshSubset = -1;
 
