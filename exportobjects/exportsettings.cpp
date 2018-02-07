@@ -643,6 +643,11 @@ namespace ATG
         auto pCategoryOpt = g_SettingsManager.AddCategory( pCategoryMeshes, "Mesh optimization" );
         g_SettingsManager.AddBool( pCategoryOpt, "Use geometric rather than topographic adjacency", "gadjacency", false, &bGeometricAdjacency );
         g_SettingsManager.AddBool( pCategoryOpt, "Perform vertex cache optimization of meshes", "optimizemeshes", false, &bOptimizeVCache );
+        static const ExportEnumValue OptAlgorithm[] = {
+            { "Hoppe TVC", "tvc", 0 },
+            { "Forsyth linear-speed", "lru", 1 },
+        };
+        g_SettingsManager.AddEnum( pCategoryMeshes, "Optimization algorithm", "optimization", 1, OptAlgorithm, ARRAYSIZE(OptAlgorithm), (INT*)&dwOptimizationAlgorithm );
         g_SettingsManager.AddIntBounded( pCategoryOpt, "Vertex cache size for optimizemesh", "vcache", 12, 0, 64, &iVcacheSize );
         g_SettingsManager.AddIntBounded( pCategoryOpt, "Strip restart length for optimizemesh", "restart", 7, 0, 64, &iStripRestart );
         g_SettingsManager.AddBool( pCategoryOpt, "Clean up meshes (implied by optimizemeshes)", "cleanmeshes", false, &bCleanMeshes );

@@ -1161,13 +1161,19 @@ void ExportMesh::OptimizeVcache()
     uint32_t vertexCache = static_cast<uint32_t>( g_pScene->Settings().iVcacheSize );
     uint32_t restart = std::min<uint32_t>( vertexCache, g_pScene->Settings().iStripRestart );
 
-    if (!vertexCache)
+    bool useLRU = g_pScene->Settings().dwOptimizationAlgorithm == 1;
+
+    if (useLRU)
     {
-        ExportLog::LogMsg( 4, "Optimize mesh for strip order..." );
+        ExportLog::LogMsg(4, "Optimize mesh using Forsyth LRU algorithm...");
+    }
+    else if (!vertexCache)
+    {
+        ExportLog::LogMsg( 4, "Optimize mesh for strip order using Hoppe TVC algorithm..." );
     }
     else
     {
-        ExportLog::LogMsg( 4, "Optimize mesh for vertex cache (vcache: %u, restart: %u)...", vertexCache, restart );
+        ExportLog::LogMsg( 4, "Optimize mesh for vertex cache (vcache: %u, restart: %u) using Hoppe TVC algorithm...", vertexCache, restart );
     }
 
     if (!m_pAttributes)
@@ -1206,8 +1212,19 @@ void ExportMesh::OptimizeVcache()
     std::unique_ptr<uint32_t[]> faceRemap( new uint32_t[ nFaces ] );
     if (indexSize == 2)
     {
-        hr = OptimizeFacesEx( reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, m_pAdjacency.get(), m_pAttributes.get(),
-                              faceRemap.get(), vertexCache, restart );
+        if (useLRU)
+        {
+            hr = OptimizeFacesLRUEx(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, m_pAttributes.get(), faceRemap.get());
+        }
+        else
+        {
+            hr = OptimizeFacesEx(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, m_pAdjacency.get(), m_pAttributes.get(),
+                faceRemap.get(), vertexCache, restart);
+        }
+    }
+    else if (useLRU)
+    {
+        hr = OptimizeFacesLRUEx(reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, m_pAttributes.get(), faceRemap.get());
     }
     else
     {

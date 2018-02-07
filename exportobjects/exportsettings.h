@@ -209,6 +209,7 @@ namespace ATG
         bool        bOptimizeAnimations;
         bool        bCleanMeshes;
         bool        bOptimizeVCache;
+        DWORD       dwOptimizationAlgorithm;
         INT         iVcacheSize;
         INT         iStripRestart;
         float       fExportScale;
