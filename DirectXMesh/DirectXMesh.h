@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,7 +33,7 @@
 
 #include <directxmath.h>
 
-#define DIRECTX_MESH_VERSION 110
+#define DIRECTX_MESH_VERSION 120
 
 namespace DirectX
 {
@@ -328,6 +329,19 @@ namespace DirectX
         // Cleans the mesh, splitting vertices if needed
 
     //---------------------------------------------------------------------------------
+    // Mesh utilities
+
+    HRESULT __cdecl WeldVertices( _Inout_updates_all_(nFaces*3) uint16_t* indices, _In_ size_t nFaces,
+                                  _In_ size_t nVerts, _In_reads_(nVerts) const uint32_t* pointRep,
+                                  _Out_writes_opt_(nVerts) uint32_t* vertexRemap,
+                                  _In_ std::function<bool __cdecl(uint32_t v0, uint32_t v1)> weldTest );
+    HRESULT __cdecl WeldVertices( _Inout_updates_all_(nFaces*3) uint32_t* indices, _In_ size_t nFaces,
+                                  _In_ size_t nVerts, _In_reads_(nVerts) const uint32_t* pointRep,
+                                  _Out_writes_opt_(nVerts) uint32_t* vertexRemap,
+                                  _In_ std::function<bool __cdecl(uint32_t v0, uint32_t v1)> weldTest );
+        // Welds vertices together based on a test function
+
+    //---------------------------------------------------------------------------------
     // Mesh Optimization
 
     HRESULT __cdecl AttributeSort( _In_ size_t nFaces, _Inout_updates_all_(nFaces) uint32_t* attributes,
@@ -339,6 +353,9 @@ namespace DirectX
         OPTFACES_V_DEFAULT      = 12,
         OPTFACES_R_DEFAULT      = 7,
             // Default vertex cache size and restart threshold which is considered 'device independent'
+
+        OPTFACES_LRU_DEFAULT    = 32,
+            // Default vertex cache size for the LRU algorithm
 
         OPTFACES_V_STRIPORDER   = 0,
             // Indicates no vertex cache optimization, only reordering into strips
@@ -354,6 +371,12 @@ namespace DirectX
                                    _Out_writes_(nFaces) uint32_t* faceRemap,
                                    _In_ uint32_t vertexCache = OPTFACES_V_DEFAULT,
                                    _In_ uint32_t restart = OPTFACES_R_DEFAULT );
+    HRESULT __cdecl OptimizeFacesLRU( _In_reads_(nFaces*3) const uint16_t* indices, _In_ size_t nFaces,
+                                      _Out_writes_(nFaces) uint32_t* faceRemap,
+                                      _In_ uint32_t lruCacheSize = OPTFACES_LRU_DEFAULT );
+    HRESULT __cdecl OptimizeFacesLRU( _In_reads_(nFaces*3) const uint32_t* indices, _In_ size_t nFaces,
+                                      _Out_writes_(nFaces) uint32_t* faceRemap,
+                                      _In_ uint32_t lruCacheSize = OPTFACES_LRU_DEFAULT );
         // Reorders faces to increase hit rate of vertex caches
 
     HRESULT __cdecl OptimizeFacesEx( _In_reads_(nFaces*3) const uint16_t* indices, _In_ size_t nFaces,
@@ -368,12 +391,20 @@ namespace DirectX
                                      _Out_writes_(nFaces) uint32_t* faceRemap,
                                      _In_ uint32_t vertexCache = OPTFACES_V_DEFAULT,
                                      _In_ uint32_t restart = OPTFACES_R_DEFAULT );
+    HRESULT __cdecl OptimizeFacesLRUEx( _In_reads_(nFaces*3) const uint16_t* indices, _In_ size_t nFaces,
+                                        _In_reads_(nFaces) const uint32_t* attributes,
+                                        _Out_writes_(nFaces) uint32_t* faceRemap,
+                                        _In_ uint32_t lruCacheSize = OPTFACES_LRU_DEFAULT );
+    HRESULT __cdecl OptimizeFacesLRUEx( _In_reads_(nFaces*3) const uint32_t* indices, _In_ size_t nFaces,
+                                        _In_reads_(nFaces) const uint32_t* attributes,
+                                        _Out_writes_(nFaces) uint32_t* faceRemap,
+                                        _In_ uint32_t lruCacheSize = OPTFACES_LRU_DEFAULT );
         // Attribute group version of OptimizeFaces
 
     HRESULT __cdecl OptimizeVertices( _In_reads_(nFaces*3) const uint16_t* indices, _In_ size_t nFaces, _In_ size_t nVerts,
-                                      _Out_writes_(nVerts) uint32_t* vertexRemap );
+                                      _Out_writes_(nVerts) uint32_t* vertexRemap, _Out_opt_ size_t* trailingUnused = nullptr );
     HRESULT __cdecl OptimizeVertices( _In_reads_(nFaces*3) const uint32_t* indices, _In_ size_t nFaces, _In_ size_t nVerts,
-                                      _Out_writes_(nVerts) uint32_t* vertexRemap );
+                                      _Out_writes_(nVerts) uint32_t* vertexRemap, _Out_opt_ size_t* trailingUnused = nullptr );
         // Reorders vertices in order of use
 
     //---------------------------------------------------------------------------------
@@ -401,7 +432,7 @@ namespace DirectX
                                            _Out_writes_(nFaces*3) uint32_t* ibout, _Out_writes_(nFaces*3) uint32_t* adjout );
     HRESULT __cdecl ReorderIBAndAdjacency( _Inout_updates_all_(nFaces*3) uint32_t* ib, _In_ size_t nFaces, _Inout_updates_all_(nFaces*3) uint32_t* adj,
                                            _In_reads_(nFaces) const uint32_t* faceRemap );
-    // Applies a face remap reordering to an index buffer and adjacency
+        // Applies a face remap reordering to an index buffer and adjacency
 
     HRESULT __cdecl FinalizeIB( _In_reads_(nFaces*3) const uint16_t* ibin, _In_ size_t nFaces,
                                 _In_reads_(nVerts) const uint32_t* vertexRemap, _In_ size_t nVerts,
@@ -433,6 +464,12 @@ namespace DirectX
                                             _Inout_updates_all_(nVerts) uint32_t* pointRep,
                                             _In_reads_(nVerts) const uint32_t* vertexRemap );
         // Applies a vertex remap and/or a vertex duplication set to a vertex buffer and point representatives
+
+    HRESULT __cdecl CompactVB( _In_reads_bytes_(nVerts*stride) const void* vbin, _In_ size_t stride, _In_ size_t nVerts,
+                               _In_ size_t trailingUnused,
+                               _In_reads_opt_(nVerts) const uint32_t* vertexRemap,
+                               _Out_writes_bytes_((nVerts-trailingUnused)*stride) void* vbout );
+        // Applies a vertex remap which contains a known number of unused entries at the end
 
 #include "DirectXMesh.inl"
 
