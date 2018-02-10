@@ -3,7 +3,7 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-November 2, 2017
+February 9, 2018
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes
 use of the Autodesk FBX SDK to import an FBX file and then export the data as an SDKMESH. The SDKMESH
@@ -71,7 +71,8 @@ https://opensource.microsoft.com/codeofconduct/
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2018.1.1) forWindows VS 2013 and/or VS 2015
+Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2018.1.1) for Windows VS 2013
+and/or VS 2015
 
     http://autodesk.com/fbx
 
@@ -119,6 +120,10 @@ RELEASE NOTES
 ---------------
 RELEASE HISTORY
 ---------------
+
+February 9, 2018
+    Added -optimization switch to control LUR vs. Hoppe algorithm (defaults to LRU)
+    Updated DirectXMesh, DirectXTex, and UVAtlas libraries
 
 November 2, 2017
     VS 2017 updated for Windows 10 Fall Creators Update SDK (16299)
