@@ -3,12 +3,8 @@
 //  
 // DirectX Mesh Geometry Library - Vertex Buffer Writer
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
@@ -60,7 +56,7 @@ namespace
 class VBWriter::Impl
 {
 public:
-    Impl() :
+    Impl() throw() :
         mStrides{},
         mBuffers{},
         mVerts{},
@@ -111,7 +107,7 @@ public:
                     mTempSize = mVerts[j];
             }
 
-            mTempBuffer.reset(reinterpret_cast<XMVECTOR*>(_aligned_malloc(sizeof(XMVECTOR) * mTempSize, 16)));
+            mTempBuffer.reset(static_cast<XMVECTOR*>(_aligned_malloc(sizeof(XMVECTOR) * mTempSize, 16)));
             if (!mTempBuffer)
                 mTempSize = 0;
         }
@@ -138,7 +134,7 @@ HRESULT VBWriter::Impl::Initialize(const InputElementDesc* vbDecl, size_t nDecl)
 {
     Release();
 
-    uint32_t offsets[c_MaxSlot];
+    uint32_t offsets[c_MaxSlot] = {};
 
 #if defined(__d3d12_h__) || defined(__d3d12_x_h__)
     {
@@ -217,19 +213,19 @@ HRESULT VBWriter::Impl::AddStream(void* vb, size_t nVerts, size_t inputSlot, siz
 
 //-------------------------------------------------------------------------------------
 #define STORE_VERTS( type, func )\
-        for( size_t icount = 0; icount < count; ++icount )\
+        for(size_t icount = 0; icount < count; ++icount)\
         {\
-            if ( ( ptr + sizeof(type) ) > eptr )\
+            if ((ptr + sizeof(type)) > eptr)\
                 return E_UNEXPECTED;\
-            func( reinterpret_cast<type*>(ptr), *buffer++ );\
+            func(reinterpret_cast<type*>(ptr), *buffer++);\
             ptr += stride;\
         }\
         break;
 
 #define STORE_VERTS_X2( type, func, x2bias )\
-        for( size_t icount = 0; icount < count; ++icount )\
+        for(size_t icount = 0; icount < count; ++icount)\
         {\
-            if ( ( ptr + sizeof(type) ) > eptr )\
+            if ((ptr + sizeof(type)) > eptr)\
                 return E_UNEXPECTED;\
             XMVECTOR v = *buffer++;\
             if (x2bias)\
@@ -237,7 +233,7 @@ HRESULT VBWriter::Impl::AddStream(void* vb, size_t nVerts, size_t inputSlot, siz
                 v = XMVectorClamp(v, g_XMNegativeOne, g_XMOne);\
                 v = XMVectorMultiplyAdd(v, g_XMOneHalf, g_XMOneHalf);\
             }\
-            func( reinterpret_cast<type*>(ptr), v );\
+            func(reinterpret_cast<type*>(ptr), v);\
             ptr += stride;\
         }\
         break;
@@ -262,7 +258,7 @@ HRESULT VBWriter::Impl::Write(const XMVECTOR* buffer, const char* semanticName, 
 
     uint32_t inputSlot = mInputDesc[it->second].InputSlot;
 
-    auto vb = reinterpret_cast<uint8_t*>(mBuffers[inputSlot]);
+    auto vb = static_cast<uint8_t*>(mBuffers[inputSlot]);
     if (!vb)
         return E_FAIL;
 
@@ -489,7 +485,7 @@ HRESULT VBWriter::Impl::Write(const XMVECTOR* buffer, const char* semanticName, 
             {
                 f = std::max<float>(std::min<float>(f, 1.f), 0.f);
             }
-            *reinterpret_cast<uint8_t*>(ptr) = static_cast<uint8_t>(f * 255.f);
+            *ptr = static_cast<uint8_t>(f * 255.f);
             ptr += stride;
         }
         break;
@@ -501,7 +497,7 @@ HRESULT VBWriter::Impl::Write(const XMVECTOR* buffer, const char* semanticName, 
                 return E_UNEXPECTED;
             float f = XMVectorGetX(*buffer++);
             f = std::max<float>(std::min<float>(f, 255.f), 0.f);
-            *reinterpret_cast<uint8_t*>(ptr) = static_cast<uint8_t>(f);
+            *ptr = static_cast<uint8_t>(f);
             ptr += stride;
         }
         break;
@@ -642,21 +638,21 @@ HRESULT VBWriter::Impl::Write(const XMVECTOR* buffer, const char* semanticName, 
 //=====================================================================================
 
 // Public constructor.
-VBWriter::VBWriter()
+VBWriter::VBWriter() throw()
     : pImpl(new Impl())
 {
 }
 
 
 // Move constructor.
-VBWriter::VBWriter(VBWriter&& moveFrom)
+VBWriter::VBWriter(VBWriter&& moveFrom) throw()
     : pImpl(std::move(moveFrom.pImpl))
 {
 }
 
 
 // Move assignment.
-VBWriter& VBWriter::operator= (VBWriter&& moveFrom)
+VBWriter& VBWriter::operator= (VBWriter&& moveFrom) throw()
 {
     pImpl = std::move(moveFrom.pImpl);
     return *this;

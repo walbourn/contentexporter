@@ -3,12 +3,8 @@
 //  
 // DirectX Mesh Geometry Library - Vertex Buffer Reader
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
@@ -60,7 +56,7 @@ namespace
 class VBReader::Impl
 {
 public:
-    Impl() :
+    Impl() throw() :
         mStrides{},
         mBuffers{},
         mVerts{},
@@ -111,7 +107,7 @@ public:
                     mTempSize = mVerts[j];
             }
 
-            mTempBuffer.reset(reinterpret_cast<XMVECTOR*>(_aligned_malloc(sizeof(XMVECTOR) * mTempSize, 16)));
+            mTempBuffer.reset(static_cast<XMVECTOR*>(_aligned_malloc(sizeof(XMVECTOR) * mTempSize, 16)));
             if (!mTempBuffer)
                 mTempSize = 0;
         }
@@ -139,7 +135,7 @@ HRESULT VBReader::Impl::Initialize(const InputElementDesc* vbDecl, size_t nDecl)
 {
     Release();
 
-    uint32_t offsets[c_MaxSlot];
+    uint32_t offsets[c_MaxSlot] = {};
 
 #if defined(__d3d12_h__) || defined(__d3d12_x_h__)
     {
@@ -218,24 +214,24 @@ HRESULT VBReader::Impl::AddStream(const void* vb, size_t nVerts, size_t inputSlo
 
 //-------------------------------------------------------------------------------------
 #define LOAD_VERTS( type, func )\
-        for( size_t icount = 0; icount < count; ++icount )\
+        for(size_t icount = 0; icount < count; ++icount)\
         {\
-            if ( ( ptr + sizeof(type) ) > eptr )\
+            if ((ptr + sizeof(type)) > eptr)\
                 return E_UNEXPECTED;\
-            *buffer++ = func( reinterpret_cast<const type*>(ptr) );\
+            *buffer++ = func(reinterpret_cast<const type*>(ptr));\
             ptr += stride;\
         }\
         break;
 
 #define LOAD_VERTS4_X2( type, func, x2bias )\
-        for( size_t icount = 0; icount < count; ++icount )\
+        for(size_t icount = 0; icount < count; ++icount)\
         {\
-            if ( ( ptr + sizeof(type) ) > eptr )\
+            if ((ptr + sizeof(type)) > eptr)\
                 return E_UNEXPECTED;\
-            XMVECTOR v = func( reinterpret_cast<const type*>(ptr) );\
+            XMVECTOR v = func(reinterpret_cast<const type*>(ptr));\
             if (x2bias)\
             {\
-                v = XMVectorMultiplyAdd( v, g_XMTwo, g_XMNegativeOne );\
+                v = XMVectorMultiplyAdd(v, g_XMTwo, g_XMNegativeOne);\
             }\
             *buffer++ = v;\
             ptr += stride;\
@@ -243,14 +239,14 @@ HRESULT VBReader::Impl::AddStream(const void* vb, size_t nVerts, size_t inputSlo
         break;
 
 #define LOAD_VERTS3_X2( type, func, x2bias )\
-        for( size_t icount = 0; icount < count; ++icount )\
+        for(size_t icount = 0; icount < count; ++icount)\
         {\
-            if ( ( ptr + sizeof(type) ) > eptr )\
+            if ((ptr + sizeof(type)) > eptr)\
                 return E_UNEXPECTED;\
-            XMVECTOR v = func( reinterpret_cast<const type*>(ptr) );\
+            XMVECTOR v = func(reinterpret_cast<const type*>(ptr));\
             if (x2bias)\
             {\
-                XMVECTOR v2 = XMVectorMultiplyAdd( v, g_XMTwo, g_XMNegativeOne );\
+                XMVECTOR v2 = XMVectorMultiplyAdd(v, g_XMTwo, g_XMNegativeOne);\
                 v = XMVectorSelect(v, v2, g_XMSelect1110);\
             }\
             *buffer++ = v;\
@@ -259,14 +255,14 @@ HRESULT VBReader::Impl::AddStream(const void* vb, size_t nVerts, size_t inputSlo
         break;
 
 #define LOAD_VERTS2_X2( type, func, x2bias )\
-        for( size_t icount = 0; icount < count; ++icount )\
+        for(size_t icount = 0; icount < count; ++icount)\
         {\
-            if ( ( ptr + sizeof(type) ) > eptr )\
+            if ((ptr + sizeof(type)) > eptr)\
                 return E_UNEXPECTED;\
-            XMVECTOR v = func( reinterpret_cast<const type*>(ptr) );\
+            XMVECTOR v = func(reinterpret_cast<const type*>(ptr));\
             if (x2bias)\
             {\
-                XMVECTOR v2 = XMVectorMultiplyAdd( v, g_XMTwo, g_XMNegativeOne );\
+                XMVECTOR v2 = XMVectorMultiplyAdd(v, g_XMTwo, g_XMNegativeOne);\
                 v = XMVectorSelect(v, v2, g_XMSelect1100);\
             }\
             *buffer++ = v;\
@@ -294,7 +290,7 @@ HRESULT VBReader::Impl::Read(XMVECTOR* buffer, const char* semanticName, unsigne
 
     uint32_t inputSlot = mInputDesc[it->second].InputSlot;
 
-    auto vb = reinterpret_cast<const uint8_t*>(mBuffers[inputSlot]);
+    auto vb = static_cast<const uint8_t*>(mBuffers[inputSlot]);
     if (!vb)
         return E_FAIL;
 
@@ -491,7 +487,7 @@ HRESULT VBReader::Impl::Read(XMVECTOR* buffer, const char* semanticName, unsigne
         {
             if ((ptr + sizeof(uint8_t)) > eptr)
                 return E_UNEXPECTED;
-            auto i = *reinterpret_cast<const uint8_t*>(ptr);
+            const uint8_t i = *ptr;
             float f = static_cast<float>(i) / 255.f;
             if (x2bias)
             {
@@ -508,7 +504,7 @@ HRESULT VBReader::Impl::Read(XMVECTOR* buffer, const char* semanticName, unsigne
         {
             if ((ptr + sizeof(uint8_t)) > eptr)
                 return E_UNEXPECTED;
-            auto i = *reinterpret_cast<const uint8_t*>(ptr);
+            const uint8_t i = *ptr;
             *buffer++ = XMVectorSet(static_cast<float>(i), 0.f, 0.f, 0.f);
             ptr += stride;
         }
@@ -644,21 +640,21 @@ HRESULT VBReader::Impl::Read(XMVECTOR* buffer, const char* semanticName, unsigne
 //=====================================================================================
 
 // Public constructor.
-VBReader::VBReader()
+VBReader::VBReader() throw()
     : pImpl(new Impl())
 {
 }
 
 
 // Move constructor.
-VBReader::VBReader(VBReader&& moveFrom)
+VBReader::VBReader(VBReader&& moveFrom) throw()
     : pImpl(std::move(moveFrom.pImpl))
 {
 }
 
 
 // Move assignment.
-VBReader& VBReader::operator= (VBReader&& moveFrom)
+VBReader& VBReader::operator= (VBReader&& moveFrom) throw()
 {
     pImpl = std::move(moveFrom.pImpl);
     return *this;

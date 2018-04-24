@@ -5,12 +5,8 @@
 //
 // Hoppe "Optimization of mesh locality for transparent vertex caching"
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
@@ -26,7 +22,7 @@ namespace
     class mesh_status
     {
     public:
-        mesh_status() :
+        mesh_status() throw() :
             mUnprocessed{},
             mFaceOffset(0),
             mFaceCount(0),
@@ -457,7 +453,7 @@ namespace
     class sim_vcache
     {
     public:
-        sim_vcache() : mTail(0), mCacheSize(0) {}
+        sim_vcache() throw() : mTail(0), mCacheSize(0) {}
 
         HRESULT initialize(uint32_t cacheSize)
         {

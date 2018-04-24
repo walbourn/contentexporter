@@ -3,12 +3,8 @@
 //  
 // DirectX Mesh Geometry Library - Remap functions for applying face/vertex mappings
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
@@ -204,7 +200,7 @@ namespace
 
         auto vbtemp = temp.get() + ((sizeof(bool) + sizeof(uint32_t)) * nVerts);
 
-        auto ptr = reinterpret_cast<uint8_t*>(vb);
+        auto ptr = static_cast<uint8_t*>(vb);
 
         for (size_t j = 0; j < nVerts; ++j)
         {
@@ -616,8 +612,8 @@ HRESULT DirectX::FinalizeVB(
 
     size_t newVerts = nVerts + nDupVerts;
 
-    auto sptr = reinterpret_cast<const uint8_t*>(vbin);
-    auto dptr = reinterpret_cast<uint8_t*>(vbout);
+    auto sptr = static_cast<const uint8_t*>(vbin);
+    auto dptr = static_cast<uint8_t*>(vbout);
 
 #ifdef _DEBUG
     memset(vbout, 0, newVerts * stride);
@@ -727,8 +723,8 @@ HRESULT DirectX::FinalizeVBAndPointReps(
         }
     }
 
-    auto sptr = reinterpret_cast<const uint8_t*>(vbin);
-    auto dptr = reinterpret_cast<uint8_t*>(vbout);
+    auto sptr = static_cast<const uint8_t*>(vbin);
+    auto dptr = static_cast<uint8_t*>(vbout);
 
 #ifdef _DEBUG
     memset(vbout, 0, newVerts * stride);
@@ -849,8 +845,8 @@ HRESULT DirectX::CompactVB(
 
     size_t newVerts = nVerts - trailingUnused;
 
-    auto sptr = reinterpret_cast<const uint8_t*>(vbin);
-    auto dptr = reinterpret_cast<uint8_t*>(vbout);
+    auto sptr = static_cast<const uint8_t*>(vbin);
+    auto dptr = static_cast<uint8_t*>(vbout);
 
 #ifdef _DEBUG
     memset(vbout, 0, newVerts * stride);

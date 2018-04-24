@@ -6,12 +6,8 @@
 // Forsyth "Linear-Speed Vertex Cache Optimisation"
 // https://tomforsyth1000.github.io/papers/fast_vert_cache_opt.html
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
@@ -151,7 +147,7 @@ namespace
         IndexType   cachePos0;
         IndexType   cachePos1;
 
-        OptimizeVertexData() : score(0.f), activeFaceListStart(0), activeFaceListSize(0), cachePos0(0), cachePos1(0) { }
+        OptimizeVertexData() throw() : score(0.f), activeFaceListStart(0), activeFaceListSize(0), cachePos0(0), cachePos1(0) { }
     };
 
     template <typename T, typename IndexType>
@@ -325,7 +321,7 @@ namespace
             }
         }
 
-        uint32_t vertexCacheBuffer[(kMaxVertexCacheSize + 3) * 2];
+        uint32_t vertexCacheBuffer[(kMaxVertexCacheSize + 3) * 2] = {};
         uint32_t *cache0 = vertexCacheBuffer;
         uint32_t *cache1 = vertexCacheBuffer + (kMaxVertexCacheSize + 3);
         uint32_t entriesInCache0 = 0;
@@ -571,7 +567,7 @@ HRESULT DirectX::OptimizeFacesLRUEx(
     if (subsets.empty())
         return E_UNEXPECTED;
 
-    for( auto it = subsets.cbegin(); it != subsets.cend(); ++it)
+    for (auto it = subsets.cbegin(); it != subsets.cend(); ++it)
     {
         HRESULT hr = OptimizeFacesImpl<uint16_t>(
             &indices[it->first * 3], static_cast<uint32_t>(it->second * 3),

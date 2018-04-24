@@ -3,12 +3,8 @@
 //  
 // DirectX Mesh Geometry Library - Mesh clean-up
 //
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //-------------------------------------------------------------------------------------
@@ -187,16 +183,7 @@ namespace
                     || (j0 == j2 && j0 != UNUSED32)
                     || (j1 == j2 && j1 != UNUSED32))
                 {
-                    uint32_t neighbor;
-
-                    if (j0 == j1 || j0 == j2)
-                    {
-                        neighbor = j0;
-                    }
-                    else
-                    {
-                        neighbor = j1;
-                    }
+                    uint32_t neighbor = (j0 == j1 || j0 == j2) ? j0 : j1;
 
                     // remove links then break bowties will clean up any remaining issues
                     for (uint32_t edge = 0; edge < 3; ++edge)
