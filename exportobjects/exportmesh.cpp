@@ -1347,11 +1347,8 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     INT iUVOffset = -1;
 
     // create a vertex element struct and set default values
-    D3DVERTEXELEMENT9 VertexElement;
-    ZeroMemory( &VertexElement, sizeof( D3DVERTEXELEMENT9 ) );
-
-    D3D11_INPUT_ELEMENT_DESC InputElement;
-    ZeroMemory( &InputElement, sizeof( D3D11_INPUT_ELEMENT_DESC ) );
+    D3DVERTEXELEMENT9 VertexElement = {};
+    D3D11_INPUT_ELEMENT_DESC InputElement = {};
 
     bool bCompressVertexData = ( dwFlags & COMPRESS_VERTEX_DATA );
 

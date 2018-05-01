@@ -304,9 +304,8 @@ namespace ATG
         if( pEntry->m_Type != ExportSettingsEntry::CT_CATEGORY )
             return;
 
-        TVINSERTSTRUCT TreeItem;
-        ZeroMemory( &TreeItem, sizeof( TVINSERTSTRUCT ) );
-        CHAR strText[MAX_PATH];
+        TVINSERTSTRUCT TreeItem = {};
+        CHAR strText[MAX_PATH] = {};
         strcpy_s( strText, pEntry->m_DisplayName.SafeString() );
         TreeItem.item.pszText = strText;
         TreeItem.item.mask = TVIF_TEXT | TVIF_PARAM;

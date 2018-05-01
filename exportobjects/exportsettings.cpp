@@ -87,8 +87,7 @@ namespace ATG
 
     void ExportSettingsEntry::CreateSettingName()
     {
-        CHAR strSettingName[512];
-        ZeroMemory( strSettingName, sizeof( strSettingName ) );
+        CHAR strSettingName[512] = {};
         const CHAR* strDisplayName = m_DisplayName.SafeString();
         assert( strlen( strDisplayName ) < ARRAYSIZE( strSettingName ) );
         CHAR* pDest = strSettingName;
