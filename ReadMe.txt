@@ -71,12 +71,12 @@ https://opensource.microsoft.com/codeofconduct/
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2018.1.1) for Windows VS 2015
+Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2019.0) for Windows VS 2015
 
     http://autodesk.com/fbx
 
 Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK
-(such as "C:\Program Files\Autodesk\FBX\FbxSdk\2018.1.1")
+(such as "C:\Program Files\Autodesk\FBX\FbxSdk\2019.0")
 
 Open the ContentExporter_201?.sln from Visual Studio.
 
