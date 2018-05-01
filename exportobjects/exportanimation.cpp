@@ -456,7 +456,7 @@ void ExportAnimation::Optimize()
         return;
     }
 
-    ExportLog::LogMsg( 4, "Optimizing animation with %Iu tracks.", m_vTracks.size() );
+    ExportLog::LogMsg( 4, "Optimizing animation with %zu tracks.", m_vTracks.size() );
     std::vector< ExportAnimationTrack* > NewTrackList;
     for( size_t i = 0; i < m_vTracks.size(); i++ )
     {
@@ -474,7 +474,7 @@ void ExportAnimation::Optimize()
             NewTrackList.push_back( pTrack );
         }
     }
-    ExportLog::LogMsg( 4, "Animation has %Iu tracks after optimization.", NewTrackList.size() );
+    ExportLog::LogMsg( 4, "Animation has %zu tracks after optimization.", NewTrackList.size() );
     m_vTracks = NewTrackList;
 }
 

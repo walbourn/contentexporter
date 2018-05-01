@@ -234,7 +234,7 @@ void SetBindPose()
         }
     }
 
-    ExportLog::LogMsg( 3, "Created bind pose map with %Iu nodes.", g_BindPoseMap.size() );
+    ExportLog::LogMsg( 3, "Created bind pose map with %zu nodes.", g_BindPoseMap.size() );
 }
 
 HRESULT FBXImport::ImportFile( const CHAR* strFileName )
@@ -309,7 +309,7 @@ HRESULT FBXImport::ImportFile( const CHAR* strFileName )
                 CHAR strCurrentAnimName[MAX_PATH];
                 if( i > 0 )
                 {
-                    sprintf_s( strCurrentAnimName, "%s%Iu", (const CHAR*)AnimName, i );
+                    sprintf_s( strCurrentAnimName, "%s%zu", (const CHAR*)AnimName, i );
                 }
                 else
                 {

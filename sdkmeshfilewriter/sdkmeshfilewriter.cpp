@@ -351,7 +351,7 @@ namespace ATG
             // Only one mesh per frame is supported in the SDKMesh format.
             if( dwModelCount > 1 )
             {
-                ExportLog::LogWarning( "Frame \"%s\" has %Iu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount );
+                ExportLog::LogWarning( "Frame \"%s\" has %zu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount );
             }
             Frame.Mesh = static_cast<UINT>( g_MeshHeaderArray.size() );
             ExportModel* pModel = pRootFrame->GetModelByIndex( 0 );

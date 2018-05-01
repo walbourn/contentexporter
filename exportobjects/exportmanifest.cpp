@@ -349,7 +349,7 @@ namespace ATG
         default: // 11.0 or greater
             if ( info.width > 16384 || info.height > 16384 )
             {
-                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 11.0 or later (16384) \"%s\".", info.width, info.height, strSourceFileName );
+                ExportLog::LogWarning( "Texture size (%zu,%zu) too large for feature level 11.0 or later (16384) \"%s\".", info.width, info.height, strSourceFileName );
             }
             break;
 
@@ -357,14 +357,14 @@ namespace ATG
         case D3D_FEATURE_LEVEL_10_0:
             if ( info.width > 8192 || info.height > 8192 )
             {
-                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 10.0 or 10.1 (8192) \"%s\".", info.width, info.height, strSourceFileName );
+                ExportLog::LogWarning( "Texture size (%zu,%zu) too large for feature level 10.0 or 10.1 (8192) \"%s\".", info.width, info.height, strSourceFileName );
             }
             break;
 
         case D3D_FEATURE_LEVEL_9_3:
             if ( info.width > 4096 || info.height > 4096 )
             {
-                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 9.3 (4096) \"%s\".", info.width, info.height, strSourceFileName );
+                ExportLog::LogWarning( "Texture size (%zu,%zu) too large for feature level 9.3 (4096) \"%s\".", info.width, info.height, strSourceFileName );
             }
             break;
 
@@ -372,7 +372,7 @@ namespace ATG
         case D3D_FEATURE_LEVEL_9_1:
             if ( info.width > 2048 || info.height > 2048 )
             {
-                ExportLog::LogWarning( "Texture size (%Iu,%Iu) too large for feature level 9.1 or 9.2 (2048) \"%s\".", info.width, info.height, strSourceFileName );
+                ExportLog::LogWarning( "Texture size (%zu,%zu) too large for feature level 9.1 or 9.2 (2048) \"%s\".", info.width, info.height, strSourceFileName );
             }
             break;
         }
@@ -446,7 +446,7 @@ namespace ATG
         {
             if ( (info.width % 4) != 0 || (info.height % 4) != 0 )
             {
-                ExportLog::LogWarning( "Texture size (%Iux%Iu) not a multiple of 4 \"%s\", so skipping compress", info.width, info.height, strSourceFileName );
+                ExportLog::LogWarning( "Texture size (%zux%zu) not a multiple of 4 \"%s\", so skipping compress", info.width, info.height, strSourceFileName );
             }
             else
             {

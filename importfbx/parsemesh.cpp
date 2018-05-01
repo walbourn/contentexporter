@@ -584,7 +584,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
             auto pMaterial = MaterialList[dwSubset];
             auto pSubset = pMesh->GetSubset( dwSubset );
             CHAR strUniqueSubsetName[100];
-            sprintf_s( strUniqueSubsetName, "subset%Iu_%s", dwSubset, pMaterial->GetName().SafeString() );
+            sprintf_s( strUniqueSubsetName, "subset%zu_%s", dwSubset, pMaterial->GetName().SafeString() );
             pSubset->SetName( strUniqueSubsetName );
             pModel->SetSubsetBinding( pSubset->GetName(), pMaterial );
         }
@@ -600,7 +600,7 @@ void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, bo
             assert( pSubset->iOriginalMeshSubset < static_cast<INT>( dwMaterialCount ) );
             auto pMaterial = MaterialList[pSubset->iOriginalMeshSubset];
             CHAR strUniqueSubsetName[100];
-            sprintf_s( strUniqueSubsetName, "subset%Iu_%s", dwSubset, pMaterial->GetName().SafeString() );
+            sprintf_s( strUniqueSubsetName, "subset%zu_%s", dwSubset, pMaterial->GetName().SafeString() );
             pSubset->Name = strUniqueSubsetName;
             pModel->SetSubsetBinding( pSubset->Name, pMaterial, true );
         }

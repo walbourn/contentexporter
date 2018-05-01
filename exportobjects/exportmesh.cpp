@@ -553,7 +553,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
     if( m_RawTriangles.empty() )
         return;
 
-    ExportLog::LogMsg( 4, "Optimizing mesh \"%s\" with %Iu triangles.", GetName().SafeString(), m_RawTriangles.size() );
+    ExportLog::LogMsg( 4, "Optimizing mesh \"%s\" with %zu triangles.", GetName().SafeString(), m_RawTriangles.size() );
     
     // Apply a AttributeSort optimization
     SortRawTrianglesBySubsetIndex();
@@ -610,7 +610,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
         m_TriangleToPolygonMapping.push_back( pTriangle->PolygonIndex );
         pCurrentIBSubset->IncrementIndexCount( 3 );
     }
-    ExportLog::LogMsg( 3, "Triangle list mesh: %Iu verts, %Iu indices, %Iu subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
+    ExportLog::LogMsg( 3, "Triangle list mesh: %zu verts, %zu indices, %zu subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
 
     size_t nVerts = VertexData.size();
     if ( nVerts > 4294967295 )
@@ -723,7 +723,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
     ClearRawTriangles();
     ComputeBounds();
 
-    ExportLog::LogMsg( 3, "Vertex size: %u bytes; VB size: %Iu bytes", m_pVB->GetVertexSize(), m_pVB->GetVertexDataSize() );
+    ExportLog::LogMsg( 3, "Vertex size: %u bytes; VB size: %zu bytes", m_pVB->GetVertexSize(), m_pVB->GetVertexDataSize() );
 
     if( ExportLog::GetLogLevel() >= 4 )
     {
@@ -753,7 +753,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
         }
     }
 
-    ExportLog::LogMsg( 4, "DCC stored %u verts; final vertex count is %Iu due to duplication.", m_uDCCVertexCount, m_pVB->GetVertexCount() );
+    ExportLog::LogMsg( 4, "DCC stored %u verts; final vertex count is %zu due to duplication.", m_uDCCVertexCount, m_pVB->GetVertexCount() );
 
     if( dwFlags & FORCE_SUBD_CONVERSION )
     {
@@ -802,7 +802,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
 
     size_t nNewVerts = nVerts + dups.size();
 
-    ExportLog::LogMsg( 4, "Mesh cleanup increased vertex count from %Iu to %Iu.", nVerts, nNewVerts );
+    ExportLog::LogMsg( 4, "Mesh cleanup increased vertex count from %zu to %zu.", nVerts, nNewVerts );
 
     std::unique_ptr<XMFLOAT3[]> pos;
     if (m_pVBPositions)
@@ -1067,14 +1067,14 @@ void ExportMesh::ComputeUVAtlas()
         return;
     }
 
-    ExportLog::LogMsg( 4, "Created UV atlas with %Iu charts in texcoord %d.", outCharts, iDestUVIndex );
+    ExportLog::LogMsg( 4, "Created UV atlas with %zu charts in texcoord %d.", outCharts, iDestUVIndex );
 
     // Update vertex buffer from UVAtlas
     size_t nNewVerts = vertexRemapArray.size();
 
     if ( nNewVerts != nVerts )
     {
-        ExportLog::LogMsg( 4, "UV atlas increased vertex count from %Iu to %Iu.", nVerts, nNewVerts );
+        ExportLog::LogMsg( 4, "UV atlas increased vertex count from %zu to %zu.", nVerts, nNewVerts );
     }
 
     std::unique_ptr<XMFLOAT3[]> pos(new XMFLOAT3[nNewVerts]);
