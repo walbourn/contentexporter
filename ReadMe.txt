@@ -10,7 +10,7 @@ use of the Autodesk FBX SDK to import an FBX file and then export the data as an
 format is a runtime geometry format supported by the DirectX Tool Kit and DXUT, and is used in the
 Windows 8 Store app sample Marble Maze.
 
-The source is written for Visual Studio 2013 Update 5, Visual Studio 2015 Update 3, or Visual Studio 2017.
+The source is written for Visual Studio 2015 Update 3 or Visual Studio 2017.
 
 These components are designed to work without requiring any content from the DirectX SDK. For details,
 see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee663275.aspx>.
@@ -71,8 +71,7 @@ https://opensource.microsoft.com/codeofconduct/
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2018.1.1) for Windows VS 2013
-and/or VS 2015
+Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2018.1.1) for Windows VS 2015
 
     http://autodesk.com/fbx
 
@@ -107,11 +106,7 @@ RELEASE NOTES
 
 * The VS 2015 and later projects do not support building a 32-bit (x86) version of the exporter.
   x64 native (x64) use is wide-spread for content creation tools and provides much greater
-  memory flexiblity. The VS 2013 project retains the x86 configuration if needed.
-
-* OpenEXR support for textures is not supported in the VS 2013 build due to limitations in the
-  OpenEXR and ZLIB NuGet packages. VS 2013 projects can still build the exporter, but will throw
-  an error if you attempt to export an FBX that contains an .exr texture.
+  memory flexiblity.
 
 * The VS 2017 project uses the VS 2015 version of the Autodesk FBX SDK libraries. VS 2017 C/C++
   Runtime is binary-compatible with VS 2015 so this links successfully.
