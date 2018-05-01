@@ -1175,8 +1175,7 @@ void WriteBinaryBlobData( BYTE* pData, size_t dwDataSizeBytes )
     if( ( dwDataSizeBytes % dwPadSize ) != 0 )
     {
         DWORD dwZeroPadSize = dwPadSize - ( dwDataSizeBytes % dwPadSize );
-        BYTE bZeros[dwPadSize];
-        ZeroMemory( bZeros, dwPadSize );
+        BYTE bZeros[dwPadSize] = {};
         WriteFile( g_hBinaryBlobFile, bZeros, dwZeroPadSize, &dwBytesWritten, nullptr );
     }
 }
@@ -1285,8 +1284,7 @@ void BundleTextures()
     {
         // Run the bundler.
         ExportLog::LogMsg( 4, "Running the bundler to create %s.", g_TextureBundledFile.strIntermediateFileName.SafeString() );
-        SHELLEXECUTEINFO sei;
-        ZeroMemory( &sei, sizeof( SHELLEXECUTEINFO ) );
+        SHELLEXECUTEINFO sei = {};
         sei.cbSize = sizeof( SHELLEXECUTEINFO );
         sei.fMask = SEE_MASK_NOCLOSEPROCESS;
         sei.hwnd = nullptr;

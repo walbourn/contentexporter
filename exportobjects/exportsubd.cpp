@@ -95,7 +95,7 @@ namespace ATG
         assert( dwIndexCount % 3 == 0 );
         const size_t dwTriangleCount = dwIndexCount / 3;
 
-        ExportLog::LogMsg( 4, "Processing %Iu verts and %Iu triangles into a subdivision surface control mesh.", dwVertexCount, dwTriangleCount );
+        ExportLog::LogMsg( 4, "Processing %zu verts and %zu triangles into a subdivision surface control mesh.", dwVertexCount, dwTriangleCount );
 
         INT iCurrentPolyIndex = -1;
         INT iCurrentPolySize = 0;
@@ -211,7 +211,7 @@ namespace ATG
         // sanity check our final triangle and quad counts
         assert( dwTriangleCount == ( m_Triangles.size() + m_Quads.size() * 2 ) );
 
-        ExportLog::LogMsg( 3, "Subdivision surface control mesh complete; %Iu triangles and %Iu quads found, %Iu unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
+        ExportLog::LogMsg( 3, "Subdivision surface control mesh complete; %zu triangles and %zu quads found, %zu unique positions.", m_Triangles.size(), m_Quads.size(), m_Positions.size() );
     }
 
     INT ExportSubDProcessMesh::CreateOrAddPosition( const XMFLOAT3& vPosition, INT iMeshVertexIndex )
@@ -317,7 +317,7 @@ namespace ATG
         m_BoundaryEdges.clear();
 
         size_t dwTotalEdgeCount = m_Triangles.size() * 3 + m_Quads.size() * 4;
-        ExportLog::LogMsg( 4, "Scanning %Iu edges in control mesh for boundary edges.", dwTotalEdgeCount );
+        ExportLog::LogMsg( 4, "Scanning %zu edges in control mesh for boundary edges.", dwTotalEdgeCount );
 
         // add the edges in all of the triangles
         const size_t dwTriangleCount = m_Triangles.size();
@@ -351,7 +351,7 @@ namespace ATG
         const size_t dwPositionCount = m_Positions.size();
 
         // anything left over in the boundary edge table is a boundary edge
-        ExportLog::LogMsg( 3, "Control mesh has %Iu boundary edges.", dwBoundaryEdgeCount );
+        ExportLog::LogMsg( 3, "Control mesh has %zu boundary edges.", dwBoundaryEdgeCount );
 
         // scan for more than 2 incident boundary edges on any position vertex
         m_IncidentBoundaryEdgesPerPosition.clear();
@@ -446,7 +446,7 @@ namespace ATG
         if( m_BoundaryEdges.empty() )
             return;
 
-        ExportLog::LogMsg( 4, "Creating %Iu degenerate quads from %Iu boundary edges.", m_BoundaryEdges.size(), m_BoundaryEdges.size() );
+        ExportLog::LogMsg( 4, "Creating %zu degenerate quads from %zu boundary edges.", m_BoundaryEdges.size(), m_BoundaryEdges.size() );
 
         const size_t dwPositionCount = m_Positions.size();
 

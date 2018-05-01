@@ -59,7 +59,7 @@ namespace ATG
 
     bool ExportLog::GenerateLogReport( bool bEchoWarningsAndErrors )
     {
-        LogMsg( 0, "%Iu warning(s), %Iu error(s).", g_dwWarningCount, g_dwErrorCount );
+        LogMsg( 0, "%zu warning(s), %zu error(s).", g_dwWarningCount, g_dwErrorCount );
         if( !bEchoWarningsAndErrors )
             return (g_dwErrorCount > 0);
 

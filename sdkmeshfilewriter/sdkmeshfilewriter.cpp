@@ -83,8 +83,7 @@ namespace ATG
             return dwIndex;
         }
 
-        SDKMESH_MATERIAL Material;
-        ZeroMemory( &Material, sizeof(SDKMESH_MATERIAL) );
+        SDKMESH_MATERIAL Material = {};
         strcpy_s( Material.Name, pMaterial->GetName() );
 
         auto pColor = pMaterial->FindParameter( "DiffuseColor" );
@@ -154,8 +153,7 @@ namespace ATG
 
     void CaptureVertexBuffer( ExportVB* pVB, const D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
     {
-        SDKMESH_VERTEX_BUFFER_HEADER VBHeader;
-        ZeroMemory( &VBHeader, sizeof( SDKMESH_VERTEX_BUFFER_HEADER ) );
+        SDKMESH_VERTEX_BUFFER_HEADER VBHeader = {};
         VBHeader.DataOffset = 0;
         VBHeader.SizeBytes = pVB->GetVertexDataSize();
         VBHeader.StrideBytes = pVB->GetVertexSize();
@@ -169,8 +167,7 @@ namespace ATG
 
     void CaptureIndexBuffer( ExportIB* pIB )
     {
-        SDKMESH_INDEX_BUFFER_HEADER IBHeader;
-        ZeroMemory( &IBHeader, sizeof( SDKMESH_INDEX_BUFFER_HEADER ) );
+        SDKMESH_INDEX_BUFFER_HEADER IBHeader = {};
         IBHeader.DataOffset = 0;
         IBHeader.IndexType = pIB->GetIndexSize() == 2 ? IT_16BIT : IT_32BIT;
         IBHeader.NumIndices = pIB->GetIndexCount();
@@ -247,8 +244,7 @@ namespace ATG
         ExportMeshBase* pMeshBase = pModel->GetMesh();
         g_ModelMeshArray.push_back( pMeshBase );
 
-        SDKMESH_MESH MeshHeader;
-        ZeroMemory( &MeshHeader, sizeof( SDKMESH_MESH ) );
+        SDKMESH_MESH MeshHeader = {};
         strcpy_s( MeshHeader.Name, pMeshBase->GetName().SafeString() );
 
         switch( pMeshBase->GetSmallestBound() )
@@ -333,8 +329,7 @@ namespace ATG
 
     void CaptureScene( ExportFrame* pRootFrame, UINT dwParentIndex )
     {
-        SDKMESH_FRAME Frame;
-        ZeroMemory( &Frame, sizeof( SDKMESH_FRAME ) );
+        SDKMESH_FRAME Frame = {};
         strcpy_s( Frame.Name, pRootFrame->GetName().SafeString() );
         Frame.Matrix = pRootFrame->Transform().Matrix();
         Frame.ParentFrame = dwParentIndex;
@@ -351,7 +346,7 @@ namespace ATG
             // Only one mesh per frame is supported in the SDKMesh format.
             if( dwModelCount > 1 )
             {
-                ExportLog::LogWarning( "Frame \"%s\" has %Iu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount );
+                ExportLog::LogWarning( "Frame \"%s\" has %zu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount );
             }
             Frame.Mesh = static_cast<UINT>( g_MeshHeaderArray.size() );
             ExportModel* pModel = pRootFrame->GetModelByIndex( 0 );
@@ -588,8 +583,7 @@ namespace ATG
 
         ExportLog::LogMsg( 1, "Writing to SDKMESH file \"%s\"", strFileName );
 
-        SDKMESH_HEADER FileHeader;
-        ZeroMemory( &FileHeader, sizeof( SDKMESH_HEADER ) );
+        SDKMESH_HEADER FileHeader = {};
 
         FileHeader.Version = SDKMESH_FILE_VERSION;
         FileHeader.IsBigEndian = static_cast<BYTE>(!g_pScene->Settings().bLittleEndian);
@@ -853,8 +847,7 @@ namespace ATG
 
         ExportLog::LogMsg( 1, "Writing to SDKMESH animation file \"%s\"", strAnimFileName );
 
-        SDKANIMATION_FILE_HEADER AnimHeader;
-        ZeroMemory( &AnimHeader, sizeof( SDKANIMATION_FILE_HEADER ) );
+        SDKANIMATION_FILE_HEADER AnimHeader = {};
 
         const size_t dwKeyCount = size_t( pAnim->GetDuration() / pAnim->fSourceFrameInterval );
         size_t dwTrackHeadersDataSize = dwTrackCount * sizeof( SDKANIMATION_FRAME_DATA );
@@ -879,8 +872,7 @@ namespace ATG
                 return false;
 
             ExportFrame* pSourceFrame = pTrack->TransformTrack.pSourceFrame;
-            SDKANIMATION_FRAME_DATA FrameData;
-            ZeroMemory( &FrameData, sizeof( SDKANIMATION_FRAME_DATA ) );
+            SDKANIMATION_FRAME_DATA FrameData = {};
             FrameData.DataOffset = dwTrackHeadersDataSize + i * dwSingleTrackDataSize;
             if( !pSourceFrame )
             {

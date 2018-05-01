@@ -121,7 +121,7 @@ void CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFb
 
     size_t dwNodeCount = scanlist.size();
 
-    ExportLog::LogMsg( 2, "Capturing animation data from %Iu nodes, from time %0.3f to %0.3f, at an interval of %0.3f seconds.", dwNodeCount, fStartTime, fEndTime, fDeltaTime );
+    ExportLog::LogMsg( 2, "Capturing animation data from %zu nodes, from time %0.3f to %0.3f, at an interval of %0.3f seconds.", dwNodeCount, fStartTime, fEndTime, fDeltaTime );
 
     while( fCurrentTime <= fEndTime )
     {

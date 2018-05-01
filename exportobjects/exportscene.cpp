@@ -24,10 +24,10 @@ void ExportStatistics::FinalReport()
     ULONGLONG ExportParseTime = StartSaveTime - StartSceneParseTime;
     ULONGLONG ExportSaveTime = EndExportTime - StartSaveTime;
 
-    ExportLog::LogMsg( 2, "%Iu poly meshes consisting of %Iu vertices, %Iu triangles, and %Iu materials exported.", MeshesExported, VertsExported, TrisExported, MaterialsExported );
+    ExportLog::LogMsg( 2, "%zu poly meshes consisting of %zu vertices, %zu triangles, and %zu materials exported.", MeshesExported, VertsExported, TrisExported, MaterialsExported );
     if( SubDMeshesProcessed > 0 )
     {
-        ExportLog::LogMsg( 2, "%Iu subdivision surface meshes processed, including %Iu quads and %Iu triangles.", SubDMeshesProcessed, SubDQuadsProcessed, SubDTrisProcessed );
+        ExportLog::LogMsg( 2, "%zu subdivision surface meshes processed, including %zu quads and %zu triangles.", SubDMeshesProcessed, SubDQuadsProcessed, SubDTrisProcessed );
     }
     ExportLog::LogMsg( 2, "Export complete in %0.2f seconds; %0.2f seconds for scene parse and %0.2f seconds for file writing.", 
         (float)ExportTotalTime / 1000.0f, (float)ExportParseTime / 1000.0f, (float)ExportSaveTime / 1000.0f );

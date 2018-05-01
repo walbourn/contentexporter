@@ -461,7 +461,7 @@ bool MacroLoadFileList( const CHAR* strArgument, bool& bUsedArgument )
 
     fclose( fp );
 
-    ExportLog::LogMsg( 1, "Loaded %Iu input filenames from file \"%s\".", dwCount, strArgument );
+    ExportLog::LogMsg( 1, "Loaded %zu input filenames from file \"%s\".", dwCount, strArgument );
 
     return true;
 }
@@ -822,12 +822,10 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     g_WorkingPath = ExportPath::GetCurrentPath();
 
     ExportLog::AddListener( &g_ConsoleOutListener );
-#if _MSC_VER >= 1500
     if( IsDebuggerPresent() )
     {
         ExportLog::AddListener( &g_DebugSpewListener );
     }
-#endif
 
 #ifdef _DEBUG
     sprintf_s( g_strExporterName, "%s version %d.%d.%d (DEBUG)", CONTENT_EXPORTER_TITLE, CONTENT_EXPORTER_MAJOR_VERSION, CONTENT_EXPORTER_MINOR_VERSION, CONTENT_EXPORTER_REVISION );
