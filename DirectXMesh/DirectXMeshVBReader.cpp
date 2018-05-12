@@ -56,7 +56,7 @@ namespace
 class VBReader::Impl
 {
 public:
-    Impl() throw() :
+    Impl() noexcept :
         mStrides{},
         mBuffers{},
         mVerts{},
@@ -171,16 +171,19 @@ HRESULT VBReader::Impl::Initialize(const InputElementDesc* vbDecl, size_t nDecl)
 
         mInputDesc[j].AlignedByteOffset = offsets[j];
 
-        mSemantics.insert(SemanticMap::value_type(vbDecl[j].SemanticName, j));
+        auto decl = SemanticMap::value_type(vbDecl[j].SemanticName, j);
+        mSemantics.insert(decl);
 
         // Add common aliases
         if (_stricmp(vbDecl[j].SemanticName, "POSITION") == 0)
         {
-            mSemantics.insert(SemanticMap::value_type("SV_Position", j));
+            auto decl2 = SemanticMap::value_type("SV_Position", j);
+            mSemantics.insert(decl2);
         }
         else if (_stricmp(vbDecl[j].SemanticName, "SV_Position") == 0)
         {
-            mSemantics.insert(SemanticMap::value_type("POSITION", j));
+            auto decl2 = SemanticMap::value_type("POSITION", j);
+            mSemantics.insert(decl2);
         }
     }
 
@@ -640,21 +643,21 @@ HRESULT VBReader::Impl::Read(XMVECTOR* buffer, const char* semanticName, unsigne
 //=====================================================================================
 
 // Public constructor.
-VBReader::VBReader() throw()
-    : pImpl(new Impl())
+VBReader::VBReader() noexcept
+    : pImpl(std::make_unique<Impl>())
 {
 }
 
 
 // Move constructor.
-VBReader::VBReader(VBReader&& moveFrom) throw()
+VBReader::VBReader(VBReader&& moveFrom) noexcept
     : pImpl(std::move(moveFrom.pImpl))
 {
 }
 
 
 // Move assignment.
-VBReader& VBReader::operator= (VBReader&& moveFrom) throw()
+VBReader& VBReader::operator= (VBReader&& moveFrom) noexcept
 {
     pImpl = std::move(moveFrom.pImpl);
     return *this;
