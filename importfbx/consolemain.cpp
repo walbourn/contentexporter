@@ -481,7 +481,7 @@ MacroCommand g_MacroCommands[] = {
     { "animation", "", "Sets export options for animation track export", MacroAnimation },
     { "character", "", "Sets export options for character (mesh & skeleton) export", MacroCharacter },
     { "lightmaps", "", "Sets export options for light-mapped mesh export", MacroLightmaps },
-    { "normalmaps", "", "Sets export otions for normal-mapped mesh export", MacroNormalMaps },
+    { "normalmaps", "", "Sets export options for normal-mapped mesh export", MacroNormalMaps },
     { "subd11", "", "Sets export options for subdivision surface processing for SubD11 sample", MacroSubD11 },
     { "subdxbox", "", "Sets export options for subdivision surface processing for Xbox SubD sample", MacroSubDXbox },
     { "savesettings", " <filename>", "Saves all settings to the specified filename", MacroSaveSettings },
