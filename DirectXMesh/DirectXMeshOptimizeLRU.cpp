@@ -100,16 +100,6 @@ namespace
         return TRUE;
     }
 
-    inline float FindVertexCacheScore(uint32_t cachePosition, uint32_t maxSizeVertexCache)
-    {
-        return s_vertexCacheScores[maxSizeVertexCache][cachePosition];
-    }
-
-    inline float FindVertexValenceScore(uint32_t numActiveTris)
-    {
-        return s_vertexValenceScores[numActiveTris];
-    }
-
     float FindVertexScore(uint32_t numActiveFaces, uint32_t cachePosition, uint32_t vertexCacheSize)
     {
         if (numActiveFaces == 0)
@@ -389,8 +379,8 @@ namespace
 
             // add bestFace to LRU cache
             assert(vertexRemap[bestFace] != UNUSED32);
-            assert(vertexRemap[bestFace + 1] != UNUSED32);
-            assert(vertexRemap[bestFace + 2] != UNUSED32);
+            assert(vertexRemap[size_t(bestFace) + 1] != UNUSED32);
+            assert(vertexRemap[size_t(bestFace) + 2] != UNUSED32);
 
             for (size_t v = 0; v < 3; ++v)
             {
@@ -571,6 +561,17 @@ HRESULT DirectX::OptimizeFacesLRUEx(
 
     for (auto it = subsets.cbegin(); it != subsets.cend(); ++it)
     {
+        if (it->first >= nFaces)
+            return E_UNEXPECTED;
+
+        if ((uint64_t(it->first) + uint64_t(it->second)) >= UINT32_MAX)
+            return HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
+
+        uint32_t faceMax = uint32_t(it->first + it->second);
+
+        if (faceMax > nFaces)
+            return E_UNEXPECTED;
+
         HRESULT hr = OptimizeFacesImpl<uint16_t>(
             &indices[it->first * 3], static_cast<uint32_t>(it->second * 3),
             &faceRemap[it->first], lruCacheSize, uint32_t(it->first));
@@ -606,6 +607,17 @@ HRESULT DirectX::OptimizeFacesLRUEx(
 
     for (auto it = subsets.cbegin(); it != subsets.cend(); ++it)
     {
+        if (it->first >= nFaces)
+            return E_UNEXPECTED;
+
+        if ((uint64_t(it->first) + uint64_t(it->second)) >= UINT32_MAX)
+            return HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
+
+        uint32_t faceMax = uint32_t(it->first + it->second);
+
+        if (faceMax > nFaces)
+            return E_UNEXPECTED;
+
         HRESULT hr = OptimizeFacesImpl<uint32_t>(
             &indices[it->first * 3], static_cast<uint32_t>(it->second * 3),
             &faceRemap[it->first], lruCacheSize, uint32_t(it->first));
