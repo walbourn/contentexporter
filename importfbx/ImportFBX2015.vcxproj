@@ -69,7 +69,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\DirectXTex;..\DirectXMesh;..\UVAtlas\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_OPENEXR;WIN32;_DEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -81,7 +81,7 @@
       <PreprocessorDefinitions>PRIVATE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libfbxsdk-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ContentExporter.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -96,7 +96,7 @@
     <ClCompile>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\DirectXTex;..\DirectXMesh;..\UVAtlas\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>USE_OPENEXR;WIN32;NDEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -107,7 +107,7 @@
       <PreprocessorDefinitions>PRIVATE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libfbxsdk-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ContentExporter.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -124,7 +124,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleMain.cpp" />
-    <ClCompile Include="DirectXTexEXR.cpp" />
     <ClCompile Include="FBXImportMain.cpp" />
     <ClCompile Include="ParseAnimation.cpp" />
     <ClCompile Include="ParseMaterial.cpp" />
@@ -137,7 +136,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ExporterGlobals.h" />
-    <ClInclude Include="DirectXTexEXR.h" />
     <ClInclude Include="FBXImportMain.h" />
     <ClInclude Include="ParseAnimation.h" />
     <ClInclude Include="ParseMaterial.h" />
@@ -171,19 +169,5 @@
   <ItemGroup>
     <Manifest Include="settings.manifest" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets" Condition="Exists('..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets')" />
-    <Import Project="..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets" Condition="Exists('..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets'))" />
-    <Error Condition="!Exists('..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets'))" />
-  </Target>
 </Project>

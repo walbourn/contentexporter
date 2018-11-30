@@ -59,10 +59,10 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ExecutablePath);$(DXSDK_DIR)Utilities\bin\x64</ExecutablePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2015\x64\release;$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2017\x64\release;$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
     <ExecutablePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ExecutablePath);$(DXSDK_DIR)Utilities\bin\x64</ExecutablePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2015\x64\debug;$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2017\x64\debug;$(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ContentExporter</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ContentExporter</TargetName>
   </PropertyGroup>
@@ -82,7 +82,7 @@
       <PreprocessorDefinitions>PRIVATE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libfbxsdk-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ContentExporter.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -91,6 +91,8 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -108,7 +110,7 @@
       <PreprocessorDefinitions>PRIVATE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libfbxsdk-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ContentExporter.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -121,6 +123,8 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -177,14 +181,14 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets" Condition="Exists('..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets')" />
-    <Import Project="..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets" Condition="Exists('..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets')" />
+    <Import Project="..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets" Condition="Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" />
+    <Import Project="..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets" Condition="Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc14-x64.2.2.0.7784\build\native\OpenEXR-msvc14-x64.targets'))" />
-    <Error Condition="!Exists('..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc14-x64.1.2.11.7795\build\native\zlib-msvc14-x64.targets'))" />
+    <Error Condition="!Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets'))" />
+    <Error Condition="!Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets'))" />
   </Target>
 </Project>

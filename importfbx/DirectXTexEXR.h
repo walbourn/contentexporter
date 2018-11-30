@@ -9,8 +9,6 @@
 
 #include "directxtex.h"
 
-#pragma comment(lib,"IlmImf-2_2.lib")
-
 namespace DirectX
 {
     HRESULT __cdecl GetMetadataFromEXRFile( _In_z_ const wchar_t* szFile,
