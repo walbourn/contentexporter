@@ -3,16 +3,17 @@ ATG Samples Content Exporter
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-August 17, 2018
+November 30, 2018
 
 The Samples Content Exporter was originally shipped as a sample in the legacy DirectX SDK. It makes
 use of the Autodesk FBX SDK to import an FBX file and then export the data as an SDKMESH. The SDKMESH
 format is a runtime geometry format supported by the DirectX Tool Kit and DXUT, and is used in the
 Windows 8 Store app sample Marble Maze.
 
-The source is written for Visual Studio 2015 Update 3 or Visual Studio 2017. It is recommended that
-you make use of VS 2015 Update 3, Windows Tools 1.4.1, and the Windows 10 Anniversary Update SDK (14393)
-or VS 2017 (15.8 update) with the Windows 10 April 2018 Update SDK (17134).
+This code is designed to build with Visual Studio 2015 Update 3 or Visual Studio 2017.
+It is recommended that you make use of VS 2015 Update 3, Windows Tools 1.4.1, and the
+Windows 10 Anniversary Update SDK (14393) -or- VS 2017 (15.9 update) with the
+Windows 10 October 2018 Update SDK (17763).
 
 These components are designed to work without requiring any content from the DirectX SDK. For details,
 see "Where is the DirectX SDK?" <http://msdn.microsoft.com/en-us/library/ee663275.aspx>.
@@ -52,7 +53,7 @@ All content and source code for this package are subject to the terms of the MIT
 <http://opensource.org/licenses/MIT>.
 
 Use of OpenEXR is subject to it's own license terms, and requires the ZLIB library as well. Use of
-OpenEXR can be removed by undefining USE_OPENEXR from the VS 2015/2017 project and removing
+OpenEXR can be removed by undefining USE_OPENEXR from the VS 2017 project and removing
 the NuGet packages.
 
     <https://github.com/openexr/openexr/blob/develop/OpenEXR/LICENSE>
@@ -73,12 +74,12 @@ https://opensource.microsoft.com/codeofconduct/
 BUILD INSTRUCTIONS
 ------------------
 
-Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2019.0) for Windows VS 2015
+Install the Autodesk FBX SDK 2015.1 or later (latest tested version is 2019.2) for Windows VS 2015 / VS 2017
 
     http://autodesk.com/fbx
 
 Ensure the environment variable FBX_SDK is set to point to the Autodesk FBX SDK
-(such as "C:\Program Files\Autodesk\FBX\FbxSdk\2019.0")
+(such as "C:\Program Files\Autodesk\FBX\FbxSdk\2019.2")
 
 Open the ContentExporter_201?.sln from Visual Studio.
 
@@ -110,13 +111,20 @@ RELEASE NOTES
   x64 native (x64) use is wide-spread for content creation tools and provides much greater
   memory flexiblity.
 
-* The VS 2017 project uses the VS 2015 version of the Autodesk FBX SDK libraries. VS 2017 C/C++
-  Runtime is binary-compatible with VS 2015 so this links successfully.
+* The VS 2017 project uses the VS 2017 version of the Autodesk FBX SDK libraries in 2019.2.
+  VS 2017 C/C++ Runtime is binary-compatible with VS 2015 so can link successfully with older
+  VS 2015 versions of libraries if needed (requies editing ImportFBX\ImportFBX2017.vcxproj
+  <LibraryPath> elements).
 
 
 ---------------
 RELEASE HISTORY
 ---------------
+
+November 30, 2018
+    Updated for FBX SDK 2019.2
+    - OpenEXR support removed from VS 2015 project
+    Updated DirectXMesh, DirectXTex, and UVAtlas libraries
 
 August 17, 2018
     Updated DirectXMesh, DirectXTex, and UVAtlas libraries
