@@ -17,6 +17,6 @@ namespace ATG
 
 class ExportManifest;
 
-bool WriteSDKMeshFile( const CHAR* strFileName, ExportManifest* pManifest );
+bool WriteSDKMeshFile( const CHAR* strFileName, ExportManifest* pManifest, bool version2 );
 
 }
