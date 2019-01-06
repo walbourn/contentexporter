@@ -10,9 +10,12 @@
 #include "stdafx.h"
 #include "SDKmesh.h"
 
+static_assert(sizeof(::D3DVERTEXELEMENT9) == sizeof(DXUT::D3DVERTEXELEMENT9), "Direct3D9 Decl structure size incorrect");
+
 extern ATG::ExportScene*     g_pScene;
 
 using namespace DirectX;
+using namespace DXUT;
 
 namespace ATG
 {
@@ -147,16 +150,16 @@ namespace ATG
         return dwIndex;
     }
 
-    void CaptureVertexBuffer( ExportVB* pVB, const D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
+    void CaptureVertexBuffer( ExportVB* pVB, const ::D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
     {
         SDKMESH_VERTEX_BUFFER_HEADER VBHeader = {};
         VBHeader.DataOffset = 0;
         VBHeader.SizeBytes = pVB->GetVertexDataSize();
         VBHeader.StrideBytes = pVB->GetVertexSize();
         VBHeader.NumVertices = pVB->GetVertexCount();
-        memcpy( VBHeader.Decl, pElements, dwElementCount * sizeof( D3DVERTEXELEMENT9 ) );
-        static D3DVERTEXELEMENT9 EndElement = { 0xFF, 0, D3DDECLTYPE_UNUSED, 0, 0, 0 };
-        VBHeader.Decl[ dwElementCount ] = EndElement;
+        memcpy( VBHeader.Decl, pElements, dwElementCount * sizeof( ::D3DVERTEXELEMENT9 ) );
+        static ::D3DVERTEXELEMENT9 EndElement = { 0xFF, 0, ::D3DDECLTYPE_UNUSED, 0, 0, 0 };
+        VBHeader.Decl[ dwElementCount ] = *reinterpret_cast<const DXUT::D3DVERTEXELEMENT9*>(&EndElement);
         g_VBArray.push_back( pVB );
         g_VBHeaderArray.push_back( VBHeader );
     }
@@ -581,7 +584,7 @@ namespace ATG
 
         SDKMESH_HEADER FileHeader = {};
 
-        FileHeader.Version = SDKMESH_FILE_VERSION;
+        FileHeader.Version = SDKMESH_FILE_VERSION; // TODO - _V2
         FileHeader.IsBigEndian = static_cast<BYTE>(!g_pScene->Settings().bLittleEndian);
 
         FileHeader.NumFrames = static_cast<UINT>( g_FrameArray.size() );
@@ -645,6 +648,7 @@ namespace ATG
         }
 
         // Write materials
+        // TODO - V2
         size_t dwMaterialCount = g_MaterialArray.size();
         for( size_t i = 0; i < dwMaterialCount; ++i )
         {
