@@ -118,20 +118,23 @@ namespace ATG
                     basename = basename.substr(0, pos);
                 }
 
-                strcpy_s(fname, basename.c_str());
-                strcat_s(fname, "_normal");
-                _makepath_s(Material2->NormalTexture, drive, dir, fname, ext);
-
-                strcpy_s(fname, basename.c_str());
-                strcat_s(fname, "_occlusionRoughnessMetallic");
-                _makepath_s(Material2->RMATexture, drive, dir, fname, ext);
-
-                pColor = pMaterial->FindParameter("EmissiveColor");
-                if (pColor && (pColor->ValueFloat[0] > 0 || pColor->ValueFloat[1] > 0 || pColor->ValueFloat[2] > 0))
+                if (!basename.empty())
                 {
                     strcpy_s(fname, basename.c_str());
-                    strcat_s(fname, "_emissive");
-                    _makepath_s(Material2->EmissiveTexture, drive, dir, fname, ext);
+                    strcat_s(fname, "_normal");
+                    _makepath_s(Material2->NormalTexture, drive, dir, fname, ext);
+
+                    strcpy_s(fname, basename.c_str());
+                    strcat_s(fname, "_occlusionRoughnessMetallic");
+                    _makepath_s(Material2->RMATexture, drive, dir, fname, ext);
+
+                    pColor = pMaterial->FindParameter("EmissiveColor");
+                    if (pColor && (pColor->ValueFloat[0] > 0 || pColor->ValueFloat[1] > 0 || pColor->ValueFloat[2] > 0))
+                    {
+                        strcpy_s(fname, basename.c_str());
+                        strcat_s(fname, "_emissive");
+                        _makepath_s(Material2->EmissiveTexture, drive, dir, fname, ext);
+                    }
                 }
             }
 
