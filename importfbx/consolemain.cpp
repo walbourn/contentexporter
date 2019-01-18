@@ -85,6 +85,7 @@ enum ExportFileFormat
 {
     FILEFORMAT_XATG = 0,
     FILEFORMAT_SDKMESH = 1,
+    FILEFORMAT_SDKMESH_V2 = 2,
 };
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -310,6 +311,15 @@ bool MacroSDKMesh( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
+bool MacroSDKMesh2(const CHAR* strArgument, bool& bUsedArgument)
+{
+    UNREFERENCED_PARAMETER(strArgument);
+    UNREFERENCED_PARAMETER(bUsedArgument);
+
+    g_ExportFileFormat = FILEFORMAT_SDKMESH_V2;
+    return true;
+}
+
 bool MacroXATG( const CHAR* strArgument, bool& bUsedArgument )
 {
     UNREFERENCED_PARAMETER(strArgument);
@@ -472,6 +482,7 @@ MacroCommand g_MacroCommands[] = {
     { "verbose", "", "Displays more detailed output, equivalent to -loglevel 4", MacroSetVerbose },
     { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
+    { "sdkmesh2", "", "Use the SDKMESH (version 2) output file format, equivalent to -fileformat sdkmesh2", MacroSDKMesh2 },
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
     { "xboxone", "", "Sets export options for an Xbox One target", MacroXboxOne },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
@@ -803,7 +814,7 @@ void BuildOutputFileName( const ExportPath& InputFileName )
 
     g_CurrentOutputFileName.ChangeFileName( InputFileName );
 
-    if( g_ExportFileFormat == FILEFORMAT_SDKMESH )
+    if( g_ExportFileFormat == FILEFORMAT_SDKMESH || g_ExportFileFormat == FILEFORMAT_SDKMESH_V2 )
     {
         g_CurrentOutputFileName.ChangeExtension( CONTENT_EXPORTER_BINARYFILE_EXTENSION );
     }
@@ -844,6 +855,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     static const ExportEnumValue FileFormatEnums[] = {
         { CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_FILE_EXTENSION, FILEFORMAT_XATG },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_BINARYFILE_EXTENSION, FILEFORMAT_SDKMESH },
+        { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION_V2, "sdkmesh2", FILEFORMAT_SDKMESH_V2 },
     };
     g_SettingsManager.AddEnum( g_SettingsManager.GetRootCategory( 0 ), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE( FileFormatEnums ), &g_ExportFileFormat );
 
@@ -946,10 +958,10 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
         if( SUCCEEDED(hr) )
         {
-            if( g_ExportFileFormat == FILEFORMAT_SDKMESH )
+            if( g_ExportFileFormat == FILEFORMAT_SDKMESH || g_ExportFileFormat == FILEFORMAT_SDKMESH_V2 )
             {
                 ExportTextureConverter::ProcessScene( g_pScene, &g_Manifest, "", true );
-                WriteSDKMeshFile( g_CurrentOutputFileName, &g_Manifest );
+                WriteSDKMeshFile( g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false);
                 if (bExportMaterials)
                 {
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);

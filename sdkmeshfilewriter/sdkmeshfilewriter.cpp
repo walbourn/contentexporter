@@ -10,9 +10,12 @@
 #include "stdafx.h"
 #include "SDKmesh.h"
 
+static_assert(sizeof(::D3DVERTEXELEMENT9) == sizeof(DXUT::D3DVERTEXELEMENT9), "Direct3D9 Decl structure size incorrect");
+
 extern ATG::ExportScene*     g_pScene;
 
 using namespace DirectX;
+using namespace DXUT;
 
 namespace ATG
 {
@@ -70,7 +73,7 @@ namespace ATG
         }
     }
 
-    DWORD CaptureMaterial( ExportMaterial* pMaterial )
+    DWORD CaptureMaterial( ExportMaterial* pMaterial, bool version2 )
     {
         MaterialLookupMap::iterator iter = g_ExportMaterialToSDKMeshMaterialMap.find( pMaterial );
         if( iter != g_ExportMaterialToSDKMeshMaterialMap.end() )
@@ -82,81 +85,152 @@ namespace ATG
         SDKMESH_MATERIAL Material = {};
         strcpy_s( Material.Name, pMaterial->GetName() );
 
-        auto pColor = pMaterial->FindParameter( "DiffuseColor" );
-        if( pColor )
+        if (version2)
         {
-            Material.Diffuse = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], pColor->ValueFloat[3] );
+            auto Material2 = reinterpret_cast<SDKMESH_MATERIAL_V2*>(&Material);
+
+            auto pColor = pMaterial->FindParameter("DiffuseColor");
+            if (pColor)
+            {
+                Material2->Alpha = pColor->ValueFloat[3];
+            }
+            else
+            {
+                Material2->Alpha = 1.f;
+            }
+
+            auto pDiffuse = pMaterial->FindParameter("DiffuseTexture");
+            if (pDiffuse)
+            {
+                ProcessTexture(Material2->AlbetoTexture, MAX_TEXTURE_NAME, pDiffuse->ValueString.SafeString());
+
+                // Derive other PBR texture names from base texture
+                char drive[_MAX_DRIVE] = {};
+                char dir[MAX_PATH] = {};
+                char fname[_MAX_FNAME] = {};
+                char ext[_MAX_EXT] = {};
+                _splitpath_s(Material2->AlbetoTexture, drive, dir, fname, ext);
+
+                std::string basename = fname;
+                size_t pos = basename.find_last_of('_');
+                if (pos != std::string::npos)
+                {
+                    basename = basename.substr(0, pos);
+                }
+
+                if (!basename.empty())
+                {
+                    strcpy_s(fname, basename.c_str());
+                    strcat_s(fname, "_normal");
+                    _makepath_s(Material2->NormalTexture, drive, dir, fname, ext);
+
+                    strcpy_s(fname, basename.c_str());
+                    strcat_s(fname, "_occlusionRoughnessMetallic");
+                    _makepath_s(Material2->RMATexture, drive, dir, fname, ext);
+
+                    pColor = pMaterial->FindParameter("EmissiveColor");
+                    if (pColor && (pColor->ValueFloat[0] > 0 || pColor->ValueFloat[1] > 0 || pColor->ValueFloat[2] > 0))
+                    {
+                        strcpy_s(fname, basename.c_str());
+                        strcat_s(fname, "_emissive");
+                        _makepath_s(Material2->EmissiveTexture, drive, dir, fname, ext);
+                    }
+                }
+            }
+
+            // Allow normal map property to override derived name
+            auto pNormal = pMaterial->FindParameter("NormalMapTexture");
+            if (pNormal)
+            {
+                ProcessTexture(Material2->NormalTexture, MAX_TEXTURE_NAME, pNormal->ValueString.SafeString());
+            }
+
+            // Allow emissive map property to override drived name
+            auto pEmissive = pMaterial->FindParameter("EmissiveMapTexture");
+            if (pEmissive)
+            {
+                ProcessTexture(Material2->EmissiveTexture, MAX_TEXTURE_NAME, pNormal->ValueString.SafeString());
+            }
         }
         else
         {
-            Material.Diffuse = XMFLOAT4( 1.f, 1.f, 1.f, 1.f );
-        }
-          
-        pColor = pMaterial->FindParameter( "AmbientColor" );
-        if( pColor )
-        {
-            Material.Ambient = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
-        }
-        else
-        {
-            Material.Ambient = XMFLOAT4( 0.f, 0.f, 0.f, 0.f );
+            auto pColor = pMaterial->FindParameter("DiffuseColor");
+            if (pColor)
+            {
+                Material.Diffuse = XMFLOAT4(pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], pColor->ValueFloat[3]);
+            }
+            else
+            {
+                Material.Diffuse = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+            }
+
+            pColor = pMaterial->FindParameter("AmbientColor");
+            if (pColor)
+            {
+                Material.Ambient = XMFLOAT4(pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f);
+            }
+            else
+            {
+                Material.Ambient = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+            }
+
+            pColor = pMaterial->FindParameter("EmissiveColor");
+            if (pColor)
+            {
+                Material.Emissive = XMFLOAT4(pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f);
+            }
+            else
+            {
+                Material.Emissive = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+            }
+
+            pColor = pMaterial->FindParameter("SpecularColor");
+            if (pColor)
+            {
+                Material.Specular = XMFLOAT4(pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f);
+
+                auto pPower = pMaterial->FindParameter("SpecularPower");
+                Material.Power = (pPower) ? pPower->ValueFloat[0] : 16.f;
+            }
+            else
+            {
+                Material.Specular = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+                Material.Power = 1.f;
+            }
+
+            auto pDiffuse = pMaterial->FindParameter("DiffuseTexture");
+            if (pDiffuse)
+            {
+                ProcessTexture(Material.DiffuseTexture, MAX_TEXTURE_NAME, pDiffuse->ValueString.SafeString());
+            }
+            auto pNormal = pMaterial->FindParameter("NormalMapTexture");
+            if (pNormal)
+            {
+                ProcessTexture(Material.NormalTexture, MAX_TEXTURE_NAME, pNormal->ValueString.SafeString());
+            }
+            auto pSpecular = pMaterial->FindParameter("SpecularMapTexture");
+            if (pSpecular)
+            {
+                ProcessTexture(Material.SpecularTexture, MAX_TEXTURE_NAME, pSpecular->ValueString.SafeString());
+            }
         }
 
-        pColor = pMaterial->FindParameter( "EmissiveColor" );
-        if( pColor )
-        {
-            Material.Emissive = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
-        }
-        else
-        {
-            Material.Emissive = XMFLOAT4( 0.f, 0.f, 0.f, 0.f );
-        }
-
-        pColor = pMaterial->FindParameter( "SpecularColor" );
-        if( pColor )
-        {
-            Material.Specular  = XMFLOAT4( pColor->ValueFloat[0], pColor->ValueFloat[1], pColor->ValueFloat[2], 0.f );
-
-            auto pPower = pMaterial->FindParameter( "SpecularPower" );
-            Material.Power = (pPower) ? pPower->ValueFloat[0] : 16.f;
-        }
-        else
-        {
-            Material.Specular = XMFLOAT4( 0.f, 0.f, 0.f, 0.f );
-            Material.Power = 1.f;
-        }
-
-        auto pDiffuse = pMaterial->FindParameter( "DiffuseTexture" );
-        if( pDiffuse )
-        {
-            ProcessTexture( Material.DiffuseTexture, MAX_MATERIAL_NAME, pDiffuse->ValueString.SafeString() );
-        }
-        auto pNormal = pMaterial->FindParameter( "NormalMapTexture" );
-        if( pNormal )
-        {
-            ProcessTexture( Material.NormalTexture, MAX_MATERIAL_NAME, pNormal->ValueString.SafeString() );
-        }
-        auto pSpecular = pMaterial->FindParameter( "SpecularMapTexture" );
-        if( pSpecular )
-        {
-            ProcessTexture( Material.SpecularTexture, MAX_MATERIAL_NAME, pSpecular->ValueString.SafeString() );
-        }
         DWORD dwIndex = static_cast<DWORD>( g_MaterialArray.size() );
         g_MaterialArray.push_back( Material );
         g_ExportMaterialToSDKMeshMaterialMap[pMaterial] = dwIndex;
         return dwIndex;
     }
 
-    void CaptureVertexBuffer( ExportVB* pVB, const D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
+    void CaptureVertexBuffer( ExportVB* pVB, const ::D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
     {
         SDKMESH_VERTEX_BUFFER_HEADER VBHeader = {};
         VBHeader.DataOffset = 0;
         VBHeader.SizeBytes = pVB->GetVertexDataSize();
         VBHeader.StrideBytes = pVB->GetVertexSize();
         VBHeader.NumVertices = pVB->GetVertexCount();
-        memcpy( VBHeader.Decl, pElements, dwElementCount * sizeof( D3DVERTEXELEMENT9 ) );
-        static D3DVERTEXELEMENT9 EndElement = { 0xFF, 0, D3DDECLTYPE_UNUSED, 0, 0, 0 };
-        VBHeader.Decl[ dwElementCount ] = EndElement;
+        memcpy( VBHeader.Decl, pElements, dwElementCount * sizeof( ::D3DVERTEXELEMENT9 ) );
+        static ::D3DVERTEXELEMENT9 EndElement = { 0xFF, 0, ::D3DDECLTYPE_UNUSED, 0, 0, 0 };
+        VBHeader.Decl[ dwElementCount ] = *reinterpret_cast<const DXUT::D3DVERTEXELEMENT9*>(&EndElement);
         g_VBArray.push_back( pVB );
         g_VBHeaderArray.push_back( VBHeader );
     }
@@ -192,11 +266,11 @@ namespace ATG
         }
     }
 
-    void CaptureSubset( ExportMeshBase* pMeshBase, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount )
+    void CaptureSubset( ExportMeshBase* pMeshBase, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount, bool version2 )
     {
         ExportIBSubset* pIBSubset = pMeshBase->FindSubset( pBinding->SubsetName );
         assert( pIBSubset != nullptr );
-        DWORD dwMaterialIndex = CaptureMaterial( pBinding->pMaterial );
+        DWORD dwMaterialIndex = CaptureMaterial( pBinding->pMaterial, version2 );
         SDKMESH_SUBSET Subset;
         Subset.IndexStart = pIBSubset->GetStartIndex();
         Subset.IndexCount = pIBSubset->GetIndexCount();
@@ -219,9 +293,9 @@ namespace ATG
         g_SubsetArray.push_back( Subset );
     }
 
-    void CaptureSubDSubset( ExportSubDProcessMesh* pSubDMesh, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount )
+    void CaptureSubDSubset( ExportSubDProcessMesh* pSubDMesh, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount, bool version2 )
     {
-        DWORD dwMaterialIndex = CaptureMaterial( pBinding->pMaterial );
+        DWORD dwMaterialIndex = CaptureMaterial( pBinding->pMaterial, version2 );
         ExportSubDPatchSubset* pSubset = pSubDMesh->FindSubset( pBinding->SubsetName );
         SDKMESH_SUBSET Subset;
         Subset.IndexStart = pSubset->dwStartPatch;
@@ -234,7 +308,7 @@ namespace ATG
         g_SubsetArray.push_back( Subset );
     }
 
-    void CaptureModel( ExportModel* pModel )
+    void CaptureModel( ExportModel* pModel, bool version2 )
     {
         g_ModelArray.push_back( pModel );
         ExportMeshBase* pMeshBase = pModel->GetMesh();
@@ -294,11 +368,11 @@ namespace ATG
             g_SubsetIndexArray.push_back( static_cast<UINT>( g_SubsetArray.size() ) );
             if( pSubDMesh )
             {
-                CaptureSubDSubset( pSubDMesh, pModel->GetBinding( i ), dwMaxVertexCount );
+                CaptureSubDSubset( pSubDMesh, pModel->GetBinding( i ), dwMaxVertexCount, version2 );
             }
             else
             {
-                CaptureSubset( pMeshBase, pModel->GetBinding( i ), dwMaxVertexCount );
+                CaptureSubset( pMeshBase, pModel->GetBinding( i ), dwMaxVertexCount, version2 );
             }
         }
 
@@ -323,7 +397,7 @@ namespace ATG
         g_MeshHeaderArray.push_back( MeshHeader );
     }
 
-    void CaptureScene( ExportFrame* pRootFrame, UINT dwParentIndex )
+    void CaptureScene( ExportFrame* pRootFrame, UINT dwParentIndex, bool version2 )
     {
         SDKMESH_FRAME Frame = {};
         strcpy_s( Frame.Name, pRootFrame->GetName().SafeString() );
@@ -346,7 +420,7 @@ namespace ATG
             }
             Frame.Mesh = static_cast<UINT>( g_MeshHeaderArray.size() );
             ExportModel* pModel = pRootFrame->GetModelByIndex( 0 );
-            CaptureModel( pModel );
+            CaptureModel( pModel, version2 );
         }
 
         UINT dwChildIndex = INVALID_FRAME;
@@ -369,7 +443,7 @@ namespace ATG
             {
                 g_FrameHeaderArray[ dwPreviousSiblingIndex ].SiblingFrame = dwCurrentSiblingIndex;
             }
-            CaptureScene( pRootFrame->GetChildByIndex( i ), static_cast<UINT>( dwCurrentIndex ) );
+            CaptureScene( pRootFrame->GetChildByIndex( i ), static_cast<UINT>( dwCurrentIndex ), version2 );
         }
     }
 
@@ -536,14 +610,14 @@ namespace ATG
         }
     }
 
-    bool WriteSDKMeshFile( const CHAR* strFileName, ExportManifest* pManifest )
+    bool WriteSDKMeshFile( const CHAR* strFileName, ExportManifest* pManifest, bool version2 )
     {
         if( !g_pScene )
             return false;
 
         ClearSceneArrays();
 
-        CaptureScene( g_pScene, INVALID_FRAME );
+        CaptureScene( g_pScene, INVALID_FRAME, version2 );
         CaptureSecondPass();
 
         if ( !g_SubsetArray.empty() && g_MaterialArray.empty() )
@@ -551,9 +625,21 @@ namespace ATG
             ExportLog::LogWarning( "No materials defined, so creating a default material" );
             SDKMESH_MATERIAL defMaterial;
             memset(&defMaterial, 0, sizeof(SDKMESH_MATERIAL));
-            defMaterial.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.f);
-            defMaterial.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.f);
-            defMaterial.Power = 1.f;
+
+            if (version2)
+            {
+                auto defMaterial2 = reinterpret_cast<SDKMESH_MATERIAL_V2*>(&defMaterial);
+                strcpy_s(defMaterial2->Name, "default");
+                defMaterial2->Alpha = 1.f;
+            }
+            else
+            {
+                strcpy_s(defMaterial.Name, "default");
+                defMaterial.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.f);
+                defMaterial.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.f);
+                defMaterial.Power = 1.f;
+            }
+
             g_MaterialArray.push_back( defMaterial );
         }
 
@@ -581,7 +667,7 @@ namespace ATG
 
         SDKMESH_HEADER FileHeader = {};
 
-        FileHeader.Version = SDKMESH_FILE_VERSION;
+        FileHeader.Version = (version2) ? SDKMESH_FILE_VERSION_V2 : SDKMESH_FILE_VERSION;
         FileHeader.IsBigEndian = static_cast<BYTE>(!g_pScene->Settings().bLittleEndian);
 
         FileHeader.NumFrames = static_cast<UINT>( g_FrameArray.size() );
@@ -645,6 +731,7 @@ namespace ATG
         }
 
         // Write materials
+        // TODO - V2
         size_t dwMaterialCount = g_MaterialArray.size();
         for( size_t i = 0; i < dwMaterialCount; ++i )
         {
