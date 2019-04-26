@@ -149,7 +149,7 @@ namespace ATG
             auto pEmissive = pMaterial->FindParameter("EmissiveMapTexture");
             if (pEmissive)
             {
-                ProcessTexture(Material2->EmissiveTexture, MAX_TEXTURE_NAME, pNormal->ValueString.SafeString());
+                ProcessTexture(Material2->EmissiveTexture, MAX_TEXTURE_NAME, pEmissive->ValueString.SafeString());
             }
         }
         else
