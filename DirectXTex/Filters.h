@@ -99,7 +99,7 @@ inline void _CreateLinearFilter(_In_ size_t source, _In_ size_t dest, _In_ bool 
 
 #define BILINEAR_INTERPOLATE( res, x, y, r0, r1 ) \
     res = XMVectorAdd(XMVectorScale(XMVectorAdd(XMVectorScale((r0)[ x.u0 ], x.weight0), XMVectorScale((r0)[ x.u1 ], x.weight1)), y.weight0), \
-                      XMVectorScale(XMVectorAdd(XMVectorScale((r1)[ x.u0 ], x.weight0), XMVectorScale((r1)[ x.u1 ], x.weight1)), y.weight1) )
+                      XMVectorScale(XMVectorAdd(XMVectorScale((r1)[ x.u0 ], x.weight0), XMVectorScale((r1)[ x.u1 ], x.weight1)), y.weight1) );
 
 #define TRILINEAR_INTERPOLATE( res, x, y, z, r0, r1, r2, r3 ) \
 {\
@@ -295,7 +295,7 @@ namespace TriangleFilter
         }
 
         assert(pFilter != nullptr);
-        _Analysis_assume_(pFilter != 0);
+        _Analysis_assume_(pFilter != nullptr);
 
         // Filter setup
         size_t sizeInBytes = TF_FILTER_SIZE;
