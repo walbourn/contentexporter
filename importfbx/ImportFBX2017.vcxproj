@@ -69,7 +69,6 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\DirectXTex;..\DirectXMesh;..\UVAtlas\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>USE_OPENEXR;WIN32;_DEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -98,7 +97,6 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\DirectXTex;..\DirectXMesh;..\UVAtlas\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>USE_OPENEXR;WIN32;NDEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -154,20 +152,11 @@
     <ResourceCompile Include="ContentExporter.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DirectXMesh\DirectXMesh_Desktop_2017.vcxproj">
-      <Project>{6857f086-f6fe-4150-9ed7-7446f1c1c220}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\DirectXTex\DirectXTex_Desktop_2017.vcxproj">
-      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\ExportObjects\ExportObjects2017.vcxproj">
       <Project>{6afa24fb-37b3-49d3-9832-f7ea3de3ca2e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\SDKMeshFileWriter\SDKMeshFileWriter2017.vcxproj">
       <Project>{85495119-fc0e-4f85-8357-8823b6164f9e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\UVAtlas\UVAtlas_2017_Win10.vcxproj">
-      <Project>{10359e70-6a7f-4433-8ef1-b0fb688d830e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\XATGFileWriter\XATGFileWriter2017.vcxproj">
       <Project>{3f3d7892-a3f4-43a9-87bf-b9c28e9069e8}</Project>
@@ -183,6 +172,9 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets" Condition="Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" />
     <Import Project="..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets" Condition="Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" />
+    <Import Project="..\packages\directxmesh_desktop_2017.2020.2.15.2\build\native\directxmesh_desktop_2017.targets" Condition="Exists('..\packages\directxmesh_desktop_2017.2020.2.15.2\build\native\directxmesh_desktop_2017.targets')" />
+    <Import Project="..\packages\directxtex_desktop_2017.2020.2.15.1\build\native\directxtex_desktop_2017.targets" Condition="Exists('..\packages\directxtex_desktop_2017.2020.2.15.1\build\native\directxtex_desktop_2017.targets')" />
+    <Import Project="..\packages\uvatlas_desktop_2017.2020.2.25.2\build\native\uvatlas_desktop_2017.targets" Condition="Exists('..\packages\uvatlas_desktop_2017.2020.2.25.2\build\native\uvatlas_desktop_2017.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -190,5 +182,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets'))" />
     <Error Condition="!Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets'))" />
+    <Error Condition="!Exists('..\packages\directxmesh_desktop_2017.2020.2.15.2\build\native\directxmesh_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2017.2020.2.15.2\build\native\directxmesh_desktop_2017.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_2017.2020.2.15.1\build\native\directxtex_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2017.2020.2.15.1\build\native\directxtex_desktop_2017.targets'))" />
+    <Error Condition="!Exists('..\packages\uvatlas_desktop_2017.2020.2.25.2\build\native\uvatlas_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2017.2020.2.25.2\build\native\uvatlas_desktop_2017.targets'))" />
   </Target>
 </Project>
