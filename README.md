@@ -49,7 +49,7 @@ Use of OpenEXR is subject to it's own license terms, and requires the ZLIB libra
 
 ## Build Instructions
 
-Install the Autodesk FBX SDK 2019.2 or later (latest tested version is 2020.0) for Windows VS 2017 and/or VS 2019
+Install the Autodesk FBX SDK 2019.2 or later (latest tested version is 2020.0) for Windows VS 2017.
 
     http://autodesk.com/fbx
 

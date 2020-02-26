@@ -8,7 +8,7 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ### February 26, 2020
 * Switched to using NuGet for DirectXTex, DirectXMesh, and UVAtlas using February 2020 releases
-* Retired VS 2015 projects
+* Retired VS 2015 projects, added VS 2019 projects
 
 ### February 8, 2019
 * Support for SDKMESH v2 with PBR materials using ``-sdkmesh2`` switch
