@@ -19,7 +19,7 @@ extern ATG::ExportScene* g_pScene;
 
 static XMMATRIX ConvertMatrix( const FbxMatrix& matFbx )
 {
-    XMFLOAT4X4 matConverted;
+    XMFLOAT4X4 matConverted = {};
     auto pFloats = reinterpret_cast<float*>( &matConverted );
     auto pDoubles = reinterpret_cast<const DOUBLE*>( matFbx.mData );
     for( DWORD i = 0; i < 16; ++i )
@@ -37,7 +37,7 @@ inline bool IsEqual( float A, float B )
 XMMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, CXMMATRIX matParentWorld, const bool bWarnings = true )
 {
     XMMATRIX matWorld = {};
-    XMMATRIX matLocal;
+    XMMATRIX matLocal = {};
     bool bProcessDefaultTransform = true;
 
     if( !g_BindPoseMap.empty() )
@@ -47,7 +47,7 @@ XMMATRIX ParseTransform( FbxNode* pNode, ExportFrame* pFrame, CXMMATRIX matParen
         {
             FbxMatrix PoseMatrix = iter->second;
             matWorld = ConvertMatrix( PoseMatrix );
-            XMMATRIX matInvParentWorld = XMMatrixInverse( nullptr, matParentWorld );
+            const XMMATRIX matInvParentWorld = XMMatrixInverse( nullptr, matParentWorld );
             matLocal = XMMatrixMultiply( matWorld, matInvParentWorld );
             bProcessDefaultTransform = false;
         }
@@ -106,7 +106,7 @@ void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, CXMMATRIX matParentWo
 
     auto pFrame = new ExportFrame( pNode->GetName() );
     pFrame->SetDCCObject( pNode );
-    XMMATRIX matWorld = ParseTransform( pNode, pFrame, matParentWorld );
+    const XMMATRIX matWorld = ParseTransform( pNode, pFrame, matParentWorld );
     pParentFrame->AddChild( pFrame );
 
     if( pNode->GetSubdiv() )
@@ -120,7 +120,7 @@ void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, CXMMATRIX matParentWo
     ParseCamera( pNode->GetCamera(), pFrame );
     ParseLight( pNode->GetLight(), pFrame );
 
-    DWORD dwChildCount = pNode->GetChildCount();
+    const DWORD dwChildCount = pNode->GetChildCount();
     for( DWORD i = 0; i < dwChildCount; ++i )
     {
         ParseNode( pNode->GetChild( i ), pFrame, matWorld );
@@ -129,9 +129,9 @@ void ParseNode( FbxNode* pNode, ExportFrame* pParentFrame, CXMMATRIX matParentWo
 
 void FixupNode( ExportFrame* pFrame, CXMMATRIX matParentWorld )
 {
-    auto pNode = reinterpret_cast<FbxNode*>( pFrame->GetDCCObject() );
+    auto pNode = static_cast<FbxNode*>( pFrame->GetDCCObject() );
 
-    XMMATRIX matWorld;
+    XMMATRIX matWorld = {};
     if( pNode )
     {
         ExportLog::LogMsg( 4, "Fixing up frame \"%s\".", pFrame->GetName().SafeString() );
@@ -142,7 +142,7 @@ void FixupNode( ExportFrame* pFrame, CXMMATRIX matParentWorld )
         matWorld = matParentWorld;
     }
 
-    size_t dwChildCount = pFrame->GetChildCount();
+    const size_t dwChildCount = pFrame->GetChildCount();
     for( size_t i = 0; i < dwChildCount; ++i )
     {
         FixupNode( pFrame->GetChildByIndex( i ), matWorld );
@@ -199,7 +199,7 @@ void ParseLight( FbxLight* pFbxLight, ExportFrame* pParentFrame )
     float fIntensity = (float)pFbxLight->Intensity.Get();
     fIntensity *= 0.01f;
 
-    XMFLOAT4 Color( (float)colorRGB[0] * fIntensity, (float)colorRGB[1] * fIntensity, (float)colorRGB[2] * fIntensity, 1.0f );
+    const XMFLOAT4 Color( (float)colorRGB[0] * fIntensity, (float)colorRGB[1] * fIntensity, (float)colorRGB[2] * fIntensity, 1.0f );
     pLight->Color = Color;
 
     switch( pFbxLight->DecayType.Get() )

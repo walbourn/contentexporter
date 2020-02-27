@@ -191,13 +191,13 @@ namespace
             break;
         case D3DDECLTYPE_DXGI_R10G10B10A2_UNORM:
         {
-            XMVECTOR clr = XMLoadFloat4(&Src);
+            const XMVECTOR clr = XMLoadFloat4(&Src);
             XMStoreUDecN4(reinterpret_cast<XMUDECN4*>(pDest), clr);
             break;
         }
         case D3DDECLTYPE_DXGI_R11G11B10_FLOAT:
         {
-            XMVECTOR clr = XMLoadFloat4(&Src);
+            const XMVECTOR clr = XMLoadFloat4(&Src);
             XMStoreFloat3PK(reinterpret_cast<XMFLOAT3PK*>(pDest), clr);
             break;
         }
@@ -210,19 +210,22 @@ namespace
 
 namespace ATG
 {
+    ExportMeshTriangleAllocator g_MeshTriangleAllocator;
+}
 
-ExportMeshTriangleAllocator g_MeshTriangleAllocator;
+using namespace ATG;
 
-ExportMeshBase::ExportMeshBase( ExportString name )
-: ExportBase( name )
-{ }
+ExportMeshBase::ExportMeshBase(ExportString name)
+    : ExportBase(name),
+    m_SmallestBound(SphereBound)
+{}
 
 ExportMeshBase::~ExportMeshBase()
 { }
 
 ExportIBSubset* ExportMeshBase::FindSubset( const ExportString Name )
 {
-    size_t dwSubsetCount = GetSubsetCount();
+    const size_t dwSubsetCount = GetSubsetCount();
     for( size_t i = 0; i < dwSubsetCount; ++i )
     {
         ExportIBSubset* pSubset = GetSubset( i );
@@ -270,7 +273,7 @@ void ExportMesh::ByteSwap()
 
 void ExportVB::Allocate()
 {
-    size_t uSize = GetVertexDataSize();
+    const size_t uSize = GetVertexDataSize();
     m_pVertexData.reset( new uint8_t[ uSize ] );
     ZeroMemory( m_pVertexData.get(), uSize );
 }
@@ -352,7 +355,7 @@ void ExportIB::ByteSwap()
         auto pIndexData16 = reinterpret_cast<WORD*>( m_pIndexData.get() );
         for( size_t i = 0; i < m_uIndexCount; i++ )
         {
-            WORD wIndex = _byteswap_ushort( pIndexData16[ i ] );
+            const WORD wIndex = _byteswap_ushort( pIndexData16[ i ] );
             pIndexData16[ i ] = wIndex;
         }
     }
@@ -361,7 +364,7 @@ void ExportIB::ByteSwap()
         auto pIndexData32 = reinterpret_cast<DWORD*>( m_pIndexData.get() );
         for( size_t i = 0; i < m_uIndexCount; i++ )
         {
-            DWORD dwIndex = _byteswap_ulong( pIndexData32[ i ] );
+            const DWORD dwIndex = _byteswap_ulong( pIndexData32[ i ] );
             pIndexData32[ i ] = dwIndex;
         }
     }
@@ -400,7 +403,7 @@ void ExportMeshTriangleAllocator::SetSizeHint( UINT uAnticipatedSize )
 {
     if( uAnticipatedSize <= m_uTotalCount )
         return;
-    UINT uNewCount = std::max<UINT>( uAnticipatedSize - m_uTotalCount, 10000 );
+    const UINT uNewCount = std::max<UINT>( uAnticipatedSize - m_uTotalCount, 10000 );
     AllocationBlock NewBlock;
     NewBlock.m_uTriangleCount = uNewCount;
     NewBlock.pTriangleArray = new ExportMeshTriangle[ uNewCount ];
@@ -479,7 +482,7 @@ UINT FindOrAddVertex( ExportMeshVertexArray& ExistingVertexArray, ExportMeshVert
         if( pVertex->Equals( pTestVertex ) )
             return static_cast<UINT>( i );
     }
-    UINT index = static_cast<UINT>( ExistingVertexArray.size() );
+    const UINT index = static_cast<UINT>( ExistingVertexArray.size() );
     ExistingVertexArray.push_back( pTestVertex );
     return index;
 }
@@ -531,7 +534,7 @@ void ExportMesh::SetVertexNormalCount( UINT uCount )
     m_VertexFormat.m_bBinormal = ( uCount > 2 );
 }
 
-bool SubsetLess( ExportMeshTriangle* pA, ExportMeshTriangle* pB )
+bool SubsetLess(const  ExportMeshTriangle* pA, const ExportMeshTriangle* pB )
 {
     return pA->SubsetIndex < pB->SubsetIndex;
 }
@@ -587,9 +590,9 @@ void ExportMesh::Optimize( DWORD dwFlags )
         }
         // collapse the triangle verts into the final vertex list
         // this removes unnecessary duplicates, and retains necessary duplicates
-        UINT uIndexA = FindOrAddVertexFast( VertexData, &pTriangle->Vertex[0] );
-        UINT uIndexB = FindOrAddVertexFast( VertexData, &pTriangle->Vertex[1] );
-        UINT uIndexC = FindOrAddVertexFast( VertexData, &pTriangle->Vertex[2] );
+        const UINT uIndexA = FindOrAddVertexFast( VertexData, &pTriangle->Vertex[0] );
+        const UINT uIndexB = FindOrAddVertexFast( VertexData, &pTriangle->Vertex[1] );
+        const UINT uIndexC = FindOrAddVertexFast( VertexData, &pTriangle->Vertex[2] );
         // record final indices into the index list
         IndexData.push_back( uIndexA );
         if( bFlipTriangles )
@@ -608,7 +611,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
     }
     ExportLog::LogMsg( 3, "Triangle list mesh: %zu verts, %zu indices, %zu subsets", VertexData.size(), IndexData.size(), m_vSubsets.size() );
 
-    size_t nVerts = VertexData.size();
+    const size_t nVerts = VertexData.size();
     if ( nVerts > 4294967295 )
     {
         ExportLog::LogError( "Mesh \"%s\" has more than 2^32-1 vertices.  Index buffer is invalid.", GetName().SafeString() );
@@ -653,7 +656,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
     }
 
     INT iUVAtlasTexCoordIndex = g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
-    bool bComputeUVAtlas = ( iUVAtlasTexCoordIndex >= 0 );
+    const bool bComputeUVAtlas = ( iUVAtlasTexCoordIndex >= 0 );
     if( bComputeUVAtlas )
     {
         if( iUVAtlasTexCoordIndex < static_cast<INT>( m_VertexFormat.m_uUVSetCount ) )
@@ -723,7 +726,7 @@ void ExportMesh::Optimize( DWORD dwFlags )
 
     if( ExportLog::GetLogLevel() >= 4 )
     {
-        size_t dwDeclSize = GetVertexDeclElementCount();
+        const size_t dwDeclSize = GetVertexDeclElementCount();
         
         static const CHAR* strDeclUsages[] = { "Position", "BlendWeight", "BlendIndices", "Normal", "PSize", "TexCoord", "Tangent", "Binormal", "TessFactor", "PositionT", "Color", "Fog", "Depth", "Sample" };
         static const CHAR* strDeclTypes[] = { "Float1", "Float2", "Float3", "Float4", "D3DColor", "UByte", "Short2", "Short4", "UByte4N", "Short2N", "Short4N", "UShort2N", "UShort4N", "UDec3", "Dec3N", "Float16_2", "Float16_4", "Unused" };
@@ -771,8 +774,8 @@ void ExportMesh::CleanMesh(bool breakBowTies)
         ComputeAdjacency();
     }
 
-    size_t nFaces = m_pIB->GetIndexCount() / 3;
-    size_t nVerts = m_pVB->GetVertexCount();
+    const size_t nFaces = m_pIB->GetIndexCount() / 3;
+    const size_t nVerts = m_pVB->GetVertexCount();
 
     HRESULT hr = E_FAIL; 
     std::vector<uint32_t> dups;
@@ -796,7 +799,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
         return;
     }
 
-    size_t nNewVerts = nVerts + dups.size();
+    const size_t nNewVerts = nVerts + dups.size();
 
     ExportLog::LogMsg( 4, "Mesh cleanup increased vertex count from %zu to %zu.", nVerts, nNewVerts );
 
@@ -839,7 +842,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
         }
     }
 
-    DWORD stride = m_pVB->GetVertexSize();
+    const DWORD stride = m_pVB->GetVertexSize();
 
     auto newVB = std::make_unique<ExportVB>();
     newVB->SetVertexCount( nNewVerts );
@@ -890,10 +893,10 @@ void ExportMesh::ComputeVertexTangentSpaces()
         return;
     }
 
-    size_t nVerts = m_pVB->GetVertexCount();
+    const size_t nVerts = m_pVB->GetVertexCount();
 
-    std::unique_ptr<XMFLOAT3 []> tan1(new XMFLOAT3[nVerts]);
-    std::unique_ptr<XMFLOAT3 []> tan2(new XMFLOAT3[nVerts]);
+    auto tan1 = std::make_unique<XMFLOAT3 []>(nVerts);
+    auto tan2 = std::make_unique<XMFLOAT3 []>(nVerts);
 
     HRESULT hr = E_FAIL;
     if (m_pIB->GetIndexSize() == 2)
@@ -960,12 +963,12 @@ void ExportMesh::ComputeAdjacency()
         return;
     }
 
-    size_t nFaces = m_pIB->GetIndexCount() / 3;
-    size_t nVerts = m_pVB->GetVertexCount();
+    const size_t nFaces = m_pIB->GetIndexCount() / 3;
+    const size_t nVerts = m_pVB->GetVertexCount();
 
     m_pAdjacency.reset( new uint32_t[ nFaces * 3 ] );
 
-    float epsilon = (g_pScene->Settings().bGeometricAdjacency) ? 1e-5f : 0.f;
+    const float epsilon = (g_pScene->Settings().bGeometricAdjacency) ? 1e-5f : 0.f;
 
     HRESULT hr = E_FAIL;
     if (m_pIB->GetIndexSize() == 2)
@@ -991,7 +994,7 @@ static HRESULT __cdecl UVAtlasCallback( float fPercentDone  )
 {
     static ULONGLONG s_lastTick = 0;
 
-    ULONGLONG tick = GetTickCount64();
+    const ULONGLONG tick = GetTickCount64();
 
     if ( ( tick - s_lastTick ) > 1000 )
     {
@@ -1031,15 +1034,15 @@ void ExportMesh::ComputeUVAtlas()
         return;
     }
 
-    INT iDestUVIndex = g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
+    const INT iDestUVIndex = g_pScene->Settings().iGenerateUVAtlasOnTexCoordIndex;
     assert( iDestUVIndex >= 0 && iDestUVIndex < 8 );
 
-    size_t nFaces = m_pIB->GetIndexCount() / 3;
-    size_t nVerts = m_pVB->GetVertexCount();
+    const size_t nFaces = m_pIB->GetIndexCount() / 3;
+    const size_t nVerts = m_pVB->GetVertexCount();
 
-    DXGI_FORMAT indexFormat = (m_pIB->GetIndexSize() == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    const DXGI_FORMAT indexFormat = (m_pIB->GetIndexSize() == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
 
-    size_t texSize = g_pScene->Settings().iUVAtlasTextureSize;
+    const size_t texSize = g_pScene->Settings().iUVAtlasTextureSize;
 
     std::vector<UVAtlasVertex> vb;
     std::vector<uint8_t> ib;
@@ -1066,7 +1069,7 @@ void ExportMesh::ComputeUVAtlas()
     ExportLog::LogMsg( 4, "Created UV atlas with %zu charts in texcoord %d.", outCharts, iDestUVIndex );
 
     // Update vertex buffer from UVAtlas
-    size_t nNewVerts = vertexRemapArray.size();
+    const size_t nNewVerts = vertexRemapArray.size();
 
     if ( nNewVerts != nVerts )
     {
@@ -1081,7 +1084,7 @@ void ExportMesh::ComputeUVAtlas()
         return;
     }
 
-    DWORD stride = m_pVB->GetVertexSize();
+    const DWORD stride = m_pVB->GetVertexSize();
 
     std::unique_ptr<ExportVB> newVB(new ExportVB);
     newVB->SetVertexCount( nNewVerts );
@@ -1115,7 +1118,7 @@ void ExportMesh::ComputeUVAtlas()
         std::unique_ptr<XMFLOAT2[]> uvs(new XMFLOAT2[nNewVerts]);
 
         auto txptr = uvs.get();
-        size_t j = 0;
+        const size_t j = 0;
         for (auto it = vb.cbegin(); it != vb.cend() && j < nNewVerts; ++it, ++txptr)
         {
             *txptr = it->uv;
@@ -1154,10 +1157,10 @@ void ExportMesh::OptimizeVcache()
     assert( m_pIB != 0 );
     assert( m_pVB != 0 );
 
-    uint32_t vertexCache = static_cast<uint32_t>( g_pScene->Settings().iVcacheSize );
-    uint32_t restart = std::min<uint32_t>( vertexCache, g_pScene->Settings().iStripRestart );
+    const uint32_t vertexCache = static_cast<uint32_t>( g_pScene->Settings().iVcacheSize );
+    const uint32_t restart = std::min<uint32_t>( vertexCache, g_pScene->Settings().iStripRestart );
 
-    bool useLRU = g_pScene->Settings().dwOptimizationAlgorithm == 1;
+    const bool useLRU = g_pScene->Settings().dwOptimizationAlgorithm == 1;
 
     if (useLRU)
     {
@@ -1186,12 +1189,13 @@ void ExportMesh::OptimizeVcache()
         return;
     }
 
-    size_t nFaces = m_pIB->GetIndexCount() / 3;
-    size_t nVerts = m_pVB->GetVertexCount();
-    DWORD indexSize = m_pIB->GetIndexSize();
+    const size_t nFaces = m_pIB->GetIndexCount() / 3;
+    const size_t nVerts = m_pVB->GetVertexCount();
+    const DWORD indexSize = m_pIB->GetIndexSize();
 
     // Compute stats before optimization
-    float acmr, atvr;
+    float acmr = 0;
+    float atvr = 0;
     if (indexSize == 2)
     {
         ComputeVertexCacheMissRate(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, nVerts, vertexCache, acmr, atvr);
@@ -1284,7 +1288,7 @@ void ExportMesh::OptimizeVcache()
         return;
     }
 
-    DWORD stride = m_pVB->GetVertexSize();
+    const DWORD stride = m_pVB->GetVertexSize();
 
     auto newVB = std::make_unique<ExportVB>();
     newVB->SetVertexCount( nVerts );
@@ -1299,7 +1303,8 @@ void ExportMesh::OptimizeVcache()
     }
 
     // Compute stats after optimization
-    float acmr2, atvr2;
+    float acmr2 = 0;
+    float atvr2 = 0;
     if (indexSize == 2)
     {
         ComputeVertexCacheMissRate(reinterpret_cast<const uint16_t*>(newIB->GetIndexData()), nFaces, nVerts, vertexCache, acmr2, atvr2);
@@ -1346,9 +1351,9 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
     D3DVERTEXELEMENT9 VertexElement = {};
     D3D11_INPUT_ELEMENT_DESC InputElement = {};
 
-    bool bCompressVertexData = ( dwFlags & COMPRESS_VERTEX_DATA );
+    const bool bCompressVertexData = ( dwFlags & COMPRESS_VERTEX_DATA );
 
-    DWORD dwColorType = g_pScene->Settings().dwVertexColorType;
+    const DWORD dwColorType = g_pScene->Settings().dwVertexColorType;
     DXGI_FORMAT dwColorTypeDXGI = DXGI_FORMAT_B8G8R8A8_UNORM;
 
     switch(dwColorType)
@@ -1575,7 +1580,7 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
         return;
 
     // create vertex buffer and allocate storage
-    size_t nVerts = VertexArray.size();
+    const size_t nVerts = VertexArray.size();
 
     m_pVB = std::make_unique<ExportVB>();
     m_pVB->SetVertexCount( nVerts );
@@ -1649,7 +1654,7 @@ void ExportMesh::BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dw
         }
         if( iUVOffset != -1 )
         {
-            UINT iTangentSpaceIndex = g_pScene->Settings().iTangentSpaceIndex;
+            const UINT iTangentSpaceIndex = g_pScene->Settings().iTangentSpaceIndex;
             if (m_VertexFormat.m_uUVSetCount > iTangentSpaceIndex)
             {
                 if (m_VertexFormat.m_uUVSetSize > 1)
@@ -1724,14 +1729,14 @@ void ExportMesh::ComputeBounds()
     BoundingBox::CreateFromPoints( m_BoundingAABB,
                                    m_pVB->GetVertexCount(), reinterpret_cast<const XMFLOAT3*>( m_pVB->GetVertexData() ), m_pVB->GetVertexSize() );
 
-    float fVolumeSphere = XM_PI * ( 4.0f / 3.0f ) * 
-                          m_BoundingSphere.Radius * 
-                          m_BoundingSphere.Radius * 
-                          m_BoundingSphere.Radius;
+    const float fVolumeSphere = XM_PI * (4.0f / 3.0f) *
+        m_BoundingSphere.Radius *
+        m_BoundingSphere.Radius *
+        m_BoundingSphere.Radius;
 
-    float fVolumeAABB = m_BoundingAABB.Extents.x * 
-                        m_BoundingAABB.Extents.y * 
-                        m_BoundingAABB.Extents.z * 8.0f;
+    const float fVolumeAABB = m_BoundingAABB.Extents.x *
+        m_BoundingAABB.Extents.y *
+        m_BoundingAABB.Extents.z * 8.0f;
 
     if( fVolumeAABB <= fVolumeSphere)
         m_SmallestBound = AxisAlignedBoxBound;
@@ -1779,5 +1784,3 @@ ExportModel::~ExportModel()
     m_vBindings.clear();
     m_pMesh = nullptr;
 }
-
-};

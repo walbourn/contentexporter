@@ -116,7 +116,7 @@ void AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, D
     pMaterial->AddParameter( OutputParam );
 }
 
-static void CheckUVSettings(FbxFileTexture* texture, ExportMaterial* pMaterial)
+static void CheckUVSettings(FbxFileTexture* texture, const ExportMaterial* pMaterial)
 {
     if (texture->GetSwapUV())
     {
@@ -143,14 +143,14 @@ static void CheckUVSettings(FbxFileTexture* texture, ExportMaterial* pMaterial)
 bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
 {
     bool bResult = false;
-    DWORD dwLayeredTextureCount = Property.GetSrcObjectCount<FbxLayeredTexture>();
+    const DWORD dwLayeredTextureCount = Property.GetSrcObjectCount<FbxLayeredTexture>();
     if( dwLayeredTextureCount > 0 )
     {
         DWORD dwTextureIndex = 0;
         for( DWORD i = 0; i < dwLayeredTextureCount; ++i )
         {
             auto pFbxLayeredTexture = FbxCast<FbxLayeredTexture>( Property.GetSrcObject<FbxLayeredTexture>( i ) );
-            DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount<FbxFileTexture>();
+            const DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount<FbxFileTexture>();
             for( DWORD j = 0; j < dwTextureCount; ++j )
             {
                 auto pFbxTexture = FbxCast<FbxFileTexture>( pFbxLayeredTexture->GetSrcObject<FbxFileTexture>( j ) );
@@ -167,7 +167,7 @@ bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
     }
     else
     {
-        DWORD dwTextureCount = Property.GetSrcObjectCount<FbxFileTexture>();
+        const DWORD dwTextureCount = Property.GetSrcObjectCount<FbxFileTexture>();
         for( DWORD i = 0; i < dwTextureCount; ++i )
         {
             auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject<FbxFileTexture>( i ) );
@@ -230,7 +230,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
             // Diffuse Color
             {
                 FbxDouble3 color = pFbxLambert->Diffuse.Get();
-                double factor = pFbxLambert->DiffuseFactor.Get();
+                const double factor = pFbxLambert->DiffuseFactor.Get();
 
                 ExportMaterialParameter OutputParam;
                 OutputParam.Name = "DiffuseColor";
@@ -250,7 +250,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
             // Ambient Color
             {
                 FbxDouble3 color = pFbxLambert->Ambient.Get();
-                double factor = pFbxLambert->AmbientFactor.Get();
+                const double factor = pFbxLambert->AmbientFactor.Get();
 
                 ExportMaterialParameter OutputParam;
                 OutputParam.Name = "AmbientColor";
@@ -269,7 +269,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
             // Emissive Color
             {
                 FbxDouble3 color = pFbxLambert->Emissive.Get();
-                double factor = pFbxLambert->EmissiveFactor.Get();
+                const double factor = pFbxLambert->EmissiveFactor.Get();
 
                 ExportMaterialParameter OutputParam;
                 OutputParam.Name = "EmissiveColor";
@@ -291,7 +291,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
                 // Specular Color
                 {
                     FbxDouble3 color = pFbxPhong->Specular.Get();
-                    double factor = pFbxPhong->SpecularFactor.Get();
+                    const double factor = pFbxPhong->SpecularFactor.Get();
 
                     ExportMaterialParameter OutputParam;
                     OutputParam.Name = "SpecularColor";
@@ -337,7 +337,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
         DWORD dwParameterFlags;
     };
 
-    TextureParameterExtraction ExtractionList[] =
+    const TextureParameterExtraction ExtractionList[] =
     {
         { FbxSurfaceMaterial::sTransparentColor,   "AlphaTexture",                 PPO_TransparentMaterial,    ExportMaterialParameter::EMPF_ALPHACHANNEL },
         { FbxSurfaceMaterial::sDiffuse,            "DiffuseTexture",               PPO_Nothing,                ExportMaterialParameter::EMPF_DIFFUSEMAP },
@@ -356,7 +356,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
         if( !Property.IsValid() )
             continue;
 
-        bool bFound = ExtractTextures( Property, tpe.strParameterName, pMaterial, tpe.dwParameterFlags );
+        const bool bFound = ExtractTextures( Property, tpe.strParameterName, pMaterial, tpe.dwParameterFlags );
         if( bFound )
         {
             if( tpe.dwPostOperations & PPO_TransparentMaterial )
@@ -369,7 +369,7 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 
     FixupGenericMaterial( pMaterial );
 
-    bool bResult = g_pScene->AddMaterial( pMaterial );
+    const bool bResult = g_pScene->AddMaterial( pMaterial );
     assert( bResult );
     if( !bResult )
     {

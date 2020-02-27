@@ -13,11 +13,9 @@
 #include "ExportScene.h"
 
 using namespace DirectX;
+using namespace ATG;
 
 extern ATG::ExportScene* g_pScene;
-
-namespace ATG
-{
 
 void ExportTransform::SetIdentity()
 {
@@ -44,15 +42,15 @@ bool ExportTransform::Initialize( XMFLOAT4X4 matrix )
 
 bool ExportTransform::DecomposeMatrix()
 {
-    XMMATRIX matrix = XMLoadFloat4x4( &m_Matrix );
+    const XMMATRIX matrix = XMLoadFloat4x4( &m_Matrix );
 
-    float fScaleX = XMVectorGetX( XMVector3LengthSq( matrix.r[0] ) );
-    float fScaleY = XMVectorGetX( XMVector3LengthSq( matrix.r[1] ) );
-    float fScaleZ = XMVectorGetX( XMVector3LengthSq( matrix.r[2] ) );
+    const float fScaleX = XMVectorGetX( XMVector3LengthSq( matrix.r[0] ) );
+    const float fScaleY = XMVectorGetX( XMVector3LengthSq( matrix.r[1] ) );
+    const float fScaleZ = XMVectorGetX( XMVector3LengthSq( matrix.r[2] ) );
 
-    float fDiffXY = fabs( fScaleX - fScaleY );
-    float fDiffYZ = fabs( fScaleY - fScaleZ );
-    float fDiffXZ = fabs( fScaleX - fScaleZ );
+    const float fDiffXY = fabs( fScaleX - fScaleY );
+    const float fDiffYZ = fabs( fScaleY - fScaleZ );
+    const float fDiffXZ = fabs( fScaleX - fScaleZ );
     bool bUniformScale = true;
     if( fDiffXY > 0.001f || fDiffYZ > 0.001f || fDiffXZ > 0.001f )
         bUniformScale = false;
@@ -70,7 +68,7 @@ bool ExportTransform::DecomposeMatrix()
 void ExportTransform::Multiply( const XMFLOAT4X4& Matrix )
 {
     XMMATRIX m = XMLoadFloat4x4( &m_Matrix );
-    XMMATRIX m1 = XMLoadFloat4x4( &Matrix );
+    const XMMATRIX m1 = XMLoadFloat4x4( &Matrix );
 
     m = XMMatrixMultiply( m, m1 );
     XMStoreFloat4x4( &m_Matrix, m );
@@ -97,5 +95,3 @@ void ExportTransform::Normalize()
 ExportBase::~ExportBase()
 {
 }
-
-};

@@ -24,7 +24,7 @@ namespace
         }
         else
         {
-            int length = (dwLength == 0) ? -1 : static_cast<int>(dwLength);
+            const int length = (dwLength == 0) ? -1 : static_cast<int>(dwLength);
             int result = WideCharToMultiByte(CP_ACP, 0, strData, length, strText, 255, nullptr, nullptr);
             if (result <= 0)
             {
@@ -42,7 +42,7 @@ namespace
     {
         if (!strBool)
             return bDefaultValue;
-        WCHAR FirstChar = strBool[0];
+        const WCHAR FirstChar = strBool[0];
         return (FirstChar == L'T' || FirstChar == L't' || FirstChar == L'1');
     }
 
@@ -57,7 +57,10 @@ namespace
 
 namespace ATG
 {
-ExportMaterialDefinitionVector  g_Materials;
+    ExportMaterialDefinitionVector  g_Materials;
+}
+
+using namespace ATG;
 
 HRESULT MaterialDatabaseReader::ElementBegin( const WCHAR* strName, UINT NameLen, const XMLAttribute *pAttributes, UINT NumAttributes )
 {
@@ -104,7 +107,7 @@ void MaterialDatabaseReader::ParseAttributes( const XMLAttribute* pAttributes, s
 
 const WCHAR* MaterialDatabaseReader::FindAttribute( const WCHAR* strName )
 {
-    size_t dwCount = m_CurrentElementAttributes.size();
+    const size_t dwCount = m_CurrentElementAttributes.size();
     for( size_t i = 0; i < dwCount; ++i )
     {
         if( _wcsicmp( strName, m_CurrentElementAttributes[i].strName ) == 0 )
@@ -238,7 +241,7 @@ void MaterialDatabaseReader::ProcessElementEnd()
 
 ExportMaterialDefinition::~ExportMaterialDefinition()
 {
-    size_t dwCount = Parameters.size();
+    const size_t dwCount = Parameters.size();
     for( size_t i = 0; i < dwCount; ++i )
         delete Parameters[i];
     Parameters.clear();
@@ -284,13 +287,11 @@ const ExportMaterialDefinition* ExportMaterialDatabase::GetMaterial( size_t dwIn
 
 const ExportMaterialDefinition* ExportMaterialDatabase::FindMaterial( ExportString strName )
 {
-    size_t dwCount = GetMaterialCount();
+    const size_t dwCount = GetMaterialCount();
     for( size_t i = 0; i < dwCount; ++i )
     {
         if( g_Materials[i]->strName == strName )
             return g_Materials[i];
     }
     return nullptr;
-}
-
 }

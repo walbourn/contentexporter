@@ -11,8 +11,7 @@
 #include "stdafx.h"
 #include "ExportFrame.h"
 
-namespace ATG
-{
+using namespace ATG;
 
 ExportFrame::ExportFrame()
 : ExportBase( nullptr )
@@ -70,5 +69,3 @@ void ExportFrame::NormalizeTransform()
 {
     m_Transform.Normalize();
 }
-
-};

@@ -27,10 +27,11 @@ typedef std::vector<ExportMeshBase*> ExportMeshBaseList;
 class ExportStatistics
 {
 public:
-    ExportStatistics()
+    ExportStatistics() noexcept
     {
         ZeroMemory( this, sizeof( ExportStatistics ) );
     }
+
     void StartExport() { StartExportTime = GetTickCount64(); }
     void StartSceneParse() { StartSceneParseTime = GetTickCount64(); }
     void StartSave() { StartSaveTime = GetTickCount64(); }
@@ -60,11 +61,15 @@ public:
     ExportString        MachineName;
     ExportString        PlatformName;
     __time64_t          ExportTime;
+
+    ExportInformation() : ExportTime(0) {}
 };
 
 class IDCCTransformer
 {
 public:
+    virtual ~IDCCTransformer() = default;
+
     virtual void TransformMatrix( DirectX::XMFLOAT4X4* pDestMatrix, const DirectX::XMFLOAT4X4* pSrcMatrix ) const = 0;
     virtual void TransformPosition( DirectX::XMFLOAT3* pDestPosition, const DirectX::XMFLOAT3* pSrcPosition ) const = 0;
     virtual void TransformDirection( DirectX::XMFLOAT3* pDestDirection, const DirectX:: XMFLOAT3* pSrcDirection ) const = 0;
@@ -76,7 +81,7 @@ class ExportScene :
 {
 public:
     ExportScene();
-    virtual ~ExportScene();
+    ~ExportScene();
 
     ExportStatistics& Statistics() { return m_Statistics; }
     ExportCoreSettings& Settings() { return g_ExportCoreSettings; }

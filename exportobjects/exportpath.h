@@ -38,7 +38,7 @@ public:
     ExportPath GetFileName() const;
     ExportPath GetFileNameWithoutExtension() const;
 
-    bool HasExtension() const { return m_strExtension != 0; }
+    bool HasExtension() const { return m_strExtension != nullptr; }
     bool HasFileName() const;
     const CHAR* GetExtension() const;
     bool IsAbsolutePath() const;

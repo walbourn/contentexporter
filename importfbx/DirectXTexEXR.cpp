@@ -59,7 +59,7 @@ namespace
             }
         }
 
-        void clear() { m_handle = 0; }
+        void clear() { m_handle = nullptr; }
 
     private:
         HANDLE m_handle;
@@ -73,7 +73,7 @@ namespace
     public:
         com_exception(HRESULT hr) : result(hr) {}
 
-        virtual const char* what() const override
+        const char* what() const override
         {
             static char s_str[64] = {};
             sprintf_s(s_str, "Failure with HRESULT of %08X", result);
@@ -92,7 +92,7 @@ namespace
         InputStream(HANDLE hFile, const char fileName[]) :
             IStream(fileName), m_hFile(hFile)
         {
-            LARGE_INTEGER dist = {};
+            const LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_END))
             {
@@ -110,7 +110,7 @@ namespace
         InputStream(const InputStream &) = delete;
         InputStream& operator = (const InputStream &) = delete;
 
-        virtual bool read(char c[], int n) override
+        bool read(char c[], int n) override
         {
             DWORD bytesRead;
             if (!ReadFile(m_hFile, c, static_cast<DWORD>(n), &bytesRead, nullptr))
@@ -118,7 +118,7 @@ namespace
                 throw com_exception(HRESULT_FROM_WIN32(GetLastError()));
             }
 
-            LARGE_INTEGER dist = {};
+            const LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_CURRENT))
             {
@@ -128,9 +128,9 @@ namespace
             return result.QuadPart >= m_EOF;
         }
 
-        virtual Imf::Int64 tellg() override
+        Imf::Int64 tellg() override
         {
-            LARGE_INTEGER dist = {};
+            const LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_CURRENT))
             {
@@ -139,7 +139,7 @@ namespace
             return result.QuadPart;
         }
 
-        virtual void seekg(Imf::Int64 pos) override
+        void seekg(Imf::Int64 pos) override
         {
             LARGE_INTEGER dist;
             dist.QuadPart = pos;
@@ -149,7 +149,7 @@ namespace
             }
         }
 
-        virtual void clear() override
+        void clear() override
         {
             SetLastError(0);
         }
@@ -168,7 +168,7 @@ namespace
         OutputStream(const OutputStream &) = delete;
         OutputStream& operator = (const OutputStream &) = delete;
 
-        virtual void write(const char c[], int n) override
+        void write(const char c[], int n) override
         {
             DWORD bytesWritten;
             if (!WriteFile(m_hFile, c, static_cast<DWORD>(n), &bytesWritten, nullptr))
@@ -177,9 +177,9 @@ namespace
             }
         }
 
-        virtual Imf::Int64 tellp() override
+        Imf::Int64 tellp() override
         {
-            LARGE_INTEGER dist = {};
+            const LARGE_INTEGER dist = {};
             LARGE_INTEGER result;
             if (!SetFilePointerEx(m_hFile, dist, &result, FILE_CURRENT))
             {
@@ -188,7 +188,7 @@ namespace
             return result.QuadPart;
         }
 
-        virtual void seekp(Imf::Int64 pos) override
+        void seekp(Imf::Int64 pos) override
         {
             LARGE_INTEGER dist;
             dist.QuadPart = pos;
@@ -218,7 +218,7 @@ HRESULT DirectX::GetMetadataFromEXRFile(const wchar_t* szFile, TexMetadata& meta
         return E_INVALIDARG;
 
     char fileName[MAX_PATH];
-    int result = WideCharToMultiByte(CP_ACP, 0, szFile, -1, fileName, MAX_PATH, nullptr, nullptr);
+    const int result = WideCharToMultiByte(CP_ACP, 0, szFile, -1, fileName, MAX_PATH, nullptr, nullptr);
     if (result <= 0)
     {
         *fileName = 0;
@@ -243,10 +243,10 @@ HRESULT DirectX::GetMetadataFromEXRFile(const wchar_t* szFile, TexMetadata& meta
     {
         Imf::RgbaInputFile file(stream);
 
-        auto dw = file.dataWindow();
+        const auto dw = file.dataWindow();
 
-        int width = dw.max.x - dw.min.x + 1;
-        int height = dw.max.y - dw.min.y + 1;
+        const int width = dw.max.x - dw.min.x + 1;
+        const int height = dw.max.y - dw.min.y + 1;
 
         if (width < 1 || height < 1)
             return E_FAIL;
@@ -298,7 +298,7 @@ HRESULT DirectX::LoadFromEXRFile(const wchar_t* szFile, TexMetadata* metadata, S
     }
 
     char fileName[MAX_PATH];
-    int result = WideCharToMultiByte(CP_ACP, 0, szFile, -1, fileName, MAX_PATH, nullptr, nullptr);
+    const int result = WideCharToMultiByte(CP_ACP, 0, szFile, -1, fileName, MAX_PATH, nullptr, nullptr);
     if (result <= 0)
     {
         *fileName = 0;
@@ -325,8 +325,8 @@ HRESULT DirectX::LoadFromEXRFile(const wchar_t* szFile, TexMetadata* metadata, S
 
         auto dw = file.dataWindow();
 
-        int width = dw.max.x - dw.min.x + 1;
-        int height = dw.max.y - dw.min.y + 1;
+        const int width = dw.max.x - dw.min.x + 1;
+        const int height = dw.max.y - dw.min.y + 1;
 
         if (width < 1 || height < 1)
             return E_FAIL;
@@ -407,7 +407,7 @@ HRESULT DirectX::SaveToEXRFile(const Image& image, const wchar_t* szFile)
     }
 
     char fileName[MAX_PATH];
-    int result = WideCharToMultiByte(CP_ACP, 0, szFile, -1, fileName, MAX_PATH, nullptr, nullptr);
+    const int result = WideCharToMultiByte(CP_ACP, 0, szFile, -1, fileName, MAX_PATH, nullptr, nullptr);
     if (result <= 0)
     {
         *fileName = 0;
@@ -431,8 +431,8 @@ HRESULT DirectX::SaveToEXRFile(const Image& image, const wchar_t* szFile)
 
     try
     {
-        int width = static_cast<int>(image.width);
-        int height = static_cast<int>(image.height);
+        const int width = static_cast<int>(image.width);
+        const int height = static_cast<int>(image.height);
 
         Imf::RgbaOutputFile file(stream, Imf::Header(width, height), Imf::WRITE_RGBA);
 
@@ -459,7 +459,7 @@ HRESULT DirectX::SaveToEXRFile(const Image& image, const wchar_t* szFile)
                     auto destPtr = dPtr;
                     for (int k = 0; k < width; ++k, ++srcPtr, ++destPtr)
                     {
-                        XMVECTOR v = XMLoadFloat4(srcPtr);
+                        const XMVECTOR v = XMLoadFloat4(srcPtr);
                         PackedVector::XMStoreHalf4(destPtr, v);
                     }
 

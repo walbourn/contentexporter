@@ -198,7 +198,9 @@ class ExportMaterial;
 struct ExportMeshVertex
 {
 public:
-    ExportMeshVertex()
+    ExportMeshVertex() :
+        DCCVertexIndex(0),
+        pNextDuplicateVertex(nullptr)
     {
         Initialize();
     }
@@ -362,7 +364,7 @@ public:
     ExportMesh( ExportString name );
     ~ExportMesh();
 
-    virtual MeshType GetMeshType() const override { return ExportMeshBase::PolyMesh; }
+    MeshType GetMeshType() const override { return ExportMeshBase::PolyMesh; }
 
     void SetVertexUVCount( UINT uCount ) { m_VertexFormat.m_uUVSetCount = uCount; }
     void SetVertexUVDimension( UINT uDimension ) { m_VertexFormat.m_uUVSetSize = uDimension; }
@@ -384,7 +386,7 @@ public:
     size_t GetTriangleCount() const { return m_TriangleToPolygonMapping.size(); }
     INT GetPolygonForTriangle( size_t dwTriangleIndex ) const { return m_TriangleToPolygonMapping[dwTriangleIndex]; }
 
-    virtual void AddInfluence( ExportString InfluenceName ) override { m_InfluenceNames.push_back( InfluenceName ); m_VertexFormat.m_bSkinData = true; }
+    void AddInfluence( ExportString InfluenceName ) override { m_InfluenceNames.push_back( InfluenceName ); m_VertexFormat.m_bSkinData = true; }
 
 protected:
     void BuildVertexBuffer( ExportMeshVertexArray& VertexArray, DWORD dwFlags );

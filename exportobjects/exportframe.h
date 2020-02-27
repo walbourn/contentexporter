@@ -25,7 +25,7 @@ class ExportFrame :
 public:
     ExportFrame();
     ExportFrame( ExportString name );
-    virtual ~ExportFrame();
+    ~ExportFrame();
 
     void AddChild( ExportFrame* pFrame ) { m_vChildren.push_back( pFrame ); }
     void RemoveChild( ExportFrame* pFrame );

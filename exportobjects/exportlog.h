@@ -19,6 +19,8 @@ namespace ATG
 class ILogListener
 {
 public:
+    virtual ~ILogListener() = default;
+
     virtual void LogMessage( const CHAR* strMessage ) = 0;
     virtual void LogWarning( const CHAR* strMessage ) { LogMessage( strMessage ); }
     virtual void LogError( const CHAR* strMessage ) { LogMessage( strMessage ); }
@@ -28,7 +30,7 @@ public:
 class DebugSpewListener : public ILogListener
 {
 public:
-    virtual void LogMessage( const CHAR* strMessage ) override
+    void LogMessage( const CHAR* strMessage ) override
     {
         OutputDebugStringA( strMessage );
         OutputDebugStringA( "\n" );
@@ -43,7 +45,7 @@ public:
     void StartLogging( const CHAR* strFileName );
     void StopLogging();
 
-    virtual void LogMessage( const CHAR* strMessage ) override;
+    void LogMessage( const CHAR* strMessage ) override;
 protected:
     HANDLE      m_hFileHandle;
 };

@@ -57,6 +57,8 @@ namespace ATG
         bool                        bVisibleInTool;
         bool                        bExportToContentFile;
         bool                        bDetectAlpha;
+
+        ExportMaterialParameterDefinition() : ParamType(MPT_STRING), bVisibleInTool(false), bExportToContentFile(false), bDetectAlpha(false) {}
     };
     typedef std::vector<ExportMaterialParameterDefinition*> ExportMaterialParameterDefinitionVector;
 
@@ -74,22 +76,24 @@ namespace ATG
     {
     public:
         MaterialDatabaseReader()
-            : m_pCurrentMaterial( nullptr ),
+            : m_strCurrentElementName{},
+            m_bCurrentElementEndTag(false),
+            m_pCurrentMaterial(nullptr),
             m_pCurrentParam( nullptr )
-        { }
-        virtual HRESULT  StartDocument() override { return S_OK; }
-        virtual HRESULT  EndDocument() override { return S_OK; }
+        {}
+        HRESULT  StartDocument() override { return S_OK; }
+        HRESULT  EndDocument() override { return S_OK; }
 
-        virtual HRESULT  ElementBegin( const WCHAR* strName, UINT NameLen, 
-            const XMLAttribute *pAttributes, UINT NumAttributes ) override;
-        virtual HRESULT  ElementContent( const WCHAR *strData, UINT DataLen, bool More ) override;
-        virtual HRESULT  ElementEnd( const WCHAR *strName, UINT NameLen ) override;
+        HRESULT  ElementBegin( const WCHAR* strName, UINT NameLen, 
+        const XMLAttribute *pAttributes, UINT NumAttributes ) override;
+        HRESULT  ElementContent( const WCHAR *strData, UINT DataLen, bool More ) override;
+        HRESULT  ElementEnd( const WCHAR *strName, UINT NameLen ) override;
 
-        virtual HRESULT  CDATABegin( ) override { return S_OK; }
-        virtual HRESULT  CDATAData( const WCHAR *strCDATA, UINT CDATALen, bool bMore ) override { return S_OK; }
-        virtual HRESULT  CDATAEnd( ) override { return S_OK; }
+        HRESULT  CDATABegin( ) override { return S_OK; }
+        HRESULT  CDATAData( const WCHAR *strCDATA, UINT CDATALen, bool bMore ) override { return S_OK; }
+        HRESULT  CDATAEnd( ) override { return S_OK; }
 
-        virtual void     Error( HRESULT hError, const CHAR *strMessage ) override;
+        void     Error( HRESULT hError, const CHAR *strMessage ) override;
     protected:
         void             ParseAttributes( const XMLAttribute* pAttributes, size_t dwAttributeCount );
         const WCHAR*     FindAttribute( const WCHAR* strName );

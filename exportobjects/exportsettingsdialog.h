@@ -27,15 +27,15 @@ namespace ATG
         };
         ExportSettingsDialog();
 
-        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override; 
-        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
-        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
-        virtual LRESULT OnNotify( INT idCtrl, LPNMHDR pnmh ) override;
+        LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override; 
+        LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
+        LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
+        LRESULT OnNotify( INT idCtrl, LPNMHDR pnmh ) override;
 
         static UINT WINAPI ThreadEntry( void* pData );
         static LRESULT CALLBACK ScrollPaneWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 
-        virtual void Show() override;
+        void Show() override;
         DialogState GetDialogState() const { return m_DialogState; }
 
     protected:

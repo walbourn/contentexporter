@@ -44,8 +44,8 @@ class ISAXCallback
 {
 friend class XMLParser;
 public:
-    ISAXCallback() {};
-    ~ISAXCallback() {};
+    ISAXCallback() : m_strFilename(nullptr), m_LineNum(0), m_LinePos(0) {}
+    virtual ~ISAXCallback() = default;
 
     virtual HRESULT  StartDocument() = 0;
     virtual HRESULT  EndDocument() = 0;

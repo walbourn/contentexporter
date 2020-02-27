@@ -19,6 +19,8 @@ namespace ATG
     class ExportProgress
     {
     public:
+        virtual ~ExportProgress() = default;
+
         virtual void Initialize( const CHAR* strTitle );
         virtual void Terminate();
 

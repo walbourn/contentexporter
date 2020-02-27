@@ -50,7 +50,7 @@ namespace ATG
                 hwndParent, 
                 reinterpret_cast<DLGPROC>( DlgProc ),
                 reinterpret_cast<LPARAM>( this ) );
-            return (m_hwnd != 0);
+            return (m_hwnd != nullptr);
         };
 
         void Destroy()
@@ -162,7 +162,13 @@ namespace ATG
         };
     public:
 
-        GridLayout(INT rows = 1, INT columns = 1)
+        GridLayout(INT rows = 1, INT columns = 1) :
+            m_columnSpec{},
+            m_rowSpec{},
+            m_columnAlloc{},
+            m_rowAlloc{},
+            m_xOffset(0),
+            m_yOffset(0)
         {
             assert(rows > 0 && columns > 0);
             Reset();
@@ -222,7 +228,7 @@ namespace ATG
         // allocation methods
         // ------------------------------
 
-        void SetRect(const LPRECT rect, INT border = 0);
+        void SetRect(const LPCRECT rect, INT border = 0);
         void SetWindowRect(HWND hwnd, INT border = 0);
         void SetClientRect(HWND hwnd, INT border = 0);
 

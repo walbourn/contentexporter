@@ -15,16 +15,17 @@ class FBXTransformer : public ATG::IDCCTransformer
 {
 public:
     FBXTransformer()
-        : m_fUnitScale( 1.0f ),
-          m_bFlipZ( true )
-    { }
+        : m_fUnitScale(1.0f),
+        m_bMaxConversion(false),
+        m_bFlipZ(true)
+    {}
 
     void Initialize( FbxScene* pScene );
 
-    virtual void TransformMatrix( DirectX::XMFLOAT4X4* pDestMatrix, const DirectX::XMFLOAT4X4* pSrcMatrix ) const override;
-    virtual void TransformPosition( DirectX::XMFLOAT3* pDestPosition, const DirectX::XMFLOAT3* pSrcPosition ) const override;
-    virtual void TransformDirection( DirectX::XMFLOAT3* pDestDirection, const DirectX::XMFLOAT3* pSrcDirection ) const override;
-    virtual float TransformLength( float fInputLength ) const override;
+    void TransformMatrix( DirectX::XMFLOAT4X4* pDestMatrix, const DirectX::XMFLOAT4X4* pSrcMatrix ) const override;
+    void TransformPosition( DirectX::XMFLOAT3* pDestPosition, const DirectX::XMFLOAT3* pSrcPosition ) const override;
+    void TransformDirection( DirectX::XMFLOAT3* pDestDirection, const DirectX::XMFLOAT3* pSrcDirection ) const override;
+    float TransformLength( float fInputLength ) const override;
 
     // Sets unit scale for exporting all geometry - works with characters too.
     void SetUnitScale( const float fScale )

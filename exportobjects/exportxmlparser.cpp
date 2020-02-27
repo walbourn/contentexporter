@@ -13,18 +13,27 @@
 #include "stdafx.h"
 #include "ExportXmlParser.h"
 
-namespace ATG
-{
+using namespace ATG;
 
 //-------------------------------------------------------------------------------------
 // Name: XMLParser::XMLParser
 //-------------------------------------------------------------------------------------
-XMLParser::XMLParser()
+XMLParser::XMLParser() :
+    m_pISAXCallback(nullptr),
+    m_hFile(INVALID_HANDLE_VALUE),
+    m_pInXMLBuffer(nullptr),
+    m_uInXMLBufferCharsLeft(0),
+    m_dwCharsTotal(0),
+    m_dwCharsConsumed(0),
+    m_pReadBuf{},
+    m_pWriteBuf{},
+    m_pReadPtr(m_pReadBuf),
+    m_pWritePtr(m_pWriteBuf),
+    m_bUnicode(false),
+    m_bReverseBytes(false),
+    m_bSkipNextAdvance(false),
+    m_Ch(0)
 {
-    m_pWritePtr = m_pWriteBuf;
-    m_pReadPtr = m_pReadBuf;
-    m_pISAXCallback = nullptr;
-    m_hFile = INVALID_HANDLE_VALUE;
 }
 
 //-------------------------------------------------------------------------------------
@@ -41,7 +50,7 @@ XMLParser::~XMLParser()
 //-------------------------------------------------------------------------------------
 void XMLParser::FillBuffer()
 {
-    DWORD NChars;
+    DWORD NChars = 0;
 
     m_pReadPtr = m_pReadBuf;
 
@@ -62,7 +71,7 @@ void XMLParser::FillBuffer()
     }
 
     m_dwCharsConsumed += NChars;
-    __int64 iProgress = ( (__int64)m_dwCharsConsumed * 1000 ) / (__int64)m_dwCharsTotal;
+    const int64_t iProgress = ( int64_t(m_dwCharsConsumed) * 1000 ) / int64_t(m_dwCharsTotal);
     m_pISAXCallback->SetParseProgress( static_cast<DWORD>( iProgress ) );
 
     m_pReadBuf[ NChars ] = '\0';
@@ -109,7 +118,7 @@ HRESULT XMLParser::ConsumeSpace()
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::ConvertEscape()
 {      
-    HRESULT hr;
+    HRESULT hr = S_OK;
     WCHAR wVal = 0;
         
     if( FAILED( hr = AdvanceCharacter() ) )
@@ -185,13 +194,12 @@ HRESULT XMLParser::ConvertEscape()
     // must be an entity reference
 
     WCHAR *pEntityRefVal = m_pWritePtr;
-    UINT EntityRefLen;
 
     SkipNextAdvance();
     if( FAILED( hr = AdvanceName() ) )
         return hr;
       
-    EntityRefLen = static_cast<UINT>( m_pWritePtr - pEntityRefVal );
+    const UINT EntityRefLen = static_cast<UINT>( m_pWritePtr - pEntityRefVal );
     m_pWritePtr = pEntityRefVal;
 
     if ( EntityRefLen == 0 )
@@ -237,7 +245,6 @@ HRESULT XMLParser::ConvertEscape()
 HRESULT XMLParser::AdvanceAttrVal()
 {
     HRESULT hr;
-    WCHAR wQuoteChar;
 
     if( FAILED( hr = AdvanceCharacter() ) )
         return hr;
@@ -248,7 +255,7 @@ HRESULT XMLParser::AdvanceAttrVal()
         return E_INVALID_XML_SYNTAX;
     }
 
-    wQuoteChar = m_Ch;
+    const WCHAR wQuoteChar = m_Ch;
     
     for( ;; )
     {
@@ -402,7 +409,7 @@ HRESULT XMLParser::AdvanceCharacter( bool bOkToFail )
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::AdvanceElement()
 {    
-    HRESULT hr;
+    HRESULT hr = S_OK;
 
     // write ptr at the beginning of the buffer
     m_pWritePtr = m_pWriteBuf;
@@ -520,13 +527,10 @@ HRESULT XMLParser::AdvanceElement()
     }
     else
     {
-        XMLAttribute   Attributes[ XML_MAX_ATTRIBUTES_PER_ELEMENT ]; 
-        UINT           NumAttrs;
+        XMLAttribute   Attributes[XML_MAX_ATTRIBUTES_PER_ELEMENT] = {};
+        UINT           NumAttrs = 0;
 
         WCHAR *pEntityRefVal = m_pWritePtr;
-        UINT  EntityRefLen;
-
-        NumAttrs = 0;
     
         SkipNextAdvance();
 
@@ -534,7 +538,7 @@ HRESULT XMLParser::AdvanceElement()
         if( FAILED( hr = AdvanceName() ) ) 
             return hr;
 
-        EntityRefLen = static_cast<UINT>( m_pWritePtr - pEntityRefVal );
+        const UINT EntityRefLen = static_cast<UINT>( m_pWritePtr - pEntityRefVal );
 
         if( FAILED( hr = ConsumeSpace() ) ) 
             return hr;
@@ -628,7 +632,7 @@ HRESULT XMLParser::AdvanceElement()
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::AdvanceCDATA()
 {
-    HRESULT hr;
+    HRESULT hr = S_OK;
     WORD wStage = 0;
     
     if( FAILED( m_pISAXCallback->CDATABegin() ) )
@@ -679,7 +683,7 @@ HRESULT XMLParser::AdvanceCDATA()
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::AdvanceComment()
 {
-    HRESULT hr;
+    HRESULT hr = S_OK;
     WORD wStage;
 
     wStage = 0;
@@ -852,7 +856,7 @@ HRESULT XMLParser::MainParseLoop()
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::ParseXMLFile( const CHAR *strFilename )
 {    
-    HRESULT hr;
+    HRESULT hr = S_OK;
 
     if( !m_pISAXCallback )
         return E_NOINTERFACE;
@@ -903,8 +907,6 @@ HRESULT XMLParser::ParseXMLFile( const CHAR *strFilename )
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::ParseXMLBuffer( const CHAR *strBuffer, UINT uBufferSize )
 {    
-    HRESULT hr;
-
     if( !m_pISAXCallback )
         return E_NOINTERFACE;
 
@@ -924,7 +926,7 @@ HRESULT XMLParser::ParseXMLBuffer( const CHAR *strBuffer, UINT uBufferSize )
     m_dwCharsTotal = m_uInXMLBufferCharsLeft;
     m_dwCharsConsumed = 0;
     
-    hr = MainParseLoop();
+    HRESULT hr = MainParseLoop();
 
     // we no longer own strFilename, so un-set it
     m_pISAXCallback->m_strFilename = nullptr;  
@@ -949,5 +951,3 @@ void XMLParser::Error( HRESULT hErr, const CHAR* strFormat, ... )
     m_pISAXCallback->Error( hErr, strBuffer );
     va_end( pArglist );
 }
-
-} // namespace ATG

@@ -55,7 +55,7 @@ protected:
             m_strValue.reset();
             return;
         }
-        size_t dwSize = strlen( strCopy ) + 1;
+        const size_t dwSize = strlen( strCopy ) + 1;
         m_strValue.reset( new CHAR[dwSize] );
         strcpy_s( m_strValue.get(), dwSize, strCopy );
     }
@@ -105,7 +105,7 @@ const CHAR* ExportString::AddString( const CHAR* strString )
         ++iter;
     }
 
-    size_t dwSize = strlen( strString ) + 1;
+    const size_t dwSize = strlen( strString ) + 1;
     CHAR* strCopy = new CHAR[ dwSize ];
     strcpy_s( strCopy, dwSize, strString );
     CurrentList.push_back( strCopy );

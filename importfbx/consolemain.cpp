@@ -47,17 +47,17 @@ public:
         m_wDefaultConsoleTextAttributes = csbi.wAttributes;
         m_wBackgroundAttributes = m_wDefaultConsoleTextAttributes & 0x00F0;
     }
-    virtual void LogMessage( const CHAR* strMessage ) override
+    void LogMessage( const CHAR* strMessage ) override
     {
         puts( strMessage );
     }
-    virtual void LogWarning( const CHAR* strMessage ) override
+    void LogWarning( const CHAR* strMessage ) override
     {
         SetConsoleTextAttribute( m_hOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY | m_wBackgroundAttributes );
         LogMessage( strMessage );
         SetConsoleTextAttribute( m_hOut, m_wDefaultConsoleTextAttributes );
     }
-    virtual void LogError( const CHAR* strMessage ) override
+    void LogError( const CHAR* strMessage ) override
     {
         SetConsoleTextAttribute( m_hOut, FOREGROUND_RED | FOREGROUND_INTENSITY | m_wBackgroundAttributes );
         LogMessage( strMessage );
@@ -100,11 +100,8 @@ struct MacroCommand
     MacroCommandCallback* pCallback;
 };
 
-bool MacroDisplayHelp( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroDisplayHelp( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     PrintHelp();
     return true;
 }
@@ -122,11 +119,8 @@ bool MacroSetOutputPath( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroCollisionMesh( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroCollisionMesh( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bExportAnimations = false;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().bComputeVertexTangentSpace = false;
@@ -145,11 +139,8 @@ bool MacroCollisionMesh( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroAnimation( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroAnimation( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bExportAnimations = true;
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().bComputeVertexTangentSpace = false;
@@ -171,11 +162,8 @@ bool MacroAnimation( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroCharacter( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroCharacter( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bExportAnimations = false;
     g_pScene->Settings().bExportCameras = false;
     g_pScene->Settings().bExportLights = false;
@@ -185,11 +173,8 @@ bool MacroCharacter( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroLightmaps( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroLightmaps( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bExportAnimations = false;
     g_pScene->Settings().bExportMeshes = true;
     g_pScene->Settings().bExportMaterials = true;
@@ -203,11 +188,8 @@ bool MacroLightmaps( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroNormalMaps(const CHAR* strArgument, bool& bUsedArgument)
+bool MacroNormalMaps(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bExportAnimations = false;
     g_pScene->Settings().bExportMeshes = true;
     g_pScene->Settings().bExportMaterials = true;
@@ -221,11 +203,8 @@ bool MacroNormalMaps(const CHAR* strArgument, bool& bUsedArgument)
     return true;
 }
 
-bool MacroWindowsD3D9( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroWindowsD3D9( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -237,11 +216,8 @@ bool MacroWindowsD3D9( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroWindowsD3D10( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroWindowsD3D10( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -253,11 +229,8 @@ bool MacroWindowsD3D10( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroWindowsD3D11( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroWindowsD3D11( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -269,11 +242,8 @@ bool MacroWindowsD3D11( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroXbox360( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroXbox360( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bLittleEndian = false;
     g_XATGSettings.bBinaryBlobExport = true;
     g_XATGSettings.bBundleTextures = true;
@@ -286,11 +256,8 @@ bool MacroXbox360( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroXboxOne(const CHAR* strArgument, bool& bUsedArgument)
+bool MacroXboxOne(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_pScene->Settings().bLittleEndian = true;
     g_XATGSettings.bBundleTextures = false;
     g_XATGSettings.bUseExistingBundle = false;
@@ -302,39 +269,29 @@ bool MacroXboxOne(const CHAR* strArgument, bool& bUsedArgument)
     return true;
 }
 
-bool MacroSDKMesh( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroSDKMesh( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
     return true;
 }
 
-bool MacroSDKMesh2(const CHAR* strArgument, bool& bUsedArgument)
+bool MacroSDKMesh2(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_ExportFileFormat = FILEFORMAT_SDKMESH_V2;
     return true;
 }
 
-bool MacroXATG( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroXATG( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     g_ExportFileFormat = FILEFORMAT_XATG;
     return true;
 }
 
 bool MacroSubD11( const CHAR* strArgument, bool& bUsedArgument )
 {
-    UNREFERENCED_PARAMETER(strArgument);
+    MacroWindowsD3D11(strArgument, bUsedArgument);
 
-    MacroWindowsD3D11( nullptr, bUsedArgument );
-    MacroSDKMesh( nullptr, bUsedArgument );
+    MacroSDKMesh(strArgument, bUsedArgument);
     g_pScene->Settings().bCompressVertexData = false;
     g_pScene->Settings().bConvertMeshesToSubD = true;
     g_pScene->Settings().bExportBinormal = false;
@@ -346,9 +303,7 @@ bool MacroSubD11( const CHAR* strArgument, bool& bUsedArgument )
 
 bool MacroSubDXbox( const CHAR* strArgument, bool& bUsedArgument )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-
-    MacroXbox360( nullptr, bUsedArgument );
+    MacroXbox360(strArgument, bUsedArgument);
     g_pScene->Settings().bCompressVertexData = true;
     g_pScene->Settings().bConvertMeshesToSubD = true;
     g_pScene->Settings().bExportBinormal = false;
@@ -372,20 +327,14 @@ bool MacroSetLogLevel( const CHAR* strArgument, bool& bUsedArgument )
     return true;
 }
 
-bool MacroSetVerbose( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroSetVerbose( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
     ExportLog::SetLogLevel( 4 );
     return true;
 }
 
-bool MacroAttach( const CHAR* strArgument, bool& bUsedArgument )
+bool MacroAttach( const CHAR* /*strArgument*/, bool& /*bUsedArgument*/ )
 {
-    UNREFERENCED_PARAMETER(strArgument);
-    UNREFERENCED_PARAMETER(bUsedArgument);
-
 #ifdef _DEBUG
     ExportLog::LogMsg( 0, "!!! Attach debugger NOW and then press any key..." );
     (void)_getch();
@@ -402,7 +351,7 @@ bool MacroSaveSettings( const CHAR* strArgument, bool& bUsedArgument )
     }
     bUsedArgument = true;
 
-    bool bResult = g_SettingsManager.SaveSettings( strArgument );
+    const bool bResult = g_SettingsManager.SaveSettings( strArgument );
     if( !bResult )
     {
         ExportLog::LogError( "Could not save settings to file \"%s\".", strArgument );
@@ -422,7 +371,7 @@ bool MacroLoadSettings( const CHAR* strArgument, bool& bUsedArgument )
     }
     bUsedArgument = true;
 
-    bool bResult = g_SettingsManager.LoadSettings( strArgument );
+    const bool bResult = g_SettingsManager.LoadSettings( strArgument );
     if( !bResult )
     {
         ExportLog::LogError( "Could not load settings from file \"%s\".", strArgument );
@@ -525,7 +474,7 @@ ExportSettingsEntry* FindCommandHelper( ExportSettingsEntry* pRoot, const CHAR* 
 ExportSettingsEntry* FindCommand( const CHAR* strCommand )
 {
     ExportSettingsEntry* pResult = nullptr;
-    size_t dwCount = g_SettingsManager.GetRootCategoryCount();
+    const size_t dwCount = g_SettingsManager.GetRootCategoryCount();
     for( size_t i = 0; i < dwCount; ++i )
     {
         auto pEntry = g_SettingsManager.GetRootCategory( i );
@@ -539,10 +488,10 @@ ExportSettingsEntry* FindCommand( const CHAR* strCommand )
 bool ParseMacroCommand( const CHAR* strCommand, const CHAR* strArgument, bool& pMacroFound, bool& bUsedArgument )
 {
     pMacroFound = false;
-    size_t dwCount = _countof( g_MacroCommands );
+    const size_t dwCount = _countof( g_MacroCommands );
     for( size_t i = 0; i < dwCount; ++i )
     {
-        MacroCommand& Command = g_MacroCommands[i];
+        const auto& Command = g_MacroCommands[i];
         if( _stricmp( strCommand, Command.strCommandLine ) == 0 )
         {
             pMacroFound = true;
@@ -554,7 +503,7 @@ bool ParseMacroCommand( const CHAR* strCommand, const CHAR* strArgument, bool& p
 
 bool ParseEnum( ExportSettingsEntry* pEntry, const CHAR* strArgument )
 {
-    DWORD dwEnumCount = pEntry->m_dwEnumValueCount;
+    const DWORD dwEnumCount = pEntry->m_dwEnumValueCount;
     for( DWORD i = 0; i < dwEnumCount; ++i )
     {
         if( _stricmp( strArgument, pEntry->m_pEnumValues[i].strCommandLine ) == 0 )
@@ -594,8 +543,8 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument, bool
     {
     case ExportSettingsEntry::CT_CHECKBOX:
         {
-            size_t dwLength = strlen( strCommandName );
-            CHAR Argument = strCommand[dwLength];
+            const size_t dwLength = strlen( strCommandName );
+            const CHAR Argument = strCommand[dwLength];
             if( Argument == '+' )
             {
                 pEntry->SetValue( true );
@@ -618,7 +567,7 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument, bool
                 ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
                 return false;
             }
-            INT iValue = atoi( strArgument );
+            const INT iValue = atoi( strArgument );
             pEntry->SetValue( iValue );
             bUsedArgument = true;
             break;
@@ -630,7 +579,7 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument, bool
                 ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
                 return false;
             }
-            float fValue = (float)atof( strArgument );
+            const float fValue = (float)atof( strArgument );
             pEntry->SetValue( fValue );
             bUsedArgument = true;
             break;
@@ -642,7 +591,7 @@ bool ParseCommand( const CHAR* strOriginalCommand, const CHAR* strArgument, bool
                 ExportLog::LogError( "No parameter value passed for option \"%s\".", strCommandName );
                 return false;
             }
-            bool bValid = ParseEnum( pEntry, strArgument );
+            const bool bValid = ParseEnum( pEntry, strArgument );
             if( !bValid )
             {
                 ExportLog::LogError( "Invalid parameter value (\"%s\") given for option \"%s\".", strArgument, strCommand );
@@ -695,7 +644,7 @@ void PrintEntryHelp( ExportSettingsEntry* pEntry )
     case ExportSettingsEntry::CT_ENUM:
         {
             strcpy_s( strAnnotation, " [ " );
-            DWORD dwCount = pEntry->m_dwEnumValueCount;
+            const DWORD dwCount = pEntry->m_dwEnumValueCount;
             for( DWORD i = 0; i < dwCount; ++i )
             {
                 if( i > 0 )
@@ -731,13 +680,13 @@ void PrintHelp()
     ExportLog::LogMsg( 0, "\nThe following command line options can be used to modify scene parse and file output behavior." );
 
     ExportLog::LogMsg( 0, "\nGeneral & Macro Options:" );
-    size_t dwMacroCount = ARRAYSIZE( g_MacroCommands );
+    const size_t dwMacroCount = ARRAYSIZE( g_MacroCommands );
     for( size_t i = 0; i < dwMacroCount; ++i )
     {
         ExportLog::LogMsg( 0, "    -%s%s : %s", g_MacroCommands[i].strCommandLine, g_MacroCommands[i].strAnnotation, g_MacroCommands[i].strDescription );
     }
 
-    size_t dwRootCategoryCount = g_SettingsManager.GetRootCategoryCount();
+    const size_t dwRootCategoryCount = g_SettingsManager.GetRootCategoryCount();
     for( size_t i = 0; i < dwRootCategoryCount; ++i )
     {
         auto pCategory = g_SettingsManager.GetRootCategory( i );
@@ -770,7 +719,7 @@ bool ParseCommandLine( INT argc, CHAR* argv[] )
         g_CommandStrings.push_back( strToken );
     }
 
-    size_t dwCommandCount = g_CommandStrings.size();
+    const size_t dwCommandCount = g_CommandStrings.size();
     for( size_t i = 0; i < dwCommandCount; ++i )
     {
         const CHAR* strCommand = g_CommandStrings[i];
@@ -927,13 +876,13 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
     ExportLog::LogMsg( 4, "COM has been initialized." );
 
-    size_t dwInputFileCount = g_InputFileNames.size();
+    const size_t dwInputFileCount = g_InputFileNames.size();
 
     bool bFoundErrors = false;
 
     for( size_t i = 0; i < dwInputFileCount; ++i )
     {
-        ExportPath InputFileName = g_InputFileNames[i];
+        const ExportPath InputFileName = g_InputFileNames[i];
         g_CurrentInputFileName = InputFileName;
 
         BuildOutputFileName( InputFileName );
@@ -954,7 +903,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
         g_pScene->Statistics().StartSave();
 
-        bool bExportMaterials = g_pScene->Settings().bExportMaterials;
+        const bool bExportMaterials = g_pScene->Settings().bExportMaterials;
 
         if( SUCCEEDED(hr) )
         {

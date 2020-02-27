@@ -52,7 +52,7 @@ void ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIn
         scanlist.push_back( asn );
     }
 
-    DWORD dwChildCount = pNode->GetChildCount();
+    const DWORD dwChildCount = pNode->GetChildCount();
     for( DWORD i = 0; i < dwChildCount; ++i )
     {
         ParseNode( pNode->GetChild( i ), scanlist, dwFlags, iCurrentIndex, bIncludeNode );
@@ -61,7 +61,7 @@ void ParseNode( FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIn
 
 static XMFLOAT4X4 ConvertMatrix( const FbxMatrix& matrix )
 {
-    XMFLOAT4X4 matResult;
+    XMFLOAT4X4 matResult = {};
     auto fData = reinterpret_cast<float*>( &matResult );
     auto pSrcData = reinterpret_cast<const DOUBLE*>( &matrix );
     for( DWORD i = 0; i < 16; ++i )
@@ -72,15 +72,15 @@ static XMFLOAT4X4 ConvertMatrix( const FbxMatrix& matrix )
 }
 
 
-void AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatrix& matFBXGlobal, float fTime )
+void AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, const FbxAMatrix& matFBXGlobal, float fTime )
 {
-    XMFLOAT4X4 matGlobal = ConvertMatrix( matFBXGlobal );
+    const XMFLOAT4X4 matGlobal = ConvertMatrix( matFBXGlobal );
     asn.matGlobal = matGlobal;
     XMFLOAT4X4 matLocal = matGlobal;
     if( pParent )
     {
         XMMATRIX m = XMLoadFloat4x4( &pParent->matGlobal );
-        XMMATRIX matInvParentGlobal = XMMatrixInverse( nullptr, m );
+        const XMMATRIX matInvParentGlobal = XMMatrixInverse( nullptr, m );
 
         m = XMLoadFloat4x4( &matGlobal );
         m = XMMatrixMultiply( m, matInvParentGlobal );
@@ -108,14 +108,14 @@ void AddKey( AnimationScanNode& asn, const AnimationScanNode* pParent, FbxAMatri
     asn.pTrack->TransformTrack.AddKey( fTime, trans, rot, scale );
 }
 
-void CaptureAnimation( ScanList& scanlist, ExportAnimation* pAnim, FbxScene* pFbxScene )
+void CaptureAnimation( ScanList& scanlist, const ExportAnimation* pAnim, FbxScene* pFbxScene )
 {
     const float fDeltaTime = pAnim->fSourceSamplingInterval;
     const float fStartTime = pAnim->fStartTime;
     const float fEndTime = pAnim->fEndTime;
     float fCurrentTime = fStartTime;
 
-    size_t dwNodeCount = scanlist.size();
+    const size_t dwNodeCount = scanlist.size();
 
     ExportLog::LogMsg( 2, "Capturing animation data from %zu nodes, from time %0.3f to %0.3f, at an interval of %0.3f seconds.", dwNodeCount, fStartTime, fEndTime, fDeltaTime );
 
@@ -169,11 +169,12 @@ void ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
     FbxTime FrameTime;
     FrameTime.SetTime( 0, 0, 0, 1, 0, pFbxScene->GetGlobalSettings().GetTimeMode() );
 
-    float fFrameTime = (float)FrameTime.GetSecondDouble();
-    float fSampleTime = fFrameTime / (float)g_pScene->Settings().iAnimSampleCountPerFrame;
+    const float fFrameTime = (float)FrameTime.GetSecondDouble();
+    const float fSampleTime = fFrameTime / (float)g_pScene->Settings().iAnimSampleCountPerFrame;
     assert( fSampleTime > 0 );
 
-    float fStartTime, fEndTime;
+    float fStartTime = 0;
+    float fEndTime = 0;
     if( pTakeInfo )
     {
         fStartTime = (float)pTakeInfo->mLocalTimeSpan.GetStart().GetSecondDouble();
@@ -204,7 +205,7 @@ void ParseAnimStack( FbxScene* pFbxScene, FbxString* strAnimStackName )
     ScanList scanlist;
     ParseNode( pFbxScene->GetRootNode(), scanlist, 0, -1, bIncludeAllNodes );
 
-    size_t dwTrackCount = scanlist.size();
+    const size_t dwTrackCount = scanlist.size();
     for( size_t i = 0; i < dwTrackCount; ++i )
     {
         const CHAR* strTrackName = scanlist[i].pNode->GetName();
@@ -231,7 +232,7 @@ void ParseAnimation( FbxScene* pFbxScene )
     FbxArray<FbxString*> AnimStackNameArray;
     pFbxScene->FillAnimStackNameArray( AnimStackNameArray );
 
-    DWORD dwAnimStackCount = static_cast<DWORD>( AnimStackNameArray.GetCount() );
+    const DWORD dwAnimStackCount = static_cast<DWORD>( AnimStackNameArray.GetCount() );
     for( DWORD i = 0; i < dwAnimStackCount; ++i )
     {
         ParseAnimStack( pFbxScene, AnimStackNameArray.GetAt(i) );

@@ -11,14 +11,13 @@
 #include "stdafx.h"
 #include "exportscene.h"
 
-namespace ATG
-{
+using namespace ATG;
 
 void ExportStatistics::FinalReport()
 {
-    ULONGLONG ExportTotalTime = EndExportTime - StartExportTime;
-    ULONGLONG ExportParseTime = StartSaveTime - StartSceneParseTime;
-    ULONGLONG ExportSaveTime = EndExportTime - StartSaveTime;
+    const ULONGLONG ExportTotalTime = EndExportTime - StartExportTime;
+    const ULONGLONG ExportParseTime = StartSaveTime - StartSceneParseTime;
+    const ULONGLONG ExportSaveTime = EndExportTime - StartSaveTime;
 
     ExportLog::LogMsg( 2, "%zu poly meshes consisting of %zu vertices, %zu triangles, and %zu materials exported.", MeshesExported, VertsExported, TrisExported, MaterialsExported );
     if( SubDMeshesProcessed > 0 )
@@ -34,7 +33,7 @@ ExportScene::ExportScene()
   m_pDCCTransformer( nullptr )
 {
     m_Information.ExportTime = _time64( nullptr );
-    CHAR strDomain[50];
+    CHAR strDomain[50] = {};
     size_t BufferSize = ARRAYSIZE(strDomain);
     getenv_s( &BufferSize, strDomain, ARRAYSIZE(strDomain), "USERDOMAIN" );
     CHAR strUsername[50];
@@ -42,7 +41,7 @@ ExportScene::ExportScene()
     CHAR strTemp[256];
     sprintf_s( strTemp, "%s\\%s", strDomain, strUsername );
     m_Information.UserName = strTemp;
-    CHAR strComputerName[100];
+    CHAR strComputerName[100] = {};
     BufferSize = ARRAYSIZE(strComputerName);
     getenv_s( &BufferSize, strComputerName, ARRAYSIZE(strComputerName), "COMPUTERNAME" );
     m_Information.MachineName = strComputerName;
@@ -178,5 +177,3 @@ ExportMeshBase* ExportScene::FindMesh( void* pDCCObject )
     }
     return nullptr;
 }
-
-};

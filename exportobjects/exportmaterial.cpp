@@ -11,8 +11,7 @@
 #include "stdafx.h"
 #include "ExportMaterial.h"
 
-namespace ATG
-{
+using namespace ATG;
 
 ExportMaterial::ExportMaterial()
 : ExportBase( nullptr ),
@@ -60,6 +59,4 @@ ExportString ExportMaterial::GetDefaultSpecularMapTextureName()
 {
     return ExportString( g_ExportCoreSettings.strDefaultSpecMapTextureName );
 }
-
-};
 

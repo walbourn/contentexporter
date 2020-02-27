@@ -42,6 +42,8 @@ namespace ATG
         DXGI_FORMAT             CompressedTextureFormat;
         DXGI_FORMAT             HDRTextureFormat;
         ExportTextureOperation  TextureOperation;
+
+        ExportFileRecord() : FileType(EFT_SCENEFILE_XML), CompressedTextureFormat(DXGI_FORMAT_UNKNOWN), HDRTextureFormat(DXGI_FORMAT_UNKNOWN), TextureOperation(ETO_NOTHING) {}
     };
     typedef std::vector<ExportFileRecord> ExportFileRecordVector;
 

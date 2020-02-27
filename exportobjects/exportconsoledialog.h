@@ -20,20 +20,20 @@ namespace ATG
     public:
         ExportConsoleDialog();
 
-        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override;
-        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
-        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
+        LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override;
+        LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
+        LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
 
-        virtual void LogMessage( const CHAR* strMessage ) override;
-        virtual void LogWarning( const CHAR* strMessage ) override;
-        virtual void LogError( const CHAR* strMessage ) override;
-        virtual void LogCommand( DWORD dwCommand, void* pData ) override;
+        void LogMessage( const CHAR* strMessage ) override;
+        void LogWarning( const CHAR* strMessage ) override;
+        void LogError( const CHAR* strMessage ) override;
+        void LogCommand( DWORD dwCommand, void* pData ) override;
 
-        virtual void Initialize( const CHAR* strTitle ) override;
-        virtual void Terminate() override;
-        virtual void SetCaption( const CHAR* strCaption ) override;
-        virtual void StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole ) override;
-        virtual void SetProgress( float fTaskRelativeProgress ) override;
+        void Initialize( const CHAR* strTitle ) override;
+        void Terminate() override;
+        void SetCaption( const CHAR* strCaption ) override;
+        void StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole ) override;
+        void SetProgress( float fTaskRelativeProgress ) override;
 
         void ConsolePrint( COLORREF rgb, const CHAR* strText );
         void ConsoleNewline();

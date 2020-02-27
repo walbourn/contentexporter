@@ -15,17 +15,20 @@ const CHAR g_VolumeSeparator = ':';
 const CHAR g_DirectorySeparator = '\\';
 const CHAR g_AltDirectorySeparator = '/';
 
-ExportPath::ExportPath()
+ExportPath::ExportPath() :
+    m_strPath{},
+    m_strExtension(nullptr),
+    m_strFileName(nullptr)
 {
     Initialize( "" );
 }
 
-ExportPath::ExportPath( const CHAR* strPath )
+ExportPath::ExportPath( const CHAR* strPath ) : ExportPath()
 {
     Initialize( strPath );
 }
 
-ExportPath::ExportPath( const ExportPath& OtherPath )
+ExportPath::ExportPath( const ExportPath& OtherPath ) : ExportPath()
 {
     Initialize( (const CHAR*)OtherPath );
 }
@@ -208,7 +211,7 @@ ExportPath ExportPath::GetFileNameWithoutExtension() const
         return GetFileName();
     }
 
-    CHAR strFileName[MAX_PATH];
+    CHAR strFileName[MAX_PATH] = {};
 
     // copy only the chars between the filename and the extension period
     size_t dwCount = ( m_strExtension - m_strFileName );
@@ -221,7 +224,7 @@ ExportPath ExportPath::GetFileNameWithoutExtension() const
 
 ExportPath ExportPath::GetDirectory() const
 {
-    CHAR strDirectory[MAX_PATH];
+    CHAR strDirectory[MAX_PATH] = {};
 
     // copy only the chars between the path and the start of the filename
     size_t dwCount = ( m_strFileName - m_strPath );

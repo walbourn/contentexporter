@@ -113,7 +113,7 @@ namespace ATG
     class ExportSettingsManager
     {
     public:
-        ExportSettingsManager() {}
+        ExportSettingsManager() = default;
         ~ExportSettingsManager();
 
         ExportSettingsEntry* AddRootCategory( ExportString Caption );
