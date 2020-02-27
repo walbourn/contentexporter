@@ -62,28 +62,28 @@ namespace ATG
 
 using namespace ATG;
 
-HRESULT MaterialDatabaseReader::ElementBegin( const WCHAR* strName, UINT NameLen, const XMLAttribute *pAttributes, UINT NumAttributes )
+HRESULT MaterialDatabaseReader::ElementBegin(const WCHAR* strName, UINT NameLen, const XMLAttribute* pAttributes, UINT NumAttributes)
 {
     ProcessElementBeginContent();
 
-    CopyString( strName, NameLen, m_strCurrentElementName, ARRAYSIZE(m_strCurrentElementName) );
+    CopyString(strName, NameLen, m_strCurrentElementName, ARRAYSIZE(m_strCurrentElementName));
     m_bCurrentElementEndTag = false;
 
-    ParseAttributes( pAttributes, NumAttributes );
+    ParseAttributes(pAttributes, NumAttributes);
 
     return S_OK;
 }
 
-HRESULT MaterialDatabaseReader::ElementContent( const WCHAR *strData, UINT DataLen, bool More )
+HRESULT MaterialDatabaseReader::ElementContent(const WCHAR* strData, UINT DataLen, bool More)
 {
     return S_OK;
 }
 
-HRESULT MaterialDatabaseReader::ElementEnd( const WCHAR *strName, UINT NameLen )
+HRESULT MaterialDatabaseReader::ElementEnd(const WCHAR* strName, UINT NameLen)
 {
     ProcessElementBeginContent();
 
-    CopyString( strName, NameLen, m_strCurrentElementName, ARRAYSIZE(m_strCurrentElementName) );
+    CopyString(strName, NameLen, m_strCurrentElementName, ARRAYSIZE(m_strCurrentElementName));
     m_bCurrentElementEndTag = true;
 
     ProcessElementEnd();
@@ -93,58 +93,58 @@ HRESULT MaterialDatabaseReader::ElementEnd( const WCHAR *strName, UINT NameLen )
     return S_OK;
 }
 
-void MaterialDatabaseReader::ParseAttributes( const XMLAttribute* pAttributes, size_t dwAttributeCount )
+void MaterialDatabaseReader::ParseAttributes(const XMLAttribute* pAttributes, size_t dwAttributeCount)
 {
     m_CurrentElementAttributes.clear();
-    for( size_t i = 0; i < dwAttributeCount; ++i )
+    for (size_t i = 0; i < dwAttributeCount; ++i)
     {
         ElementAttribute ea;
-        CopyString( pAttributes[i].strName, pAttributes[i].NameLen, ea.strName, ARRAYSIZE(ea.strName) );
-        CopyString( pAttributes[i].strValue, pAttributes[i].ValueLen, ea.strValue, ARRAYSIZE(ea.strValue) );
-        m_CurrentElementAttributes.push_back( ea );
+        CopyString(pAttributes[i].strName, pAttributes[i].NameLen, ea.strName, ARRAYSIZE(ea.strName));
+        CopyString(pAttributes[i].strValue, pAttributes[i].ValueLen, ea.strValue, ARRAYSIZE(ea.strValue));
+        m_CurrentElementAttributes.push_back(ea);
     }
 }
 
-const WCHAR* MaterialDatabaseReader::FindAttribute( const WCHAR* strName )
+const WCHAR* MaterialDatabaseReader::FindAttribute(const WCHAR* strName)
 {
     const size_t dwCount = m_CurrentElementAttributes.size();
-    for( size_t i = 0; i < dwCount; ++i )
+    for (size_t i = 0; i < dwCount; ++i)
     {
-        if( _wcsicmp( strName, m_CurrentElementAttributes[i].strName ) == 0 )
+        if (_wcsicmp(strName, m_CurrentElementAttributes[i].strName) == 0)
             return m_CurrentElementAttributes[i].strValue;
     }
     return nullptr;
 }
 
-void MaterialDatabaseReader::Error( HRESULT hError, const CHAR *strMessage )
+void MaterialDatabaseReader::Error(HRESULT hError, const CHAR* strMessage)
 {
 
 }
 
-ExportMaterialParameterType ConvertType( const WCHAR* strType )
+ExportMaterialParameterType ConvertType(const WCHAR* strType)
 {
-    if( !strType )
+    if (!strType)
         return MPT_STRING;
 
-    if( _wcsicmp( strType, L"bool" ) == 0 )
+    if (_wcsicmp(strType, L"bool") == 0)
         return MPT_BOOL;
-    else if( _wcsicmp( strType, L"texture2d" ) == 0 )
+    else if (_wcsicmp(strType, L"texture2d") == 0)
         return MPT_TEXTURE2D;
-    else if( _wcsicmp( strType, L"float4" ) == 0 )
+    else if (_wcsicmp(strType, L"float4") == 0)
         return MPT_FLOAT4;
-    else if( _wcsicmp( strType, L"float2" ) == 0 )
+    else if (_wcsicmp(strType, L"float2") == 0)
         return MPT_FLOAT2;
-    else if( _wcsicmp( strType, L"float3" ) == 0 )
+    else if (_wcsicmp(strType, L"float3") == 0)
         return MPT_FLOAT3;
-    else if( _wcsicmp( strType, L"float" ) == 0 )
+    else if (_wcsicmp(strType, L"float") == 0)
         return MPT_FLOAT;
-    else if( _wcsicmp( strType, L"integer" ) == 0 )
+    else if (_wcsicmp(strType, L"integer") == 0)
         return MPT_INTEGER;
-    else if( _wcsicmp( strType, L"texturecube" ) == 0 )
+    else if (_wcsicmp(strType, L"texturecube") == 0)
         return MPT_TEXTURECUBE;
-    else if( _wcsicmp( strType, L"texturevolume" ) == 0 )
+    else if (_wcsicmp(strType, L"texturevolume") == 0)
         return MPT_TEXTUREVOLUME;
-    else if( _wcsicmp( strType, L"texture" ) == 0 )
+    else if (_wcsicmp(strType, L"texture") == 0)
         return MPT_TEXTURE2D;
 
     return MPT_STRING;
@@ -152,89 +152,89 @@ ExportMaterialParameterType ConvertType( const WCHAR* strType )
 
 void MaterialDatabaseReader::ProcessElementBeginContent()
 {
-    if( MATCH_ELEMENT_NAME( L"Material" ) )
+    if (MATCH_ELEMENT_NAME(L"Material"))
     {
         m_pCurrentMaterial = nullptr;
 
-        const WCHAR* strName = FindAttribute( L"Name" );
-        if( !strName )
+        const WCHAR* strName = FindAttribute(L"Name");
+        if (!strName)
             return;
 
         m_pCurrentMaterial = new ExportMaterialDefinition();
-        m_pCurrentMaterial->strName = ConvertString( strName );
+        m_pCurrentMaterial->strName = ConvertString(strName);
 
-        const WCHAR* strDesc = FindAttribute( L"Description" );
-        if( strDesc )
-            m_pCurrentMaterial->strDescription = ConvertString( strDesc );
+        const WCHAR* strDesc = FindAttribute(L"Description");
+        if (strDesc)
+            m_pCurrentMaterial->strDescription = ConvertString(strDesc);
 
-        g_Materials.push_back( m_pCurrentMaterial );
+        g_Materials.push_back(m_pCurrentMaterial);
         return;
     }
-    else if( MATCH_ELEMENT_NAME( L"Parameter" ) )
+    else if (MATCH_ELEMENT_NAME(L"Parameter"))
     {
-        if( !m_pCurrentMaterial )
+        if (!m_pCurrentMaterial)
             return;
 
-        if( m_pCurrentParam )
+        if (m_pCurrentParam)
             return;
 
-        const WCHAR* strName = FindAttribute( L"Name" );
-        if( !strName )
+        const WCHAR* strName = FindAttribute(L"Name");
+        if (!strName)
             return;
 
         m_pCurrentParam = new ExportMaterialParameterDefinition();
-        m_pCurrentParam->strName = ConvertString( strName );
+        m_pCurrentParam->strName = ConvertString(strName);
 
-        m_pCurrentMaterial->Parameters.push_back( m_pCurrentParam );
+        m_pCurrentMaterial->Parameters.push_back(m_pCurrentParam);
 
-        const WCHAR* strDisplayName = FindAttribute( L"DisplayName" );
-        if( strDisplayName )
-            m_pCurrentParam->strDisplayName = ConvertString( strDisplayName );
+        const WCHAR* strDisplayName = FindAttribute(L"DisplayName");
+        if (strDisplayName)
+            m_pCurrentParam->strDisplayName = ConvertString(strDisplayName);
         else
             m_pCurrentParam->strDisplayName = m_pCurrentParam->strName;
 
-        const WCHAR* strDesc = FindAttribute( L"Description" );
-        m_pCurrentParam->strDescription = ConvertString( strDesc );
+        const WCHAR* strDesc = FindAttribute(L"Description");
+        m_pCurrentParam->strDescription = ConvertString(strDesc);
 
-        const WCHAR* strDisplayHint = FindAttribute( L"DisplayHint" );
-        if( !strDisplayHint || wcslen( strDisplayHint ) < 1 )
+        const WCHAR* strDisplayHint = FindAttribute(L"DisplayHint");
+        if (!strDisplayHint || wcslen(strDisplayHint) < 1)
             m_pCurrentParam->strDisplayHint = " ";
         else
-            m_pCurrentParam->strDisplayHint = ConvertString( strDisplayHint );
+            m_pCurrentParam->strDisplayHint = ConvertString(strDisplayHint);
 
-        const WCHAR* strLoaderHint = FindAttribute( L"LoadHint" );
-        m_pCurrentParam->strLoaderHint = ConvertString( strLoaderHint );
+        const WCHAR* strLoaderHint = FindAttribute(L"LoadHint");
+        m_pCurrentParam->strLoaderHint = ConvertString(strLoaderHint);
 
-        const WCHAR* strType = FindAttribute( L"Type" );
-        m_pCurrentParam->ParamType = ConvertType( strType );
+        const WCHAR* strType = FindAttribute(L"Type");
+        m_pCurrentParam->ParamType = ConvertType(strType);
 
-        const WCHAR* strVisible = FindAttribute( L"ToolVisible" );
-        m_pCurrentParam->bVisibleInTool = ConvertBool( strVisible, false );
+        const WCHAR* strVisible = FindAttribute(L"ToolVisible");
+        m_pCurrentParam->bVisibleInTool = ConvertBool(strVisible, false);
 
-        const WCHAR* strExport = FindAttribute( L"Export" );
-        m_pCurrentParam->bExportToContentFile = ConvertBool( strExport, true );
+        const WCHAR* strExport = FindAttribute(L"Export");
+        m_pCurrentParam->bExportToContentFile = ConvertBool(strExport, true);
 
-        const WCHAR* strDetectAlpha = FindAttribute( L"DetectAlpha" );
-        m_pCurrentParam->bDetectAlpha = ConvertBool( strDetectAlpha, false );
+        const WCHAR* strDetectAlpha = FindAttribute(L"DetectAlpha");
+        m_pCurrentParam->bDetectAlpha = ConvertBool(strDetectAlpha, false);
 
-        const WCHAR* strDefaultValue = FindAttribute( L"DefaultValue" );
-        m_pCurrentParam->strDefaultValue = ConvertString( strDefaultValue );
+        const WCHAR* strDefaultValue = FindAttribute(L"DefaultValue");
+        m_pCurrentParam->strDefaultValue = ConvertString(strDefaultValue);
         return;
     }
 }
 
 void MaterialDatabaseReader::ProcessElementEnd()
 {
-    if( MATCH_ELEMENT_NAME( L"Material" ) )
+    if (MATCH_ELEMENT_NAME(L"Material"))
     {
-        assert( m_pCurrentMaterial != nullptr );
-        assert( m_pCurrentParam == nullptr );
+        assert(m_pCurrentMaterial != nullptr);
+        assert(m_pCurrentParam == nullptr);
         m_pCurrentMaterial = nullptr;
     }
-    else if( MATCH_ELEMENT_NAME( L"Parameter" ) )
+    else if (MATCH_ELEMENT_NAME(L"Parameter"))
     {
-        assert( m_pCurrentMaterial != nullptr );
-        assert( m_pCurrentParam != nullptr );
+        assert(m_pCurrentMaterial != nullptr);
+        assert(m_pCurrentParam != nullptr);
         m_pCurrentParam = nullptr;
     }
 }
@@ -242,31 +242,31 @@ void MaterialDatabaseReader::ProcessElementEnd()
 ExportMaterialDefinition::~ExportMaterialDefinition()
 {
     const size_t dwCount = Parameters.size();
-    for( size_t i = 0; i < dwCount; ++i )
+    for (size_t i = 0; i < dwCount; ++i)
         delete Parameters[i];
     Parameters.clear();
 }
 
 void ExportMaterialDatabase::Clear()
 {
-    for( size_t i = 0; i < g_Materials.size(); ++i )
+    for (size_t i = 0; i < g_Materials.size(); ++i)
     {
         delete g_Materials[i];
     }
     g_Materials.clear();
 }
 
-bool ExportMaterialDatabase::Initialize( const CHAR* strFileName )
+bool ExportMaterialDatabase::Initialize(const CHAR* strFileName)
 {
     MaterialDatabaseReader mdr;
     XMLParser xp;
-    xp.RegisterSAXCallbackInterface( &mdr );
-    HRESULT hr = xp.ParseXMLFile( strFileName );
-    if( hr == S_OK )
+    xp.RegisterSAXCallbackInterface(&mdr);
+    HRESULT hr = xp.ParseXMLFile(strFileName);
+    if (hr == S_OK)
     {
-        strcpy_s( g_strMaterialDBFileName, strFileName );
+        strcpy_s(g_strMaterialDBFileName, strFileName);
     }
-    return ( hr == S_OK );
+    return (hr == S_OK);
 }
 
 const CHAR* ExportMaterialDatabase::GetDatabaseFileName()
@@ -279,18 +279,18 @@ size_t ExportMaterialDatabase::GetMaterialCount()
     return g_Materials.size();
 }
 
-const ExportMaterialDefinition* ExportMaterialDatabase::GetMaterial( size_t dwIndex )
+const ExportMaterialDefinition* ExportMaterialDatabase::GetMaterial(size_t dwIndex)
 {
-    assert( dwIndex < GetMaterialCount() );
-    return g_Materials[ dwIndex ];
+    assert(dwIndex < GetMaterialCount());
+    return g_Materials[dwIndex];
 }
 
-const ExportMaterialDefinition* ExportMaterialDatabase::FindMaterial( ExportString strName )
+const ExportMaterialDefinition* ExportMaterialDatabase::FindMaterial(ExportString strName)
 {
     const size_t dwCount = GetMaterialCount();
-    for( size_t i = 0; i < dwCount; ++i )
+    for (size_t i = 0; i < dwCount; ++i)
     {
-        if( g_Materials[i]->strName == strName )
+        if (g_Materials[i]->strName == strName)
             return g_Materials[i];
     }
     return nullptr;

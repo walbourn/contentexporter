@@ -18,7 +18,7 @@ namespace ATG
     class ExportLight : public ExportBase
     {
     public:
-        ExportLight( ExportString strName );
+        ExportLight(ExportString strName);
         enum LightType
         {
             LT_AMBIENT = 0,

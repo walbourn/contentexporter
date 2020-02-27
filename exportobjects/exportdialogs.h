@@ -15,11 +15,11 @@
 
 namespace ATG
 {
-    void InitializeExportDialogs( const CHAR* strTitle, HWND hParentWindow, HINSTANCE hInst );
+    void InitializeExportDialogs(const CHAR* strTitle, HWND hParentWindow, HINSTANCE hInst);
     void TerminateExportDialogs();
 
     void ShowConsoleDialog();
-    bool ShowSettingsDialog( bool bModal );
+    bool ShowSettingsDialog(bool bModal);
 
     class ExportDialogBase : public ThinDialog
     {

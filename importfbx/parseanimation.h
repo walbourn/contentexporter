@@ -11,4 +11,4 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-void ParseAnimation( FbxScene* pFbxScene );
+void ParseAnimation(FbxScene* pFbxScene);

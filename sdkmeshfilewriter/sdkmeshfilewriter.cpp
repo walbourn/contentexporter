@@ -12,7 +12,7 @@
 
 static_assert(sizeof(::D3DVERTEXELEMENT9) == sizeof(DXUT::D3DVERTEXELEMENT9), "Direct3D9 Decl structure size incorrect");
 
-extern ATG::ExportScene*     g_pScene;
+extern ATG::ExportScene* g_pScene;
 
 using namespace DirectX;
 using namespace DXUT;
@@ -33,12 +33,12 @@ namespace ATG
     std::vector<UINT>                               g_FrameInfluenceArray;
     std::vector<SDKMESH_MATERIAL>                   g_MaterialArray;
 
-    typedef std::unordered_map<ExportMaterial*,DWORD> MaterialLookupMap;
+    typedef std::unordered_map<ExportMaterial*, DWORD> MaterialLookupMap;
     MaterialLookupMap                               g_ExportMaterialToSDKMeshMaterialMap;
 
     BYTE g_Padding4K[4096] = {};
 
-    bool WriteSDKMeshAnimationFile( const CHAR* strFileName, ExportManifest* pManifest );
+    bool WriteSDKMeshAnimationFile(const CHAR* strFileName, ExportManifest* pManifest);
 
     void ClearSceneArrays() noexcept
     {
@@ -58,31 +58,31 @@ namespace ATG
         g_ExportMaterialToSDKMeshMaterialMap.clear();
     }
 
-    void ProcessTexture( CHAR* strDest, const DWORD dwDestLength, const CHAR* strSrc )
+    void ProcessTexture(CHAR* strDest, const DWORD dwDestLength, const CHAR* strSrc)
     {
-        const size_t dwLength = strlen( strSrc ) + 1;
-        if( dwLength > dwDestLength )
+        const size_t dwLength = strlen(strSrc) + 1;
+        if (dwLength > dwDestLength)
         {
-            ExportLog::LogWarning( "Truncating texture path \"%s\".", strSrc );
-            strncpy_s( strDest, dwDestLength, strSrc, dwDestLength - 1 );
+            ExportLog::LogWarning("Truncating texture path \"%s\".", strSrc);
+            strncpy_s(strDest, dwDestLength, strSrc, dwDestLength - 1);
             strDest[dwDestLength - 1] = '\0';
         }
         else
         {
-            strcpy_s( strDest, dwDestLength, strSrc );
+            strcpy_s(strDest, dwDestLength, strSrc);
         }
     }
 
-    DWORD CaptureMaterial( ExportMaterial* pMaterial, bool version2 )
+    DWORD CaptureMaterial(ExportMaterial* pMaterial, bool version2)
     {
-        MaterialLookupMap::iterator iter = g_ExportMaterialToSDKMeshMaterialMap.find( pMaterial );
-        if( iter != g_ExportMaterialToSDKMeshMaterialMap.end() )
+        MaterialLookupMap::iterator iter = g_ExportMaterialToSDKMeshMaterialMap.find(pMaterial);
+        if (iter != g_ExportMaterialToSDKMeshMaterialMap.end())
         {
             return iter->second;
         }
 
         SDKMESH_MATERIAL Material = {};
-        strcpy_s( Material.Name, pMaterial->GetName() );
+        strcpy_s(Material.Name, pMaterial->GetName());
 
         if (version2)
         {
@@ -214,69 +214,69 @@ namespace ATG
             }
         }
 
-        DWORD dwIndex = static_cast<DWORD>( g_MaterialArray.size() );
-        g_MaterialArray.push_back( Material );
+        DWORD dwIndex = static_cast<DWORD>(g_MaterialArray.size());
+        g_MaterialArray.push_back(Material);
         g_ExportMaterialToSDKMeshMaterialMap[pMaterial] = dwIndex;
         return dwIndex;
     }
 
-    void CaptureVertexBuffer( ExportVB* pVB, const ::D3DVERTEXELEMENT9* pElements, size_t dwElementCount )
+    void CaptureVertexBuffer(ExportVB* pVB, const ::D3DVERTEXELEMENT9* pElements, size_t dwElementCount)
     {
         SDKMESH_VERTEX_BUFFER_HEADER VBHeader = {};
         VBHeader.DataOffset = 0;
         VBHeader.SizeBytes = pVB->GetVertexDataSize();
         VBHeader.StrideBytes = pVB->GetVertexSize();
         VBHeader.NumVertices = pVB->GetVertexCount();
-        memcpy( VBHeader.Decl, pElements, dwElementCount * sizeof( ::D3DVERTEXELEMENT9 ) );
+        memcpy(VBHeader.Decl, pElements, dwElementCount * sizeof(::D3DVERTEXELEMENT9));
         static ::D3DVERTEXELEMENT9 EndElement = { 0xFF, 0, ::D3DDECLTYPE_UNUSED, 0, 0, 0 };
-        VBHeader.Decl[ dwElementCount ] = *reinterpret_cast<const DXUT::D3DVERTEXELEMENT9*>(&EndElement);
-        g_VBArray.push_back( pVB );
-        g_VBHeaderArray.push_back( VBHeader );
+        VBHeader.Decl[dwElementCount] = *reinterpret_cast<const DXUT::D3DVERTEXELEMENT9*>(&EndElement);
+        g_VBArray.push_back(pVB);
+        g_VBHeaderArray.push_back(VBHeader);
     }
 
-    void CaptureIndexBuffer( ExportIB* pIB )
+    void CaptureIndexBuffer(ExportIB* pIB)
     {
         SDKMESH_INDEX_BUFFER_HEADER IBHeader = {};
         IBHeader.DataOffset = 0;
         IBHeader.IndexType = pIB->GetIndexSize() == 2 ? IT_16BIT : IT_32BIT;
         IBHeader.NumIndices = pIB->GetIndexCount();
         IBHeader.SizeBytes = UINT64(pIB->GetIndexDataSize());
-        g_IBArray.push_back( pIB );
-        g_IBHeaderArray.push_back( IBHeader );
+        g_IBArray.push_back(pIB);
+        g_IBHeaderArray.push_back(IBHeader);
     }
 
-    void CapturePolyMesh( ExportMesh* pMesh )
+    void CapturePolyMesh(ExportMesh* pMesh)
     {
         auto pSubDMesh = pMesh->GetSubDMesh();
-        if( pSubDMesh )
+        if (pSubDMesh)
         {
-            CaptureIndexBuffer( pSubDMesh->GetQuadPatchIB() );
-            CaptureVertexBuffer( pMesh->GetVB(), &pMesh->GetVertexDeclElement( 0 ), pMesh->GetVertexDeclElementCount() );
-            CaptureVertexBuffer( pSubDMesh->GetQuadPatchDataVB(), pSubDMesh->GetPatchDataDecl(), pSubDMesh->GetPatchDataDeclElementCount() );
-            if( pSubDMesh->GetTrianglePatchDataVB() )
+            CaptureIndexBuffer(pSubDMesh->GetQuadPatchIB());
+            CaptureVertexBuffer(pMesh->GetVB(), &pMesh->GetVertexDeclElement(0), pMesh->GetVertexDeclElementCount());
+            CaptureVertexBuffer(pSubDMesh->GetQuadPatchDataVB(), pSubDMesh->GetPatchDataDecl(), pSubDMesh->GetPatchDataDeclElementCount());
+            if (pSubDMesh->GetTrianglePatchDataVB())
             {
-                ExportLog::LogWarning( "Subdivision surface mesh \"%s\" contains triangle patches, which are not currently written to SDKMESH files.", pMesh->GetName().SafeString() );
+                ExportLog::LogWarning("Subdivision surface mesh \"%s\" contains triangle patches, which are not currently written to SDKMESH files.", pMesh->GetName().SafeString());
             }
         }
         else
         {
-            CaptureIndexBuffer( pMesh->GetIB() );
-            CaptureVertexBuffer( pMesh->GetVB(), &pMesh->GetVertexDeclElement( 0 ), pMesh->GetVertexDeclElementCount() );
+            CaptureIndexBuffer(pMesh->GetIB());
+            CaptureVertexBuffer(pMesh->GetVB(), &pMesh->GetVertexDeclElement(0), pMesh->GetVertexDeclElementCount());
         }
     }
 
-    void CaptureSubset( ExportMeshBase* pMeshBase, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount, bool version2 )
+    void CaptureSubset(ExportMeshBase* pMeshBase, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount, bool version2)
     {
-        auto pIBSubset = pMeshBase->FindSubset( pBinding->SubsetName );
-        assert( pIBSubset != nullptr );
-        const DWORD dwMaterialIndex = CaptureMaterial( pBinding->pMaterial, version2 );
+        auto pIBSubset = pMeshBase->FindSubset(pBinding->SubsetName);
+        assert(pIBSubset != nullptr);
+        const DWORD dwMaterialIndex = CaptureMaterial(pBinding->pMaterial, version2);
         SDKMESH_SUBSET Subset;
         Subset.IndexStart = pIBSubset->GetStartIndex();
         Subset.IndexCount = pIBSubset->GetIndexCount();
         Subset.MaterialID = dwMaterialIndex;
         Subset.VertexStart = 0;
-        Subset.VertexCount = UINT64( dwMaxVertexCount );
-        switch( pIBSubset->GetPrimitiveType() )
+        Subset.VertexCount = UINT64(dwMaxVertexCount);
+        switch (pIBSubset->GetPrimitiveType())
         {
         case ExportIBSubset::TriangleList:
             Subset.PrimitiveType = PT_TRIANGLE_LIST;
@@ -288,171 +288,171 @@ namespace ATG
             Subset.PrimitiveType = PT_TRIANGLE_LIST;
             break;
         }
-        strcpy_s( Subset.Name, pIBSubset->GetName().SafeString() );
-        g_SubsetArray.push_back( Subset );
+        strcpy_s(Subset.Name, pIBSubset->GetName().SafeString());
+        g_SubsetArray.push_back(Subset);
     }
 
-    void CaptureSubDSubset( ExportSubDProcessMesh* pSubDMesh, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount, bool version2 )
+    void CaptureSubDSubset(ExportSubDProcessMesh* pSubDMesh, ExportMaterialSubsetBinding* pBinding, size_t dwMaxVertexCount, bool version2)
     {
-        const DWORD dwMaterialIndex = CaptureMaterial( pBinding->pMaterial, version2 );
-        auto pSubset = pSubDMesh->FindSubset( pBinding->SubsetName );
+        const DWORD dwMaterialIndex = CaptureMaterial(pBinding->pMaterial, version2);
+        auto pSubset = pSubDMesh->FindSubset(pBinding->SubsetName);
         SDKMESH_SUBSET Subset;
         Subset.IndexStart = pSubset->dwStartPatch;
         Subset.IndexCount = pSubset->dwPatchCount;
         Subset.MaterialID = dwMaterialIndex;
         Subset.VertexStart = 0;
-        Subset.VertexCount = UINT64( dwMaxVertexCount );
+        Subset.VertexCount = UINT64(dwMaxVertexCount);
         Subset.PrimitiveType = pSubset->bQuadPatches ? PT_QUAD_PATCH_LIST : PT_TRIANGLE_PATCH_LIST;
-        strcpy_s( Subset.Name, pSubset->Name.SafeString() );
-        g_SubsetArray.push_back( Subset );
+        strcpy_s(Subset.Name, pSubset->Name.SafeString());
+        g_SubsetArray.push_back(Subset);
     }
 
-    void CaptureModel( ExportModel* pModel, bool version2 )
+    void CaptureModel(ExportModel* pModel, bool version2)
     {
-        g_ModelArray.push_back( pModel );
+        g_ModelArray.push_back(pModel);
         ExportMeshBase* pMeshBase = pModel->GetMesh();
-        g_ModelMeshArray.push_back( pMeshBase );
+        g_ModelMeshArray.push_back(pMeshBase);
 
         SDKMESH_MESH MeshHeader = {};
-        strcpy_s( MeshHeader.Name, pMeshBase->GetName().SafeString() );
+        strcpy_s(MeshHeader.Name, pMeshBase->GetName().SafeString());
 
-        switch( pMeshBase->GetSmallestBound() )
+        switch (pMeshBase->GetSmallestBound())
         {
         case ExportMeshBase::SphereBound:
-            {
-                MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingSphere().Center;
-                const float fSize = pMeshBase->GetBoundingSphere().Radius;
-                MeshHeader.BoundingBoxExtents = XMFLOAT3( fSize, fSize, fSize );
-                break;
-            }
+        {
+            MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingSphere().Center;
+            const float fSize = pMeshBase->GetBoundingSphere().Radius;
+            MeshHeader.BoundingBoxExtents = XMFLOAT3(fSize, fSize, fSize);
+            break;
+        }
         case ExportMeshBase::AxisAlignedBoxBound:
             MeshHeader.BoundingBoxCenter = pMeshBase->GetBoundingAABB().Center;
             MeshHeader.BoundingBoxExtents = pMeshBase->GetBoundingAABB().Extents;
             break;
         }
 
-        MeshHeader.NumFrameInfluences = UINT( pMeshBase->GetInfluenceCount() );
+        MeshHeader.NumFrameInfluences = UINT(pMeshBase->GetInfluenceCount());
 
         ExportSubDProcessMesh* pSubDMesh = nullptr;
         size_t dwMaxVertexCount = 0;
         size_t dwMaxIndexCount = 0;
-        MeshHeader.IndexBuffer = UINT( g_IBArray.size() );
-        switch( pMeshBase->GetMeshType() )
+        MeshHeader.IndexBuffer = UINT(g_IBArray.size());
+        switch (pMeshBase->GetMeshType())
         {
         case ExportMeshBase::PolyMesh:
-            {
-                auto pMesh = reinterpret_cast<ExportMesh*>( pMeshBase );
-                pSubDMesh = pMesh->GetSubDMesh();
-                if( pSubDMesh )
-                {
-                    MeshHeader.NumVertexBuffers = 2;
-                    MeshHeader.VertexBuffers[0] = static_cast<UINT>( g_VBArray.size() );
-                    MeshHeader.VertexBuffers[1] = static_cast<UINT>( g_VBArray.size() + 1 );
-                }
-                else
-                {
-                    MeshHeader.NumVertexBuffers = 1;
-                    MeshHeader.VertexBuffers[0] = static_cast<UINT>( g_VBArray.size() );
-                }
-                CapturePolyMesh( pMesh );
-                dwMaxVertexCount = pMesh->GetVB()->GetVertexCount();
-                dwMaxIndexCount = pMesh->GetIB()->GetIndexCount();
-            }
-            break;
-        }
-
-        MeshHeader.NumSubsets = static_cast<UINT>( pModel->GetBindingCount() );
-        for( DWORD i = 0; i < MeshHeader.NumSubsets; ++i )
         {
-            g_SubsetIndexArray.push_back( static_cast<UINT>( g_SubsetArray.size() ) );
-            if( pSubDMesh )
+            auto pMesh = reinterpret_cast<ExportMesh*>(pMeshBase);
+            pSubDMesh = pMesh->GetSubDMesh();
+            if (pSubDMesh)
             {
-                CaptureSubDSubset( pSubDMesh, pModel->GetBinding( i ), dwMaxVertexCount, version2 );
+                MeshHeader.NumVertexBuffers = 2;
+                MeshHeader.VertexBuffers[0] = static_cast<UINT>(g_VBArray.size());
+                MeshHeader.VertexBuffers[1] = static_cast<UINT>(g_VBArray.size() + 1);
             }
             else
             {
-                CaptureSubset( pMeshBase, pModel->GetBinding( i ), dwMaxVertexCount, version2 );
+                MeshHeader.NumVertexBuffers = 1;
+                MeshHeader.VertexBuffers[0] = static_cast<UINT>(g_VBArray.size());
+            }
+            CapturePolyMesh(pMesh);
+            dwMaxVertexCount = pMesh->GetVB()->GetVertexCount();
+            dwMaxIndexCount = pMesh->GetIB()->GetIndexCount();
+        }
+        break;
+        }
+
+        MeshHeader.NumSubsets = static_cast<UINT>(pModel->GetBindingCount());
+        for (DWORD i = 0; i < MeshHeader.NumSubsets; ++i)
+        {
+            g_SubsetIndexArray.push_back(static_cast<UINT>(g_SubsetArray.size()));
+            if (pSubDMesh)
+            {
+                CaptureSubDSubset(pSubDMesh, pModel->GetBinding(i), dwMaxVertexCount, version2);
+            }
+            else
+            {
+                CaptureSubset(pMeshBase, pModel->GetBinding(i), dwMaxVertexCount, version2);
             }
         }
 
-        if ( !MeshHeader.NumSubsets )
+        if (!MeshHeader.NumSubsets)
         {
             MeshHeader.NumSubsets = 1;
 
-            ExportLog::LogWarning( "No model binding for mesh \"%s\" so creating a default subset", pMeshBase->GetName().SafeString() );
+            ExportLog::LogWarning("No model binding for mesh \"%s\" so creating a default subset", pMeshBase->GetName().SafeString());
 
-            g_SubsetIndexArray.push_back( static_cast<UINT>( g_SubsetArray.size() ) );
-                
+            g_SubsetIndexArray.push_back(static_cast<UINT>(g_SubsetArray.size()));
+
             SDKMESH_SUBSET Subset = {};
             Subset.IndexStart = 0;
-            Subset.IndexCount = static_cast<UINT64>( dwMaxIndexCount );
+            Subset.IndexCount = static_cast<UINT64>(dwMaxIndexCount);
             Subset.MaterialID = INVALID_MATERIAL;
             Subset.VertexStart = 0;
-            Subset.VertexCount = static_cast<UINT64>( dwMaxVertexCount );
+            Subset.VertexCount = static_cast<UINT64>(dwMaxVertexCount);
             Subset.PrimitiveType = PT_TRIANGLE_LIST;
-            g_SubsetArray.push_back( Subset );
+            g_SubsetArray.push_back(Subset);
         }
 
-        g_MeshHeaderArray.push_back( MeshHeader );
+        g_MeshHeaderArray.push_back(MeshHeader);
     }
 
-    void CaptureScene( ExportFrame* pRootFrame, UINT dwParentIndex, bool version2 )
+    void CaptureScene(ExportFrame* pRootFrame, UINT dwParentIndex, bool version2)
     {
         SDKMESH_FRAME Frame = {};
-        strcpy_s( Frame.Name, pRootFrame->GetName().SafeString() );
+        strcpy_s(Frame.Name, pRootFrame->GetName().SafeString());
         Frame.Matrix = pRootFrame->Transform().Matrix();
         Frame.ParentFrame = dwParentIndex;
         Frame.AnimationDataIndex = INVALID_ANIMATION_DATA;
         const size_t dwCurrentIndex = g_FrameArray.size();
 
         const size_t dwModelCount = pRootFrame->GetModelCount();
-        if ( dwModelCount == 0 )
+        if (dwModelCount == 0)
         {
             Frame.Mesh = INVALID_MESH;
         }
         else
         {
             // Only one mesh per frame is supported in the SDKMesh format.
-            if( dwModelCount > 1 )
+            if (dwModelCount > 1)
             {
-                ExportLog::LogWarning( "Frame \"%s\" has %zu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount );
+                ExportLog::LogWarning("Frame \"%s\" has %zu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount);
             }
-            Frame.Mesh = static_cast<UINT>( g_MeshHeaderArray.size() );
-            ExportModel* pModel = pRootFrame->GetModelByIndex( 0 );
-            CaptureModel( pModel, version2 );
+            Frame.Mesh = static_cast<UINT>(g_MeshHeaderArray.size());
+            ExportModel* pModel = pRootFrame->GetModelByIndex(0);
+            CaptureModel(pModel, version2);
         }
 
         UINT dwChildIndex = INVALID_FRAME;
         const size_t dwChildCount = pRootFrame->GetChildCount();
-        if( dwChildCount > 0 )
-            dwChildIndex = static_cast<DWORD>( g_FrameHeaderArray.size() + 1 );
-        Frame.ChildFrame = static_cast<UINT>( dwChildIndex );
+        if (dwChildCount > 0)
+            dwChildIndex = static_cast<DWORD>(g_FrameHeaderArray.size() + 1);
+        Frame.ChildFrame = static_cast<UINT>(dwChildIndex);
         Frame.SiblingFrame = INVALID_FRAME;
 
-        g_FrameHeaderArray.push_back( Frame );
-        g_FrameArray.push_back( pRootFrame );
+        g_FrameHeaderArray.push_back(Frame);
+        g_FrameArray.push_back(pRootFrame);
 
         DWORD dwPreviousSiblingIndex = INVALID_FRAME;
         DWORD dwCurrentSiblingIndex = INVALID_FRAME;
-        for( size_t i = 0; i < dwChildCount; ++i )
+        for (size_t i = 0; i < dwChildCount; ++i)
         {
             dwPreviousSiblingIndex = dwCurrentSiblingIndex;
-            dwCurrentSiblingIndex = static_cast<DWORD>( g_FrameHeaderArray.size() );
-            if( dwPreviousSiblingIndex != INVALID_FRAME )
+            dwCurrentSiblingIndex = static_cast<DWORD>(g_FrameHeaderArray.size());
+            if (dwPreviousSiblingIndex != INVALID_FRAME)
             {
-                g_FrameHeaderArray[ dwPreviousSiblingIndex ].SiblingFrame = dwCurrentSiblingIndex;
+                g_FrameHeaderArray[dwPreviousSiblingIndex].SiblingFrame = dwCurrentSiblingIndex;
             }
-            CaptureScene( pRootFrame->GetChildByIndex( i ), static_cast<UINT>( dwCurrentIndex ), version2 );
+            CaptureScene(pRootFrame->GetChildByIndex(i), static_cast<UINT>(dwCurrentIndex), version2);
         }
     }
 
-    UINT FindFrame( ExportString Name )
+    UINT FindFrame(ExportString Name)
     {
         const size_t dwFrameCount = g_FrameArray.size();
-        for( size_t i = 0; i < dwFrameCount; ++i )
+        for (size_t i = 0; i < dwFrameCount; ++i)
         {
-            if( g_FrameArray[i]->GetName() == Name )
-                return static_cast<UINT>( i );
+            if (g_FrameArray[i]->GetName() == Name)
+                return static_cast<UINT>(i);
         }
         return INVALID_FRAME;
     }
@@ -460,168 +460,168 @@ namespace ATG
     void CaptureSecondPass()
     {
         // Create frame influence lists
-        assert( g_MeshHeaderArray.size() == g_ModelMeshArray.size() );
+        assert(g_MeshHeaderArray.size() == g_ModelMeshArray.size());
         const size_t dwMeshCount = g_MeshHeaderArray.size();
-        for( size_t i = 0; i < dwMeshCount; ++i )
+        for (size_t i = 0; i < dwMeshCount; ++i)
         {
             SDKMESH_MESH& Mesh = g_MeshHeaderArray[i];
             const ExportMeshBase* pMeshBase = g_ModelMeshArray[i];
-            for( DWORD j = 0; j < Mesh.NumFrameInfluences; ++j )
+            for (DWORD j = 0; j < Mesh.NumFrameInfluences; ++j)
             {
-                const auto InfluenceName = pMeshBase->GetInfluence( j );
-                const DWORD dwFrameIndex = FindFrame( InfluenceName );
-                g_FrameInfluenceArray.push_back( static_cast<UINT>( dwFrameIndex ) );
+                const auto InfluenceName = pMeshBase->GetInfluence(j);
+                const DWORD dwFrameIndex = FindFrame(InfluenceName);
+                g_FrameInfluenceArray.push_back(static_cast<UINT>(dwFrameIndex));
             }
 
-            if ( !Mesh.NumFrameInfluences )
+            if (!Mesh.NumFrameInfluences)
             {
                 Mesh.NumFrameInfluences = 1;
-                g_FrameInfluenceArray.push_back( 0 );
+                g_FrameInfluenceArray.push_back(0);
             }
         }
     }
 
-    constexpr inline DWORD RoundUp4K( DWORD dwValue )
+    constexpr inline DWORD RoundUp4K(DWORD dwValue)
     {
-        return ( ( dwValue + 4095 ) / 4096 ) * 4096;
+        return ((dwValue + 4095) / 4096) * 4096;
     }
 
-    constexpr inline DWORD RoundUp32B( DWORD dwValue )
+    constexpr inline DWORD RoundUp32B(DWORD dwValue)
     {
-        return ( ( dwValue + 31 ) / 32 ) * 32;
+        return ((dwValue + 31) / 32) * 32;
     }
 
     size_t ComputeMeshHeaderIndexDataSize()
     {
-        return ( ( g_SubsetIndexArray.size() + g_FrameInfluenceArray.size() ) * sizeof( UINT ) ); 
+        return ((g_SubsetIndexArray.size() + g_FrameInfluenceArray.size()) * sizeof(UINT));
     }
 
     DWORD ComputeBufferDataSize()
     {
         DWORD dwDataSize = 0;
         const size_t dwVBCount = g_VBHeaderArray.size();
-        for( size_t i = 0; i < dwVBCount; ++i )
+        for (size_t i = 0; i < dwVBCount; ++i)
         {
             const auto& VBHeader = g_VBHeaderArray[i];
-            dwDataSize += RoundUp4K( static_cast<DWORD>( VBHeader.SizeBytes ) );
+            dwDataSize += RoundUp4K(static_cast<DWORD>(VBHeader.SizeBytes));
         }
         const size_t dwIBCount = g_IBHeaderArray.size();
-        for( size_t i = 0; i < dwIBCount; ++i )
+        for (size_t i = 0; i < dwIBCount; ++i)
         {
             const auto& IBHeader = g_IBHeaderArray[i];
-            dwDataSize += RoundUp4K( static_cast<DWORD>( IBHeader.SizeBytes ) );
+            dwDataSize += RoundUp4K(static_cast<DWORD>(IBHeader.SizeBytes));
         }
         return dwDataSize;
     }
 
-    void WriteVertexBufferHeaders( HANDLE hFile, UINT64& DataOffset )
+    void WriteVertexBufferHeaders(HANDLE hFile, UINT64& DataOffset)
     {
         const size_t dwVBCount = g_VBHeaderArray.size();
-        for( size_t i = 0; i < dwVBCount; ++i )
+        for (size_t i = 0; i < dwVBCount; ++i)
         {
             auto& VBHeader = g_VBHeaderArray[i];
             VBHeader.DataOffset = DataOffset;
-            DataOffset += RoundUp4K( static_cast<DWORD>( VBHeader.SizeBytes ) );
+            DataOffset += RoundUp4K(static_cast<DWORD>(VBHeader.SizeBytes));
             DWORD dwBytesWritten = 0;
-            WriteFile( hFile, &VBHeader, sizeof( SDKMESH_VERTEX_BUFFER_HEADER ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, &VBHeader, sizeof(SDKMESH_VERTEX_BUFFER_HEADER), &dwBytesWritten, nullptr);
         }
     }
 
-    void WriteIndexBufferHeaders( HANDLE hFile, UINT64& DataOffset )
+    void WriteIndexBufferHeaders(HANDLE hFile, UINT64& DataOffset)
     {
         const size_t dwIBCount = g_IBHeaderArray.size();
-        for( size_t i = 0; i < dwIBCount; ++i )
+        for (size_t i = 0; i < dwIBCount; ++i)
         {
             auto& IBHeader = g_IBHeaderArray[i];
             IBHeader.DataOffset = DataOffset;
-            DataOffset += RoundUp4K( static_cast<DWORD>( IBHeader.SizeBytes ) );
+            DataOffset += RoundUp4K(static_cast<DWORD>(IBHeader.SizeBytes));
             DWORD dwBytesWritten = 0;
-            WriteFile( hFile, &IBHeader, sizeof( SDKMESH_INDEX_BUFFER_HEADER ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, &IBHeader, sizeof(SDKMESH_INDEX_BUFFER_HEADER), &dwBytesWritten, nullptr);
         }
     }
 
-    void WriteMeshes( HANDLE hFile, UINT64& DataOffset )
+    void WriteMeshes(HANDLE hFile, UINT64& DataOffset)
     {
         const size_t dwMeshCount = g_MeshHeaderArray.size();
         DWORD dwBytesWritten = 0;
-        for( size_t i = 0; i < dwMeshCount; ++i )
+        for (size_t i = 0; i < dwMeshCount; ++i)
         {
             auto& Mesh = g_MeshHeaderArray[i];
             Mesh.SubsetOffset = DataOffset;
-            DataOffset += Mesh.NumSubsets * sizeof( UINT );
+            DataOffset += Mesh.NumSubsets * sizeof(UINT);
             Mesh.FrameInfluenceOffset = DataOffset;
-            DataOffset += Mesh.NumFrameInfluences * sizeof( UINT );
-            WriteFile( hFile, &Mesh, sizeof( SDKMESH_MESH ), &dwBytesWritten, nullptr );
+            DataOffset += Mesh.NumFrameInfluences * sizeof(UINT);
+            WriteFile(hFile, &Mesh, sizeof(SDKMESH_MESH), &dwBytesWritten, nullptr);
         }
     }
 
-    void WriteSubsetIndexAndFrameInfluenceData( HANDLE hFile )
+    void WriteSubsetIndexAndFrameInfluenceData(HANDLE hFile)
     {
         const size_t dwMeshCount = g_MeshHeaderArray.size();
         DWORD dwSubsetIndexCount = 0;
         DWORD dwFrameInfluenceCount = 0;
         DWORD dwBytesWritten = 0;
-        for( size_t i = 0; i < dwMeshCount; ++i )
+        for (size_t i = 0; i < dwMeshCount; ++i)
         {
             const auto& Mesh = g_MeshHeaderArray[i];
-            if( Mesh.NumSubsets > 0 )
+            if (Mesh.NumSubsets > 0)
             {
-                WriteFile( hFile, &g_SubsetIndexArray[ dwSubsetIndexCount ], Mesh.NumSubsets * sizeof( UINT ), &dwBytesWritten, nullptr );
+                WriteFile(hFile, &g_SubsetIndexArray[dwSubsetIndexCount], Mesh.NumSubsets * sizeof(UINT), &dwBytesWritten, nullptr);
                 dwSubsetIndexCount += Mesh.NumSubsets;
             }
-            if( Mesh.NumFrameInfluences > 0 )
+            if (Mesh.NumFrameInfluences > 0)
             {
-                WriteFile( hFile, &g_FrameInfluenceArray[ dwFrameInfluenceCount ], Mesh.NumFrameInfluences * sizeof( UINT ), &dwBytesWritten, nullptr );
+                WriteFile(hFile, &g_FrameInfluenceArray[dwFrameInfluenceCount], Mesh.NumFrameInfluences * sizeof(UINT), &dwBytesWritten, nullptr);
                 dwFrameInfluenceCount += Mesh.NumFrameInfluences;
             }
         }
     }
 
-    void WriteVertexBufferData( HANDLE hFile )
+    void WriteVertexBufferData(HANDLE hFile)
     {
-        assert( g_VBHeaderArray.size() == g_VBArray.size() );
+        assert(g_VBHeaderArray.size() == g_VBArray.size());
         const size_t dwVBCount = g_VBHeaderArray.size();
         DWORD dwBytesWritten = 0;
-        for( size_t i = 0; i < dwVBCount; ++i )
+        for (size_t i = 0; i < dwVBCount; ++i)
         {
             const auto pVB = g_VBArray[i];
-            const DWORD dwDataSize = static_cast<DWORD>( pVB->GetVertexDataSize() );
-            WriteFile( hFile, pVB->GetVertexData(), dwDataSize, &dwBytesWritten, nullptr );
-            const DWORD dwPaddingSize = RoundUp4K( dwDataSize ) - dwDataSize;
-            assert( dwPaddingSize < 4096 );
-            WriteFile( hFile, g_Padding4K, dwPaddingSize, &dwBytesWritten, nullptr );
+            const DWORD dwDataSize = static_cast<DWORD>(pVB->GetVertexDataSize());
+            WriteFile(hFile, pVB->GetVertexData(), dwDataSize, &dwBytesWritten, nullptr);
+            const DWORD dwPaddingSize = RoundUp4K(dwDataSize) - dwDataSize;
+            assert(dwPaddingSize < 4096);
+            WriteFile(hFile, g_Padding4K, dwPaddingSize, &dwBytesWritten, nullptr);
         }
     }
 
-    void WriteIndexBufferData( HANDLE hFile )
+    void WriteIndexBufferData(HANDLE hFile)
     {
-        assert( g_IBHeaderArray.size() == g_IBArray.size() );
+        assert(g_IBHeaderArray.size() == g_IBArray.size());
         const size_t dwIBCount = g_IBHeaderArray.size();
         DWORD dwBytesWritten = 0;
-        for( size_t i = 0; i < dwIBCount; ++i )
+        for (size_t i = 0; i < dwIBCount; ++i)
         {
             const auto pIB = g_IBArray[i];
-            const DWORD dwDataSize = static_cast<DWORD>( pIB->GetIndexDataSize() );
-            WriteFile( hFile, pIB->GetIndexData(), dwDataSize, &dwBytesWritten, nullptr );
-            const DWORD dwPaddingSize = RoundUp4K( dwDataSize ) - dwDataSize;
-            assert( dwPaddingSize < 4096 );
-            WriteFile( hFile, g_Padding4K, dwPaddingSize, &dwBytesWritten, nullptr );
+            const DWORD dwDataSize = static_cast<DWORD>(pIB->GetIndexDataSize());
+            WriteFile(hFile, pIB->GetIndexData(), dwDataSize, &dwBytesWritten, nullptr);
+            const DWORD dwPaddingSize = RoundUp4K(dwDataSize) - dwDataSize;
+            assert(dwPaddingSize < 4096);
+            WriteFile(hFile, g_Padding4K, dwPaddingSize, &dwBytesWritten, nullptr);
         }
     }
 
-    bool WriteSDKMeshFile( const CHAR* strFileName, ExportManifest* pManifest, bool version2 )
+    bool WriteSDKMeshFile(const CHAR* strFileName, ExportManifest* pManifest, bool version2)
     {
-        if( !g_pScene )
+        if (!g_pScene)
             return false;
 
         ClearSceneArrays();
 
-        CaptureScene( g_pScene, INVALID_FRAME, version2 );
+        CaptureScene(g_pScene, INVALID_FRAME, version2);
         CaptureSecondPass();
 
-        if ( !g_SubsetArray.empty() && g_MaterialArray.empty() )
+        if (!g_SubsetArray.empty() && g_MaterialArray.empty())
         {
-            ExportLog::LogWarning( "No materials defined, so creating a default material" );
+            ExportLog::LogWarning("No materials defined, so creating a default material");
             SDKMESH_MATERIAL defMaterial;
             memset(&defMaterial, 0, sizeof(SDKMESH_MATERIAL));
 
@@ -639,355 +639,355 @@ namespace ATG
                 defMaterial.Power = 1.f;
             }
 
-            g_MaterialArray.push_back( defMaterial );
+            g_MaterialArray.push_back(defMaterial);
         }
 
-        if ( !g_SubsetArray.empty() && g_FrameHeaderArray.empty() )
+        if (!g_SubsetArray.empty() && g_FrameHeaderArray.empty())
         {
-            ExportLog::LogWarning( "No frames defined, so creating root frame" );
+            ExportLog::LogWarning("No frames defined, so creating root frame");
             SDKMESH_FRAME defFrame;
             memset(&defFrame, 0, sizeof(SDKMESH_FRAME));
-            strcpy_s( defFrame.Name, "root");
+            strcpy_s(defFrame.Name, "root");
             defFrame.ParentFrame = defFrame.ChildFrame = defFrame.SiblingFrame = DWORD(-1);
             defFrame.AnimationDataIndex = INVALID_ANIMATION_DATA;
             const XMMATRIX id = XMMatrixIdentity();
-            XMStoreFloat4x4( &defFrame.Matrix, id );
-            g_FrameHeaderArray.push_back( defFrame );
+            XMStoreFloat4x4(&defFrame.Matrix, id);
+            g_FrameHeaderArray.push_back(defFrame);
         }
 
-        HANDLE hFile = CreateFileA( strFileName, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr );
-        if( hFile == INVALID_HANDLE_VALUE )
+        HANDLE hFile = CreateFileA(strFileName, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile == INVALID_HANDLE_VALUE)
         {
-            ExportLog::LogError( "Could not write to file \"%s\".  Check that the file is not read-only and that the path exists.", strFileName );
+            ExportLog::LogError("Could not write to file \"%s\".  Check that the file is not read-only and that the path exists.", strFileName);
             return false;
         }
 
-        ExportLog::LogMsg( 1, "Writing to SDKMESH file \"%s\"", strFileName );
+        ExportLog::LogMsg(1, "Writing to SDKMESH file \"%s\"", strFileName);
 
         SDKMESH_HEADER FileHeader = {};
 
         FileHeader.Version = (version2) ? SDKMESH_FILE_VERSION_V2 : SDKMESH_FILE_VERSION;
         FileHeader.IsBigEndian = static_cast<BYTE>(!g_pScene->Settings().bLittleEndian);
 
-        FileHeader.NumFrames = static_cast<UINT>( g_FrameArray.size() );
-        FileHeader.NumMaterials = static_cast<UINT>( g_MaterialArray.size() );
-        FileHeader.NumMeshes = static_cast<UINT>( g_MeshHeaderArray.size() );
-        FileHeader.NumTotalSubsets = static_cast<UINT>( g_SubsetArray.size() );
-        FileHeader.NumIndexBuffers = static_cast<UINT>( g_IBHeaderArray.size() );
-        FileHeader.NumVertexBuffers = static_cast<UINT>( g_VBHeaderArray.size() );
+        FileHeader.NumFrames = static_cast<UINT>(g_FrameArray.size());
+        FileHeader.NumMaterials = static_cast<UINT>(g_MaterialArray.size());
+        FileHeader.NumMeshes = static_cast<UINT>(g_MeshHeaderArray.size());
+        FileHeader.NumTotalSubsets = static_cast<UINT>(g_SubsetArray.size());
+        FileHeader.NumIndexBuffers = static_cast<UINT>(g_IBHeaderArray.size());
+        FileHeader.NumVertexBuffers = static_cast<UINT>(g_VBHeaderArray.size());
 
-        FileHeader.HeaderSize = sizeof( SDKMESH_HEADER ) +
-                                FileHeader.NumVertexBuffers * sizeof( SDKMESH_VERTEX_BUFFER_HEADER ) + 
-                                FileHeader.NumIndexBuffers * sizeof( SDKMESH_INDEX_BUFFER_HEADER );
+        FileHeader.HeaderSize = sizeof(SDKMESH_HEADER) +
+            FileHeader.NumVertexBuffers * sizeof(SDKMESH_VERTEX_BUFFER_HEADER) +
+            FileHeader.NumIndexBuffers * sizeof(SDKMESH_INDEX_BUFFER_HEADER);
 
-        const UINT64 StaticDataSize = FileHeader.NumMeshes * sizeof( SDKMESH_MESH ) +
-                                 FileHeader.NumTotalSubsets * sizeof( SDKMESH_SUBSET ) +
-                                 FileHeader.NumFrames * sizeof( SDKMESH_FRAME ) + 
-                                 FileHeader.NumMaterials * sizeof( SDKMESH_MATERIAL );
+        const UINT64 StaticDataSize = FileHeader.NumMeshes * sizeof(SDKMESH_MESH) +
+            FileHeader.NumTotalSubsets * sizeof(SDKMESH_SUBSET) +
+            FileHeader.NumFrames * sizeof(SDKMESH_FRAME) +
+            FileHeader.NumMaterials * sizeof(SDKMESH_MATERIAL);
 
         FileHeader.NonBufferDataSize = StaticDataSize + ComputeMeshHeaderIndexDataSize();
 
         FileHeader.BufferDataSize = ComputeBufferDataSize();
 
 
-        FileHeader.VertexStreamHeadersOffset = sizeof( SDKMESH_HEADER );
-        FileHeader.IndexStreamHeadersOffset = FileHeader.VertexStreamHeadersOffset + FileHeader.NumVertexBuffers * sizeof( SDKMESH_VERTEX_BUFFER_HEADER );
-        FileHeader.MeshDataOffset = FileHeader.IndexStreamHeadersOffset + FileHeader.NumIndexBuffers * sizeof( SDKMESH_INDEX_BUFFER_HEADER );
+        FileHeader.VertexStreamHeadersOffset = sizeof(SDKMESH_HEADER);
+        FileHeader.IndexStreamHeadersOffset = FileHeader.VertexStreamHeadersOffset + FileHeader.NumVertexBuffers * sizeof(SDKMESH_VERTEX_BUFFER_HEADER);
+        FileHeader.MeshDataOffset = FileHeader.IndexStreamHeadersOffset + FileHeader.NumIndexBuffers * sizeof(SDKMESH_INDEX_BUFFER_HEADER);
         FileHeader.SubsetDataOffset = FileHeader.MeshDataOffset + FileHeader.NumMeshes * sizeof(SDKMESH_MESH);
         FileHeader.FrameDataOffset = FileHeader.SubsetDataOffset + FileHeader.NumTotalSubsets * sizeof(SDKMESH_SUBSET);
         FileHeader.MaterialDataOffset = FileHeader.FrameDataOffset + FileHeader.NumFrames * sizeof(SDKMESH_FRAME);
 
         // Write header to file
         DWORD dwBytesWritten = 0;
-        WriteFile( hFile, &FileHeader, sizeof( SDKMESH_HEADER ), &dwBytesWritten, nullptr );
+        WriteFile(hFile, &FileHeader, sizeof(SDKMESH_HEADER), &dwBytesWritten, nullptr);
 
         UINT64 BufferDataOffset = FileHeader.HeaderSize + FileHeader.NonBufferDataSize;
 
         // Write VB headers
-        WriteVertexBufferHeaders( hFile, BufferDataOffset );
+        WriteVertexBufferHeaders(hFile, BufferDataOffset);
 
         // Write IB headers
-        WriteIndexBufferHeaders( hFile, BufferDataOffset );
+        WriteIndexBufferHeaders(hFile, BufferDataOffset);
 
         // Write meshes
         UINT64 SubsetListOffset = FileHeader.HeaderSize + StaticDataSize;
-        WriteMeshes( hFile, SubsetListOffset );
+        WriteMeshes(hFile, SubsetListOffset);
 
         // Write subsets
         const size_t dwSubsetCount = g_SubsetArray.size();
-        for( size_t i = 0; i < dwSubsetCount; ++i )
+        for (size_t i = 0; i < dwSubsetCount; ++i)
         {
             const auto& Subset = g_SubsetArray[i];
-            WriteFile( hFile, &Subset, sizeof( SDKMESH_SUBSET ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, &Subset, sizeof(SDKMESH_SUBSET), &dwBytesWritten, nullptr);
         }
 
         // Write frames
         const size_t dwFrameCount = g_FrameHeaderArray.size();
-        for( size_t i = 0; i < dwFrameCount; ++i )
+        for (size_t i = 0; i < dwFrameCount; ++i)
         {
             const auto& Frame = g_FrameHeaderArray[i];
-            WriteFile( hFile, &Frame, sizeof( SDKMESH_FRAME ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, &Frame, sizeof(SDKMESH_FRAME), &dwBytesWritten, nullptr);
         }
 
         // Write materials
         // TODO - V2
         const size_t dwMaterialCount = g_MaterialArray.size();
-        for( size_t i = 0; i < dwMaterialCount; ++i )
+        for (size_t i = 0; i < dwMaterialCount; ++i)
         {
             const auto& Material = g_MaterialArray[i];
-            WriteFile( hFile, &Material, sizeof( SDKMESH_MATERIAL ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, &Material, sizeof(SDKMESH_MATERIAL), &dwBytesWritten, nullptr);
         }
 
         // Write subset index lists and frame influence lists
-        WriteSubsetIndexAndFrameInfluenceData( hFile );
+        WriteSubsetIndexAndFrameInfluenceData(hFile);
 
         // Write VB data
-        WriteVertexBufferData( hFile );
-        
-        // Write IB data
-        WriteIndexBufferData( hFile );
+        WriteVertexBufferData(hFile);
 
-        CloseHandle( hFile );
+        // Write IB data
+        WriteIndexBufferData(hFile);
+
+        CloseHandle(hFile);
 
         ClearSceneArrays();
 
-        WriteSDKMeshAnimationFile( strFileName, pManifest );
+        WriteSDKMeshAnimationFile(strFileName, pManifest);
 
         return true;
     }
 
-    bool SamplePositionData(const ExportAnimationPositionKey* pKeys, size_t dwKeyCount, SDKANIMATION_DATA* pDestKeys, size_t dwDestKeyCount, float fKeyInterval )
+    bool SamplePositionData(const ExportAnimationPositionKey* pKeys, size_t dwKeyCount, SDKANIMATION_DATA* pDestKeys, size_t dwDestKeyCount, float fKeyInterval)
     {
-        if( dwKeyCount == 0 )
+        if (dwKeyCount == 0)
             return false;
 
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationPositionKey StartKey = pKeys[dwCurrentSrcKey];
         ExportAnimationPositionKey EndKey = {};
-        if( dwKeyCount > 1 )
+        if (dwKeyCount > 1)
         {
             bEndKey = true;
             EndKey = pKeys[dwCurrentSrcKey + 1];
         }
 
         float fTime = 0;
-        for( size_t i = 0; i < dwDestKeyCount; ++i )
+        for (size_t i = 0; i < dwDestKeyCount; ++i)
         {
-            while( bEndKey && fTime >= EndKey.fTime )
+            while (bEndKey && fTime >= EndKey.fTime)
             {
                 StartKey = EndKey;
                 ++dwCurrentSrcKey;
-                if( dwCurrentSrcKey >= dwKeyCount )
+                if (dwCurrentSrcKey >= dwKeyCount)
                     bEndKey = false;
                 else
                     EndKey = pKeys[dwCurrentSrcKey + 1];
             }
-            if( !bEndKey )
+            if (!bEndKey)
             {
                 pDestKeys[i].Translation = StartKey.Position;
             }
             else
             {
-                assert( fTime <= EndKey.fTime );
-                float fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
-                fLerpFactor = std::min( std::max( 0.0f, fLerpFactor ), 1.0f );
+                assert(fTime <= EndKey.fTime);
+                float fLerpFactor = (fTime - StartKey.fTime) / (EndKey.fTime - StartKey.fTime);
+                fLerpFactor = std::min(std::max(0.0f, fLerpFactor), 1.0f);
 
-                XMVECTOR v = XMLoadFloat3( &StartKey.Position );
-                const XMVECTOR vEnd = XMLoadFloat3( &EndKey.Position );
+                XMVECTOR v = XMLoadFloat3(&StartKey.Position);
+                const XMVECTOR vEnd = XMLoadFloat3(&EndKey.Position);
 
-                v = XMVectorLerp( v, vEnd, fLerpFactor );
+                v = XMVectorLerp(v, vEnd, fLerpFactor);
 
-                XMStoreFloat3( &pDestKeys[i].Translation, v );
+                XMStoreFloat3(&pDestKeys[i].Translation, v);
             }
             fTime += fKeyInterval;
         }
         return true;
     }
 
-    bool SampleOrientationData(const ExportAnimationOrientationKey* pKeys, size_t dwKeyCount, SDKANIMATION_DATA* pDestKeys, size_t dwDestKeyCount, float fKeyInterval )
+    bool SampleOrientationData(const ExportAnimationOrientationKey* pKeys, size_t dwKeyCount, SDKANIMATION_DATA* pDestKeys, size_t dwDestKeyCount, float fKeyInterval)
     {
-        if( dwKeyCount == 0 )
+        if (dwKeyCount == 0)
             return false;
 
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationOrientationKey StartKey = pKeys[dwCurrentSrcKey];
         ExportAnimationOrientationKey EndKey = {};
-        if( dwKeyCount > 1 )
+        if (dwKeyCount > 1)
         {
             bEndKey = true;
             EndKey = pKeys[dwCurrentSrcKey + 1];
         }
 
         float fTime = 0;
-        for( size_t i = 0; i < dwDestKeyCount; ++i )
+        for (size_t i = 0; i < dwDestKeyCount; ++i)
         {
-            while( bEndKey && fTime >= EndKey.fTime )
+            while (bEndKey && fTime >= EndKey.fTime)
             {
                 StartKey = EndKey;
                 ++dwCurrentSrcKey;
-                if( dwCurrentSrcKey >= dwKeyCount )
+                if (dwCurrentSrcKey >= dwKeyCount)
                     bEndKey = false;
                 else
                     EndKey = pKeys[dwCurrentSrcKey + 1];
             }
-            if( !bEndKey )
+            if (!bEndKey)
             {
                 pDestKeys[i].Orientation = (XMFLOAT4)StartKey.Orientation;
             }
             else
             {
-                assert( fTime <= EndKey.fTime );
-                float fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
-                fLerpFactor = std::min( std::max( 0.0f, fLerpFactor ), 1.0f );
+                assert(fTime <= EndKey.fTime);
+                float fLerpFactor = (fTime - StartKey.fTime) / (EndKey.fTime - StartKey.fTime);
+                fLerpFactor = std::min(std::max(0.0f, fLerpFactor), 1.0f);
 
-                XMVECTOR v = XMLoadFloat4( &StartKey.Orientation );
-                const XMVECTOR vEnd = XMLoadFloat4( &EndKey.Orientation );
+                XMVECTOR v = XMLoadFloat4(&StartKey.Orientation);
+                const XMVECTOR vEnd = XMLoadFloat4(&EndKey.Orientation);
 
-                v = XMVectorLerp( v, vEnd, fLerpFactor );
+                v = XMVectorLerp(v, vEnd, fLerpFactor);
 
-                XMStoreFloat4( &pDestKeys[i].Orientation, v );
+                XMStoreFloat4(&pDestKeys[i].Orientation, v);
             }
             fTime += fKeyInterval;
         }
         return true;
     }
 
-    bool SampleScaleData(const ExportAnimationScaleKey* pKeys, size_t dwKeyCount, SDKANIMATION_DATA* pDestKeys, size_t dwDestKeyCount, float fKeyInterval )
+    bool SampleScaleData(const ExportAnimationScaleKey* pKeys, size_t dwKeyCount, SDKANIMATION_DATA* pDestKeys, size_t dwDestKeyCount, float fKeyInterval)
     {
-        if( dwKeyCount == 0 )
+        if (dwKeyCount == 0)
             return false;
 
         DWORD dwCurrentSrcKey = 0;
         bool bEndKey = false;
         ExportAnimationScaleKey StartKey = pKeys[dwCurrentSrcKey];
         ExportAnimationScaleKey EndKey = {};
-        if( dwKeyCount > 1 )
+        if (dwKeyCount > 1)
         {
             bEndKey = true;
             EndKey = pKeys[dwCurrentSrcKey + 1];
         }
 
         float fTime = 0;
-        for( size_t i = 0; i < dwDestKeyCount; ++i )
+        for (size_t i = 0; i < dwDestKeyCount; ++i)
         {
-            while( bEndKey && fTime >= EndKey.fTime )
+            while (bEndKey && fTime >= EndKey.fTime)
             {
                 StartKey = EndKey;
                 ++dwCurrentSrcKey;
-                if( dwCurrentSrcKey >= dwKeyCount )
+                if (dwCurrentSrcKey >= dwKeyCount)
                     bEndKey = false;
                 else
                     EndKey = pKeys[dwCurrentSrcKey + 1];
             }
-            if( !bEndKey )
+            if (!bEndKey)
             {
                 pDestKeys[i].Scaling = StartKey.Scale;
             }
             else
             {
-                assert( fTime <= EndKey.fTime );
-                float fLerpFactor = ( fTime - StartKey.fTime ) / ( EndKey.fTime - StartKey.fTime );
-                fLerpFactor = std::min( std::max( 0.0f, fLerpFactor ), 1.0f );
+                assert(fTime <= EndKey.fTime);
+                float fLerpFactor = (fTime - StartKey.fTime) / (EndKey.fTime - StartKey.fTime);
+                fLerpFactor = std::min(std::max(0.0f, fLerpFactor), 1.0f);
 
-                XMVECTOR v = XMLoadFloat3( &StartKey.Scale );
-                const XMVECTOR vEnd = XMLoadFloat3( &EndKey.Scale );
+                XMVECTOR v = XMLoadFloat3(&StartKey.Scale);
+                const XMVECTOR vEnd = XMLoadFloat3(&EndKey.Scale);
 
-                v = XMVectorLerp( v, vEnd, fLerpFactor );
+                v = XMVectorLerp(v, vEnd, fLerpFactor);
 
-                XMStoreFloat3( &pDestKeys[i].Scaling, v );
+                XMStoreFloat3(&pDestKeys[i].Scaling, v);
             }
             fTime += fKeyInterval;
         }
         return true;
     }
 
-    bool WriteSDKMeshAnimationFile( const CHAR* strFileName, ExportManifest* pManifest )
+    bool WriteSDKMeshAnimationFile(const CHAR* strFileName, ExportManifest* pManifest)
     {
-        if( !g_pScene || g_pScene->GetAnimationCount() == 0 )
+        if (!g_pScene || g_pScene->GetAnimationCount() == 0)
             return false;
 
-        if( !g_pScene->Settings().bExportAnimations )
+        if (!g_pScene->Settings().bExportAnimations)
             return false;
 
-        ExportAnimation* pAnim = g_pScene->GetAnimation( 0 );
+        ExportAnimation* pAnim = g_pScene->GetAnimation(0);
         const size_t dwTrackCount = pAnim->GetTrackCount();
-        if ( dwTrackCount == 0 )
+        if (dwTrackCount == 0)
             return false;
 
         CHAR strAnimFileName[MAX_PATH];
-        strcpy_s( strAnimFileName, strFileName );
-        strcat_s( strAnimFileName, "_anim" );
+        strcpy_s(strAnimFileName, strFileName);
+        strcat_s(strAnimFileName, "_anim");
 
-        HANDLE hFile = CreateFileA( strAnimFileName, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr );
-        if( hFile == INVALID_HANDLE_VALUE )
+        HANDLE hFile = CreateFileA(strAnimFileName, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile == INVALID_HANDLE_VALUE)
         {
-            ExportLog::LogError( "Could not write to file \"%s\".  Check that the file is not read-only and that the path exists.", strAnimFileName );
+            ExportLog::LogError("Could not write to file \"%s\".  Check that the file is not read-only and that the path exists.", strAnimFileName);
             return false;
         }
 
-        ExportLog::LogMsg( 1, "Writing to SDKMESH animation file \"%s\"", strAnimFileName );
+        ExportLog::LogMsg(1, "Writing to SDKMESH animation file \"%s\"", strAnimFileName);
 
         SDKANIMATION_FILE_HEADER AnimHeader = {};
 
-        const size_t dwKeyCount = size_t( pAnim->GetDuration() / pAnim->fSourceFrameInterval );
-        const size_t dwTrackHeadersDataSize = dwTrackCount * sizeof( SDKANIMATION_FRAME_DATA );
-        const size_t dwSingleTrackDataSize = dwKeyCount * sizeof( SDKANIMATION_DATA );
+        const size_t dwKeyCount = size_t(pAnim->GetDuration() / pAnim->fSourceFrameInterval);
+        const size_t dwTrackHeadersDataSize = dwTrackCount * sizeof(SDKANIMATION_FRAME_DATA);
+        const size_t dwSingleTrackDataSize = dwKeyCount * sizeof(SDKANIMATION_DATA);
 
         AnimHeader.Version = SDKMESH_FILE_VERSION;
         AnimHeader.IsBigEndian = !g_pScene->Settings().bLittleEndian;
         AnimHeader.FrameTransformType = FTT_RELATIVE;
-        AnimHeader.NumAnimationKeys = static_cast<UINT>( dwKeyCount );
-        AnimHeader.AnimationFPS = static_cast<UINT>( 1.001f / pAnim->fSourceFrameInterval );
-        AnimHeader.NumFrames = static_cast<UINT>( dwTrackCount );
+        AnimHeader.NumAnimationKeys = static_cast<UINT>(dwKeyCount);
+        AnimHeader.AnimationFPS = static_cast<UINT>(1.001f / pAnim->fSourceFrameInterval);
+        AnimHeader.NumFrames = static_cast<UINT>(dwTrackCount);
         AnimHeader.AnimationDataSize = dwTrackHeadersDataSize + dwTrackCount * dwSingleTrackDataSize;
-        AnimHeader.AnimationDataOffset = sizeof( SDKANIMATION_FILE_HEADER );
+        AnimHeader.AnimationDataOffset = sizeof(SDKANIMATION_FILE_HEADER);
 
         DWORD dwBytesWritten = 0;
-        WriteFile( hFile, &AnimHeader, sizeof( SDKANIMATION_FILE_HEADER ), &dwBytesWritten, nullptr );
+        WriteFile(hFile, &AnimHeader, sizeof(SDKANIMATION_FILE_HEADER), &dwBytesWritten, nullptr);
 
-        for( size_t i = 0; i < dwTrackCount; ++i )
+        for (size_t i = 0; i < dwTrackCount; ++i)
         {
-            ExportAnimationTrack* pTrack = pAnim->GetTrack( i );
-            if ( !pTrack )
+            ExportAnimationTrack* pTrack = pAnim->GetTrack(i);
+            if (!pTrack)
                 return false;
 
             auto pSourceFrame = pTrack->TransformTrack.pSourceFrame;
             SDKANIMATION_FRAME_DATA FrameData = {};
             FrameData.DataOffset = dwTrackHeadersDataSize + i * dwSingleTrackDataSize;
-            if( !pSourceFrame )
+            if (!pSourceFrame)
             {
-                strncpy_s( FrameData.FrameName, pTrack->GetName().SafeString(), MAX_FRAME_NAME );
+                strncpy_s(FrameData.FrameName, pTrack->GetName().SafeString(), MAX_FRAME_NAME);
             }
             else
             {
-                strncpy_s( FrameData.FrameName, pSourceFrame->GetName().SafeString(), MAX_FRAME_NAME );
+                strncpy_s(FrameData.FrameName, pSourceFrame->GetName().SafeString(), MAX_FRAME_NAME);
             }
-            WriteFile( hFile, &FrameData, sizeof( SDKANIMATION_FRAME_DATA ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, &FrameData, sizeof(SDKANIMATION_FRAME_DATA), &dwBytesWritten, nullptr);
         }
 
-        std::unique_ptr<SDKANIMATION_DATA[]> pTrackData( new SDKANIMATION_DATA[ dwKeyCount ] );
+        std::unique_ptr<SDKANIMATION_DATA[]> pTrackData(new SDKANIMATION_DATA[dwKeyCount]);
 
-        for( size_t i = 0; i < dwTrackCount; ++i )
+        for (size_t i = 0; i < dwTrackCount; ++i)
         {
-            ExportAnimationTrack* pTrack = pAnim->GetTrack( i );
-            if ( !pTrack )
+            ExportAnimationTrack* pTrack = pAnim->GetTrack(i);
+            if (!pTrack)
                 return false;
 
             ExportAnimationTransformTrack* pTT = &pTrack->TransformTrack;
 
-            ZeroMemory( pTrackData.get(), dwKeyCount * sizeof( SDKANIMATION_DATA ) );
-            SamplePositionData( pTT->GetPositionKeys(), pTT->GetPositionKeyCount(), pTrackData.get(), dwKeyCount, pAnim->fSourceFrameInterval );
-            SampleOrientationData( pTT->GetOrientationKeys(), pTT->GetOrientationKeyCount(), pTrackData.get(), dwKeyCount, pAnim->fSourceFrameInterval );
-            SampleScaleData( pTT->GetScaleKeys(), pTT->GetScaleKeyCount(), pTrackData.get(), dwKeyCount, pAnim->fSourceFrameInterval );
+            ZeroMemory(pTrackData.get(), dwKeyCount * sizeof(SDKANIMATION_DATA));
+            SamplePositionData(pTT->GetPositionKeys(), pTT->GetPositionKeyCount(), pTrackData.get(), dwKeyCount, pAnim->fSourceFrameInterval);
+            SampleOrientationData(pTT->GetOrientationKeys(), pTT->GetOrientationKeyCount(), pTrackData.get(), dwKeyCount, pAnim->fSourceFrameInterval);
+            SampleScaleData(pTT->GetScaleKeys(), pTT->GetScaleKeyCount(), pTrackData.get(), dwKeyCount, pAnim->fSourceFrameInterval);
 
-            WriteFile( hFile, pTrackData.get(), static_cast<DWORD>( dwKeyCount * sizeof( SDKANIMATION_DATA ) ), &dwBytesWritten, nullptr );
+            WriteFile(hFile, pTrackData.get(), static_cast<DWORD>(dwKeyCount * sizeof(SDKANIMATION_DATA)), &dwBytesWritten, nullptr);
         }
 
         pTrackData.reset();
 
-        CloseHandle( hFile );
+        CloseHandle(hFile);
 
         return true;
     }

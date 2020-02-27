@@ -31,41 +31,41 @@ ExportSettingsEntry::ExportSettingsEntry()
 
 ExportSettingsEntry::~ExportSettingsEntry()
 {
-    if( m_pFirstChild )
+    if (m_pFirstChild)
     {
         delete m_pFirstChild;
         m_pFirstChild = nullptr;
     }
-    if( m_pSibling )
+    if (m_pSibling)
     {
         delete m_pSibling;
         m_pSibling = nullptr;
     }
 }
 
-void ExportSettingsEntry::SetDefaultValue( bool bSetChildren, bool bSetSiblings )
+void ExportSettingsEntry::SetDefaultValue(bool bSetChildren, bool bSetSiblings)
 {
-    if( m_pLinkedCurrentValue )
+    if (m_pLinkedCurrentValue)
     {
-        if( m_DefaultValue.m_Type == ExportVariant::VT_STRING )
-            strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, m_DefaultValue.m_strValue );
-        else if( m_DefaultValue.m_Type == ExportVariant::VT_BOOL )
-            *static_cast<bool*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_bValue ? true : false;
+        if (m_DefaultValue.m_Type == ExportVariant::VT_STRING)
+            strcpy_s((CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, m_DefaultValue.m_strValue);
+        else if (m_DefaultValue.m_Type == ExportVariant::VT_BOOL)
+            *static_cast<bool*>(m_pLinkedCurrentValue) = m_DefaultValue.m_bValue ? true : false;
         else
-            *static_cast<INT*>( m_pLinkedCurrentValue ) = m_DefaultValue.m_iValue;
+            *static_cast<INT*>(m_pLinkedCurrentValue) = m_DefaultValue.m_iValue;
     }
     else
     {
         m_CurrentValue = m_DefaultValue;
     }
 
-    if( bSetSiblings && m_pSibling )
+    if (bSetSiblings && m_pSibling)
     {
-        m_pSibling->SetDefaultValue( bSetChildren, true );
+        m_pSibling->SetDefaultValue(bSetChildren, true);
     }
-    if( bSetChildren && m_pFirstChild )
+    if (bSetChildren && m_pFirstChild)
     {
-        m_pFirstChild->SetDefaultValue( true, true );
+        m_pFirstChild->SetDefaultValue(true, true);
     }
 }
 
@@ -74,7 +74,7 @@ void ExportSettingsEntry::ReverseChildOrder()
     ExportSettingsEntry* pHead = nullptr;
     ExportSettingsEntry* pCurrent = m_pFirstChild;
 
-    while( pCurrent )
+    while (pCurrent)
     {
         ExportSettingsEntry* pNext = pCurrent->m_pSibling;
         pCurrent->m_pSibling = pHead;
@@ -89,11 +89,11 @@ void ExportSettingsEntry::CreateSettingName()
 {
     CHAR strSettingName[512] = {};
     const CHAR* strDisplayName = m_DisplayName.SafeString();
-    assert( strlen( strDisplayName ) < ARRAYSIZE( strSettingName ) );
+    assert(strlen(strDisplayName) < ARRAYSIZE(strSettingName));
     CHAR* pDest = strSettingName;
-    while( *strDisplayName != '\0' )
+    while (*strDisplayName != '\0')
     {
-        if( *strDisplayName != ' ' )
+        if (*strDisplayName != ' ')
         {
             *pDest = *strDisplayName;
             ++pDest;
@@ -106,62 +106,62 @@ void ExportSettingsEntry::CreateSettingName()
 
 bool ExportSettingsEntry::GetValueBool() const
 {
-    assert( m_Type == CT_CHECKBOX );
-    auto pValue = static_cast<const bool*>( GetCurrentValue() );
+    assert(m_Type == CT_CHECKBOX);
+    auto pValue = static_cast<const bool*>(GetCurrentValue());
     return *pValue;
 }
 
 const CHAR* ExportSettingsEntry::GetValueString() const
 {
-    assert( m_Type == CT_STRING );
-    if( m_pLinkedCurrentValue )
-        return static_cast<const CHAR*>( m_pLinkedCurrentValue );
+    assert(m_Type == CT_STRING);
+    if (m_pLinkedCurrentValue)
+        return static_cast<const CHAR*>(m_pLinkedCurrentValue);
     return m_CurrentValue.m_strValue;
 }
 
 INT ExportSettingsEntry::GetValueInt() const
 {
-    assert( m_Type == CT_BOUNDEDINTSLIDER || m_Type == CT_ENUM );
-    auto pValue = static_cast<const INT*>( GetCurrentValue() );
+    assert(m_Type == CT_BOUNDEDINTSLIDER || m_Type == CT_ENUM);
+    auto pValue = static_cast<const INT*>(GetCurrentValue());
     return *pValue;
 }
 
 float ExportSettingsEntry::GetValueFloat() const
 {
-    assert( m_Type == CT_BOUNDEDFLOATSLIDER );
-    auto pValue = static_cast<const float*>( GetCurrentValue() );
+    assert(m_Type == CT_BOUNDEDFLOATSLIDER);
+    auto pValue = static_cast<const float*>(GetCurrentValue());
     return *pValue;
 }
 
-void ExportSettingsEntry::SetValue( INT iValue )
+void ExportSettingsEntry::SetValue(INT iValue)
 {
-    assert( m_Type == CT_BOUNDEDINTSLIDER || m_Type == CT_CHECKBOX || m_Type == CT_ENUM );
+    assert(m_Type == CT_BOUNDEDINTSLIDER || m_Type == CT_CHECKBOX || m_Type == CT_ENUM);
 
-    if ( m_CurrentValue.m_Type == ExportVariant::VT_BOOL )
+    if (m_CurrentValue.m_Type == ExportVariant::VT_BOOL)
     {
-        auto pValue = static_cast<bool*>( GetCurrentValue() );
+        auto pValue = static_cast<bool*>(GetCurrentValue());
         *pValue = iValue ? true : false;
     }
     else
     {
-        auto pValue = static_cast<INT*>( GetCurrentValue() );
+        auto pValue = static_cast<INT*>(GetCurrentValue());
         *pValue = iValue;
     }
 }
 
-void ExportSettingsEntry::SetValue( float fValue )
+void ExportSettingsEntry::SetValue(float fValue)
 {
-    assert( m_Type == CT_BOUNDEDFLOATSLIDER );
-    auto pValue = static_cast<float*>( GetCurrentValue() );
+    assert(m_Type == CT_BOUNDEDFLOATSLIDER);
+    auto pValue = static_cast<float*>(GetCurrentValue());
     *pValue = fValue;
 }
 
-void ExportSettingsEntry::SetValue( const CHAR* strValue )
+void ExportSettingsEntry::SetValue(const CHAR* strValue)
 {
-    assert( m_Type == CT_STRING );
-    if( m_pLinkedCurrentValue )
+    assert(m_Type == CT_STRING);
+    if (m_pLinkedCurrentValue)
     {
-        strcpy_s( (CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, strValue );
+        strcpy_s((CHAR*)m_pLinkedCurrentValue, SETTINGS_STRING_LENGTH, strValue);
     }
     else
     {
@@ -172,38 +172,38 @@ void ExportSettingsEntry::SetValue( const CHAR* strValue )
 ExportSettingsManager::~ExportSettingsManager()
 {
     const size_t dwCount = GetRootCategoryCount();
-    for( size_t i = 0; i < dwCount; ++i )
+    for (size_t i = 0; i < dwCount; ++i)
     {
-        delete GetRootCategory( i );
+        delete GetRootCategory(i);
     }
     m_RootCategories.clear();
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddRootCategory( ExportString Caption )
+ExportSettingsEntry* ExportSettingsManager::AddRootCategory(ExportString Caption)
 {
-    return AddCategory( nullptr, Caption );
+    return AddCategory(nullptr, Caption);
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddCategory( ExportSettingsEntry* pParentCategory, ExportString Caption )
+ExportSettingsEntry* ExportSettingsManager::AddCategory(ExportSettingsEntry* pParentCategory, ExportString Caption)
 {
     ExportSettingsEntry* pNewCategory = new ExportSettingsEntry();
     pNewCategory->m_DisplayName = Caption;
     pNewCategory->m_Type = ExportSettingsEntry::CT_CATEGORY;
-    if( pParentCategory )
+    if (pParentCategory)
     {
-        pParentCategory->AddChild( pNewCategory );
+        pParentCategory->AddChild(pNewCategory);
     }
     else
     {
-        m_RootCategories.push_back( pNewCategory );
+        m_RootCategories.push_back(pNewCategory);
     }
 
     return pNewCategory;
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddBool( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, bool bDefaultValue, bool* pLinkedValue )
+ExportSettingsEntry* ExportSettingsManager::AddBool(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, bool bDefaultValue, bool* pLinkedValue)
 {
-    assert( pCategory != nullptr );
+    assert(pCategory != nullptr);
     ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
     pNewEntry->m_DisplayName = Caption;
     pNewEntry->CreateSettingName();
@@ -214,13 +214,13 @@ ExportSettingsEntry* ExportSettingsManager::AddBool( ExportSettingsEntry* pCateg
     pNewEntry->m_CurrentValue = pNewEntry->m_DefaultValue;
     pNewEntry->m_Type = ExportSettingsEntry::CT_CHECKBOX;
 
-    pCategory->AddChild( pNewEntry );
+    pCategory->AddChild(pNewEntry);
     return pNewEntry;
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddIntBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue )
+ExportSettingsEntry* ExportSettingsManager::AddIntBounded(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue)
 {
-    assert( pCategory != nullptr );
+    assert(pCategory != nullptr);
     ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
     pNewEntry->m_DisplayName = Caption;
     pNewEntry->CreateSettingName();
@@ -234,13 +234,13 @@ ExportSettingsEntry* ExportSettingsManager::AddIntBounded( ExportSettingsEntry* 
     pNewEntry->m_MinValue.m_iValue = iMin;
     pNewEntry->m_MaxValue.m_iValue = iMax;
 
-    pCategory->AddChild( pNewEntry );
+    pCategory->AddChild(pNewEntry);
     return pNewEntry;
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddFloatBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, float fDefaultValue, float fMin, float fMax, float* pLinkedValue )
+ExportSettingsEntry* ExportSettingsManager::AddFloatBounded(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, float fDefaultValue, float fMin, float fMax, float* pLinkedValue)
 {
-    assert( pCategory != nullptr );
+    assert(pCategory != nullptr);
     ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
     pNewEntry->m_DisplayName = Caption;
     pNewEntry->CreateSettingName();
@@ -254,13 +254,13 @@ ExportSettingsEntry* ExportSettingsManager::AddFloatBounded( ExportSettingsEntry
     pNewEntry->m_MinValue.m_fValue = fMin;
     pNewEntry->m_MaxValue.m_fValue = fMax;
 
-    pCategory->AddChild( pNewEntry );
+    pCategory->AddChild(pNewEntry);
     return pNewEntry;
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddString( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue )
+ExportSettingsEntry* ExportSettingsManager::AddString(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue)
 {
-    assert( pCategory != nullptr );
+    assert(pCategory != nullptr);
     ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
     pNewEntry->m_DisplayName = Caption;
     pNewEntry->CreateSettingName();
@@ -271,13 +271,13 @@ ExportSettingsEntry* ExportSettingsManager::AddString( ExportSettingsEntry* pCat
     pNewEntry->m_CurrentValue = pNewEntry->m_DefaultValue;
     pNewEntry->m_Type = ExportSettingsEntry::CT_STRING;
 
-    pCategory->AddChild( pNewEntry );
+    pCategory->AddChild(pNewEntry);
     return pNewEntry;
 }
 
-ExportSettingsEntry* ExportSettingsManager::AddEnum( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue )
+ExportSettingsEntry* ExportSettingsManager::AddEnum(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue)
 {
-    assert( pCategory != nullptr );
+    assert(pCategory != nullptr);
     ExportSettingsEntry* pNewEntry = new ExportSettingsEntry();
     pNewEntry->m_DisplayName = Caption;
     pNewEntry->CreateSettingName();
@@ -290,171 +290,171 @@ ExportSettingsEntry* ExportSettingsManager::AddEnum( ExportSettingsEntry* pCateg
     pNewEntry->m_pEnumValues = pEnumValues;
     pNewEntry->m_dwEnumValueCount = dwEnumValueCount;
 
-    pCategory->AddChild( pNewEntry );
+    pCategory->AddChild(pNewEntry);
     return pNewEntry;
 }
 
-bool ExportSettingsManager::MarshalAllSettings( CHAR* strDestBuffer, DWORD dwBufferSize, bool bNewLines, ExportSettingsEntry* pRoot )
+bool ExportSettingsManager::MarshalAllSettings(CHAR* strDestBuffer, DWORD dwBufferSize, bool bNewLines, ExportSettingsEntry* pRoot)
 {
     bool bResult = true;
-    if( !pRoot )
+    if (!pRoot)
     {
         const size_t dwRootCount = GetRootCategoryCount();
-        for( size_t i = 0; i < dwRootCount; ++i )
+        for (size_t i = 0; i < dwRootCount; ++i)
         {
-            bResult &= MarshalAllSettings( strDestBuffer, dwBufferSize, bNewLines, GetRootCategory( i ) );
+            bResult &= MarshalAllSettings(strDestBuffer, dwBufferSize, bNewLines, GetRootCategory(i));
         }
         return bResult;
     }
 
-    if( pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY && pRoot->m_pFirstChild )
+    if (pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY && pRoot->m_pFirstChild)
     {
-        bResult &= MarshalAllSettings( strDestBuffer, dwBufferSize, bNewLines, pRoot->m_pFirstChild );
+        bResult &= MarshalAllSettings(strDestBuffer, dwBufferSize, bNewLines, pRoot->m_pFirstChild);
     }
     else
     {
-        size_t dwCurrentLen = strlen( strDestBuffer );
+        size_t dwCurrentLen = strlen(strDestBuffer);
         CHAR* strCurrentSpot = strDestBuffer + dwCurrentLen;
         const CHAR* strSettingName = pRoot->m_CommandLineOptionName.SafeString();
-        const size_t dwNameLen = strlen( strSettingName );
-        if( dwCurrentLen + dwNameLen + 1 > dwBufferSize )
+        const size_t dwNameLen = strlen(strSettingName);
+        if (dwCurrentLen + dwNameLen + 1 > dwBufferSize)
             return false;
-        strcat_s( strDestBuffer, dwBufferSize, strSettingName );
-        strcat_s( strDestBuffer, dwBufferSize, "=" );
-        dwCurrentLen += ( dwNameLen + 1 );
+        strcat_s(strDestBuffer, dwBufferSize, strSettingName);
+        strcat_s(strDestBuffer, dwBufferSize, "=");
+        dwCurrentLen += (dwNameLen + 1);
 
-        switch( pRoot->m_CurrentValue.m_Type )
+        switch (pRoot->m_CurrentValue.m_Type)
         {
         case ExportVariant::VT_STRING:
+        {
+            const CHAR* strValue = pRoot->GetValueString();
+            const size_t dwValueLen = strlen(strValue);
+            if (dwCurrentLen + dwValueLen + 1 > dwBufferSize)
             {
-                const CHAR* strValue = pRoot->GetValueString();
-                const size_t dwValueLen = strlen( strValue );
-                if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )
-                {
-                    *strCurrentSpot = '\0';
-                    return false;
-                }
-                strcat_s( strDestBuffer, dwBufferSize, strValue );
-                break;
+                *strCurrentSpot = '\0';
+                return false;
             }
+            strcat_s(strDestBuffer, dwBufferSize, strValue);
+            break;
+        }
         case ExportVariant::VT_INT:
         case ExportVariant::VT_BOOL:
-            {
-                INT iValue = 0;
-                if( pRoot->m_CurrentValue.m_Type == ExportVariant::VT_BOOL )
-                    iValue = pRoot->GetValueBool();
-                else
-                    iValue = pRoot->GetValueInt();
-                CHAR strValue[32] = {};
-                _itoa_s( iValue, strValue, 10 );
-                const size_t dwValueLen = strlen( strValue );
-                if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )
-                {
-                    *strCurrentSpot = '\0';
-                    return false;
-                }
-                strcat_s( strDestBuffer, dwBufferSize, strValue );
-                break;
-            }
-        case ExportVariant::VT_FLOAT:
-            {
-                const float fValue = pRoot->GetValueFloat();
-                CHAR strValue[32];
-                sprintf_s( strValue, "%0.5f", fValue );
-                const size_t dwValueLen = strlen( strValue );
-                if( dwCurrentLen + dwValueLen + 1 > dwBufferSize )
-                {
-                    *strCurrentSpot = '\0';
-                    return false;
-                }
-                strcat_s( strDestBuffer, dwBufferSize, strValue );
-                break;
-            }
-        }
-        if( bNewLines )
         {
-            strcat_s( strDestBuffer, dwBufferSize, ";\n" );
+            INT iValue = 0;
+            if (pRoot->m_CurrentValue.m_Type == ExportVariant::VT_BOOL)
+                iValue = pRoot->GetValueBool();
+            else
+                iValue = pRoot->GetValueInt();
+            CHAR strValue[32] = {};
+            _itoa_s(iValue, strValue, 10);
+            const size_t dwValueLen = strlen(strValue);
+            if (dwCurrentLen + dwValueLen + 1 > dwBufferSize)
+            {
+                *strCurrentSpot = '\0';
+                return false;
+            }
+            strcat_s(strDestBuffer, dwBufferSize, strValue);
+            break;
+        }
+        case ExportVariant::VT_FLOAT:
+        {
+            const float fValue = pRoot->GetValueFloat();
+            CHAR strValue[32];
+            sprintf_s(strValue, "%0.5f", fValue);
+            const size_t dwValueLen = strlen(strValue);
+            if (dwCurrentLen + dwValueLen + 1 > dwBufferSize)
+            {
+                *strCurrentSpot = '\0';
+                return false;
+            }
+            strcat_s(strDestBuffer, dwBufferSize, strValue);
+            break;
+        }
+        }
+        if (bNewLines)
+        {
+            strcat_s(strDestBuffer, dwBufferSize, ";\n");
         }
         else
         {
-            strcat_s( strDestBuffer, dwBufferSize, ";" );
+            strcat_s(strDestBuffer, dwBufferSize, ";");
         }
     }
 
-    if( pRoot->m_pSibling )
+    if (pRoot->m_pSibling)
     {
-        bResult &= MarshalAllSettings( strDestBuffer, dwBufferSize, bNewLines, pRoot->m_pSibling );
+        bResult &= MarshalAllSettings(strDestBuffer, dwBufferSize, bNewLines, pRoot->m_pSibling);
     }
 
     return bResult;
 }
 
-bool ExportSettingsManager::UnMarshalAllSettings( const CHAR* strSrcBuffer )
+bool ExportSettingsManager::UnMarshalAllSettings(const CHAR* strSrcBuffer)
 {
-    const size_t dwSrcLen = strlen( strSrcBuffer );
-    if( dwSrcLen == 0 )
+    const size_t dwSrcLen = strlen(strSrcBuffer);
+    if (dwSrcLen == 0)
         return true;
 
     auto strSrcTokenized = std::make_unique<CHAR[]>(dwSrcLen + 1);
-    strcpy_s( strSrcTokenized.get(), dwSrcLen + 1, strSrcBuffer );
+    strcpy_s(strSrcTokenized.get(), dwSrcLen + 1, strSrcBuffer);
 
     static const CHAR* strDelimiters = ";\n";
 
     CHAR* strNextToken = nullptr;
-    CHAR* pToken = strtok_s( strSrcTokenized.get(), strDelimiters, &strNextToken );
-    while( pToken )
+    CHAR* pToken = strtok_s(strSrcTokenized.get(), strDelimiters, &strNextToken);
+    while (pToken)
     {
         bool bProcess = true;
-        if( strlen( pToken ) == 0 )
+        if (strlen(pToken) == 0)
             bProcess = false;
-        if( *pToken == '#' )
+        if (*pToken == '#')
             bProcess = false;
 
-        if( bProcess )
+        if (bProcess)
         {
             CHAR* strSettingName = pToken;
-            CHAR* strEquals = strchr( pToken, '=' );
-            if( !strEquals )
+            CHAR* strEquals = strchr(pToken, '=');
+            if (!strEquals)
                 break;
             CHAR* strValue = strEquals + 1;
             *strEquals = '\0';
 
-            ExportSettingsEntry* pEntry = FindSettingsEntry( strSettingName, true, nullptr );
-            if( pEntry )
+            ExportSettingsEntry* pEntry = FindSettingsEntry(strSettingName, true, nullptr);
+            if (pEntry)
             {
-                ExportLog::LogMsg( 4, "Setting \"%s\" = \"%s\"", strSettingName, strValue );
-                switch( pEntry->m_CurrentValue.m_Type )
+                ExportLog::LogMsg(4, "Setting \"%s\" = \"%s\"", strSettingName, strValue);
+                switch (pEntry->m_CurrentValue.m_Type)
                 {
                 case ExportVariant::VT_STRING:
-                    pEntry->SetValue( strValue );
+                    pEntry->SetValue(strValue);
                     break;
                 case ExportVariant::VT_INT:
                 case ExportVariant::VT_BOOL:
-                    pEntry->SetValue( atoi( strValue ) );
+                    pEntry->SetValue(atoi(strValue));
                     break;
                 case ExportVariant::VT_FLOAT:
-                    pEntry->SetValue( (float)atof( strValue ) );
+                    pEntry->SetValue((float)atof(strValue));
                     break;
                 }
             }
             else
             {
-                ExportLog::LogWarning( "Did not find setting \"%s\"", strSettingName );
+                ExportLog::LogWarning("Did not find setting \"%s\"", strSettingName);
             }
         }
-        pToken = strtok_s( nullptr, strDelimiters, &strNextToken );
+        pToken = strtok_s(nullptr, strDelimiters, &strNextToken);
     }
 
     return true;
 }
 
-ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry( ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot )
+ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry(ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot)
 {
     static ExportSettingsEntry* pCachedNextEntry = nullptr;
-    if( pCachedNextEntry )
+    if (pCachedNextEntry)
     {
-        if( ( bCommandLineName && pCachedNextEntry->m_CommandLineOptionName == SettingName ) ||
-            ( !bCommandLineName && pCachedNextEntry->m_SettingName == SettingName ) )
+        if ((bCommandLineName && pCachedNextEntry->m_CommandLineOptionName == SettingName) ||
+            (!bCommandLineName && pCachedNextEntry->m_SettingName == SettingName))
         {
             ExportSettingsEntry* pFound = pCachedNextEntry;
             pCachedNextEntry = pCachedNextEntry->m_pSibling;
@@ -462,13 +462,13 @@ ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry( ExportString Sett
         }
     }
 
-    if( !pRoot )
+    if (!pRoot)
     {
         const size_t dwRootCount = GetRootCategoryCount();
-        for( size_t i = 0; i < dwRootCount; ++i )
+        for (size_t i = 0; i < dwRootCount; ++i)
         {
-            ExportSettingsEntry* pFound = FindSettingsEntry( SettingName, bCommandLineName, GetRootCategory( i ) );
-            if( pFound )
+            ExportSettingsEntry* pFound = FindSettingsEntry(SettingName, bCommandLineName, GetRootCategory(i));
+            if (pFound)
             {
                 pCachedNextEntry = pFound->m_pSibling;
                 return pFound;
@@ -477,29 +477,29 @@ ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry( ExportString Sett
     }
     else
     {
-        if( pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY )
+        if (pRoot->m_Type == ExportSettingsEntry::CT_CATEGORY)
         {
-            if( pRoot->m_pFirstChild )
+            if (pRoot->m_pFirstChild)
             {
-                ExportSettingsEntry* pEntry = FindSettingsEntry( SettingName, bCommandLineName, pRoot->m_pFirstChild );
-                if( pEntry )
+                ExportSettingsEntry* pEntry = FindSettingsEntry(SettingName, bCommandLineName, pRoot->m_pFirstChild);
+                if (pEntry)
                 {
                     return pEntry;
                 }
             }
-            if( pRoot->m_pSibling )
+            if (pRoot->m_pSibling)
             {
-                return FindSettingsEntry( SettingName, bCommandLineName, pRoot->m_pSibling );
+                return FindSettingsEntry(SettingName, bCommandLineName, pRoot->m_pSibling);
             }
         }
-        if( ( bCommandLineName && pRoot->m_CommandLineOptionName == SettingName ) ||
-            ( !bCommandLineName && pRoot->m_SettingName == SettingName ) )
+        if ((bCommandLineName && pRoot->m_CommandLineOptionName == SettingName) ||
+            (!bCommandLineName && pRoot->m_SettingName == SettingName))
         {
             return pRoot;
         }
-        if( pRoot->m_pSibling )
+        if (pRoot->m_pSibling)
         {
-            return FindSettingsEntry( SettingName, bCommandLineName, pRoot->m_pSibling );
+            return FindSettingsEntry(SettingName, bCommandLineName, pRoot->m_pSibling);
         }
     }
     return nullptr;
@@ -508,30 +508,30 @@ ExportSettingsEntry* ExportSettingsManager::FindSettingsEntry( ExportString Sett
 void ExportSettingsManager::SetDefaultValues()
 {
     const size_t dwCount = GetRootCategoryCount();
-    for( size_t i = 0; i < dwCount; ++i )
+    for (size_t i = 0; i < dwCount; ++i)
     {
-        m_RootCategories[i]->SetDefaultValue( true, true );
+        m_RootCategories[i]->SetDefaultValue(true, true);
     }
 }
 
-bool ExportSettingsManager::SaveSettings( const CHAR* strFileName )
+bool ExportSettingsManager::SaveSettings(const CHAR* strFileName)
 {
     const size_t dwBufferSize = 32 * 1024;
     auto strBuffer = std::make_unique<CHAR[]>(dwBufferSize);
-    ZeroMemory( strBuffer.get(), dwBufferSize * sizeof( CHAR ) );
+    ZeroMemory(strBuffer.get(), dwBufferSize * sizeof(CHAR));
 
-    const bool bSuccess = MarshalAllSettings( strBuffer.get(), dwBufferSize, true, nullptr );
-    if( !bSuccess )
+    const bool bSuccess = MarshalAllSettings(strBuffer.get(), dwBufferSize, true, nullptr);
+    if (!bSuccess)
     {
         return false;
     }
 
     FILE* fp = nullptr;
-    fopen_s( &fp, strFileName, "w" );
-    if( fp )
+    fopen_s(&fp, strFileName, "w");
+    if (fp)
     {
-        fputs( strBuffer.get(), fp );
-        fclose( fp );
+        fputs(strBuffer.get(), fp);
+        fclose(fp);
         return true;
     }
     else
@@ -540,43 +540,43 @@ bool ExportSettingsManager::SaveSettings( const CHAR* strFileName )
     }
 }
 
-bool ExportSettingsManager::LoadSettings( const CHAR* strFileName )
+bool ExportSettingsManager::LoadSettings(const CHAR* strFileName)
 {
     FILE* fp = nullptr;
-    fopen_s( &fp, strFileName, "r" );
-    if( !fp )
+    fopen_s(&fp, strFileName, "r");
+    if (!fp)
     {
         return false;
     }
 
     const size_t dwBufferSize = 32 * 1024;
     auto strBuffer = std::make_unique<CHAR[]>(dwBufferSize);
-    ZeroMemory( strBuffer.get(), dwBufferSize * sizeof( CHAR ) );
+    ZeroMemory(strBuffer.get(), dwBufferSize * sizeof(CHAR));
 
-    const size_t dwReadBytes = fread( strBuffer.get(), sizeof(CHAR), dwBufferSize, fp );
-    fclose( fp );
+    const size_t dwReadBytes = fread(strBuffer.get(), sizeof(CHAR), dwBufferSize, fp);
+    fclose(fp);
 
-    if( dwReadBytes == 0 )
+    if (dwReadBytes == 0)
     {
         return false;
     }
     else
     {
-        assert( dwReadBytes < dwBufferSize );
+        assert(dwReadBytes < dwBufferSize);
         strBuffer[dwReadBytes] = '\0';
-        const bool bSuccess = UnMarshalAllSettings( strBuffer.get() );
+        const bool bSuccess = UnMarshalAllSettings(strBuffer.get());
         return bSuccess;
     }
 }
 
 ExportCoreSettings::ExportCoreSettings()
 {
-    auto pCategoryPlatform = g_SettingsManager.AddRootCategory( "Target Platform" );
+    auto pCategoryPlatform = g_SettingsManager.AddRootCategory("Target Platform");
     static const ExportEnumValue EndianEnums[] = {
         { "Big-Endian (PowerPC)", "ppc", 0 },
         { "Little-Endian (Intel)", "intel", 1 },
     };
-    g_SettingsManager.AddEnum( pCategoryPlatform, "Data Endianness", "endian", 1, EndianEnums, ARRAYSIZE( EndianEnums ), &bLittleEndian );
+    g_SettingsManager.AddEnum(pCategoryPlatform, "Data Endianness", "endian", 1, EndianEnums, ARRAYSIZE(EndianEnums), &bLittleEndian);
     static const ExportEnumValue FLTypes[] = {
         { "Feature Level 12.1", "12.1", 0xc100 /*D3D_FEATURE_LEVEL_12_1*/ },
         { "Feature Level 12.0", "12.0", 0xc000 /*D3D_FEATURE_LEVEL_12_0*/ },
@@ -588,25 +588,25 @@ ExportCoreSettings::ExportCoreSettings()
         { "Feature Level 9.2",  "9.2",  D3D_FEATURE_LEVEL_9_2 },
         { "Feature Level 9.1",  "9.1",  D3D_FEATURE_LEVEL_9_1 },
     };
-    g_SettingsManager.AddEnum( pCategoryPlatform, "Target Feature Level", "featurelevel", D3D_FEATURE_LEVEL_11_0, FLTypes, ARRAYSIZE( FLTypes ), (INT*)&dwFeatureLevel );
+    g_SettingsManager.AddEnum(pCategoryPlatform, "Target Feature Level", "featurelevel", D3D_FEATURE_LEVEL_11_0, FLTypes, ARRAYSIZE(FLTypes), (INT*)&dwFeatureLevel);
     pCategoryPlatform->ReverseChildOrder();
-        
-    auto pCategoryScene = g_SettingsManager.AddRootCategory( "Scene" );
-    g_SettingsManager.AddBool( pCategoryScene, "Export Hidden Objects", "exporthiddenobjects", false, &bExportHiddenObjects );
-    g_SettingsManager.AddBool( pCategoryScene, "Export Frames", "exportframes", true, &bExportScene );
-    g_SettingsManager.AddBool( pCategoryScene, "Export Lights", "exportlights", true, &bExportLights );
-    g_SettingsManager.AddFloatBounded( pCategoryScene, "Light Range Scale", "lightrangescale", 1.0f, 0.0f, 1000.0f, &fLightRangeScale );
-    g_SettingsManager.AddBool( pCategoryScene, "Export Cameras", "exportcameras", true, &bExportCameras );
-    g_SettingsManager.AddBool( pCategoryScene, "Export in Bind Pose", "exportbindpose", true, &bSetBindPoseBeforeSceneParse );
-    g_SettingsManager.AddFloatBounded( pCategoryScene, "Export Scene Scale (1.0 = default)", "exportscale", 1.0f, 0.0f, 1000000.f, &fExportScale );
+
+    auto pCategoryScene = g_SettingsManager.AddRootCategory("Scene");
+    g_SettingsManager.AddBool(pCategoryScene, "Export Hidden Objects", "exporthiddenobjects", false, &bExportHiddenObjects);
+    g_SettingsManager.AddBool(pCategoryScene, "Export Frames", "exportframes", true, &bExportScene);
+    g_SettingsManager.AddBool(pCategoryScene, "Export Lights", "exportlights", true, &bExportLights);
+    g_SettingsManager.AddFloatBounded(pCategoryScene, "Light Range Scale", "lightrangescale", 1.0f, 0.0f, 1000.0f, &fLightRangeScale);
+    g_SettingsManager.AddBool(pCategoryScene, "Export Cameras", "exportcameras", true, &bExportCameras);
+    g_SettingsManager.AddBool(pCategoryScene, "Export in Bind Pose", "exportbindpose", true, &bSetBindPoseBeforeSceneParse);
+    g_SettingsManager.AddFloatBounded(pCategoryScene, "Export Scene Scale (1.0 = default)", "exportscale", 1.0f, 0.0f, 1000000.f, &fExportScale);
     pCategoryScene->ReverseChildOrder();
 
-    auto pCategoryMeshes = g_SettingsManager.AddRootCategory( "Meshes" );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", false, &bCompressVertexData );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", false, &bComputeVertexTangentSpace );
-    g_SettingsManager.AddIntBounded( pCategoryMeshes, "Generate Tangents on Texture Coordinate Index", "tangentsindex", 0, 0, 7, &iTangentSpaceIndex );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Export Binormals", "exportbinormals", true, &bExportBinormal );
+    auto pCategoryMeshes = g_SettingsManager.AddRootCategory("Meshes");
+    g_SettingsManager.AddBool(pCategoryMeshes, "Export Meshes", "exportmeshes", true, &bExportMeshes);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Compress Vertex Data", "compressvertexdata", false, &bCompressVertexData);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Compute Vertex Tangent Space", "computevertextangents", false, &bComputeVertexTangentSpace);
+    g_SettingsManager.AddIntBounded(pCategoryMeshes, "Generate Tangents on Texture Coordinate Index", "tangentsindex", 0, 0, 7, &iTangentSpaceIndex);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Export Binormals", "exportbinormals", true, &bExportBinormal);
     static const ExportEnumValue VertexNormalTypes[] = {
         { "FLOAT3 (12 bytes)", "float3", D3DDECLTYPE_FLOAT3 },
         { "UBYTE4N Biased (4 bytes)", "ubyte4n", D3DDECLTYPE_UBYTE4N },
@@ -617,9 +617,9 @@ ExportCoreSettings::ExportCoreSettings()
         { "R8G8B8A8 Signed (4 bytes)", "rgba_snorm", D3DDECLTYPE_DXGI_R8G8B8A8_SNORM },
         { "10:10:10 Signed A2 (4 bytes, Xbox)", "rgba_s10", D3DDECLTYPE_XBOX_R10G10B10_SNORM_A2_UNORM },
     };
-    g_SettingsManager.AddEnum( pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE( VertexNormalTypes ), (INT*)&dwNormalCompressedType );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Export Vertex Colors", "exportcolors", true, &bExportColors );
+    g_SettingsManager.AddEnum(pCategoryMeshes, "Compressed Type for Normals", "compressednormaltype", D3DDECLTYPE_FLOAT16_4, VertexNormalTypes, ARRAYSIZE(VertexNormalTypes), (INT*)&dwNormalCompressedType);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Export Normals", "exportnormals", true, &bExportNormals);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Export Vertex Colors", "exportcolors", true, &bExportColors);
     static const ExportEnumValue VertexColorTypes[] = {
         { "D3DCOLOR (4 bytes)", "bgra", D3DDECLTYPE_D3DCOLOR },
         { "UBYTE4N (4 bytes)", "rgba", D3DDECLTYPE_UBYTE4N },
@@ -629,65 +629,65 @@ ExportCoreSettings::ExportCoreSettings()
         { "R11G11B10 (4 bytes)", "r11g11b10", D3DDECLTYPE_DXGI_R11G11B10_FLOAT },
     };
     g_SettingsManager.AddEnum(pCategoryMeshes, "Type for Vertex Colors", "vertexcolortype", D3DDECLTYPE_D3DCOLOR, VertexColorTypes, ARRAYSIZE(VertexColorTypes), (INT*)&dwVertexColorType);
-    g_SettingsManager.AddBool( pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", false, &bForceIndex32Format );
-    g_SettingsManager.AddIntBounded( pCategoryMeshes, "Max UV Set Count", "maxuvsetcount", 8, 0, 8, &iMaxUVSetCount );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Export Bone Weights & Indices for Skinned Meshes", "exportboneweights", true, &bExportSkinWeights );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Always Export Bone Weights & Indices for Skinned Meshes (even if no data present)", "forceboneweights", false, &bForceExportSkinWeights );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Flip Triangle Winding", "fliptriangles", true, &bFlipTriangles );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Apply global transformation (if not animated)", "applyglobaltrans", false, &bApplyGlobalTrans );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", true, &bInvertTexVCoord );
-    g_SettingsManager.AddBool( pCategoryMeshes, "Invert Z Coordinates", "flipz", true, &bFlipZ );
-    g_SettingsManager.AddString( pCategoryMeshes, "Mesh Name Decoration, applied as a prefix to mesh names", "meshnamedecoration", "Mesh", strMeshNameDecoration );
+    g_SettingsManager.AddBool(pCategoryMeshes, "Force 32 Bit Index Buffers", "force32bitindices", false, &bForceIndex32Format);
+    g_SettingsManager.AddIntBounded(pCategoryMeshes, "Max UV Set Count", "maxuvsetcount", 8, 0, 8, &iMaxUVSetCount);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Export Bone Weights & Indices for Skinned Meshes", "exportboneweights", true, &bExportSkinWeights);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Always Export Bone Weights & Indices for Skinned Meshes (even if no data present)", "forceboneweights", false, &bForceExportSkinWeights);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Flip Triangle Winding", "fliptriangles", true, &bFlipTriangles);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Apply global transformation (if not animated)", "applyglobaltrans", false, &bApplyGlobalTrans);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Invert V Texture Coordinates", "invertvtexcoord", true, &bInvertTexVCoord);
+    g_SettingsManager.AddBool(pCategoryMeshes, "Invert Z Coordinates", "flipz", true, &bFlipZ);
+    g_SettingsManager.AddString(pCategoryMeshes, "Mesh Name Decoration, applied as a prefix to mesh names", "meshnamedecoration", "Mesh", strMeshNameDecoration);
 
-    auto pCategoryOpt = g_SettingsManager.AddCategory( pCategoryMeshes, "Mesh optimization" );
-    g_SettingsManager.AddBool( pCategoryOpt, "Use geometric rather than topographic adjacency", "gadjacency", false, &bGeometricAdjacency );
-    g_SettingsManager.AddBool( pCategoryOpt, "Perform vertex cache optimization of meshes", "optimizemeshes", false, &bOptimizeVCache );
+    auto pCategoryOpt = g_SettingsManager.AddCategory(pCategoryMeshes, "Mesh optimization");
+    g_SettingsManager.AddBool(pCategoryOpt, "Use geometric rather than topographic adjacency", "gadjacency", false, &bGeometricAdjacency);
+    g_SettingsManager.AddBool(pCategoryOpt, "Perform vertex cache optimization of meshes", "optimizemeshes", false, &bOptimizeVCache);
     static const ExportEnumValue OptAlgorithm[] = {
         { "Hoppe TVC", "tvc", 0 },
         { "Forsyth linear-speed", "lru", 1 },
     };
-    g_SettingsManager.AddEnum( pCategoryMeshes, "Optimization algorithm", "optimization", 1, OptAlgorithm, ARRAYSIZE(OptAlgorithm), (INT*)&dwOptimizationAlgorithm );
-    g_SettingsManager.AddIntBounded( pCategoryOpt, "Vertex cache size for optimizemesh", "vcache", 12, 0, 64, &iVcacheSize );
-    g_SettingsManager.AddIntBounded( pCategoryOpt, "Strip restart length for optimizemesh", "restart", 7, 0, 64, &iStripRestart );
-    g_SettingsManager.AddBool( pCategoryOpt, "Clean up meshes (implied by optimizemeshes)", "cleanmeshes", false, &bCleanMeshes );
+    g_SettingsManager.AddEnum(pCategoryMeshes, "Optimization algorithm", "optimization", 1, OptAlgorithm, ARRAYSIZE(OptAlgorithm), (INT*)&dwOptimizationAlgorithm);
+    g_SettingsManager.AddIntBounded(pCategoryOpt, "Vertex cache size for optimizemesh", "vcache", 12, 0, 64, &iVcacheSize);
+    g_SettingsManager.AddIntBounded(pCategoryOpt, "Strip restart length for optimizemesh", "restart", 7, 0, 64, &iStripRestart);
+    g_SettingsManager.AddBool(pCategoryOpt, "Clean up meshes (implied by optimizemeshes)", "cleanmeshes", false, &bCleanMeshes);
     pCategoryOpt->ReverseChildOrder();
 
-    auto pCategoryUVAtlas = g_SettingsManager.AddCategory( pCategoryMeshes, "UV Atlas Generation" );
-    g_SettingsManager.AddIntBounded( pCategoryUVAtlas, "Generate UV Atlas on Texture Coordinate Index", "generateuvatlas", -1, -1, 7, &iGenerateUVAtlasOnTexCoordIndex );
-    g_SettingsManager.AddFloatBounded( pCategoryUVAtlas, "UV Atlas Max Stretch Factor", "uvatlasstretch", 0.75f, 0.0f, 1.0f, &fUVAtlasMaxStretch );
-    g_SettingsManager.AddFloatBounded( pCategoryUVAtlas, "UV Atlas Gutter Size", "uvatlasgutter", 2.5f, 0.0f, 10.0f, &fUVAtlasGutter );
-    g_SettingsManager.AddIntBounded( pCategoryUVAtlas, "UV Atlas Texture Size", "uvatlastexturesize", 1024, 64, 4096, &iUVAtlasTextureSize );
+    auto pCategoryUVAtlas = g_SettingsManager.AddCategory(pCategoryMeshes, "UV Atlas Generation");
+    g_SettingsManager.AddIntBounded(pCategoryUVAtlas, "Generate UV Atlas on Texture Coordinate Index", "generateuvatlas", -1, -1, 7, &iGenerateUVAtlasOnTexCoordIndex);
+    g_SettingsManager.AddFloatBounded(pCategoryUVAtlas, "UV Atlas Max Stretch Factor", "uvatlasstretch", 0.75f, 0.0f, 1.0f, &fUVAtlasMaxStretch);
+    g_SettingsManager.AddFloatBounded(pCategoryUVAtlas, "UV Atlas Gutter Size", "uvatlasgutter", 2.5f, 0.0f, 10.0f, &fUVAtlasGutter);
+    g_SettingsManager.AddIntBounded(pCategoryUVAtlas, "UV Atlas Texture Size", "uvatlastexturesize", 1024, 64, 4096, &iUVAtlasTextureSize);
     pCategoryUVAtlas->ReverseChildOrder();
 
-    auto pCategorySubD = g_SettingsManager.AddCategory( pCategoryMeshes, "Subdivision Surfaces" );
-    g_SettingsManager.AddBool( pCategorySubD, "Convert Poly Meshes to Subdivision Surfaces", "convertmeshtosubd", false, &bConvertMeshesToSubD );
+    auto pCategorySubD = g_SettingsManager.AddCategory(pCategoryMeshes, "Subdivision Surfaces");
+    g_SettingsManager.AddBool(pCategorySubD, "Convert Poly Meshes to Subdivision Surfaces", "convertmeshtosubd", false, &bConvertMeshesToSubD);
     pCategorySubD->ReverseChildOrder();
 
     pCategoryMeshes->ReverseChildOrder();
 
-    auto pCategoryMaterials = g_SettingsManager.AddRootCategory( "Materials" );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Export Materials", "exportmaterials", true, &bExportMaterials );
-    g_SettingsManager.AddString( pCategoryMaterials, "Default Material Name", "defaultmaterialname", "Default", strDefaultMaterialName );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Export material colors", "materialcolors", true, &bMaterialColors );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Use BGRA texture format", "texturebgra", false, &bBGRvsRGB );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Ignore sRGB metadata in source texture", "ignoresrgb", true, &bIgnoreSRGB );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", true, &bGenerateTextureMipMaps );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", true, &bForceTextureOverwrite );
-    g_SettingsManager.AddBool( pCategoryMaterials, "Use emissive texture as specular texture", "useemissivetexture", true, &bUseEmissiveTexture );
-    g_SettingsManager.AddString( pCategoryMaterials, "Default Diffuse Map Texture Filename", "defaultdiffusemap", "", strDefaultDiffuseMapTextureName );
-    g_SettingsManager.AddString( pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "", strDefaultNormalMapTextureName );
-    g_SettingsManager.AddString( pCategoryMaterials, "Default Specular Map Texture Filename", "defaultspecmap", "", strDefaultSpecMapTextureName );
+    auto pCategoryMaterials = g_SettingsManager.AddRootCategory("Materials");
+    g_SettingsManager.AddBool(pCategoryMaterials, "Export Materials", "exportmaterials", true, &bExportMaterials);
+    g_SettingsManager.AddString(pCategoryMaterials, "Default Material Name", "defaultmaterialname", "Default", strDefaultMaterialName);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Export material colors", "materialcolors", true, &bMaterialColors);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Use Texture Compression", "texturecompression", true, &bTextureCompression);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Use BGRA texture format", "texturebgra", false, &bBGRvsRGB);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Ignore sRGB metadata in source texture", "ignoresrgb", true, &bIgnoreSRGB);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Generate Texture Mip Maps", "generatetexturemips", true, &bGenerateTextureMipMaps);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Force Texture File Overwriting", "forcetextureoverwrite", true, &bForceTextureOverwrite);
+    g_SettingsManager.AddBool(pCategoryMaterials, "Use emissive texture as specular texture", "useemissivetexture", true, &bUseEmissiveTexture);
+    g_SettingsManager.AddString(pCategoryMaterials, "Default Diffuse Map Texture Filename", "defaultdiffusemap", "", strDefaultDiffuseMapTextureName);
+    g_SettingsManager.AddString(pCategoryMaterials, "Default Normal Map Texture Filename", "defaultnormalmap", "", strDefaultNormalMapTextureName);
+    g_SettingsManager.AddString(pCategoryMaterials, "Default Specular Map Texture Filename", "defaultspecmap", "", strDefaultSpecMapTextureName);
     pCategoryMaterials->ReverseChildOrder();
 
-    auto pCategoryAnimation = g_SettingsManager.AddRootCategory( "Animation" );
-    g_SettingsManager.AddBool( pCategoryAnimation, "Export Animations", "exportanimations", true, &bExportAnimations );
-    g_SettingsManager.AddBool( pCategoryAnimation, "Optimize Animations", "optimizeanimations", true, &bOptimizeAnimations );
-    g_SettingsManager.AddBool( pCategoryAnimation, "Rename Animations To Match Output File Name", "renameanimations", true, &bRenameAnimationsToFileName );
-    g_SettingsManager.AddIntBounded( pCategoryAnimation, "Animation Baking Sample Count Per Frame", "animsamplecount", 1, 1, 10, &iAnimSampleCountPerFrame );
-    g_SettingsManager.AddIntBounded( pCategoryAnimation, "Position Curve Quality", "positioncurvequality", 50, 0, 100, &iAnimPositionExportQuality );
-    g_SettingsManager.AddIntBounded( pCategoryAnimation, "Orientation Curve Quality", "orientationcurvequality", 50, 0, 100, &iAnimOrientationExportQuality );
-    g_SettingsManager.AddString( pCategoryAnimation, "Animation Root Node Name (default includes all nodes)", "animationrootnode", "", strAnimationRootNodeName );
+    auto pCategoryAnimation = g_SettingsManager.AddRootCategory("Animation");
+    g_SettingsManager.AddBool(pCategoryAnimation, "Export Animations", "exportanimations", true, &bExportAnimations);
+    g_SettingsManager.AddBool(pCategoryAnimation, "Optimize Animations", "optimizeanimations", true, &bOptimizeAnimations);
+    g_SettingsManager.AddBool(pCategoryAnimation, "Rename Animations To Match Output File Name", "renameanimations", true, &bRenameAnimationsToFileName);
+    g_SettingsManager.AddIntBounded(pCategoryAnimation, "Animation Baking Sample Count Per Frame", "animsamplecount", 1, 1, 10, &iAnimSampleCountPerFrame);
+    g_SettingsManager.AddIntBounded(pCategoryAnimation, "Position Curve Quality", "positioncurvequality", 50, 0, 100, &iAnimPositionExportQuality);
+    g_SettingsManager.AddIntBounded(pCategoryAnimation, "Orientation Curve Quality", "orientationcurvequality", 50, 0, 100, &iAnimOrientationExportQuality);
+    g_SettingsManager.AddString(pCategoryAnimation, "Animation Root Node Name (default includes all nodes)", "animationrootnode", "", strAnimationRootNodeName);
     pCategoryAnimation->ReverseChildOrder();
 
     SetDefaultSettings();

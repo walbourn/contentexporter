@@ -11,5 +11,5 @@
 //-------------------------------------------------------------------------------------
 #pragma once
 
-void ParseMesh( FbxNode* pNode, FbxMesh* pFbxMesh, ATG::ExportFrame* pParentFrame, bool bSubDProcess = false, const CHAR* strSuffix = nullptr );
-void ParseSubDiv( FbxNode* pNode, const FbxSubDiv* pFbxSubD, ATG::ExportFrame* pParentFrame );
+void ParseMesh(FbxNode* pNode, FbxMesh* pFbxMesh, ATG::ExportFrame* pParentFrame, bool bSubDProcess = false, const CHAR* strSuffix = nullptr);
+void ParseSubDiv(FbxNode* pNode, const FbxSubDiv* pFbxSubD, ATG::ExportFrame* pParentFrame);

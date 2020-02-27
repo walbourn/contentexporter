@@ -21,12 +21,12 @@ namespace ATG
     public:
         virtual ~ExportProgress() = default;
 
-        virtual void Initialize( const CHAR* strTitle );
+        virtual void Initialize(const CHAR* strTitle);
         virtual void Terminate();
 
-        virtual void SetCaption( const CHAR* strCaption );
-        virtual void StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole );
-        virtual void SetProgress( float fTaskRelativeProgress );
+        virtual void SetCaption(const CHAR* strCaption);
+        virtual void StartNewTask(const CHAR* strCaption, float fTaskPercentOfWhole);
+        virtual void SetProgress(float fTaskRelativeProgress);
     };
 
     extern ExportProgress* g_pProgress;

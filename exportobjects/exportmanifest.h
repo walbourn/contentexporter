@@ -51,14 +51,14 @@ namespace ATG
     {
     public:
         void Clear() { m_Files.clear(); }
-        void ClearFilesOfType( ExportFileType FileType );
-        size_t AddFile( const ExportFileRecord& File );
-        size_t AddFile( ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType = EFT_TEXTURE2D );
+        void ClearFilesOfType(ExportFileType FileType);
+        size_t AddFile(const ExportFileRecord& File);
+        size_t AddFile(ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType = EFT_TEXTURE2D);
         size_t GetFileCount() const { return m_Files.size(); }
-        ExportFileRecord& GetFile( size_t dwIndex ) { return m_Files[dwIndex]; }
-        size_t FindFile( ExportString strFileName ) const;
+        ExportFileRecord& GetFile(size_t dwIndex) { return m_Files[dwIndex]; }
+        size_t FindFile(ExportString strFileName) const;
 
-        static bool FileExists( const ExportPath& Path );
+        static bool FileExists(const ExportPath& Path);
 
     protected:
         ExportFileRecordVector  m_Files;
@@ -71,11 +71,11 @@ namespace ATG
     class ExportTextureConverter
     {
     public:
-        static void ProcessScene( ExportScene* pScene, ExportManifest* pManifest, const ExportPath& TextureSubPath, bool bIntermediateDDSFormat );
-        static void PerformTextureFileOperations( ExportManifest* pManifest );
+        static void ProcessScene(ExportScene* pScene, ExportManifest* pManifest, const ExportPath& TextureSubPath, bool bIntermediateDDSFormat);
+        static void PerformTextureFileOperations(ExportManifest* pManifest);
 
     protected:
-        static void ProcessMaterial( ExportMaterial* pMaterial, ExportManifest* pManifest );
-        static void ProcessTextureParameter( ExportMaterialParameter* pParameter, ExportManifest* pManifest );
+        static void ProcessMaterial(ExportMaterial* pMaterial, ExportManifest* pManifest);
+        static void ProcessTextureParameter(ExportMaterialParameter* pParameter, ExportManifest* pManifest);
     };
 }

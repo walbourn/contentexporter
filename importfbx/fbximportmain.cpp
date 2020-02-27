@@ -28,20 +28,20 @@ extern ATG::ExportScene* g_pScene;
 
 extern ExportPath g_CurrentOutputFileName;
 
-void FBXTransformer::Initialize( FbxScene* pScene )
+void FBXTransformer::Initialize(FbxScene* pScene)
 {
-    ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
+    ExportLog::LogMsg(4, "Identifying scene's coordinate system.");
     auto SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
 
     // convert scene to Maya Y up coordinate system
-    FbxAxisSystem::MayaYUp.ConvertScene( pScene );
+    FbxAxisSystem::MayaYUp.ConvertScene(pScene);
 
     INT iUpAxisSign;
-    const auto UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
+    const auto UpVector = SceneAxisSystem.GetUpVector(iUpAxisSign);
 
-    if( UpVector == FbxAxisSystem::eZAxis )
+    if (UpVector == FbxAxisSystem::eZAxis)
     {
-        ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
+        ExportLog::LogMsg(4, "Converting from Z-up axis system to Y-up axis system.");
         m_bMaxConversion = true;
     }
     else
@@ -49,19 +49,19 @@ void FBXTransformer::Initialize( FbxScene* pScene )
         m_bMaxConversion = false;
     }
 
-    SetUnitScale( (float)g_pScene->Settings().fExportScale );
-    SetZFlip( g_pScene->Settings().bFlipZ );
+    SetUnitScale((float)g_pScene->Settings().fExportScale);
+    SetZFlip(g_pScene->Settings().bFlipZ);
 }
 
-void FBXTransformer::TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4* pSrcMatrix ) const
+void FBXTransformer::TransformMatrix(XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4* pSrcMatrix) const
 {
     XMFLOAT4X4 SrcMatrix = {};
-    if( pSrcMatrix == pDestMatrix )
+    if (pSrcMatrix == pDestMatrix)
     {
-        memcpy( &SrcMatrix, pSrcMatrix, sizeof( XMFLOAT4X4 ) );
+        memcpy(&SrcMatrix, pSrcMatrix, sizeof(XMFLOAT4X4));
         pSrcMatrix = &SrcMatrix;
     }
-    memcpy( pDestMatrix, pSrcMatrix, sizeof( XMFLOAT4X4 ) );
+    memcpy(pDestMatrix, pSrcMatrix, sizeof(XMFLOAT4X4));
 
     // What we're doing here is premultiplying by a left hand -> right hand matrix,
     // and then postmultiplying by a right hand -> left hand matrix.
@@ -69,7 +69,7 @@ void FBXTransformer::TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4*
     // column are negated (so element _33 is left alone).  So instead of actually
     // carrying out the multiplication, we just negate the 6 matrix elements.
 
-    if ( m_bFlipZ )
+    if (m_bFlipZ)
     {
         pDestMatrix->_13 = -pSrcMatrix->_13;
         pDestMatrix->_23 = -pSrcMatrix->_23;
@@ -86,16 +86,16 @@ void FBXTransformer::TransformMatrix( XMFLOAT4X4* pDestMatrix, const XMFLOAT4X4*
     pDestMatrix->_43 *= m_fUnitScale;
 }
 
-void FBXTransformer::TransformPosition( XMFLOAT3* pDestPosition, const XMFLOAT3* pSrcPosition ) const
+void FBXTransformer::TransformPosition(XMFLOAT3* pDestPosition, const XMFLOAT3* pSrcPosition) const
 {
     XMFLOAT3 SrcVector = {};
-    if( pSrcPosition == pDestPosition )
+    if (pSrcPosition == pDestPosition)
     {
         SrcVector = *pSrcPosition;
         pSrcPosition = &SrcVector;
     }
 
-    if( m_bMaxConversion )
+    if (m_bMaxConversion)
     {
         pDestPosition->x = pSrcPosition->x * m_fUnitScale;
         pDestPosition->y = pSrcPosition->z * m_fUnitScale;
@@ -111,16 +111,16 @@ void FBXTransformer::TransformPosition( XMFLOAT3* pDestPosition, const XMFLOAT3*
     }
 }
 
-void FBXTransformer::TransformDirection( XMFLOAT3* pDestDirection, const XMFLOAT3* pSrcDirection ) const
+void FBXTransformer::TransformDirection(XMFLOAT3* pDestDirection, const XMFLOAT3* pSrcDirection) const
 {
     XMFLOAT3 SrcVector = {};
-    if( pSrcDirection == pDestDirection )
+    if (pSrcDirection == pDestDirection)
     {
         SrcVector = *pSrcDirection;
         pSrcDirection = &SrcVector;
     }
 
-    if( m_bMaxConversion )
+    if (m_bMaxConversion)
     {
         pDestDirection->x = pSrcDirection->x;
         pDestDirection->y = pSrcDirection->z;
@@ -136,7 +136,7 @@ void FBXTransformer::TransformDirection( XMFLOAT3* pDestDirection, const XMFLOAT
     }
 }
 
-float FBXTransformer::TransformLength( float fInputLength ) const
+float FBXTransformer::TransformLength(float fInputLength) const
 {
     return fInputLength * m_fUnitScale;
 }
@@ -144,28 +144,28 @@ float FBXTransformer::TransformLength( float fInputLength ) const
 
 HRESULT FBXImport::Initialize()
 {
-    if( !g_pSDKManager )
+    if (!g_pSDKManager)
     {
         g_pSDKManager = FbxManager::Create();
-        if( !g_pSDKManager )
+        if (!g_pSDKManager)
             return E_FAIL;
 
-        auto ios = FbxIOSettings::Create( g_pSDKManager, IOSROOT );
-        if( !ios )
+        auto ios = FbxIOSettings::Create(g_pSDKManager, IOSROOT);
+        if (!ios)
             return E_FAIL;
 
         g_pSDKManager->SetIOSettings(ios);
     }
 
-    if( !g_pImporter )
+    if (!g_pImporter)
     {
-        g_pImporter = FbxImporter::Create( g_pSDKManager, "" );
-        if ( !g_pImporter )
+        g_pImporter = FbxImporter::Create(g_pSDKManager, "");
+        if (!g_pImporter)
             return E_FAIL;
     }
 
-    g_pFBXScene = FbxScene::Create( g_pSDKManager, "" );
-    if ( !g_pFBXScene )
+    g_pFBXScene = FbxScene::Create(g_pSDKManager, "");
+    if (!g_pFBXScene)
         return E_FAIL;
 
     return S_OK;
@@ -178,51 +178,51 @@ void FBXImport::ClearScene()
 
 void SetBindPose()
 {
-    assert( g_pFBXScene != nullptr );
+    assert(g_pFBXScene != nullptr);
 
     g_BindPoses.clear();
     const INT iPoseCount = g_pFBXScene->GetPoseCount();
-    for( INT i = 0; i < iPoseCount; ++i )
+    for (INT i = 0; i < iPoseCount; ++i)
     {
-        auto pPose = g_pFBXScene->GetPose( i );
+        auto pPose = g_pFBXScene->GetPose(i);
         const INT iNodeCount = pPose->GetCount();
-        ExportLog::LogMsg( 4, "Found %spose: \"%s\" with %d nodes", pPose->IsBindPose() ? "bind " : "", pPose->GetName(), iNodeCount );
-        for( INT j = 0; j < iNodeCount; ++j )
+        ExportLog::LogMsg(4, "Found %spose: \"%s\" with %d nodes", pPose->IsBindPose() ? "bind " : "", pPose->GetName(), iNodeCount);
+        for (INT j = 0; j < iNodeCount; ++j)
         {
-            auto pPoseNode = pPose->GetNode( j );
-            ExportLog::LogMsg( 5, "Pose node %d: %s", j, pPoseNode->GetName() );
+            auto pPoseNode = pPose->GetNode(j);
+            ExportLog::LogMsg(5, "Pose node %d: %s", j, pPoseNode->GetName());
         }
-        if( pPose->IsBindPose() )
+        if (pPose->IsBindPose())
         {
-            g_BindPoses.push_back( pPose );
+            g_BindPoses.push_back(pPose);
         }
     }
-    if( g_BindPoses.empty() )
+    if (g_BindPoses.empty())
     {
-        if( g_pScene->Settings().bExportAnimations )
+        if (g_pScene->Settings().bExportAnimations)
         {
-            ExportLog::LogWarning( "No valid bind pose found; will export scene using the default pose." );
+            ExportLog::LogWarning("No valid bind pose found; will export scene using the default pose.");
         }
         return;
     }
 
     const size_t dwPoseCount = g_BindPoses.size();
-    for( size_t i = 0; i < dwPoseCount; ++i )
+    for (size_t i = 0; i < dwPoseCount; ++i)
     {
         auto pPose = g_BindPoses[i];
         const INT iNodeCount = pPose->GetCount();
-        for( INT j = 0; j < iNodeCount; ++j )
+        for (INT j = 0; j < iNodeCount; ++j)
         {
-            auto pNode = pPose->GetNode( j );
-            auto matNode = pPose->GetMatrix( j );
+            auto pNode = pPose->GetNode(j);
+            auto matNode = pPose->GetMatrix(j);
 
-            PoseMap::iterator iter = g_BindPoseMap.find( pNode );
-            if( iter != g_BindPoseMap.end() )
+            PoseMap::iterator iter = g_BindPoseMap.find(pNode);
+            if (iter != g_BindPoseMap.end())
             {
                 FbxMatrix matExisting = iter->second;
-                if( matExisting != matNode )
+                if (matExisting != matNode)
                 {
-                    ExportLog::LogWarning( "Node \"%s\" found in more than one bind pose, with conflicting transforms.", pNode->GetName() );
+                    ExportLog::LogWarning("Node \"%s\" found in more than one bind pose, with conflicting transforms.", pNode->GetName());
                 }
             }
 
@@ -230,90 +230,90 @@ void SetBindPose()
         }
     }
 
-    ExportLog::LogMsg( 3, "Created bind pose map with %zu nodes.", g_BindPoseMap.size() );
+    ExportLog::LogMsg(3, "Created bind pose map with %zu nodes.", g_BindPoseMap.size());
 }
 
-HRESULT FBXImport::ImportFile( const CHAR* strFileName )
+HRESULT FBXImport::ImportFile(const CHAR* strFileName)
 {
-    assert( g_pSDKManager != nullptr );
-    assert( g_pImporter != nullptr );
-    assert( g_pFBXScene != nullptr );
+    assert(g_pSDKManager != nullptr);
+    assert(g_pImporter != nullptr);
+    assert(g_pFBXScene != nullptr);
 
-    assert( g_pScene != nullptr );
+    assert(g_pScene != nullptr);
 
     CHAR strTemp[200];
     g_pScene->Information().ExporterName = g_strExporterName;
     INT iMajorVersion, iMinorVersion, iRevision;
-    g_pSDKManager->GetFileFormatVersion( iMajorVersion, iMinorVersion, iRevision );
+    g_pSDKManager->GetFileFormatVersion(iMajorVersion, iMinorVersion, iRevision);
 
 
-    sprintf_s( strTemp, "FBX SDK %d.%d.%d", iMajorVersion, iMinorVersion, iRevision );
+    sprintf_s(strTemp, "FBX SDK %d.%d.%d", iMajorVersion, iMinorVersion, iRevision);
     g_pScene->Information().DCCNameAndVersion = strTemp;
 
-    ExportLog::LogMsg( 2, "Compiled against %s", strTemp );
-    ExportLog::LogMsg( 1, "Loading FBX file \"%s\"...", strFileName );
+    ExportLog::LogMsg(2, "Compiled against %s", strTemp);
+    ExportLog::LogMsg(1, "Loading FBX file \"%s\"...", strFileName);
 
     const INT iFileFormat = -1;
-    bool bResult = g_pImporter->Initialize( strFileName, iFileFormat, g_pSDKManager->GetIOSettings() );
+    bool bResult = g_pImporter->Initialize(strFileName, iFileFormat, g_pSDKManager->GetIOSettings());
 
-    if( !bResult )
+    if (!bResult)
     {
-        ExportLog::LogError( "Could not initialize FBX importer." );
+        ExportLog::LogError("Could not initialize FBX importer.");
         return E_FAIL;
     }
 
-    bResult = g_pImporter->Import( g_pFBXScene );
+    bResult = g_pImporter->Import(g_pFBXScene);
 
-    if( !bResult )
+    if (!bResult)
     {
-        ExportLog::LogError( "Could not load FBX file \"%s\".", strFileName );
+        ExportLog::LogError("Could not load FBX file \"%s\".", strFileName);
         return E_FAIL;
     }
 
-    ExportLog::LogMsg( 1, "FBX file \"%s\" was successfully loaded.", strFileName );
-    g_pImporter->GetFileVersion( iMajorVersion, iMinorVersion, iRevision );
-    ExportLog::LogMsg( 2, "FBX file version: %d.%d.%d", iMajorVersion, iMinorVersion, iRevision );
+    ExportLog::LogMsg(1, "FBX file \"%s\" was successfully loaded.", strFileName);
+    g_pImporter->GetFileVersion(iMajorVersion, iMinorVersion, iRevision);
+    ExportLog::LogMsg(2, "FBX file version: %d.%d.%d", iMajorVersion, iMinorVersion, iRevision);
 
-    ExportLog::LogMsg( 2, "Parsing scene." );
+    ExportLog::LogMsg(2, "Parsing scene.");
 
-    auto pTransformer = reinterpret_cast<FBXTransformer*>( g_pScene->GetDCCTransformer() );
-    pTransformer->Initialize( g_pFBXScene );
+    auto pTransformer = reinterpret_cast<FBXTransformer*>(g_pScene->GetDCCTransformer());
+    pTransformer->Initialize(g_pFBXScene);
 
     SetBindPose();
     g_bBindPoseFixupRequired = false;
 
-    assert( g_pFBXScene->GetRootNode() != nullptr );
+    assert(g_pFBXScene->GetRootNode() != nullptr);
     const XMMATRIX matIdentity = XMMatrixIdentity();
-    ParseNode( g_pFBXScene->GetRootNode(), g_pScene, matIdentity );
+    ParseNode(g_pFBXScene->GetRootNode(), g_pScene, matIdentity);
 
-    if( g_bBindPoseFixupRequired )
+    if (g_bBindPoseFixupRequired)
     {
-        ExportLog::LogMsg( 2, "Fixing up frames with updated bind pose." );
-        FixupNode( g_pScene, matIdentity );
+        ExportLog::LogMsg(2, "Fixing up frames with updated bind pose.");
+        FixupNode(g_pScene, matIdentity);
     }
 
-    if( g_pScene->Settings().bExportAnimations )
+    if (g_pScene->Settings().bExportAnimations)
     {
-        ParseAnimation( g_pFBXScene );
-        if( g_pScene->Settings().bRenameAnimationsToFileName )
+        ParseAnimation(g_pFBXScene);
+        if (g_pScene->Settings().bRenameAnimationsToFileName)
         {
             const auto AnimName = g_CurrentOutputFileName.GetFileNameWithoutExtension();
 
             const size_t dwAnimCount = g_pScene->GetAnimationCount();
-            for( size_t i = 0; i < dwAnimCount; ++i )
+            for (size_t i = 0; i < dwAnimCount; ++i)
             {
                 CHAR strCurrentAnimName[MAX_PATH] = {};
-                if( i > 0 )
+                if (i > 0)
                 {
-                    sprintf_s( strCurrentAnimName, "%s%zu", (const CHAR*)AnimName, i );
+                    sprintf_s(strCurrentAnimName, "%s%zu", (const CHAR*)AnimName, i);
                 }
                 else
                 {
-                    strcpy_s( strCurrentAnimName, (const CHAR*)AnimName );
+                    strcpy_s(strCurrentAnimName, (const CHAR*)AnimName);
                 }
-                ExportAnimation* pAnim = g_pScene->GetAnimation( i );
-                ExportLog::LogMsg( 4, "Renaming animation \"%s\" to \"%s\".", pAnim->GetName().SafeString(), strCurrentAnimName );
-                pAnim->SetName( strCurrentAnimName );
+                ExportAnimation* pAnim = g_pScene->GetAnimation(i);
+                ExportLog::LogMsg(4, "Renaming animation \"%s\" to \"%s\".", pAnim->GetName().SafeString(), strCurrentAnimName);
+                pAnim->SetName(strCurrentAnimName);
             }
         }
     }

@@ -14,19 +14,19 @@
 namespace ATG
 {
 
-class ExportManifest;
+    class ExportManifest;
 
-bool WriteXATGFile( const CHAR* strFileName, ExportManifest* pManifest );
+    bool WriteXATGFile(const CHAR* strFileName, ExportManifest* pManifest);
 
-void BundleTextures();
+    void BundleTextures();
 
-struct XATGExportSettings
-{
-    bool    bBundleTextures;
-    bool    bUseExistingBundle;
-    bool    bBinaryBlobExport;
-};
+    struct XATGExportSettings
+    {
+        bool    bBundleTextures;
+        bool    bUseExistingBundle;
+        bool    bBinaryBlobExport;
+    };
 
-void XATGInitializeSettings();
+    void XATGInitializeSettings();
 
 }

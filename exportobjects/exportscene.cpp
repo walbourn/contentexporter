@@ -19,38 +19,38 @@ void ExportStatistics::FinalReport()
     const ULONGLONG ExportParseTime = StartSaveTime - StartSceneParseTime;
     const ULONGLONG ExportSaveTime = EndExportTime - StartSaveTime;
 
-    ExportLog::LogMsg( 2, "%zu poly meshes consisting of %zu vertices, %zu triangles, and %zu materials exported.", MeshesExported, VertsExported, TrisExported, MaterialsExported );
-    if( SubDMeshesProcessed > 0 )
+    ExportLog::LogMsg(2, "%zu poly meshes consisting of %zu vertices, %zu triangles, and %zu materials exported.", MeshesExported, VertsExported, TrisExported, MaterialsExported);
+    if (SubDMeshesProcessed > 0)
     {
-        ExportLog::LogMsg( 2, "%zu subdivision surface meshes processed, including %zu quads and %zu triangles.", SubDMeshesProcessed, SubDQuadsProcessed, SubDTrisProcessed );
+        ExportLog::LogMsg(2, "%zu subdivision surface meshes processed, including %zu quads and %zu triangles.", SubDMeshesProcessed, SubDQuadsProcessed, SubDTrisProcessed);
     }
-    ExportLog::LogMsg( 2, "Export complete in %0.2f seconds; %0.2f seconds for scene parse and %0.2f seconds for file writing.", 
-        (float)ExportTotalTime / 1000.0f, (float)ExportParseTime / 1000.0f, (float)ExportSaveTime / 1000.0f );
+    ExportLog::LogMsg(2, "Export complete in %0.2f seconds; %0.2f seconds for scene parse and %0.2f seconds for file writing.",
+        (float)ExportTotalTime / 1000.0f, (float)ExportParseTime / 1000.0f, (float)ExportSaveTime / 1000.0f);
 }
 
 ExportScene::ExportScene()
-: ExportFrame(),
-  m_pDCCTransformer( nullptr )
+    : ExportFrame(),
+    m_pDCCTransformer(nullptr)
 {
-    m_Information.ExportTime = _time64( nullptr );
+    m_Information.ExportTime = _time64(nullptr);
     CHAR strDomain[50] = {};
     size_t BufferSize = ARRAYSIZE(strDomain);
-    getenv_s( &BufferSize, strDomain, ARRAYSIZE(strDomain), "USERDOMAIN" );
+    getenv_s(&BufferSize, strDomain, ARRAYSIZE(strDomain), "USERDOMAIN");
     CHAR strUsername[50];
-    getenv_s( &BufferSize, strUsername, ARRAYSIZE(strUsername), "USERNAME" );
+    getenv_s(&BufferSize, strUsername, ARRAYSIZE(strUsername), "USERNAME");
     CHAR strTemp[256];
-    sprintf_s( strTemp, "%s\\%s", strDomain, strUsername );
+    sprintf_s(strTemp, "%s\\%s", strDomain, strUsername);
     m_Information.UserName = strTemp;
     CHAR strComputerName[100] = {};
     BufferSize = ARRAYSIZE(strComputerName);
-    getenv_s( &BufferSize, strComputerName, ARRAYSIZE(strComputerName), "COMPUTERNAME" );
+    getenv_s(&BufferSize, strComputerName, ARRAYSIZE(strComputerName), "COMPUTERNAME");
     m_Information.MachineName = strComputerName;
     OSVERSIONINFO OSVersion = {};
     OSVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 #pragma prefast (disable : 28159)
 #pragma warning (suppress : 4996)
-    GetVersionEx( &OSVersion );
-    sprintf_s( strTemp, "Windows NT %u.%u build %u", OSVersion.dwMajorVersion, OSVersion.dwMinorVersion, OSVersion.dwBuildNumber );
+    GetVersionEx(&OSVersion);
+    sprintf_s(strTemp, "Windows NT %u.%u build %u", OSVersion.dwMajorVersion, OSVersion.dwMinorVersion, OSVersion.dwBuildNumber);
     m_Information.PlatformName = strTemp;
 }
 
@@ -59,9 +59,9 @@ ExportScene::~ExportScene()
     {
         ExportAnimationList::iterator iter = m_vAnimations.begin();
         ExportAnimationList::iterator end = m_vAnimations.end();
-        while( iter != end )
+        while (iter != end)
         {
-            delete *iter;
+            delete* iter;
             ++iter;
         }
         m_vAnimations.clear();
@@ -69,9 +69,9 @@ ExportScene::~ExportScene()
     {
         ExportMeshBaseList::iterator iter = m_vMeshes.begin();
         ExportMeshBaseList::iterator end = m_vMeshes.end();
-        while( iter != end )
+        while (iter != end)
         {
-            delete *iter;
+            delete* iter;
             ++iter;
         }
         m_vMeshes.clear();
@@ -79,100 +79,100 @@ ExportScene::~ExportScene()
     {
         ExportMaterialList::iterator iter = m_vMaterials.begin();
         ExportMaterialList::iterator end = m_vMaterials.end();
-        while( iter != end )
+        while (iter != end)
         {
-            delete *iter;
+            delete* iter;
             ++iter;
         }
         m_vMaterials.clear();
     }
 }
 
-bool ExportScene::AddAnimation( ExportAnimation* pAnimation )
+bool ExportScene::AddAnimation(ExportAnimation* pAnimation)
 {
-    if( !pAnimation )
+    if (!pAnimation)
         return false;
-    if( FindAnimation( pAnimation->GetName() ) )
+    if (FindAnimation(pAnimation->GetName()))
         return false;
-    m_vAnimations.push_back( pAnimation );
+    m_vAnimations.push_back(pAnimation);
     return true;
 }
 
-bool ExportScene::AddMaterial( ExportMaterial* pMaterial )
+bool ExportScene::AddMaterial(ExportMaterial* pMaterial)
 {
-    if( !pMaterial )
+    if (!pMaterial)
         return false;
-    if( FindMaterial( pMaterial->GetDCCObject() ) )
+    if (FindMaterial(pMaterial->GetDCCObject()))
         return false;
-    m_vMaterials.push_back( pMaterial );
+    m_vMaterials.push_back(pMaterial);
     return true;
 }
 
-bool ExportScene::AddMesh( ExportMeshBase* pMesh )
+bool ExportScene::AddMesh(ExportMeshBase* pMesh)
 {
-    if( !pMesh )
+    if (!pMesh)
         return false;
-    if( FindMesh( pMesh->GetName() ) )
+    if (FindMesh(pMesh->GetName()))
         return false;
-    m_vMeshes.push_back( pMesh );
+    m_vMeshes.push_back(pMesh);
     return true;
 }
 
-ExportAnimation* ExportScene::FindAnimation( ExportString name )
+ExportAnimation* ExportScene::FindAnimation(ExportString name)
 {
-    for( UINT i = 0; i < m_vAnimations.size(); i++ )
+    for (UINT i = 0; i < m_vAnimations.size(); i++)
     {
-        if( m_vAnimations[i]->GetName() == name )
+        if (m_vAnimations[i]->GetName() == name)
             return m_vAnimations[i];
     }
     return nullptr;
 }
 
-ExportMaterial* ExportScene::FindMaterial( ExportString name )
+ExportMaterial* ExportScene::FindMaterial(ExportString name)
 {
-    for( UINT i = 0; i < m_vMaterials.size(); i++ )
+    for (UINT i = 0; i < m_vMaterials.size(); i++)
     {
-        if( m_vMaterials[i]->GetName() == name )
+        if (m_vMaterials[i]->GetName() == name)
             return m_vMaterials[i];
     }
     return nullptr;
 }
 
-ExportMeshBase* ExportScene::FindMesh( ExportString name )
+ExportMeshBase* ExportScene::FindMesh(ExportString name)
 {
-    for( UINT i = 0; i < m_vMeshes.size(); i++ )
+    for (UINT i = 0; i < m_vMeshes.size(); i++)
     {
-        if( m_vMeshes[i]->GetName() == name )
+        if (m_vMeshes[i]->GetName() == name)
             return m_vMeshes[i];
     }
     return nullptr;
 }
 
-ExportAnimation* ExportScene::FindAnimation( void* pDCCObject )
+ExportAnimation* ExportScene::FindAnimation(void* pDCCObject)
 {
-    for( UINT i = 0; i < m_vAnimations.size(); i++ )
+    for (UINT i = 0; i < m_vAnimations.size(); i++)
     {
-        if( m_vAnimations[i]->GetDCCObject() == pDCCObject )
+        if (m_vAnimations[i]->GetDCCObject() == pDCCObject)
             return m_vAnimations[i];
     }
     return nullptr;
 }
 
-ExportMaterial* ExportScene::FindMaterial( void* pDCCObject )
+ExportMaterial* ExportScene::FindMaterial(void* pDCCObject)
 {
-    for( UINT i = 0; i < m_vMaterials.size(); i++ )
+    for (UINT i = 0; i < m_vMaterials.size(); i++)
     {
-        if( m_vMaterials[i]->GetDCCObject() == pDCCObject )
+        if (m_vMaterials[i]->GetDCCObject() == pDCCObject)
             return m_vMaterials[i];
     }
     return nullptr;
 }
 
-ExportMeshBase* ExportScene::FindMesh( void* pDCCObject )
+ExportMeshBase* ExportScene::FindMesh(void* pDCCObject)
 {
-    for( UINT i = 0; i < m_vMeshes.size(); i++ )
+    for (UINT i = 0; i < m_vMeshes.size(); i++)
     {
-        if( m_vMeshes[i]->GetDCCObject() == pDCCObject )
+        if (m_vMeshes[i]->GetDCCObject() == pDCCObject)
             return m_vMeshes[i];
     }
     return nullptr;

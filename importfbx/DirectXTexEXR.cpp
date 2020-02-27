@@ -107,8 +107,8 @@ namespace
             }
         }
 
-        InputStream(const InputStream &) = delete;
-        InputStream& operator = (const InputStream &) = delete;
+        InputStream(const InputStream&) = delete;
+        InputStream& operator = (const InputStream&) = delete;
 
         bool read(char c[], int n) override
         {
@@ -165,8 +165,8 @@ namespace
         OutputStream(HANDLE hFile, const char fileName[]) :
             OStream(fileName), m_hFile(hFile) {}
 
-        OutputStream(const OutputStream &) = delete;
-        OutputStream& operator = (const OutputStream &) = delete;
+        OutputStream(const OutputStream&) = delete;
+        OutputStream& operator = (const OutputStream&) = delete;
 
         void write(const char c[], int n) override
         {
@@ -257,14 +257,14 @@ HRESULT DirectX::GetMetadataFromEXRFile(const wchar_t* szFile, TexMetadata& meta
         metadata.format = DXGI_FORMAT_R16G16B16A16_FLOAT;
         metadata.dimension = TEX_DIMENSION_TEXTURE2D;
     }
-    catch (const com_exception& exc)
+    catch (const com_exception & exc)
     {
 #ifdef _DEBUG
         OutputDebugStringA(exc.what());
 #endif
         hr = exc.hr();
     }
-    catch (const std::exception& exc)
+    catch (const std::exception & exc)
     {
         exc;
 #ifdef _DEBUG
@@ -347,14 +347,14 @@ HRESULT DirectX::LoadFromEXRFile(const wchar_t* szFile, TexMetadata* metadata, S
         file.setFrameBuffer(reinterpret_cast<Imf::Rgba*>(image.GetPixels()) - dw.min.x - dw.min.y * width, 1, width);
         file.readPixels(dw.min.y, dw.max.y);
     }
-    catch (const com_exception& exc)
+    catch (const com_exception & exc)
     {
 #ifdef _DEBUG
         OutputDebugStringA(exc.what());
 #endif
         hr = exc.hr();
     }
-    catch (const std::exception& exc)
+    catch (const std::exception & exc)
     {
         exc;
 #ifdef _DEBUG
@@ -492,14 +492,14 @@ HRESULT DirectX::SaveToEXRFile(const Image& image, const wchar_t* szFile)
             }
         }
     }
-    catch (const com_exception& exc)
+    catch (const com_exception & exc)
     {
 #ifdef _DEBUG
         OutputDebugStringA(exc.what());
 #endif
         hr = exc.hr();
     }
-    catch (const std::exception& exc)
+    catch (const std::exception & exc)
     {
         exc;
 #ifdef _DEBUG

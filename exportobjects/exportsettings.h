@@ -25,11 +25,11 @@ namespace ATG
             VT_BOOL,
             VT_FLOAT,
             VT_INT,
-            VT_STRING            
+            VT_STRING
         };
     public:
         ExportVariant()
-            : m_Type( VT_NONE )
+            : m_Type(VT_NONE)
         { }
         union
         {
@@ -68,30 +68,30 @@ namespace ATG
 
         ExportVariant       m_DefaultValue;
         ExportVariant       m_CurrentValue;
-        void*               m_pLinkedCurrentValue;
+        void* m_pLinkedCurrentValue;
 
         ExportVariant       m_MinValue;
         ExportVariant       m_MaxValue;
 
-        const ExportEnumValue*  m_pEnumValues;
+        const ExportEnumValue* m_pEnumValues;
         DWORD                   m_dwEnumValueCount;
 
-        ExportSettingsEntry*    m_pFirstChild;
-        ExportSettingsEntry*    m_pSibling;
+        ExportSettingsEntry* m_pFirstChild;
+        ExportSettingsEntry* m_pSibling;
     public:
         ExportSettingsEntry();
         ~ExportSettingsEntry();
 
-        void SetDefaultValue( bool bSetChildren = false, bool bSetSiblings = false );
+        void SetDefaultValue(bool bSetChildren = false, bool bSetSiblings = false);
         float GetValueFloat() const;
         bool GetValueBool() const;
         INT GetValueInt() const;
         const CHAR* GetValueString() const;
-        void SetValue( float fValue );
-        void SetValue( INT iValue );
-        void SetValue( const CHAR* strValue );
+        void SetValue(float fValue);
+        void SetValue(INT iValue);
+        void SetValue(const CHAR* strValue);
 
-        void AddChild( ExportSettingsEntry* pNewChild )
+        void AddChild(ExportSettingsEntry* pNewChild)
         {
             pNewChild->m_pSibling = m_pFirstChild;
             m_pFirstChild = pNewChild;
@@ -116,29 +116,29 @@ namespace ATG
         ExportSettingsManager() = default;
         ~ExportSettingsManager();
 
-        ExportSettingsEntry* AddRootCategory( ExportString Caption );
-        ExportSettingsEntry* AddCategory( ExportSettingsEntry* pParentCategory, ExportString Caption );
-        bool                 DeleteRootCategoryAndChildren( ExportSettingsEntry* pCategory );
+        ExportSettingsEntry* AddRootCategory(ExportString Caption);
+        ExportSettingsEntry* AddCategory(ExportSettingsEntry* pParentCategory, ExportString Caption);
+        bool                 DeleteRootCategoryAndChildren(ExportSettingsEntry* pCategory);
 
-        ExportSettingsEntry* AddBool( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, bool bDefaultValue, bool* pLinkedValue = nullptr );
-        ExportSettingsEntry* AddFloatBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, float fDefaultValue, float fMin, float fMax, float* pLinkedValue = nullptr );
-        ExportSettingsEntry* AddIntBounded( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue = nullptr );
-        ExportSettingsEntry* AddString( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue = nullptr );
-        ExportSettingsEntry* AddEnum( ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue = nullptr );
+        ExportSettingsEntry* AddBool(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, bool bDefaultValue, bool* pLinkedValue = nullptr);
+        ExportSettingsEntry* AddFloatBounded(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, float fDefaultValue, float fMin, float fMax, float* pLinkedValue = nullptr);
+        ExportSettingsEntry* AddIntBounded(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, INT iMin, INT iMax, INT* pLinkedValue = nullptr);
+        ExportSettingsEntry* AddString(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, const CHAR* strDefaultValue, CHAR* pLinkedValue = nullptr);
+        ExportSettingsEntry* AddEnum(ExportSettingsEntry* pCategory, ExportString Caption, ExportString CmdLine, INT iDefaultValue, const ExportEnumValue* pEnumValues, DWORD dwEnumValueCount, INT* pLinkedValue = nullptr);
 
         void SetDefaultValues();
 
         size_t GetRootCategoryCount() const { return m_RootCategories.size(); }
-        ExportSettingsEntry* GetRootCategory( size_t dwIndex ) { return m_RootCategories[ dwIndex ]; }
+        ExportSettingsEntry* GetRootCategory(size_t dwIndex) { return m_RootCategories[dwIndex]; }
 
-        bool LoadSettings( const CHAR* strFileName );
-        bool SaveSettings( const CHAR* strFileName );
+        bool LoadSettings(const CHAR* strFileName);
+        bool SaveSettings(const CHAR* strFileName);
 
-        bool MarshalAllSettings( CHAR* strDestBuffer, DWORD dwBufferSize, bool bNewLines, ExportSettingsEntry* pRoot = nullptr );
-        bool UnMarshalAllSettings( const CHAR* strSrcBuffer );
+        bool MarshalAllSettings(CHAR* strDestBuffer, DWORD dwBufferSize, bool bNewLines, ExportSettingsEntry* pRoot = nullptr);
+        bool UnMarshalAllSettings(const CHAR* strSrcBuffer);
 
     protected:
-        ExportSettingsEntry* FindSettingsEntry( ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot );
+        ExportSettingsEntry* FindSettingsEntry(ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot);
 
         typedef std::vector<ExportSettingsEntry*> SettingsEntryArray;
         SettingsEntryArray  m_RootCategories;

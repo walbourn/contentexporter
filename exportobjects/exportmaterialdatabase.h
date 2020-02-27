@@ -31,7 +31,7 @@ namespace ATG
         MPT_TEXTUREVOLUME
     };
 
-    static const CHAR* ExportMaterialParameterTypeNames[] = 
+    static const CHAR* ExportMaterialParameterTypeNames[] =
     {
         "string",
         "bool",
@@ -79,24 +79,24 @@ namespace ATG
             : m_strCurrentElementName{},
             m_bCurrentElementEndTag(false),
             m_pCurrentMaterial(nullptr),
-            m_pCurrentParam( nullptr )
+            m_pCurrentParam(nullptr)
         {}
         HRESULT  StartDocument() override { return S_OK; }
         HRESULT  EndDocument() override { return S_OK; }
 
-        HRESULT  ElementBegin( const WCHAR* strName, UINT NameLen, 
-        const XMLAttribute *pAttributes, UINT NumAttributes ) override;
-        HRESULT  ElementContent( const WCHAR *strData, UINT DataLen, bool More ) override;
-        HRESULT  ElementEnd( const WCHAR *strName, UINT NameLen ) override;
+        HRESULT  ElementBegin(const WCHAR* strName, UINT NameLen,
+            const XMLAttribute* pAttributes, UINT NumAttributes) override;
+        HRESULT  ElementContent(const WCHAR* strData, UINT DataLen, bool More) override;
+        HRESULT  ElementEnd(const WCHAR* strName, UINT NameLen) override;
 
-        HRESULT  CDATABegin( ) override { return S_OK; }
-        HRESULT  CDATAData( const WCHAR *strCDATA, UINT CDATALen, bool bMore ) override { return S_OK; }
-        HRESULT  CDATAEnd( ) override { return S_OK; }
+        HRESULT  CDATABegin() override { return S_OK; }
+        HRESULT  CDATAData(const WCHAR* strCDATA, UINT CDATALen, bool bMore) override { return S_OK; }
+        HRESULT  CDATAEnd() override { return S_OK; }
 
-        void     Error( HRESULT hError, const CHAR *strMessage ) override;
+        void     Error(HRESULT hError, const CHAR* strMessage) override;
     protected:
-        void             ParseAttributes( const XMLAttribute* pAttributes, size_t dwAttributeCount );
-        const WCHAR*     FindAttribute( const WCHAR* strName );
+        void             ParseAttributes(const XMLAttribute* pAttributes, size_t dwAttributeCount);
+        const WCHAR* FindAttribute(const WCHAR* strName);
         void             ProcessElementBeginContent();
         void             ProcessElementEnd();
     protected:
@@ -111,19 +111,19 @@ namespace ATG
         bool                    m_bCurrentElementEndTag;
         ElementAttributeVector  m_CurrentElementAttributes;
 
-        ExportMaterialDefinition*               m_pCurrentMaterial;
-        ExportMaterialParameterDefinition*      m_pCurrentParam;
+        ExportMaterialDefinition* m_pCurrentMaterial;
+        ExportMaterialParameterDefinition* m_pCurrentParam;
     };
 
     class ExportMaterialDatabase
     {
     public:
         static void Clear();
-        static bool Initialize( const CHAR* strFileName );
+        static bool Initialize(const CHAR* strFileName);
         static const CHAR* GetDatabaseFileName();
         static size_t GetMaterialCount();
-        static const ExportMaterialDefinition* GetMaterial( size_t dwIndex );
-        static const ExportMaterialDefinition* FindMaterial( ExportString strName );
+        static const ExportMaterialDefinition* GetMaterial(size_t dwIndex);
+        static const ExportMaterialDefinition* FindMaterial(ExportString strName);
     };
 
 }

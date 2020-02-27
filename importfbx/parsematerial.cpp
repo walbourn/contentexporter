@@ -16,20 +16,20 @@ using namespace ATG;
 
 extern ATG::ExportScene* g_pScene;
 
-bool MaterialParameterSort( ExportMaterialParameter A, ExportMaterialParameter B )
+bool MaterialParameterSort(ExportMaterialParameter A, ExportMaterialParameter B)
 {
-    if( A.ParamType == MPT_TEXTURE2D && B.ParamType != MPT_TEXTURE2D )
+    if (A.ParamType == MPT_TEXTURE2D && B.ParamType != MPT_TEXTURE2D)
         return true;
     return false;
 }
 
-void FixupGenericMaterial( ExportMaterial* pMaterial )
+void FixupGenericMaterial(ExportMaterial* pMaterial)
 {
     ExportMaterialParameter OutputParam;
     OutputParam.ParamType = MPT_TEXTURE2D;
     OutputParam.bInstanceParam = true;
 
-    ExportMaterialParameter* pParam = pMaterial->FindParameter( "DiffuseTexture" );
+    ExportMaterialParameter* pParam = pMaterial->FindParameter("DiffuseTexture");
     if (!pParam)
     {
         OutputParam.ValueString = ExportMaterial::GetDefaultDiffuseMapTextureName();
@@ -40,17 +40,17 @@ void FixupGenericMaterial( ExportMaterial* pMaterial )
             pMaterial->AddParameter(OutputParam);
         }
     }
-    else if ( g_ExportCoreSettings.bMaterialColors )
+    else if (g_ExportCoreSettings.bMaterialColors)
     {
-        auto pColor = pMaterial->FindParameter( "DiffuseColor" );
+        auto pColor = pMaterial->FindParameter("DiffuseColor");
 
         if (pColor && pColor->ValueFloat[0] == 0 && pColor->ValueFloat[1] == 0 && pColor->ValueFloat[2] == 0)
         {
-            ExportLog::LogWarning( "Material \"%s\" has a black DiffuseColor which will modulate a DiffuseTexture to black. Set a DiffuseColor or use -materialcolors-.", pMaterial->GetName().SafeString());
+            ExportLog::LogWarning("Material \"%s\" has a black DiffuseColor which will modulate a DiffuseTexture to black. Set a DiffuseColor or use -materialcolors-.", pMaterial->GetName().SafeString());
         }
     }
 
-    pParam = pMaterial->FindParameter( "NormalMapTexture" );
+    pParam = pMaterial->FindParameter("NormalMapTexture");
     if (!pParam)
     {
         OutputParam.ValueString = ExportMaterial::GetDefaultNormalMapTextureName();
@@ -62,16 +62,16 @@ void FixupGenericMaterial( ExportMaterial* pMaterial )
         }
     }
 
-    pParam = pMaterial->FindParameter( "SpecularMapTexture" );
+    pParam = pMaterial->FindParameter("SpecularMapTexture");
     if (!pParam)
     {
         if (g_ExportCoreSettings.bUseEmissiveTexture)
         {
-            pParam = pMaterial->FindParameter( "EmissiveMapTexture" );
+            pParam = pMaterial->FindParameter("EmissiveMapTexture");
             if (pParam)
             {
                 // Copy emissive to specular (SDKMESH's material doesn't have an emissive texture slot)
-                ExportLog::LogMsg( 4, "EmissiveMapTexture encoded as SpecularMapTexture in material \"%s\".",  pMaterial->GetName().SafeString() );
+                ExportLog::LogMsg(4, "EmissiveMapTexture encoded as SpecularMapTexture in material \"%s\".", pMaterial->GetName().SafeString());
                 OutputParam.Name = "SpecularMapTexture";
                 OutputParam.ValueString = pParam->ValueString;
                 pMaterial->AddParameter(OutputParam);
@@ -92,74 +92,74 @@ void FixupGenericMaterial( ExportMaterial* pMaterial )
 
     auto pParamList = pMaterial->GetParameterList();
     //std::reverse( pParamList->begin(), pParamList->end() );
-    std::stable_sort( pParamList->begin(), pParamList->end(), MaterialParameterSort );
+    std::stable_sort(pParamList->begin(), pParamList->end(), MaterialParameterSort);
 }
 
-void AddTextureParameter( ExportMaterial* pMaterial, const CHAR* strParamName, DWORD dwIndex, const CHAR* strFileName, DWORD dwFlags )
+void AddTextureParameter(ExportMaterial* pMaterial, const CHAR* strParamName, DWORD dwIndex, const CHAR* strFileName, DWORD dwFlags)
 {
     ExportMaterialParameter OutputParam;
-    if( dwIndex == 0 )
+    if (dwIndex == 0)
     {
         OutputParam.Name = strParamName;
     }
     else
     {
         CHAR strDecoratedName[512];
-        sprintf_s( strDecoratedName, "%s%u", strParamName, dwIndex );
+        sprintf_s(strDecoratedName, "%s%u", strParamName, dwIndex);
         OutputParam.Name = strDecoratedName;
     }
-    ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%s\"", OutputParam.Name.SafeString(), strFileName );
+    ExportLog::LogMsg(4, "Material parameter \"%s\" = \"%s\"", OutputParam.Name.SafeString(), strFileName);
     OutputParam.ValueString = strFileName;
     OutputParam.ParamType = MPT_TEXTURE2D;
     OutputParam.bInstanceParam = true;
     OutputParam.Flags = dwFlags;
-    pMaterial->AddParameter( OutputParam );
+    pMaterial->AddParameter(OutputParam);
 }
 
 static void CheckUVSettings(FbxFileTexture* texture, const ExportMaterial* pMaterial)
 {
     if (texture->GetSwapUV())
     {
-        ExportLog::LogWarning( "Material \"%s\" has swapped UVs which are not exported as such", pMaterial->GetName().SafeString() );
+        ExportLog::LogWarning("Material \"%s\" has swapped UVs which are not exported as such", pMaterial->GetName().SafeString());
     }
-   
-    if ( texture->GetWrapModeU() != FbxTexture::eRepeat
-         || texture->GetWrapModeV() != FbxTexture::eRepeat )
+
+    if (texture->GetWrapModeU() != FbxTexture::eRepeat
+        || texture->GetWrapModeV() != FbxTexture::eRepeat)
     {
-        ExportLog::LogWarning( "Material \"%s\" has set to clamp wrap U/V mode which is not exported", pMaterial->GetName().SafeString() );
+        ExportLog::LogWarning("Material \"%s\" has set to clamp wrap U/V mode which is not exported", pMaterial->GetName().SafeString());
     }
 
     auto& uvScaling = texture->GetUVScaling();
     auto& uvTrans = texture->GetUVTranslation();
-    if ( uvScaling[0] != 1.0
-         || uvScaling[1] != 1.0
-         || uvTrans[0] != 0
-         || uvTrans[1] != 0 )
+    if (uvScaling[0] != 1.0
+        || uvScaling[1] != 1.0
+        || uvTrans[0] != 0
+        || uvTrans[1] != 0)
     {
-        ExportLog::LogWarning( "Material \"%s\" has UV transforms which are not exported", pMaterial->GetName().SafeString() );
+        ExportLog::LogWarning("Material \"%s\" has UV transforms which are not exported", pMaterial->GetName().SafeString());
     }
 }
 
-bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags )
+bool ExtractTextures(FbxProperty Property, const CHAR* strParameterName, ExportMaterial* pMaterial, DWORD dwFlags)
 {
     bool bResult = false;
     const DWORD dwLayeredTextureCount = Property.GetSrcObjectCount<FbxLayeredTexture>();
-    if( dwLayeredTextureCount > 0 )
+    if (dwLayeredTextureCount > 0)
     {
         DWORD dwTextureIndex = 0;
-        for( DWORD i = 0; i < dwLayeredTextureCount; ++i )
+        for (DWORD i = 0; i < dwLayeredTextureCount; ++i)
         {
-            auto pFbxLayeredTexture = FbxCast<FbxLayeredTexture>( Property.GetSrcObject<FbxLayeredTexture>( i ) );
+            auto pFbxLayeredTexture = FbxCast<FbxLayeredTexture>(Property.GetSrcObject<FbxLayeredTexture>(i));
             const DWORD dwTextureCount = pFbxLayeredTexture->GetSrcObjectCount<FbxFileTexture>();
-            for( DWORD j = 0; j < dwTextureCount; ++j )
+            for (DWORD j = 0; j < dwTextureCount; ++j)
             {
-                auto pFbxTexture = FbxCast<FbxFileTexture>( pFbxLayeredTexture->GetSrcObject<FbxFileTexture>( j ) );
-                if( !pFbxTexture )
+                auto pFbxTexture = FbxCast<FbxFileTexture>(pFbxLayeredTexture->GetSrcObject<FbxFileTexture>(j));
+                if (!pFbxTexture)
                     continue;
 
                 CheckUVSettings(pFbxTexture, pMaterial);
 
-                AddTextureParameter( pMaterial, strParameterName, dwTextureIndex, pFbxTexture->GetFileName(), dwFlags );
+                AddTextureParameter(pMaterial, strParameterName, dwTextureIndex, pFbxTexture->GetFileName(), dwFlags);
                 ++dwTextureIndex;
                 bResult = true;
             }
@@ -168,64 +168,64 @@ bool ExtractTextures( FbxProperty Property, const CHAR* strParameterName, Export
     else
     {
         const DWORD dwTextureCount = Property.GetSrcObjectCount<FbxFileTexture>();
-        for( DWORD i = 0; i < dwTextureCount; ++i )
+        for (DWORD i = 0; i < dwTextureCount; ++i)
         {
-            auto pFbxTexture = FbxCast<FbxFileTexture>( Property.GetSrcObject<FbxFileTexture>( i ) );
-            if( !pFbxTexture )
+            auto pFbxTexture = FbxCast<FbxFileTexture>(Property.GetSrcObject<FbxFileTexture>(i));
+            if (!pFbxTexture)
                 continue;
 
             CheckUVSettings(pFbxTexture, pMaterial);
 
-            AddTextureParameter( pMaterial, strParameterName, i, pFbxTexture->GetFileName(), dwFlags );
+            AddTextureParameter(pMaterial, strParameterName, i, pFbxTexture->GetFileName(), dwFlags);
             bResult = true;
         }
     }
     return bResult;
 }
 
-ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
+ExportMaterial* ParseMaterial(FbxSurfaceMaterial* pFbxMaterial)
 {
-    if ( !pFbxMaterial )
+    if (!pFbxMaterial)
         return nullptr;
 
-    auto pExistingMaterial = g_pScene->FindMaterial( pFbxMaterial );
-    if( pExistingMaterial )
+    auto pExistingMaterial = g_pScene->FindMaterial(pFbxMaterial);
+    if (pExistingMaterial)
     {
-        ExportLog::LogMsg( 4, "Found existing material \"%s\".", pFbxMaterial->GetName() );
+        ExportLog::LogMsg(4, "Found existing material \"%s\".", pFbxMaterial->GetName());
         return pExistingMaterial;
     }
 
-    ExportLog::LogMsg( 2, "Parsing material \"%s\".", pFbxMaterial->GetName() );
+    ExportLog::LogMsg(2, "Parsing material \"%s\".", pFbxMaterial->GetName());
 
     bool bRenameMaterial = false;
-    ExportString MaterialName( pFbxMaterial->GetName() );
+    ExportString MaterialName(pFbxMaterial->GetName());
     ExportMaterial* pSameNameMaterial = nullptr;
     DWORD dwRenameIndex = 0;
-    do 
+    do
     {
-        pSameNameMaterial = g_pScene->FindMaterial( MaterialName );
-        if( pSameNameMaterial )
+        pSameNameMaterial = g_pScene->FindMaterial(MaterialName);
+        if (pSameNameMaterial)
         {
             bRenameMaterial = true;
             CHAR strName[200];
-            sprintf_s( strName, "%s_%u", pFbxMaterial->GetName(), dwRenameIndex++ );
+            sprintf_s(strName, "%s_%u", pFbxMaterial->GetName(), dwRenameIndex++);
             MaterialName = strName;
         }
-    } while ( pSameNameMaterial );
+    } while (pSameNameMaterial);
 
-    if( bRenameMaterial )
+    if (bRenameMaterial)
     {
-        ExportLog::LogMsg( 2, "Found duplicate material name; renaming material \"%s\" to \"%s\".", pFbxMaterial->GetName(), MaterialName.SafeString() );
+        ExportLog::LogMsg(2, "Found duplicate material name; renaming material \"%s\" to \"%s\".", pFbxMaterial->GetName(), MaterialName.SafeString());
     }
 
-    ExportMaterial* pMaterial = new ExportMaterial( MaterialName );
-    pMaterial->SetDCCObject( pFbxMaterial );
-    pMaterial->SetDefaultMaterialName( g_pScene->Settings().strDefaultMaterialName );
+    ExportMaterial* pMaterial = new ExportMaterial(MaterialName);
+    pMaterial->SetDCCObject(pFbxMaterial);
+    pMaterial->SetDefaultMaterialName(g_pScene->Settings().strDefaultMaterialName);
 
-    if ( g_ExportCoreSettings.bMaterialColors )
+    if (g_ExportCoreSettings.bMaterialColors)
     {
         auto pFbxLambert = FbxCast<FbxSurfaceLambert>(pFbxMaterial);
-        if ( pFbxLambert )
+        if (pFbxLambert)
         {
             // Diffuse Color
             {
@@ -234,17 +234,17 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 
                 ExportMaterialParameter OutputParam;
                 OutputParam.Name = "DiffuseColor";
-                OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
-                OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
-                OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
-                OutputParam.ValueFloat[3] = static_cast<float>( 1.0 - pFbxLambert->TransparencyFactor.Get() );
+                OutputParam.ValueFloat[0] = static_cast<float>(color[0] * factor);
+                OutputParam.ValueFloat[1] = static_cast<float>(color[1] * factor);
+                OutputParam.ValueFloat[2] = static_cast<float>(color[2] * factor);
+                OutputParam.ValueFloat[3] = static_cast<float>(1.0 - pFbxLambert->TransparencyFactor.Get());
                 OutputParam.ParamType = MPT_FLOAT4;
                 OutputParam.bInstanceParam = true;
                 OutputParam.Flags = 0;
-                pMaterial->AddParameter( OutputParam );
+                pMaterial->AddParameter(OutputParam);
 
-                ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f %f\"", OutputParam.Name.SafeString(),
-                                   OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2], OutputParam.ValueFloat[3] );
+                ExportLog::LogMsg(4, "Material parameter \"%s\" = \"%f %f %f %f\"", OutputParam.Name.SafeString(),
+                    OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2], OutputParam.ValueFloat[3]);
             }
 
             // Ambient Color
@@ -254,16 +254,16 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 
                 ExportMaterialParameter OutputParam;
                 OutputParam.Name = "AmbientColor";
-                OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
-                OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
-                OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+                OutputParam.ValueFloat[0] = static_cast<float>(color[0] * factor);
+                OutputParam.ValueFloat[1] = static_cast<float>(color[1] * factor);
+                OutputParam.ValueFloat[2] = static_cast<float>(color[2] * factor);
                 OutputParam.ParamType = MPT_FLOAT3;
                 OutputParam.bInstanceParam = true;
                 OutputParam.Flags = 0;
-                pMaterial->AddParameter( OutputParam );
+                pMaterial->AddParameter(OutputParam);
 
-                ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
-                                   OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2] );
+                ExportLog::LogMsg(4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
+                    OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2]);
             }
 
             // Emissive Color
@@ -273,16 +273,16 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 
                 ExportMaterialParameter OutputParam;
                 OutputParam.Name = "EmissiveColor";
-                OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
-                OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
-                OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+                OutputParam.ValueFloat[0] = static_cast<float>(color[0] * factor);
+                OutputParam.ValueFloat[1] = static_cast<float>(color[1] * factor);
+                OutputParam.ValueFloat[2] = static_cast<float>(color[2] * factor);
                 OutputParam.ParamType = MPT_FLOAT3;
                 OutputParam.bInstanceParam = true;
                 OutputParam.Flags = 0;
-                pMaterial->AddParameter( OutputParam );
+                pMaterial->AddParameter(OutputParam);
 
-                ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
-                                   OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2] );
+                ExportLog::LogMsg(4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
+                    OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2]);
             }
 
             auto pFbxPhong = FbxCast<FbxSurfacePhong>(pFbxLambert);
@@ -295,29 +295,29 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
 
                     ExportMaterialParameter OutputParam;
                     OutputParam.Name = "SpecularColor";
-                    OutputParam.ValueFloat[0] = static_cast<float>( color[0] * factor );
-                    OutputParam.ValueFloat[1] = static_cast<float>( color[1] * factor );
-                    OutputParam.ValueFloat[2] = static_cast<float>( color[2] * factor );
+                    OutputParam.ValueFloat[0] = static_cast<float>(color[0] * factor);
+                    OutputParam.ValueFloat[1] = static_cast<float>(color[1] * factor);
+                    OutputParam.ValueFloat[2] = static_cast<float>(color[2] * factor);
                     OutputParam.ParamType = MPT_FLOAT3;
                     OutputParam.bInstanceParam = true;
                     OutputParam.Flags = 0;
-                    pMaterial->AddParameter( OutputParam );
+                    pMaterial->AddParameter(OutputParam);
 
-                    ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
-                                       OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2] );
+                    ExportLog::LogMsg(4, "Material parameter \"%s\" = \"%f %f %f\"", OutputParam.Name.SafeString(),
+                        OutputParam.ValueFloat[0], OutputParam.ValueFloat[1], OutputParam.ValueFloat[2]);
                 }
 
                 // Specular Power
                 {
                     ExportMaterialParameter OutputParam;
                     OutputParam.Name = "SpecularPower";
-                    OutputParam.ValueFloat[0] = static_cast<float>( pFbxPhong->Shininess.Get() );
+                    OutputParam.ValueFloat[0] = static_cast<float>(pFbxPhong->Shininess.Get());
                     OutputParam.ParamType = MPT_FLOAT;
                     OutputParam.bInstanceParam = true;
                     OutputParam.Flags = 0;
-                    pMaterial->AddParameter( OutputParam );
+                    pMaterial->AddParameter(OutputParam);
 
-                    ExportLog::LogMsg( 4, "Material parameter \"%s\" = \"%f\"", OutputParam.Name.SafeString(), OutputParam.ValueFloat[0] );
+                    ExportLog::LogMsg(4, "Material parameter \"%s\" = \"%f\"", OutputParam.Name.SafeString(), OutputParam.ValueFloat[0]);
                 }
             }
         }
@@ -348,32 +348,32 @@ ExportMaterial* ParseMaterial( FbxSurfaceMaterial* pFbxMaterial )
         { FbxSurfaceMaterial::sEmissive,           "EmissiveMapTexture",           PPO_Nothing,                0 },
     };
 
-    for( DWORD dwExtractionIndex = 0; dwExtractionIndex < ARRAYSIZE(ExtractionList); ++dwExtractionIndex )
+    for (DWORD dwExtractionIndex = 0; dwExtractionIndex < ARRAYSIZE(ExtractionList); ++dwExtractionIndex)
     {
         const TextureParameterExtraction& tpe = ExtractionList[dwExtractionIndex];
 
-        auto Property = pFbxMaterial->FindProperty( tpe.strFbxPropertyName );
-        if( !Property.IsValid() )
+        auto Property = pFbxMaterial->FindProperty(tpe.strFbxPropertyName);
+        if (!Property.IsValid())
             continue;
 
-        const bool bFound = ExtractTextures( Property, tpe.strParameterName, pMaterial, tpe.dwParameterFlags );
-        if( bFound )
+        const bool bFound = ExtractTextures(Property, tpe.strParameterName, pMaterial, tpe.dwParameterFlags);
+        if (bFound)
         {
-            if( tpe.dwPostOperations & PPO_TransparentMaterial )
+            if (tpe.dwPostOperations & PPO_TransparentMaterial)
             {
-                ExportLog::LogMsg( 4, "Material \"%s\" is transparent.", pMaterial->GetName().SafeString() );
-                pMaterial->SetTransparent( true );
+                ExportLog::LogMsg(4, "Material \"%s\" is transparent.", pMaterial->GetName().SafeString());
+                pMaterial->SetTransparent(true);
             }
         }
     }
 
-    FixupGenericMaterial( pMaterial );
+    FixupGenericMaterial(pMaterial);
 
-    const bool bResult = g_pScene->AddMaterial( pMaterial );
-    assert( bResult );
-    if( !bResult )
+    const bool bResult = g_pScene->AddMaterial(pMaterial);
+    assert(bResult);
+    if (!bResult)
     {
-        ExportLog::LogError( "Could not add material \"%s\" to scene.", pMaterial->GetName().SafeString() );
+        ExportLog::LogError("Could not add material \"%s\" to scene.", pMaterial->GetName().SafeString());
     }
     g_pScene->Statistics().MaterialsExported++;
 

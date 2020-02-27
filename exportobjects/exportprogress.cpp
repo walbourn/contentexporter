@@ -19,7 +19,7 @@ namespace ATG
 
 using namespace ATG;
 
-void ExportProgress::Initialize( const CHAR* strTitle )
+void ExportProgress::Initialize(const CHAR* strTitle)
 {
 }
 
@@ -27,14 +27,14 @@ void ExportProgress::Terminate()
 {
 }
 
-void ExportProgress::StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole )
+void ExportProgress::StartNewTask(const CHAR* strCaption, float fTaskPercentOfWhole)
 {
 }
 
-void ExportProgress::SetCaption( const CHAR* strCaption )
+void ExportProgress::SetCaption(const CHAR* strCaption)
 {
 }
 
-void ExportProgress::SetProgress( float fTaskRelativeProgress )
+void ExportProgress::SetProgress(float fTaskRelativeProgress)
 {
 }

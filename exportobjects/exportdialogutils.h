@@ -16,75 +16,75 @@ namespace ATG
     class ThinDialog
     {
     public:
-        static LRESULT CALLBACK DlgProc( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
+        static LRESULT CALLBACK DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-        HWND Hwnd() 
-        { 
-            return m_hwnd; 
+        HWND Hwnd()
+        {
+            return m_hwnd;
         };
 
-        ThinDialog() : 
-            m_hwnd( nullptr ),
-            m_strTemplate( nullptr )
+        ThinDialog() :
+            m_hwnd(nullptr),
+            m_strTemplate(nullptr)
         {
         };
 
-        virtual ~ThinDialog() 
+        virtual ~ThinDialog()
         {
-            ::DestroyWindow( m_hwnd );
+            ::DestroyWindow(m_hwnd);
         };
 
-        INT DoModal( HINSTANCE hinst, HWND hwndParent )
+        INT DoModal(HINSTANCE hinst, HWND hwndParent)
         {
-            return static_cast<INT>( ::DialogBoxParam( hinst, 
-                m_strTemplate, 
-                hwndParent, 
-                reinterpret_cast<DLGPROC>( DlgProc ),
-                reinterpret_cast<LPARAM>( this ) ) );
+            return static_cast<INT>(::DialogBoxParam(hinst,
+                m_strTemplate,
+                hwndParent,
+                reinterpret_cast<DLGPROC>(DlgProc),
+                reinterpret_cast<LPARAM>(this)));
         };
 
-        bool DoModeless( HINSTANCE hinst, HWND hwndParent )
+        bool DoModeless(HINSTANCE hinst, HWND hwndParent)
         {
-            m_hwnd = ::CreateDialogParam( hinst,
-                m_strTemplate, 
-                hwndParent, 
-                reinterpret_cast<DLGPROC>( DlgProc ),
-                reinterpret_cast<LPARAM>( this ) );
+            m_hwnd = ::CreateDialogParam(hinst,
+                m_strTemplate,
+                hwndParent,
+                reinterpret_cast<DLGPROC>(DlgProc),
+                reinterpret_cast<LPARAM>(this));
             return (m_hwnd != nullptr);
         };
 
         void Destroy()
         {
-            ::DestroyWindow( m_hwnd );
+            ::DestroyWindow(m_hwnd);
         }
 
     protected:
-        virtual LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam );
-        virtual LRESULT OnNcActivate( BOOL fDrawActive );
-        virtual LRESULT OnActivate( BOOL fActivated, DWORD idThread );
-        virtual LRESULT OnInitDialog( HWND hwndFocusCtrl );
-        virtual LRESULT OnDestroyDialog( );
-        virtual LRESULT OnNotify( INT idCtrl, LPNMHDR pnmh );
-        virtual LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ); 
+        virtual LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+        virtual LRESULT OnNcActivate(BOOL fDrawActive);
+        virtual LRESULT OnActivate(BOOL fActivated, DWORD idThread);
+        virtual LRESULT OnInitDialog(HWND hwndFocusCtrl);
+        virtual LRESULT OnDestroyDialog();
+        virtual LRESULT OnNotify(INT idCtrl, LPNMHDR pnmh);
+        virtual LRESULT OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl);
 
         void CenterOnParent();
         HWND m_hwnd;
         LPTSTR m_strTemplate;
 
     private:
-        
-        static void SetInstance( HWND hwndDlg, ThinDialog* pDlg )
+
+        static void SetInstance(HWND hwndDlg, ThinDialog* pDlg)
         {
-            if (pDlg)   
+            if (pDlg)
             {
-                ::SetWindowLongPtr( hwndDlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>( pDlg ) );
+                ::SetWindowLongPtr(hwndDlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pDlg));
                 pDlg->m_hwnd = hwndDlg;
             }
         };
 
-        static  ThinDialog* GetInstance( HWND hwndDlg )
+        static  ThinDialog* GetInstance(HWND hwndDlg)
         {
-            return reinterpret_cast<ThinDialog*>( ::GetWindowLongPtr( hwndDlg, GWLP_USERDATA ) );
+            return reinterpret_cast<ThinDialog*>(::GetWindowLongPtr(hwndDlg, GWLP_USERDATA));
         }
     };
 
@@ -93,9 +93,9 @@ namespace ATG
     GridLayout manages a grid of rectangles, where the column and row sizes are
     based on user-provided specifications combined with the size of an input
     rectangle, which spcifies the size of the entire grid.  Its operation is much like
-    a TABLE object in HTML.  
+    a TABLE object in HTML.
 
-    This class is really useful for laying out a window of UI elements that needs to be 
+    This class is really useful for laying out a window of UI elements that needs to be
     arbitrarily resizable.
 
     Specifications for rows and columns come in the form of FLOATs.  If the float is

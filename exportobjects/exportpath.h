@@ -22,14 +22,14 @@ protected:
 
 public:
     ExportPath();
-    ExportPath( const CHAR* strPath );
-    ExportPath( const ExportPath& OtherPath );
+    ExportPath(const CHAR* strPath);
+    ExportPath(const ExportPath& OtherPath);
 
-    void SetPathAndFileName( const CHAR* strPath );
-    void SetPathOnly( const CHAR* strPath );
+    void SetPathAndFileName(const CHAR* strPath);
+    void SetPathOnly(const CHAR* strPath);
 
-    ExportPath& operator=( const ExportPath& OtherPath );
-    operator const CHAR*() const { return m_strPath; }
+    ExportPath& operator=(const ExportPath& OtherPath);
+    operator const CHAR* () const { return m_strPath; }
 
     static ExportPath GetTempPath();
     static ExportPath GetCurrentPath();
@@ -44,15 +44,15 @@ public:
     bool IsAbsolutePath() const;
     bool IsEmpty() const { return m_strPath[0] == '\0'; }
 
-    void ChangeExtension( const CHAR* strExtension );
-    void ChangeFileName( const CHAR* strFileName );
-    void ChangeFileName( const ExportPath& OtherPath );
-    void ChangeFileNameWithExtension( const CHAR* strFileName );
-    void ChangeFileNameWithExtension( const ExportPath& OtherPath );
-    void Append( const ExportPath& OtherPath );
-    void AppendToFileName( const CHAR* strText );
+    void ChangeExtension(const CHAR* strExtension);
+    void ChangeFileName(const CHAR* strFileName);
+    void ChangeFileName(const ExportPath& OtherPath);
+    void ChangeFileNameWithExtension(const CHAR* strFileName);
+    void ChangeFileNameWithExtension(const ExportPath& OtherPath);
+    void Append(const ExportPath& OtherPath);
+    void AppendToFileName(const CHAR* strText);
     void TrimOffFileName();
 
 protected:
-    void Initialize( const CHAR* strPath );
+    void Initialize(const CHAR* strPath);
 };

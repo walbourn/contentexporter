@@ -14,52 +14,52 @@
 using namespace ATG;
 
 ExportFrame::ExportFrame()
-: ExportBase( nullptr )
+    : ExportBase(nullptr)
 {
     m_Transform.SetIdentity();
 }
 
-ExportFrame::ExportFrame( ExportString name )
-: ExportBase( name )
+ExportFrame::ExportFrame(ExportString name)
+    : ExportBase(name)
 {
     m_Transform.SetIdentity();
 }
 
 ExportFrame::~ExportFrame()
 {
-    for( size_t i = 0; i < m_vModels.size(); i++ )
+    for (size_t i = 0; i < m_vModels.size(); i++)
     {
         delete m_vModels[i];
     }
     m_vModels.clear();
-    for( size_t i = 0; i < m_vLights.size(); i++ )
+    for (size_t i = 0; i < m_vLights.size(); i++)
     {
         delete m_vLights[i];
     }
     m_vLights.clear();
-    for( size_t i = 0; i < m_vCameras.size(); i++ )
+    for (size_t i = 0; i < m_vCameras.size(); i++)
     {
         delete m_vCameras[i];
     }
     m_vCameras.clear();
-    for( size_t i = 0; i < m_vChildren.size(); i++ )
+    for (size_t i = 0; i < m_vChildren.size(); i++)
     {
         delete m_vChildren[i];
     }
     m_vChildren.clear();
 }
 
-ExportFrame* ExportFrame::FindFrameByDCCObject( void* pObject )
+ExportFrame* ExportFrame::FindFrameByDCCObject(void* pObject)
 {
-    if( !pObject )
+    if (!pObject)
         return nullptr;
-    if( pObject == GetDCCObject() )
+    if (pObject == GetDCCObject())
         return this;
 
-    for( size_t i = 0; i < m_vChildren.size(); i++ )
+    for (size_t i = 0; i < m_vChildren.size(); i++)
     {
-        ExportFrame* pFrame = m_vChildren[i]->FindFrameByDCCObject( pObject );
-        if( pFrame )
+        ExportFrame* pFrame = m_vChildren[i]->FindFrameByDCCObject(pObject);
+        if (pFrame)
             return pFrame;
     }
     return nullptr;

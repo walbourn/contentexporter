@@ -16,7 +16,7 @@ namespace ATG
     class ExportCamera : public ExportBase
     {
     public:
-        ExportCamera( ExportString strName );
+        ExportCamera(ExportString strName);
 
         DirectX::XMFLOAT3   LocalPosition;
         DirectX::XMFLOAT3   Direction;

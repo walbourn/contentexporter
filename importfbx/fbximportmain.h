@@ -20,20 +20,20 @@ public:
         m_bFlipZ(true)
     {}
 
-    void Initialize( FbxScene* pScene );
+    void Initialize(FbxScene* pScene);
 
-    void TransformMatrix( DirectX::XMFLOAT4X4* pDestMatrix, const DirectX::XMFLOAT4X4* pSrcMatrix ) const override;
-    void TransformPosition( DirectX::XMFLOAT3* pDestPosition, const DirectX::XMFLOAT3* pSrcPosition ) const override;
-    void TransformDirection( DirectX::XMFLOAT3* pDestDirection, const DirectX::XMFLOAT3* pSrcDirection ) const override;
-    float TransformLength( float fInputLength ) const override;
+    void TransformMatrix(DirectX::XMFLOAT4X4* pDestMatrix, const DirectX::XMFLOAT4X4* pSrcMatrix) const override;
+    void TransformPosition(DirectX::XMFLOAT3* pDestPosition, const DirectX::XMFLOAT3* pSrcPosition) const override;
+    void TransformDirection(DirectX::XMFLOAT3* pDestDirection, const DirectX::XMFLOAT3* pSrcDirection) const override;
+    float TransformLength(float fInputLength) const override;
 
     // Sets unit scale for exporting all geometry - works with characters too.
-    void SetUnitScale( const float fScale )
+    void SetUnitScale(const float fScale)
     {
         m_fUnitScale = fScale;
     }
 
-    void SetZFlip( const bool bFlip )
+    void SetZFlip(const bool bFlip)
     {
         m_bFlipZ = bFlip;
     }
@@ -50,7 +50,7 @@ public:
     static HRESULT Initialize();
     static void ClearScene();
 
-    static HRESULT ImportFile( const CHAR* strFileName );
+    static HRESULT ImportFile(const CHAR* strFileName);
 
 private:
 };

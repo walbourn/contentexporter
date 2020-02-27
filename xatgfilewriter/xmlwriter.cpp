@@ -44,9 +44,9 @@ XMLWriter::XMLWriter()
 // Name: XMLWriter
 // Desc: Constructor for the XML writer class.
 //----------------------------------------------------------------------------------
-XMLWriter::XMLWriter( const CHAR* strFileName ) : XMLWriter()
+XMLWriter::XMLWriter(const CHAR* strFileName) : XMLWriter()
 {
-    Initialize( strFileName );
+    Initialize(strFileName);
 }
 
 
@@ -54,9 +54,9 @@ XMLWriter::XMLWriter( const CHAR* strFileName ) : XMLWriter()
 // Name: XMLWriter
 // Desc: Constructor for the XML writer class.
 //----------------------------------------------------------------------------------
-XMLWriter::XMLWriter( CHAR* strBuffer, UINT uBufferSize ) : XMLWriter()
+XMLWriter::XMLWriter(CHAR* strBuffer, UINT uBufferSize) : XMLWriter()
 {
-    Initialize( strBuffer, uBufferSize );
+    Initialize(strBuffer, uBufferSize);
 }
 
 
@@ -74,20 +74,20 @@ XMLWriter::~XMLWriter()
 // Name: Initialize
 // Desc: Sets up the XML writer to write to a file.
 //----------------------------------------------------------------------------------
-void XMLWriter::Initialize( const CHAR* strFileName )
+void XMLWriter::Initialize(const CHAR* strFileName)
 {
     m_strBuffer = new CHAR[WRITE_BUFFER_SIZE];
     m_strBufferStart = m_strBuffer;
     m_uBufferSizeRemaining = WRITE_BUFFER_SIZE;
     m_bOpenTagFinished = true;
     m_bWriteCloseTagIndent = false;
-    m_hFile = CreateFile( strFileName, FILE_WRITE_DATA, 0, nullptr, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr );
+    m_hFile = CreateFile(strFileName, FILE_WRITE_DATA, 0, nullptr, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     m_strNameStack[0] = '\0';
     m_strNameStackTop = m_strNameStack;
     m_NameStackPositions.clear();
-    SetIndentCount( 4 );
+    SetIndentCount(4);
     m_bWriteNewlines = true;
-    if( m_hFile == INVALID_HANDLE_VALUE )
+    if (m_hFile == INVALID_HANDLE_VALUE)
     {
         m_bValid = false;
     }
@@ -102,7 +102,7 @@ void XMLWriter::Initialize( const CHAR* strFileName )
 // Name: Initialize
 // Desc: Sets up the XML writer to write to a string buffer.
 //----------------------------------------------------------------------------------
-void XMLWriter::Initialize( CHAR* strBuffer, UINT uBufferSize )
+void XMLWriter::Initialize(CHAR* strBuffer, UINT uBufferSize)
 {
     m_strBuffer = strBuffer;
     m_strBufferStart = m_strBuffer;
@@ -113,7 +113,7 @@ void XMLWriter::Initialize( CHAR* strBuffer, UINT uBufferSize )
     m_strNameStack[0] = '\0';
     m_strNameStackTop = m_strNameStack;
     m_NameStackPositions.clear();
-    SetIndentCount( 0 );
+    SetIndentCount(0);
     m_bWriteNewlines = false;
     m_bValid = true;
 }
@@ -125,16 +125,16 @@ void XMLWriter::Initialize( CHAR* strBuffer, UINT uBufferSize )
 //----------------------------------------------------------------------------------
 void XMLWriter::Close()
 {
-    if( m_hFile != INVALID_HANDLE_VALUE )
+    if (m_hFile != INVALID_HANDLE_VALUE)
     {
         FlushBufferToFile();
-        CloseHandle( m_hFile );
+        CloseHandle(m_hFile);
         delete[] m_strBufferStart;
         m_strBufferStart = nullptr;
         m_strBuffer = nullptr;
         m_hFile = INVALID_HANDLE_VALUE;
     }
-    if( m_strBuffer )
+    if (m_strBuffer)
     {
         m_strBuffer = nullptr;
         m_strBufferStart = nullptr;
@@ -145,10 +145,10 @@ void XMLWriter::Close()
 
 void XMLWriter::FlushBufferToFile()
 {
-    if( m_uBufferSizeRemaining >= WRITE_BUFFER_SIZE || m_hFile == INVALID_HANDLE_VALUE )
+    if (m_uBufferSizeRemaining >= WRITE_BUFFER_SIZE || m_hFile == INVALID_HANDLE_VALUE)
         return;
     DWORD dwBytesWritten = 0;
-    WriteFile( m_hFile, m_strBufferStart, WRITE_BUFFER_SIZE - m_uBufferSizeRemaining, &dwBytesWritten, nullptr );
+    WriteFile(m_hFile, m_strBufferStart, WRITE_BUFFER_SIZE - m_uBufferSizeRemaining, &dwBytesWritten, nullptr);
     m_uBufferSizeRemaining = WRITE_BUFFER_SIZE;
     m_strBuffer = m_strBufferStart;
 }
@@ -158,12 +158,12 @@ void XMLWriter::FlushBufferToFile()
 // Name: SetIndentCount
 // Desc: Builds a string with the correct amount of indentation spaces.
 //----------------------------------------------------------------------------------
-void XMLWriter::SetIndentCount( UINT uSpaces )
+void XMLWriter::SetIndentCount(UINT uSpaces)
 {
-    m_uIndentCount = ( uSpaces > 8 ) ? 8 : uSpaces;
-    if( m_uIndentCount > 0 )
-        memset( m_strIndent, ' ', m_uIndentCount );
-    m_strIndent[ m_uIndentCount ] = '\0';
+    m_uIndentCount = (uSpaces > 8) ? 8 : uSpaces;
+    if (m_uIndentCount > 0)
+        memset(m_strIndent, ' ', m_uIndentCount);
+    m_strIndent[m_uIndentCount] = '\0';
 }
 
 
@@ -171,20 +171,20 @@ void XMLWriter::SetIndentCount( UINT uSpaces )
 // Name: StartElement
 // Desc: Writes the beginning of an XML open tag.
 //----------------------------------------------------------------------------------
-bool XMLWriter::StartElement( const CHAR* strName )
+bool XMLWriter::StartElement(const CHAR* strName)
 {
-    if( !m_bOpenTagFinished )
+    if (!m_bOpenTagFinished)
     {
-        if( !EndOpenTag() ) 
+        if (!EndOpenTag())
             return false;
-        if( !WriteNewline() )
+        if (!WriteNewline())
             return false;
     }
     bool result = true;
     result &= WriteIndent();
-    PushName( strName );
-    result &= OutputStringFast( "<", 1 );
-    result &= OutputString( strName );
+    PushName(strName);
+    result &= OutputStringFast("<", 1);
+    result &= OutputString(strName);
     m_bOpenTagFinished = false;
     m_bWriteCloseTagIndent = false;
     return result;
@@ -198,22 +198,22 @@ bool XMLWriter::StartElement( const CHAR* strName )
 bool XMLWriter::EndElement()
 {
     const CHAR* strName = PopName();
-    if( !strName )
+    if (!strName)
         return false;
     bool result = true;
-    if( !m_bOpenTagFinished )
+    if (!m_bOpenTagFinished)
     {
         m_bOpenTagFinished = true;
-        result &= OutputStringFast( " />", 3 );
+        result &= OutputStringFast(" />", 3);
         result &= WriteNewline();
         m_bWriteCloseTagIndent = true;
         return result;
     }
-    if( m_bWriteCloseTagIndent )
+    if (m_bWriteCloseTagIndent)
         result &= WriteIndent();
-    result &= OutputStringFast( "</", 2 );
-    result &= OutputString( strName );
-    result &= OutputStringFast( ">", 1 );
+    result &= OutputStringFast("</", 2);
+    result &= OutputString(strName);
+    result &= OutputStringFast(">", 1);
     result &= WriteNewline();
     m_bWriteCloseTagIndent = true;
     return result;
@@ -224,11 +224,11 @@ bool XMLWriter::EndElement()
 // Name: WriteElement
 // Desc: Convenience function to write an XML element with a body and no attributes.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteElement( const CHAR* strName, const CHAR* strBody )
+bool XMLWriter::WriteElement(const CHAR* strName, const CHAR* strBody)
 {
     bool result = true;
-    result &= StartElement( strName );
-    result &= WriteString( strBody );
+    result &= StartElement(strName);
+    result &= WriteString(strBody);
     result &= EndElement();
     return result;
 }
@@ -238,13 +238,13 @@ bool XMLWriter::WriteElement( const CHAR* strName, const CHAR* strBody )
 // Name: WriteElement
 // Desc: Convenience function to write an XML element with a body and no attributes.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteElement( const CHAR* strName, INT iBody )
+bool XMLWriter::WriteElement(const CHAR* strName, INT iBody)
 {
     bool result = true;
-    result &= StartElement( strName );
+    result &= StartElement(strName);
     CHAR strTemp[32];
-    _itoa_s( iBody, strTemp, 10 );
-    result &= WriteString( strTemp );
+    _itoa_s(iBody, strTemp, 10);
+    result &= WriteString(strTemp);
     result &= EndElement();
     return result;
 }
@@ -254,13 +254,13 @@ bool XMLWriter::WriteElement( const CHAR* strName, INT iBody )
 // Name: WriteElement
 // Desc: Convenience function to write an XML element with a body and no attributes.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteElement( const CHAR* strName, float fBody )
+bool XMLWriter::WriteElement(const CHAR* strName, float fBody)
 {
     bool result = true;
-    result &= StartElement( strName );
+    result &= StartElement(strName);
     CHAR strTemp[32];
-    sprintf_s( strTemp, "%f", fBody );
-    result &= WriteString( strTemp );
+    sprintf_s(strTemp, "%f", fBody);
+    result &= WriteString(strTemp);
     result &= EndElement();
     return result;
 }
@@ -270,15 +270,15 @@ bool XMLWriter::WriteElement( const CHAR* strName, float fBody )
 // Name: WriteElementFormat
 // Desc: Convenience function to write an XML element with a body and no attributes.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteElementFormat( const CHAR* strName, const CHAR* strFormat, ... )
+bool XMLWriter::WriteElementFormat(const CHAR* strName, const CHAR* strFormat, ...)
 {
     bool result = true;
-    result &= StartElement( strName );
+    result &= StartElement(strName);
     CHAR strTemp[512];
     va_list args;
-    va_start( args, strFormat );
-    vsprintf_s( strTemp, strFormat, args );
-    result &= WriteString( strTemp );
+    va_start(args, strFormat);
+    vsprintf_s(strTemp, strFormat, args);
+    result &= WriteString(strTemp);
     result &= EndElement();
     return result;
 }
@@ -291,15 +291,15 @@ bool XMLWriter::WriteElementFormat( const CHAR* strName, const CHAR* strFormat, 
 bool XMLWriter::StartCDATA()
 {
     bool bResult = true;
-    if( !m_bOpenTagFinished )
+    if (!m_bOpenTagFinished)
     {
-        if( !EndOpenTag() ) 
+        if (!EndOpenTag())
             return false;
-        if( !WriteNewline() )
+        if (!WriteNewline())
             return false;
     }
     bResult &= WriteIndent();
-    bResult &= OutputStringFast( "<![CDATA[", 9 );
+    bResult &= OutputStringFast("<![CDATA[", 9);
     return bResult;
 }
 
@@ -311,7 +311,7 @@ bool XMLWriter::StartCDATA()
 bool XMLWriter::EndCDATA()
 {
     bool bResult = true;
-    bResult &= OutputStringFast( "]]>", 3 );
+    bResult &= OutputStringFast("]]>", 3);
     bResult &= WriteNewline();
     m_bWriteCloseTagIndent = true;
     return bResult;
@@ -322,10 +322,10 @@ bool XMLWriter::EndCDATA()
 // Name: WriteCDATA
 // Desc: Writes a CDATA block.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteCDATA( const CHAR* strData, DWORD dwDataLength )
+bool XMLWriter::WriteCDATA(const CHAR* strData, DWORD dwDataLength)
 {
     bool bResult = StartCDATA();
-    bResult &= OutputStringFast( strData, dwDataLength );
+    bResult &= OutputStringFast(strData, dwDataLength);
     bResult &= EndCDATA();
     return bResult;
 }
@@ -335,19 +335,19 @@ bool XMLWriter::WriteCDATA( const CHAR* strData, DWORD dwDataLength )
 // Name: StartComment
 // Desc: Writes the beginning of an XML comment tag.
 //----------------------------------------------------------------------------------
-bool XMLWriter::StartComment( bool bInline )
+bool XMLWriter::StartComment(bool bInline)
 {
-    if( !m_bOpenTagFinished )
+    if (!m_bOpenTagFinished)
     {
-        if( !EndOpenTag() ) 
+        if (!EndOpenTag())
             return false;
-        if( !bInline && !WriteNewline() )
+        if (!bInline && !WriteNewline())
             return false;
     }
     bool result = true;
-    if( !bInline )
+    if (!bInline)
         result &= WriteIndent();
-    result &= OutputStringFast( "<!-- ", 5 );
+    result &= OutputStringFast("<!-- ", 5);
     m_bOpenTagFinished = true;
     m_bWriteCloseTagIndent = false;
     m_bInlineComment = bInline;
@@ -362,8 +362,8 @@ bool XMLWriter::StartComment( bool bInline )
 bool XMLWriter::EndComment()
 {
     bool result = true;
-    result &= OutputStringFast( " -->", 4 );
-    if( !m_bInlineComment )
+    result &= OutputStringFast(" -->", 4);
+    if (!m_bInlineComment)
         result &= WriteNewline();
     m_bWriteCloseTagIndent = !m_bInlineComment;
     return result;
@@ -374,11 +374,11 @@ bool XMLWriter::EndComment()
 // Name: WriteComment
 // Desc: Convenience function to write an entire comment.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteComment( const CHAR* strComment, bool bInline )
+bool XMLWriter::WriteComment(const CHAR* strComment, bool bInline)
 {
     bool result = true;
-    result &= StartComment( bInline );
-    result &= WriteString( strComment );
+    result &= StartComment(bInline);
+    result &= WriteString(strComment);
     result &= EndComment();
     return result;
 }
@@ -390,20 +390,20 @@ bool XMLWriter::WriteComment( const CHAR* strComment, bool bInline )
 //       after calling StartElement(), but before calling WriteString() or
 //       EndElement().
 //----------------------------------------------------------------------------------
-bool XMLWriter::AddAttributeFormat( const CHAR* strName, const CHAR* strFormat, ... )
+bool XMLWriter::AddAttributeFormat(const CHAR* strName, const CHAR* strFormat, ...)
 {
-    if( m_bOpenTagFinished )
+    if (m_bOpenTagFinished)
         return false;
     bool result = true;
-    result &= OutputStringFast( " ", 1 );
-    result &= OutputString( strName );
-    result &= OutputStringFast( "=\"", 2 );
+    result &= OutputStringFast(" ", 1);
+    result &= OutputString(strName);
+    result &= OutputStringFast("=\"", 2);
     CHAR strTemp[256];
     va_list args;
-    va_start( args, strFormat );
-    vsprintf_s( strTemp, strFormat, args );
-    result &= OutputString( strTemp );
-    result &= OutputStringFast( "\"", 1 );
+    va_start(args, strFormat);
+    vsprintf_s(strTemp, strFormat, args);
+    result &= OutputString(strTemp);
+    result &= OutputStringFast("\"", 1);
     return result;
 }
 
@@ -414,16 +414,16 @@ bool XMLWriter::AddAttributeFormat( const CHAR* strName, const CHAR* strFormat, 
 //       after calling StartElement(), but before calling WriteString() or
 //       EndElement().
 //----------------------------------------------------------------------------------
-bool XMLWriter::AddAttribute( const CHAR* strName, const CHAR* strValue )
+bool XMLWriter::AddAttribute(const CHAR* strName, const CHAR* strValue)
 {
-    if( m_bOpenTagFinished )
+    if (m_bOpenTagFinished)
         return false;
     bool result = true;
-    result &= OutputStringFast( " ", 1 );
-    result &= OutputString( strName );
-    result &= OutputStringFast( "=\"", 2 );
-    result &= OutputString( strValue );
-    result &= OutputStringFast( "\"", 1 );
+    result &= OutputStringFast(" ", 1);
+    result &= OutputString(strName);
+    result &= OutputStringFast("=\"", 2);
+    result &= OutputString(strValue);
+    result &= OutputStringFast("\"", 1);
     return result;
 }
 
@@ -434,11 +434,11 @@ bool XMLWriter::AddAttribute( const CHAR* strName, const CHAR* strValue )
 //       after calling StartElement(), but before calling WriteString() or
 //       EndElement().
 //----------------------------------------------------------------------------------
-bool XMLWriter::AddAttribute( const CHAR* strName, const WCHAR* wstrValue )
+bool XMLWriter::AddAttribute(const CHAR* strName, const WCHAR* wstrValue)
 {
     CHAR strTemp[256];
-    WideCharToMultiByte( CP_ACP, 0, wstrValue, static_cast<INT>( wcslen( wstrValue ) + 1 ), strTemp, 256, nullptr, nullptr );
-    return AddAttribute( strName, strTemp );
+    WideCharToMultiByte(CP_ACP, 0, wstrValue, static_cast<INT>(wcslen(wstrValue) + 1), strTemp, 256, nullptr, nullptr);
+    return AddAttribute(strName, strTemp);
 }
 
 
@@ -448,11 +448,11 @@ bool XMLWriter::AddAttribute( const CHAR* strName, const WCHAR* wstrValue )
 //       after calling StartElement(), but before calling WriteString() or
 //       EndElement().
 //----------------------------------------------------------------------------------
-bool XMLWriter::AddAttribute( const CHAR* strName, INT iValue )
+bool XMLWriter::AddAttribute(const CHAR* strName, INT iValue)
 {
     CHAR strTemp[20];
-    _itoa_s( iValue, strTemp, 10 );
-    return AddAttribute( strName, strTemp );
+    _itoa_s(iValue, strTemp, 10);
+    return AddAttribute(strName, strTemp);
 }
 
 
@@ -462,11 +462,11 @@ bool XMLWriter::AddAttribute( const CHAR* strName, INT iValue )
 //       after calling StartElement(), but before calling WriteString() or
 //       EndElement().
 //----------------------------------------------------------------------------------
-bool XMLWriter::AddAttribute( const CHAR* strName, float fValue )
+bool XMLWriter::AddAttribute(const CHAR* strName, float fValue)
 {
     CHAR strTemp[20];
-    sprintf_s( strTemp, "%f", fValue );
-    return AddAttribute( strName, strTemp );
+    sprintf_s(strTemp, "%f", fValue);
+    return AddAttribute(strName, strTemp);
 }
 
 
@@ -474,16 +474,16 @@ bool XMLWriter::AddAttribute( const CHAR* strName, float fValue )
 // Name: WriteString
 // Desc: Writes a string after an XML open tag.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteString( const CHAR* strText )
+bool XMLWriter::WriteString(const CHAR* strText)
 {
-    if( !strText )
+    if (!strText)
         strText = "";
-    if( !m_bOpenTagFinished )
+    if (!m_bOpenTagFinished)
     {
-        if( !EndOpenTag() )
+        if (!EndOpenTag())
             return false;
     }
-    return OutputString( strText );
+    return OutputString(strText);
 }
 
 
@@ -491,18 +491,18 @@ bool XMLWriter::WriteString( const CHAR* strText )
 // Name: WriteStringFormat
 // Desc: Writes a formatted string after an XML open tag.
 //----------------------------------------------------------------------------------
-bool XMLWriter::WriteStringFormat( const CHAR* strFormat, ... )
+bool XMLWriter::WriteStringFormat(const CHAR* strFormat, ...)
 {
-    if( !m_bOpenTagFinished )
+    if (!m_bOpenTagFinished)
     {
-        if( !EndOpenTag() )
+        if (!EndOpenTag())
             return false;
     }
     CHAR strTemp[1024];
     va_list args;
-    va_start( args, strFormat );
-    vsprintf_s( strTemp, strFormat, args );
-    return OutputString( strTemp );
+    va_start(args, strFormat);
+    vsprintf_s(strTemp, strFormat, args);
+    return OutputString(strTemp);
 }
 
 
@@ -513,8 +513,8 @@ bool XMLWriter::WriteStringFormat( const CHAR* strFormat, ... )
 //----------------------------------------------------------------------------------
 bool XMLWriter::EndOpenTag()
 {
-    assert( !m_bOpenTagFinished );
-    OutputStringFast( ">", 1 );
+    assert(!m_bOpenTagFinished);
+    OutputStringFast(">", 1);
     m_bOpenTagFinished = true;
     return true;
 }
@@ -527,11 +527,11 @@ bool XMLWriter::EndOpenTag()
 //----------------------------------------------------------------------------------
 bool XMLWriter::WriteNewline()
 {
-    if( !m_bWriteNewlines )
+    if (!m_bWriteNewlines)
         return true;
-    if( m_hFile != INVALID_HANDLE_VALUE )
-        return OutputStringFast( "\r\n", 2 );
-    return OutputStringFast( "\n", 1 );
+    if (m_hFile != INVALID_HANDLE_VALUE)
+        return OutputStringFast("\r\n", 2);
+    return OutputStringFast("\n", 1);
 }
 
 
@@ -541,11 +541,11 @@ bool XMLWriter::WriteNewline()
 //----------------------------------------------------------------------------------
 bool XMLWriter::WriteIndent()
 {
-    if( m_uIndentCount == 0 )
+    if (m_uIndentCount == 0)
         return true;
-    for( size_t i = 0; i < m_NameStackPositions.size(); i++ )
+    for (size_t i = 0; i < m_NameStackPositions.size(); i++)
     {
-        if( !OutputStringFast( m_strIndent, m_uIndentCount ) )
+        if (!OutputStringFast(m_strIndent, m_uIndentCount))
             return false;
     }
     return true;
@@ -556,17 +556,17 @@ bool XMLWriter::WriteIndent()
 // Name: PushName
 // Desc: Pushes an XML tag name onto the stack.  This is used to write an open tag.
 //----------------------------------------------------------------------------------
-void XMLWriter::PushName( const CHAR* strName )
+void XMLWriter::PushName(const CHAR* strName)
 {
-    size_t uLen = strlen( strName );
-    if( ( m_strNameStackTop - m_strNameStack + uLen ) >= XMLWRITER_NAME_STACK_SIZE )
+    size_t uLen = strlen(strName);
+    if ((m_strNameStackTop - m_strNameStack + uLen) >= XMLWRITER_NAME_STACK_SIZE)
     {
-        assert( false );
+        assert(false);
         return;
     }
-    m_NameStackPositions.push_back( static_cast<UINT>( m_strNameStackTop - m_strNameStack ) );
+    m_NameStackPositions.push_back(static_cast<UINT>(m_strNameStackTop - m_strNameStack));
     *m_strNameStackTop = '\0';
-    strcat_s( m_strNameStack, strName );
+    strcat_s(m_strNameStack, strName);
     m_strNameStackTop += uLen;
 }
 
@@ -577,7 +577,7 @@ void XMLWriter::PushName( const CHAR* strName )
 //----------------------------------------------------------------------------------
 const CHAR* XMLWriter::PopName()
 {
-    if( m_NameStackPositions.empty() )
+    if (m_NameStackPositions.empty())
         return nullptr;
     UINT uPos = m_NameStackPositions.back();
     m_NameStackPositions.pop_back();
@@ -591,10 +591,10 @@ const CHAR* XMLWriter::PopName()
 // Name: OutputString
 // Desc: Sends a null-terminated string to the output.
 //----------------------------------------------------------------------------------
-bool XMLWriter::OutputString( const CHAR* strText )
+bool XMLWriter::OutputString(const CHAR* strText)
 {
-    assert( strText != nullptr );
-    return OutputStringFast( strText, static_cast<UINT>( strlen( strText ) ) );
+    assert(strText != nullptr);
+    return OutputStringFast(strText, static_cast<UINT>(strlen(strText)));
 }
 
 
@@ -602,29 +602,29 @@ bool XMLWriter::OutputString( const CHAR* strText )
 // Name: OutputStringFast
 // Desc: Sends a string with a supplied length to the output.
 //----------------------------------------------------------------------------------
-bool XMLWriter::OutputStringFast( const CHAR* strText, UINT uLength )
+bool XMLWriter::OutputStringFast(const CHAR* strText, UINT uLength)
 {
-    if( m_hFile != INVALID_HANDLE_VALUE )
+    if (m_hFile != INVALID_HANDLE_VALUE)
     {
-        while( uLength >= m_uBufferSizeRemaining )
+        while (uLength >= m_uBufferSizeRemaining)
         {
-            memcpy( m_strBuffer, strText, m_uBufferSizeRemaining );
+            memcpy(m_strBuffer, strText, m_uBufferSizeRemaining);
             m_strBuffer += m_uBufferSizeRemaining;
             strText += m_uBufferSizeRemaining;
             uLength -= m_uBufferSizeRemaining;
             m_uBufferSizeRemaining = 0;
             FlushBufferToFile();
         }
-        memcpy( m_strBuffer, strText, uLength );
+        memcpy(m_strBuffer, strText, uLength);
         m_uBufferSizeRemaining -= uLength;
         m_strBuffer += uLength;
         return true;
     }
-    else if( m_strBuffer )
+    else if (m_strBuffer)
     {
-        if( ( uLength + 1 ) > m_uBufferSizeRemaining )
+        if ((uLength + 1) > m_uBufferSizeRemaining)
             return false;
-        memcpy( m_strBuffer, strText, uLength + 1 );
+        memcpy(m_strBuffer, strText, uLength + 1);
         m_uBufferSizeRemaining -= uLength;
         m_strBuffer += uLength;
         return true;

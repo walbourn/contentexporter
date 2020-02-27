@@ -20,30 +20,30 @@ namespace ATG
     public:
         ExportConsoleDialog();
 
-        LRESULT OnCommand( WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl ) override;
-        LRESULT OnInitDialog( HWND hwndFocusCtrl ) override;
-        LRESULT OnMessage( UINT uMsg, WPARAM wParam, LPARAM lParam ) override;
+        LRESULT OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwndCtrl) override;
+        LRESULT OnInitDialog(HWND hwndFocusCtrl) override;
+        LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
-        void LogMessage( const CHAR* strMessage ) override;
-        void LogWarning( const CHAR* strMessage ) override;
-        void LogError( const CHAR* strMessage ) override;
-        void LogCommand( DWORD dwCommand, void* pData ) override;
+        void LogMessage(const CHAR* strMessage) override;
+        void LogWarning(const CHAR* strMessage) override;
+        void LogError(const CHAR* strMessage) override;
+        void LogCommand(DWORD dwCommand, void* pData) override;
 
-        void Initialize( const CHAR* strTitle ) override;
+        void Initialize(const CHAR* strTitle) override;
         void Terminate() override;
-        void SetCaption( const CHAR* strCaption ) override;
-        void StartNewTask( const CHAR* strCaption, float fTaskPercentOfWhole ) override;
-        void SetProgress( float fTaskRelativeProgress ) override;
+        void SetCaption(const CHAR* strCaption) override;
+        void StartNewTask(const CHAR* strCaption, float fTaskPercentOfWhole) override;
+        void SetProgress(float fTaskRelativeProgress) override;
 
-        void ConsolePrint( COLORREF rgb, const CHAR* strText );
+        void ConsolePrint(COLORREF rgb, const CHAR* strText);
         void ConsoleNewline();
         void ConsoleClear();
 
-        static UINT WINAPI ThreadEntry( void* pData );
+        static UINT WINAPI ThreadEntry(void* pData);
 
     protected:
-        void RecordWarning( const CHAR* strMessage );
-        void RecordError( const CHAR* strMessage );
+        void RecordWarning(const CHAR* strMessage);
+        void RecordError(const CHAR* strMessage);
         void PrintWarningsAndErrors();
         void ClearWarningsAndErrors();
 
