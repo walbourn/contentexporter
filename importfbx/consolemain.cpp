@@ -862,7 +862,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     HRESULT hr = FBXImport::Initialize();
     if (FAILED(hr))
     {
-        ExportLog::LogError("Failed to initialize FBX (%08X)\n", hr);
+        ExportLog::LogError("Failed to initialize FBX (%08X)\n", static_cast<unsigned int>(hr));
         return 1;
     }
     ExportLog::LogMsg(4, "FBX has been initialized.");
@@ -870,7 +870,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
     // Initialize COM (needed for WIC)
     if (FAILED(hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
     {
-        ExportLog::LogError("Failed to initialize COM (%08X)\n", hr);
+        ExportLog::LogError("Failed to initialize COM (%08X)\n", static_cast<unsigned int>(hr));
         return 1;
     }
 

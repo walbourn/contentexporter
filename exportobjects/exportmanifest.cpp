@@ -288,7 +288,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         HRESULT hr = LoadFromDDSFile(wSource, DDS_FLAGS_NONE, &info, *image);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not load texture \"%s\" (DDS: %08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not load texture \"%s\" (DDS: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -297,7 +297,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         HRESULT hr = LoadFromTGAFile(wSource, &info, *image);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not load texture \"%s\" (TGA: %08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not load texture \"%s\" (TGA: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -307,7 +307,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         HRESULT hr = LoadFromHDRFile(wSource, &info, *image);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not load texture \"%s\" (HDR: %08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not load texture \"%s\" (HDR: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -318,7 +318,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         HRESULT hr = LoadFromEXRFile(wSource, &info, *image);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not load texture \"%s\" (EXR: %08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not load texture \"%s\" (EXR: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
             return;
         }
 #else
@@ -335,7 +335,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         HRESULT hr = LoadFromWICFile(wSource, wicFlags, &info, *image);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not load texture \"%s\" (WIC: %08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not load texture \"%s\" (WIC: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -389,7 +389,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
             CNMAP_CHANNEL_LUMINANCE, 10.f, tformat, *timage);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not compute normal map for \"%s\" (%08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not compute normal map for \"%s\" (%08X).", strSourceFileName, static_cast<unsigned int>(hr));
         }
         else
         {
@@ -408,7 +408,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
             tformat, TEX_FILTER_DEFAULT, 0.5f, *timage);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Could not convert \"%s\" (%08X).", strSourceFileName, hr);
+            ExportLog::LogError("Could not convert \"%s\" (%08X).", strSourceFileName, static_cast<unsigned int>(hr));
         }
         else
         {
@@ -427,7 +427,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         HRESULT hr = GenerateMipMaps(image->GetImages(), image->GetImageCount(), image->GetMetadata(), TEX_FILTER_DEFAULT, 0, *timage);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Failing generating mimaps for \"%s\" (WIC: %08X).", strSourceFileName, hr);
+            ExportLog::LogError("Failing generating mimaps for \"%s\" (WIC: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
         }
         else
         {
@@ -451,7 +451,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
             HRESULT hr = Compress(image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage);
             if (FAILED(hr))
             {
-                ExportLog::LogError("Failing compressing \"%s\" (WIC: %08X).", strSourceFileName, hr);
+                ExportLog::LogError("Failing compressing \"%s\" (WIC: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
             }
             else
             {
@@ -487,7 +487,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
 
     if (FAILED(hr))
     {
-        ExportLog::LogError("Could not write texture to file \"%s\" (%08X).", strDestFileName, hr);
+        ExportLog::LogError("Could not write texture to file \"%s\" (%08X).", strDestFileName, static_cast<unsigned int>(hr));
     }
 }
 

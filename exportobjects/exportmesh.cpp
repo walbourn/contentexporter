@@ -789,7 +789,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
     }
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to clean (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to clean (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -811,7 +811,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
         hr = FinalizeVB(m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, dups.data(), dups.size(), nullptr, pos.get());
         if (FAILED(hr))
         {
-            ExportLog::LogError("Mesh \"%s\" failed clean of positions (%08X).", GetName().SafeString(), hr);
+            ExportLog::LogError("Mesh \"%s\" failed clean of positions (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -824,7 +824,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
         hr = FinalizeVB(m_pVBNormals.get(), sizeof(XMFLOAT3), nVerts, dups.data(), dups.size(), nullptr, normals.get());
         if (FAILED(hr))
         {
-            ExportLog::LogError("Mesh \"%s\" failed clean of normals (%08X).", GetName().SafeString(), hr);
+            ExportLog::LogError("Mesh \"%s\" failed clean of normals (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -837,7 +837,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
         hr = FinalizeVB(m_pVBTexCoords.get(), sizeof(XMFLOAT2), nVerts, dups.data(), dups.size(), nullptr, texcoords.get());
         if (FAILED(hr))
         {
-            ExportLog::LogError("Mesh \"%s\" failed clean of texcoords (%08X).", GetName().SafeString(), hr);
+            ExportLog::LogError("Mesh \"%s\" failed clean of texcoords (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -852,7 +852,7 @@ void ExportMesh::CleanMesh(bool breakBowTies)
     hr = FinalizeVB(m_pVB->GetVertexData(), stride, nVerts, dups.data(), dups.size(), nullptr, newVB->GetVertexData());
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed clean of vertices (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed clean of vertices (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -911,7 +911,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
     }
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to compute tangent space (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to compute tangent space (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -919,14 +919,14 @@ void ExportMesh::ComputeVertexTangentSpaces()
     hr = writer->Initialize(m_InputLayout.data(), m_InputLayout.size());
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to create VBWriter (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to create VBWriter (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
     hr = writer->AddStream(m_pVB->GetVertexData(), nVerts, 0, m_pVB->GetVertexSize());
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to initialize VBWriter (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to initialize VBWriter (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -935,7 +935,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
         hr = writer->Write(tan1.get(), "TANGENT", 0, nVerts, m_x2Bias);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Mesh \"%s\" failed to write tangents (%08X).", GetName().SafeString(), hr);
+            ExportLog::LogError("Mesh \"%s\" failed to write tangents (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         }
     }
 
@@ -944,7 +944,7 @@ void ExportMesh::ComputeVertexTangentSpaces()
         hr = writer->Write(tan2.get(), "BINORMAL", 0, nVerts, m_x2Bias);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Mesh \"%s\" failed to write bi-normals (%08X).", GetName().SafeString(), hr);
+            ExportLog::LogError("Mesh \"%s\" failed to write bi-normals (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         }
     }
 }
@@ -984,7 +984,7 @@ void ExportMesh::ComputeAdjacency()
 
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to compute adjacency (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to compute adjacency (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         m_pAdjacency.reset();
         return;
     }
@@ -1062,7 +1062,7 @@ void ExportMesh::ComputeUVAtlas()
         &outStretch, &outCharts);
     if (FAILED(hr))
     {
-        ExportLog::LogError("UV atlas creation failed for mesh \"%s\" (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("UV atlas creation failed for mesh \"%s\" (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1080,7 +1080,7 @@ void ExportMesh::ComputeUVAtlas()
     hr = UVAtlasApplyRemap(m_pVBPositions.get(), sizeof(XMFLOAT3), nVerts, nNewVerts, vertexRemapArray.data(), pos.get());
     if (FAILED(hr))
     {
-        ExportLog::LogError("UV atlas remap failed for mesh \"%s\" (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("UV atlas remap failed for mesh \"%s\" (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1094,7 +1094,7 @@ void ExportMesh::ComputeUVAtlas()
     hr = UVAtlasApplyRemap(m_pVB->GetVertexData(), stride, nVerts, nNewVerts, vertexRemapArray.data(), newVB->GetVertexData());
     if (FAILED(hr))
     {
-        ExportLog::LogError("UV atlas remap failed for mesh \"%s\" (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("UV atlas remap failed for mesh \"%s\" (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1103,14 +1103,14 @@ void ExportMesh::ComputeUVAtlas()
     hr = writer->Initialize(m_InputLayout.data(), m_InputLayout.size());
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to create VBWriter (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to create VBWriter (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
     hr = writer->AddStream(newVB->GetVertexData(), nNewVerts, 0, stride);
     if (FAILED(hr))
     {
-        ExportLog::LogError("Mesh \"%s\" failed to initialize VBWriter (%08X).", GetName().SafeString(), hr);
+        ExportLog::LogError("Mesh \"%s\" failed to initialize VBWriter (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1127,7 +1127,7 @@ void ExportMesh::ComputeUVAtlas()
         hr = writer->Write(uvs.get(), "TEXCOORD", iDestUVIndex, nNewVerts);
         if (FAILED(hr))
         {
-            ExportLog::LogError("Mesh \"%s\" failed to write new UV atlas texcoords (%08X).", GetName().SafeString(), hr);
+            ExportLog::LogError("Mesh \"%s\" failed to write new UV atlas texcoords (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
             return;
         }
     }
@@ -1233,7 +1233,7 @@ void ExportMesh::OptimizeVcache()
     }
     if (FAILED(hr))
     {
-        ExportLog::LogError("Optimize mesh for pre-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr);
+        ExportLog::LogError("Optimize mesh for pre-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1252,7 +1252,7 @@ void ExportMesh::OptimizeVcache()
     }
     if (FAILED(hr))
     {
-        ExportLog::LogError("Reorder IB for pre-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr);
+        ExportLog::LogError("Reorder IB for pre-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1270,7 +1270,7 @@ void ExportMesh::OptimizeVcache()
     }
     if (FAILED(hr))
     {
-        ExportLog::LogError("Optimize mesh for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr);
+        ExportLog::LogError("Optimize mesh for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1284,7 +1284,7 @@ void ExportMesh::OptimizeVcache()
     }
     if (FAILED(hr))
     {
-        ExportLog::LogError("Finalize IB for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr);
+        ExportLog::LogError("Finalize IB for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
@@ -1298,7 +1298,7 @@ void ExportMesh::OptimizeVcache()
     hr = FinalizeVB(m_pVB->GetVertexData(), stride, nVerts, nullptr, 0, vertRemap.get(), newVB->GetVertexData());
     if (FAILED(hr))
     {
-        ExportLog::LogError("Finalize VB for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), hr);
+        ExportLog::LogError("Finalize VB for post-transform vertex cache failed for mesh \"%s\" (%08X)", GetName().SafeString(), static_cast<unsigned int>(hr));
         return;
     }
 
