@@ -328,7 +328,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     }
     else
     {
-        DWORD wicFlags = TEX_FILTER_DEFAULT;
+        WIC_FLAGS wicFlags = WIC_FLAGS_NONE;
         if (g_pScene->Settings().bIgnoreSRGB)
             wicFlags |= WIC_FLAGS_IGNORE_SRGB;
 
