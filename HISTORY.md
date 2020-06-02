@@ -6,6 +6,10 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### June 1, 2020
+* Switched to using NuGet for DirectXTex, DirectXMesh, and UVAtlas using June 2020 releases
+* Minor code review
+
 ### February 26, 2020
 * Switched to using NuGet for DirectXTex, DirectXMesh, and UVAtlas using February 2020 releases
 * Retired VS 2015 projects, added VS 2019 projects
