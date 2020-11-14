@@ -294,7 +294,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     }
     else if (_stricmp(ext, ".tga") == 0)
     {
-        HRESULT hr = LoadFromTGAFile(wSource, &info, *image);
+        HRESULT hr = LoadFromTGAFile(wSource, TGA_FLAGS_NONE, &info, *image);
         if (FAILED(hr))
         {
             ExportLog::LogError("Could not load texture \"%s\" (TGA: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
@@ -468,7 +468,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     {
         auto img = image->GetImage(0, 0, 0);
         if (img)
-            hr = SaveToTGAFile(*img, wDest);
+            hr = SaveToTGAFile(*img, TGA_FLAGS_NONE, wDest);
         else
             hr = E_FAIL;
     }
