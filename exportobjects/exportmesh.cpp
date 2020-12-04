@@ -1049,6 +1049,12 @@ void ExportMesh::ComputeUVAtlas()
     float outStretch = 0.f;
     size_t outCharts = 0;
     std::vector<uint32_t> vertexRemapArray;
+    UVATLAS uvOptions = UVATLAS_DEFAULT;
+    if (g_pScene->Settings().bLimitFaceStretch)
+        uvOptions |= UVATLAS_LIMIT_FACE_STRETCH;
+    if (g_pScene->Settings().bLimitMergeStretch)
+        uvOptions |= UVATLAS_LIMIT_MERGE_STRETCH;
+
     HRESULT hr = UVAtlasCreate(m_pVBPositions.get(), nVerts,
         m_pIB->GetIndexData(), indexFormat, nFaces,
         0, g_pScene->Settings().fUVAtlasMaxStretch, texSize, texSize,
@@ -1056,7 +1062,7 @@ void ExportMesh::ComputeUVAtlas()
         m_pAdjacency.get(), nullptr,
         nullptr,
         UVAtlasCallback, UVATLAS_DEFAULT_CALLBACK_FREQUENCY,
-        UVATLAS_DEFAULT, vb, ib,
+        uvOptions, vb, ib,
         nullptr,
         &vertexRemapArray,
         &outStretch, &outCharts);

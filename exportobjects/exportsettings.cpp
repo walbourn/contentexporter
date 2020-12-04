@@ -657,6 +657,9 @@ ExportCoreSettings::ExportCoreSettings()
     g_SettingsManager.AddFloatBounded(pCategoryUVAtlas, "UV Atlas Max Stretch Factor", "uvatlasstretch", 0.75f, 0.0f, 1.0f, &fUVAtlasMaxStretch);
     g_SettingsManager.AddFloatBounded(pCategoryUVAtlas, "UV Atlas Gutter Size", "uvatlasgutter", 2.5f, 0.0f, 10.0f, &fUVAtlasGutter);
     g_SettingsManager.AddIntBounded(pCategoryUVAtlas, "UV Atlas Texture Size", "uvatlastexturesize", 1024, 64, 4096, &iUVAtlasTextureSize);
+    g_SettingsManager.AddBool(pCategoryUVAtlas, "UVAtlas Limit Face Stretch", "uvatlaslfs", false, &bLimitFaceStretch);
+    g_SettingsManager.AddBool(pCategoryUVAtlas, "UVAtlas Limit Merge Stretch", "uvatlaslms", false, &bLimitMergeStretch);
+
     pCategoryUVAtlas->ReverseChildOrder();
 
     auto pCategorySubD = g_SettingsManager.AddCategory(pCategoryMeshes, "Subdivision Surfaces");

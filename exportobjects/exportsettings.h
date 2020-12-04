@@ -199,6 +199,8 @@ namespace ATG
         float       fUVAtlasMaxStretch;
         float       fUVAtlasGutter;
         INT         iUVAtlasTextureSize;
+        bool        bLimitFaceStretch;
+        bool        bLimitMergeStretch;
         float       fLightRangeScale;
         CHAR        strMeshNameDecoration[SETTINGS_STRING_LENGTH];
         CHAR        strAnimationRootNodeName[SETTINGS_STRING_LENGTH];
