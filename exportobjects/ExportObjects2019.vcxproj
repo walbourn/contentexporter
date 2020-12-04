@@ -150,7 +150,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\directxmesh_desktop_2017.2020.11.12.1\build\native\directxmesh_desktop_2017.targets" Condition="Exists('..\packages\directxmesh_desktop_2017.2020.11.12.1\build\native\directxmesh_desktop_2017.targets')" />
     <Import Project="..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets" Condition="Exists('..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets')" />
-    <Import Project="..\packages\uvatlas_desktop_2017.2020.11.12.1\build\native\uvatlas_desktop_2017.targets" Condition="Exists('..\packages\uvatlas_desktop_2017.2020.11.12.1\build\native\uvatlas_desktop_2017.targets')" />
+    <Import Project="..\packages\uvatlas_desktop_2017.2020.12.2.1\build\native\uvatlas_desktop_2017.targets" Condition="Exists('..\packages\uvatlas_desktop_2017.2020.12.2.1\build\native\uvatlas_desktop_2017.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -158,6 +158,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\directxmesh_desktop_2017.2020.11.12.1\build\native\directxmesh_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2017.2020.11.12.1\build\native\directxmesh_desktop_2017.targets'))" />
     <Error Condition="!Exists('..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets'))" />
-    <Error Condition="!Exists('..\packages\uvatlas_desktop_2017.2020.11.12.1\build\native\uvatlas_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2017.2020.11.12.1\build\native\uvatlas_desktop_2017.targets'))" />
+    <Error Condition="!Exists('..\packages\uvatlas_desktop_2017.2020.12.2.1\build\native\uvatlas_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2017.2020.12.2.1\build\native\uvatlas_desktop_2017.targets'))" />
   </Target>
 </Project>
