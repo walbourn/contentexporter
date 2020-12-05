@@ -6,7 +6,7 @@ http://go.microsoft.com/fwlink/?LinkId=226208
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-**November 13, 2020**
+**December 4, 2020**
 
 The **Samples Content Exporter** was shipped as a sample in the legacy DirectX SDK. It makes use of the [Autodesk FBX SDK](http://autodesk.com/fbx) to import an FBX file and then export the data as an ``.SDKMESH``. The ``.SDKMESH`` format is a runtime geometry format supported by the _DirectX Tool Kit_ for [DX11](http://go.microsoft.com/fwlink/?LinkId=248929) / [DX12](http://go.microsoft.com/fwlink/?LinkID=615561) and [DXUT](http://go.microsoft.com/fwlink/?LinkId=320437), and is used in the Windows sample [Marble Maze](https://docs.microsoft.com/en-us/samples/microsoft/windows-appsample-marble-maze/directx-marble-maze-game-sample/).
 
