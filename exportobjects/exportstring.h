@@ -4,7 +4,7 @@
 // A pooled string class that makes string manipulation easier within the export code.
 //  
 // Advanced Technology Group (ATG)
-// Copyright (C) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=226208

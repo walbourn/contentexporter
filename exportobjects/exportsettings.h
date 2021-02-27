@@ -5,7 +5,7 @@
 // data structures for annotating, organizing, and modifying the settings variables.
 //
 // Advanced Technology Group (ATG)
-// Copyright (C) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=226208

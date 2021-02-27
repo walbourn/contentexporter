@@ -5,7 +5,7 @@
 // mesh data and generate export-ready data from a non-indexed triangle list.
 //  
 // Advanced Technology Group (ATG)
-// Copyright (C) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=226208

@@ -6,7 +6,7 @@
 // front-end project uses these defines in their builds.
 //  
 // Advanced Technology Group (ATG)
-// Copyright (C) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=226208
@@ -22,7 +22,7 @@
 #define CONTENT_EXPORTER_GLOBAL_TITLE "Samples Content Exporter"
 #define CONTENT_EXPORTER_SETTINGS_TOKEN "SamplesContentExporter"
 #define CONTENT_EXPORTER_VENDOR "Microsoft Advanced Technology Group"
-#define CONTENT_EXPORTER_COPYRIGHT "Copyright (c) Microsoft Corporation.  All Rights Reserved."
+#define CONTENT_EXPORTER_COPYRIGHT "Copyright (c) Microsoft Corporation."
 #define CONTENT_EXPORTER_FILE_EXTENSION "xatg"
 #define CONTENT_EXPORTER_FILE_FILTER "*." CONTENT_EXPORTER_FILE_EXTENSION
 #define CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION "XATG Samples Content File"

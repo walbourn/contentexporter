@@ -4,7 +4,7 @@
 // Classes representing Catmull-Clark subdivision surfaces.
 //  
 // Advanced Technology Group (ATG)
-// Copyright (C) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=226208
