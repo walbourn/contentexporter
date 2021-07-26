@@ -2,7 +2,7 @@
 
 # ATG  Samples Content Exporter
 
-http://go.microsoft.com/fwlink/?LinkId=226208
+https://aka.ms/dxsdkcontentexporter
 
 Copyright (c) Microsoft Corporation.
 

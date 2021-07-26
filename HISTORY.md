@@ -1,6 +1,6 @@
 # ATG  Samples Content Exporter
 
-http://go.microsoft.com/fwlink/?LinkId=226208
+https://aka.ms/dxsdkcontentexporter
 
 Release available for download on [GitHub](https://github.com/walbourn/contentexporter/releases)
 
