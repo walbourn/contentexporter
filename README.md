@@ -1,4 +1,4 @@
-![DirectX Logo](https://github.com/walbourn/contentexporter/wiki/Dx_logo.GIF)
+![DirectX Logo](https://raw.githubusercontent.com/wiki/walbourn/contentexporter/Dx_logo.GIF)
 
 # ATG  Samples Content Exporter
 
