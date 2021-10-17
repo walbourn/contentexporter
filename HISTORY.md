@@ -6,6 +6,12 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### October 21, 2021
+* Updated for DirectXTex August 2021 release
+* Updated for DirectXMesh and UVAtlas June 2021 releases
+* Retired VS 2017 projects
+* Code cleanup
+
 ### December 4, 2020
 * Updated for UVAtlas December 2020 release
 * Added ``-uvatlaslfs`` and ``-uvatlaslms`` switches for new UVAtlas artist control behavior flags

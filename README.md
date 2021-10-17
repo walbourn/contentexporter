@@ -6,11 +6,11 @@ https://aka.ms/dxsdkcontentexporter
 
 Copyright (c) Microsoft Corporation.
 
-**December 4, 2020**
+**October 16, 2021**
 
 The **Samples Content Exporter** was shipped as a sample in the legacy DirectX SDK. It makes use of the [Autodesk FBX SDK](http://autodesk.com/fbx) to import an FBX file and then export the data as an ``.SDKMESH``. The ``.SDKMESH`` format is a runtime geometry format supported by the _DirectX Tool Kit_ for [DX11](http://go.microsoft.com/fwlink/?LinkId=248929) / [DX12](http://go.microsoft.com/fwlink/?LinkID=615561) and [DXUT](http://go.microsoft.com/fwlink/?LinkId=320437), and is used in the Windows sample [Marble Maze](https://docs.microsoft.com/en-us/samples/microsoft/windows-appsample-marble-maze/directx-marble-maze-game-sample/).
 
-This code is designed to build with Visual Studio 2017 ([15.9](https://walbourn.github.io/vs-2017-15-9-update/)), Visual Studio 2019, or clang for Windows v9 or later. It is recommended that you make use of the Windows 10 May 2020 Update SDK ([19041](https://walbourn.github.io/windows-10-may-2020-update-sdk/)).
+This code is designed to build with Visual Studio 2019. It is recommended that you make use of the Windows 10 May 2020 Update SDK ([19041](https://walbourn.github.io/windows-10-may-2020-update-sdk/)) or later.
 
 These components are designed to work without requiring any content from the legacy DirectX SDK. For details, see [Where is the DirectX SDK?](https://aka.ms/dxsdk).
 
@@ -40,8 +40,6 @@ All content and source code for this package are subject to the terms of the [MI
 
 For the latest version of this tool, bug reports, etc. please visit the project site on [GitHub](https://github.com/walbourn/contentexporter/).
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
 Use of OpenEXR is subject to it's own license terms, and requires the ZLIB library as well. Use of OpenEXR can be removed by undefining ``USE_OPENEXR`` from the  project and removing the NuGet packages.
 
     <https://github.com/openexr/openexr/blob/develop/OpenEXR/LICENSE>
@@ -49,7 +47,7 @@ Use of OpenEXR is subject to it's own license terms, and requires the ZLIB libra
 
 ## Build Instructions
 
-Install the Autodesk FBX SDK 2019.2 or later (latest tested version is 2020.1.1) for Windows VS 2017.
+Install the Autodesk FBX SDK 2019.2 or later (latest tested version is 2020.2.1) for Windows VS 2019.
 
     http://autodesk.com/fbx
 
@@ -57,7 +55,7 @@ Ensure the environment variable ``FBX_SDK`` is set to point to the Autodesk FBX 
 
 > Because VS 2015, 2017, and 2019 are all binary compatible, you can use older Autodesk FBX SDK release if needed by modifying the project to use the '2015' versions of the libraries.
 
-Open the ``ContentExporter_201?.sln`` from Visual Studio.
+Open the ``ContentExporter_2019.sln`` from Visual Studio.
 
 Build the solution
 
@@ -75,3 +73,21 @@ example of such file containers. The documentation on the format can be found [h
 ## Release Notes
 
 * The VS projects do not support building a 32-bit (x86) version of the exporter. x64 native (x64) use is wide-spread for content creation tools and provides much greater memory flexibility.
+
+## Contributing
+
+This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Trademarks
+
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+# Credits
+
+The *DirectX SDK Samples Content Exporter* is the work of Matt Lee with contributions from Chuck Walbourn.
+
+Thanks to Shanon Drone for the SDKMESH file format.
