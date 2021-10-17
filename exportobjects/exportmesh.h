@@ -224,7 +224,7 @@ namespace ATG
         bool Equals(const ExportMeshVertex* pOtherVertex) const;
     };
 
-    typedef std::vector< ExportMeshVertex* > ExportMeshVertexArray;
+    using ExportMeshVertexArray = std::vector< ExportMeshVertex* >;
 
     struct ExportMeshTriangle
     {
@@ -246,7 +246,7 @@ namespace ATG
         INT                 PolygonIndex;
     };
 
-    typedef std::vector< ExportMeshTriangle* > ExportMeshTriangleArray;
+    using ExportMeshTriangleArray = std::vector< ExportMeshTriangle* >;
 
     class ExportMeshTriangleAllocator
     {
@@ -271,7 +271,7 @@ namespace ATG
             ExportMeshTriangle* pTriangleArray;
             UINT m_uTriangleCount;
         };
-        typedef std::list< AllocationBlock > AllocationBlockList;
+        using AllocationBlockList = std::list < AllocationBlock >;
         AllocationBlockList m_AllocationBlocks;
         UINT m_uTotalCount;
         UINT m_uAllocatedCount;
@@ -429,7 +429,7 @@ namespace ATG
         ExportMaterial* pMaterial;
     };
 
-    typedef std::vector< ExportMaterialSubsetBinding* > ExportMaterialSubsetBindingArray;
+    using ExportMaterialSubsetBindingArray = std::vector< ExportMaterialSubsetBinding* >;
 
     class ExportModel
     {

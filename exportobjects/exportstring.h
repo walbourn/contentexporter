@@ -88,7 +88,7 @@ namespace ATG
     {
         if (!strString)
             return nullptr;
-        typedef std::list< const CHAR* > StringList;
+        using StringList = std::list< const CHAR* >;
         static StringList s_StringLists[EXPORTSTRING_HASHSIZE];
 
         BYTE uBucketIndex = HashString(strString) & (EXPORTSTRING_HASHSIZE - 1);

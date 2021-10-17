@@ -24,7 +24,7 @@ public:
     std::vector<FbxNode*> InfluenceNodes;
     size_t dwVertexCount;
     DWORD dwVertexStride;
-    std::unique_ptr<BYTE[]> pBoneIndices;
+    std::unique_ptr<uint8_t[]> pBoneIndices;
     std::unique_ptr<float[]> pBoneWeights;
 
     SkinData()
@@ -43,15 +43,15 @@ public:
         dwVertexStride = dwStride;
 
         const size_t dwBufferSize = dwVertexCount * dwVertexStride;
-        pBoneIndices.reset(new BYTE[dwBufferSize]);
-        ZeroMemory(pBoneIndices.get(), sizeof(BYTE) * dwBufferSize);
+        pBoneIndices.reset(new uint8_t[dwBufferSize]);
+        ZeroMemory(pBoneIndices.get(), sizeof(uint8_t) * dwBufferSize);
 
         pBoneWeights.reset(new float[dwBufferSize]);
         ZeroMemory(pBoneWeights.get(), sizeof(float) * dwBufferSize);
     }
 
 
-    BYTE* GetIndices(size_t dwIndex)
+    uint8_t* GetIndices(size_t dwIndex)
     {
         assert(dwIndex < dwVertexCount);
         return pBoneIndices.get() + (dwIndex * dwVertexStride);
@@ -80,7 +80,7 @@ public:
                     pIndices[j] = pIndices[j - 1];
                     pWeights[j] = pWeights[j - 1];
                 }
-                pIndices[i] = static_cast<BYTE>(dwBoneIndex);
+                pIndices[i] = static_cast<uint8_t>(dwBoneIndex);
                 pWeights[i] = fBoneWeight;
                 break;
             }

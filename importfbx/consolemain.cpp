@@ -73,7 +73,7 @@ DebugSpewListener g_DebugSpewListener;
 
 ExportManifest g_Manifest;
 
-typedef std::vector<ExportPath> FileNameVector;
+using FileNameVector = std::vector<ExportPath>;
 FileNameVector g_InputFileNames;
 
 ExportPath g_WorkingPath;
@@ -90,14 +90,14 @@ enum ExportFileFormat
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
 
-typedef bool MacroCommandCallback(const CHAR* strArgument, bool& bUsedArgument);
+using MacroCommandCallback = bool(*)(const CHAR* strArgument, bool& bUsedArgument);
 
 struct MacroCommand
 {
     const CHAR* strCommandLine;
     const CHAR* strAnnotation;
     const CHAR* strDescription;
-    MacroCommandCallback* pCallback;
+    MacroCommandCallback pCallback;
 };
 
 bool MacroDisplayHelp(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)

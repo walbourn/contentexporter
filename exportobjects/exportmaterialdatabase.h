@@ -60,7 +60,7 @@ namespace ATG
 
         ExportMaterialParameterDefinition() : ParamType(MPT_STRING), bVisibleInTool(false), bExportToContentFile(false), bDetectAlpha(false) {}
     };
-    typedef std::vector<ExportMaterialParameterDefinition*> ExportMaterialParameterDefinitionVector;
+    using ExportMaterialParameterDefinitionVector = std::vector<ExportMaterialParameterDefinition*>;
 
     class ExportMaterialDefinition
     {
@@ -70,7 +70,7 @@ namespace ATG
         ExportString        strDescription;
         ExportMaterialParameterDefinitionVector     Parameters;
     };
-    typedef std::vector<ExportMaterialDefinition*> ExportMaterialDefinitionVector;
+    using ExportMaterialDefinitionVector = std::vector<ExportMaterialDefinition*>;
 
     class MaterialDatabaseReader : public ISAXCallback
     {
@@ -105,7 +105,7 @@ namespace ATG
             WCHAR   strName[256];
             WCHAR   strValue[256];
         };
-        typedef std::vector<ElementAttribute> ElementAttributeVector;
+        using ElementAttributeVector = std::vector<ElementAttribute>;
 
         WCHAR                   m_strCurrentElementName[256];
         bool                    m_bCurrentElementEndTag;

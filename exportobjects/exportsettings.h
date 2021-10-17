@@ -140,7 +140,7 @@ namespace ATG
     protected:
         ExportSettingsEntry* FindSettingsEntry(ExportString SettingName, bool bCommandLineName, ExportSettingsEntry* pRoot);
 
-        typedef std::vector<ExportSettingsEntry*> SettingsEntryArray;
+        using SettingsEntryArray = std::vector<ExportSettingsEntry*>;
         SettingsEntryArray  m_RootCategories;
     };
 

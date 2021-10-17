@@ -67,7 +67,7 @@ namespace ATG
             INT iQuadIndex;
             INT iLocalIndex;
         };
-        typedef std::unordered_map< UINT64, Edge > EdgeMap;
+        using EdgeMap = std::unordered_map< UINT64, Edge >;
 
         std::vector< Triangle >             m_Triangles;
         std::vector< Quad >                 m_Quads;

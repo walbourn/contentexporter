@@ -25,7 +25,7 @@ struct AnimationScanNode
     XMFLOAT4X4 matGlobal;
 };
 
-typedef std::vector<AnimationScanNode> ScanList;
+using ScanList = std::vector<AnimationScanNode>;
 
 void ParseNode(FbxNode* pNode, ScanList& scanlist, DWORD dwFlags, INT iParentIndex, bool bIncludeNode)
 {

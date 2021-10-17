@@ -20,21 +20,21 @@ namespace ATG
         float               fTime;
         DirectX::XMFLOAT3   Position;
     };
-    typedef std::vector<ExportAnimationPositionKey> PositionKeyList;
+    using PositionKeyList = std::vector<ExportAnimationPositionKey>;
 
     struct ExportAnimationOrientationKey
     {
         float               fTime;
         DirectX::XMFLOAT4   Orientation;
     };
-    typedef std::vector<ExportAnimationOrientationKey> OrientationKeyList;
+    using OrientationKeyList = std::vector<ExportAnimationOrientationKey>;
 
     struct ExportAnimationScaleKey
     {
         float               fTime;
         DirectX::XMFLOAT3   Scale;
     };
-    typedef std::vector<ExportAnimationScaleKey> ScaleKeyList;
+    using ScaleKeyList = std::vector<ExportAnimationScaleKey>;
 
     class ExportFrame;
 

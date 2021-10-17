@@ -42,7 +42,7 @@ namespace ATG
         INT                             ValueInt;
         DWORD                           Flags;
     };
-    typedef std::list<ExportMaterialParameter> MaterialParameterList;
+    using MaterialParameterList = std::list<ExportMaterialParameter>;
 
     class ExportMaterial :
         public ExportBase

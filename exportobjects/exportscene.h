@@ -20,9 +20,9 @@ namespace ATG
     class ExportMeshBase;
     class ExportAnimation;
 
-    typedef std::vector<ExportMaterial*> ExportMaterialList;
-    typedef std::vector<ExportAnimation*> ExportAnimationList;
-    typedef std::vector<ExportMeshBase*> ExportMeshBaseList;
+    using ExportMaterialList = std::vector<ExportMaterial*>;
+    using ExportAnimationList = std::vector<ExportAnimation*>;
+    using ExportMeshBaseList = std::vector<ExportMeshBase*>;
 
     class ExportStatistics
     {

@@ -45,7 +45,7 @@ namespace ATG
 
         ExportFileRecord() : FileType(EFT_SCENEFILE_XML), CompressedTextureFormat(DXGI_FORMAT_UNKNOWN), HDRTextureFormat(DXGI_FORMAT_UNKNOWN), TextureOperation(ETO_NOTHING) {}
     };
-    typedef std::vector<ExportFileRecord> ExportFileRecordVector;
+    using ExportFileRecordVector = std::vector<ExportFileRecord>;
 
     class ExportManifest
     {

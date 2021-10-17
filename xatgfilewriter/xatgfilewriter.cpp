@@ -49,7 +49,7 @@ namespace ATG
     void PrepareBinaryBlob();
     void PrepareBundledFile();
     DWORD GetBinaryBlobCurrentOffset();
-    void WriteBinaryBlobData(const BYTE* pData, size_t dwDataSizeBytes);
+    void WriteBinaryBlobData(const uint8_t* pData, size_t dwDataSizeBytes);
 
     void XATGInitializeSettings()
     {
@@ -1161,15 +1161,15 @@ namespace ATG
         return GetFileSize(g_hBinaryBlobFile, nullptr);
     }
 
-    void WriteBinaryBlobData(const BYTE* pData, size_t dwDataSizeBytes)
+    void WriteBinaryBlobData(const uint8_t* pData, size_t dwDataSizeBytes)
     {
         DWORD dwBytesWritten = 0;
         WriteFile(g_hBinaryBlobFile, pData, static_cast<DWORD>(dwDataSizeBytes), &dwBytesWritten, nullptr);
-        const DWORD dwPadSize = 32;
+        constexpr DWORD dwPadSize = 32;
         if ((dwDataSizeBytes % dwPadSize) != 0)
         {
             const DWORD dwZeroPadSize = dwPadSize - (dwDataSizeBytes % dwPadSize);
-            const BYTE bZeros[dwPadSize] = {};
+            const uint8_t bZeros[dwPadSize] = {};
             WriteFile(g_hBinaryBlobFile, bZeros, dwZeroPadSize, &dwBytesWritten, nullptr);
         }
     }

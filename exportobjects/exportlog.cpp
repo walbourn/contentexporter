@@ -15,13 +15,13 @@ namespace ATG
 {
     bool g_bLoggingEnabled = true;
     UINT g_uLogLevel = 10;
-    typedef std::list< ILogListener* > LogListenerList;
+    using LogListenerList = std::list< ILogListener* >;
     LogListenerList g_Listeners;
 
     size_t g_dwWarningCount = 0;
     size_t g_dwErrorCount = 0;
 
-    typedef std::list<const CHAR*> StringList;
+    using StringList = std::list<const CHAR*>;
     StringList      g_WarningsList;
     StringList      g_ErrorsList;
 

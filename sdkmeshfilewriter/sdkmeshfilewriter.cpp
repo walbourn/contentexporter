@@ -29,14 +29,14 @@ namespace ATG
     std::vector<ExportIB*>                          g_IBArray;
     std::vector<SDKMESH_INDEX_BUFFER_HEADER>        g_IBHeaderArray;
     std::vector<SDKMESH_SUBSET>                     g_SubsetArray;
-    std::vector<UINT>                               g_SubsetIndexArray;
-    std::vector<UINT>                               g_FrameInfluenceArray;
+    std::vector<uint32_t>                           g_SubsetIndexArray;
+    std::vector<uint32_t>                           g_FrameInfluenceArray;
     std::vector<SDKMESH_MATERIAL>                   g_MaterialArray;
 
-    typedef std::unordered_map<ExportMaterial*, DWORD> MaterialLookupMap;
+    using MaterialLookupMap = std::unordered_map<ExportMaterial*, DWORD>;
     MaterialLookupMap                               g_ExportMaterialToSDKMeshMaterialMap;
 
-    BYTE g_Padding4K[4096] = {};
+    uint8_t g_Padding4K[4096] = {};
 
     bool WriteSDKMeshAnimationFile(const CHAR* strFileName, ExportManifest* pManifest);
 
@@ -240,7 +240,7 @@ namespace ATG
         IBHeader.DataOffset = 0;
         IBHeader.IndexType = pIB->GetIndexSize() == 2 ? IT_16BIT : IT_32BIT;
         IBHeader.NumIndices = pIB->GetIndexCount();
-        IBHeader.SizeBytes = UINT64(pIB->GetIndexDataSize());
+        IBHeader.SizeBytes = static_cast<uint64_t>(pIB->GetIndexDataSize());
         g_IBArray.push_back(pIB);
         g_IBHeaderArray.push_back(IBHeader);
     }
@@ -275,7 +275,7 @@ namespace ATG
         Subset.IndexCount = pIBSubset->GetIndexCount();
         Subset.MaterialID = dwMaterialIndex;
         Subset.VertexStart = 0;
-        Subset.VertexCount = UINT64(dwMaxVertexCount);
+        Subset.VertexCount = static_cast<uint64_t>(dwMaxVertexCount);
         switch (pIBSubset->GetPrimitiveType())
         {
         case ExportIBSubset::TriangleList:
@@ -301,7 +301,7 @@ namespace ATG
         Subset.IndexCount = pSubset->dwPatchCount;
         Subset.MaterialID = dwMaterialIndex;
         Subset.VertexStart = 0;
-        Subset.VertexCount = UINT64(dwMaxVertexCount);
+        Subset.VertexCount = static_cast<uint64_t>(dwMaxVertexCount);
         Subset.PrimitiveType = pSubset->bQuadPatches ? PT_QUAD_PATCH_LIST : PT_TRIANGLE_PATCH_LIST;
         strcpy_s(Subset.Name, pSubset->Name.SafeString());
         g_SubsetArray.push_back(Subset);
@@ -331,12 +331,12 @@ namespace ATG
             break;
         }
 
-        MeshHeader.NumFrameInfluences = UINT(pMeshBase->GetInfluenceCount());
+        MeshHeader.NumFrameInfluences = static_cast<uint32_t>(pMeshBase->GetInfluenceCount());
 
         ExportSubDProcessMesh* pSubDMesh = nullptr;
         size_t dwMaxVertexCount = 0;
         size_t dwMaxIndexCount = 0;
-        MeshHeader.IndexBuffer = UINT(g_IBArray.size());
+        MeshHeader.IndexBuffer = static_cast<uint32_t>(g_IBArray.size());
         switch (pMeshBase->GetMeshType())
         {
         case ExportMeshBase::PolyMesh:
@@ -346,13 +346,13 @@ namespace ATG
             if (pSubDMesh)
             {
                 MeshHeader.NumVertexBuffers = 2;
-                MeshHeader.VertexBuffers[0] = static_cast<UINT>(g_VBArray.size());
-                MeshHeader.VertexBuffers[1] = static_cast<UINT>(g_VBArray.size() + 1);
+                MeshHeader.VertexBuffers[0] = static_cast<uint32_t>(g_VBArray.size());
+                MeshHeader.VertexBuffers[1] = static_cast<uint32_t>(g_VBArray.size() + 1);
             }
             else
             {
                 MeshHeader.NumVertexBuffers = 1;
-                MeshHeader.VertexBuffers[0] = static_cast<UINT>(g_VBArray.size());
+                MeshHeader.VertexBuffers[0] = static_cast<uint32_t>(g_VBArray.size());
             }
             CapturePolyMesh(pMesh);
             dwMaxVertexCount = pMesh->GetVB()->GetVertexCount();
@@ -361,10 +361,10 @@ namespace ATG
         break;
         }
 
-        MeshHeader.NumSubsets = static_cast<UINT>(pModel->GetBindingCount());
+        MeshHeader.NumSubsets = static_cast<uint32_t>(pModel->GetBindingCount());
         for (DWORD i = 0; i < MeshHeader.NumSubsets; ++i)
         {
-            g_SubsetIndexArray.push_back(static_cast<UINT>(g_SubsetArray.size()));
+            g_SubsetIndexArray.push_back(static_cast<uint32_t>(g_SubsetArray.size()));
             if (pSubDMesh)
             {
                 CaptureSubDSubset(pSubDMesh, pModel->GetBinding(i), dwMaxVertexCount, version2);
@@ -381,14 +381,14 @@ namespace ATG
 
             ExportLog::LogWarning("No model binding for mesh \"%s\" so creating a default subset", pMeshBase->GetName().SafeString());
 
-            g_SubsetIndexArray.push_back(static_cast<UINT>(g_SubsetArray.size()));
+            g_SubsetIndexArray.push_back(static_cast<uint32_t>(g_SubsetArray.size()));
 
             SDKMESH_SUBSET Subset = {};
             Subset.IndexStart = 0;
-            Subset.IndexCount = static_cast<UINT64>(dwMaxIndexCount);
+            Subset.IndexCount = static_cast<uint64_t>(dwMaxIndexCount);
             Subset.MaterialID = INVALID_MATERIAL;
             Subset.VertexStart = 0;
-            Subset.VertexCount = static_cast<UINT64>(dwMaxVertexCount);
+            Subset.VertexCount = static_cast<uint64_t>(dwMaxVertexCount);
             Subset.PrimitiveType = PT_TRIANGLE_LIST;
             g_SubsetArray.push_back(Subset);
         }
@@ -417,16 +417,16 @@ namespace ATG
             {
                 ExportLog::LogWarning("Frame \"%s\" has %zu meshes.  Only one mesh per frame is supported in the SDKMesh format.", pRootFrame->GetName().SafeString(), dwModelCount);
             }
-            Frame.Mesh = static_cast<UINT>(g_MeshHeaderArray.size());
+            Frame.Mesh = static_cast<uint32_t>(g_MeshHeaderArray.size());
             ExportModel* pModel = pRootFrame->GetModelByIndex(0);
             CaptureModel(pModel, version2);
         }
 
-        UINT dwChildIndex = INVALID_FRAME;
+        uint32_t dwChildIndex = INVALID_FRAME;
         const size_t dwChildCount = pRootFrame->GetChildCount();
         if (dwChildCount > 0)
-            dwChildIndex = static_cast<DWORD>(g_FrameHeaderArray.size() + 1);
-        Frame.ChildFrame = static_cast<UINT>(dwChildIndex);
+            dwChildIndex = static_cast<uint32_t>(g_FrameHeaderArray.size() + 1);
+        Frame.ChildFrame = static_cast<uint32_t>(dwChildIndex);
         Frame.SiblingFrame = INVALID_FRAME;
 
         g_FrameHeaderArray.push_back(Frame);
@@ -446,13 +446,13 @@ namespace ATG
         }
     }
 
-    UINT FindFrame(ExportString Name)
+    uint32_t FindFrame(ExportString Name)
     {
         const size_t dwFrameCount = g_FrameArray.size();
         for (size_t i = 0; i < dwFrameCount; ++i)
         {
             if (g_FrameArray[i]->GetName() == Name)
-                return static_cast<UINT>(i);
+                return static_cast<uint32_t>(i);
         }
         return INVALID_FRAME;
     }
@@ -470,7 +470,7 @@ namespace ATG
             {
                 const auto InfluenceName = pMeshBase->GetInfluence(j);
                 const DWORD dwFrameIndex = FindFrame(InfluenceName);
-                g_FrameInfluenceArray.push_back(static_cast<UINT>(dwFrameIndex));
+                g_FrameInfluenceArray.push_back(static_cast<uint32_t>(dwFrameIndex));
             }
 
             if (!Mesh.NumFrameInfluences)
@@ -493,7 +493,7 @@ namespace ATG
 
     size_t ComputeMeshHeaderIndexDataSize()
     {
-        return ((g_SubsetIndexArray.size() + g_FrameInfluenceArray.size()) * sizeof(UINT));
+        return ((g_SubsetIndexArray.size() + g_FrameInfluenceArray.size()) * sizeof(uint32_t));
     }
 
     DWORD ComputeBufferDataSize()
@@ -548,9 +548,9 @@ namespace ATG
         {
             auto& Mesh = g_MeshHeaderArray[i];
             Mesh.SubsetOffset = DataOffset;
-            DataOffset += Mesh.NumSubsets * sizeof(UINT);
+            DataOffset += Mesh.NumSubsets * sizeof(uint32_t);
             Mesh.FrameInfluenceOffset = DataOffset;
-            DataOffset += Mesh.NumFrameInfluences * sizeof(UINT);
+            DataOffset += Mesh.NumFrameInfluences * sizeof(uint32_t);
             WriteFile(hFile, &Mesh, sizeof(SDKMESH_MESH), &dwBytesWritten, nullptr);
         }
     }
@@ -566,12 +566,12 @@ namespace ATG
             const auto& Mesh = g_MeshHeaderArray[i];
             if (Mesh.NumSubsets > 0)
             {
-                WriteFile(hFile, &g_SubsetIndexArray[dwSubsetIndexCount], Mesh.NumSubsets * sizeof(UINT), &dwBytesWritten, nullptr);
+                WriteFile(hFile, &g_SubsetIndexArray[dwSubsetIndexCount], Mesh.NumSubsets * sizeof(uint32_t), &dwBytesWritten, nullptr);
                 dwSubsetIndexCount += Mesh.NumSubsets;
             }
             if (Mesh.NumFrameInfluences > 0)
             {
-                WriteFile(hFile, &g_FrameInfluenceArray[dwFrameInfluenceCount], Mesh.NumFrameInfluences * sizeof(UINT), &dwBytesWritten, nullptr);
+                WriteFile(hFile, &g_FrameInfluenceArray[dwFrameInfluenceCount], Mesh.NumFrameInfluences * sizeof(uint32_t), &dwBytesWritten, nullptr);
                 dwFrameInfluenceCount += Mesh.NumFrameInfluences;
             }
         }
@@ -667,14 +667,14 @@ namespace ATG
         SDKMESH_HEADER FileHeader = {};
 
         FileHeader.Version = (version2) ? SDKMESH_FILE_VERSION_V2 : SDKMESH_FILE_VERSION;
-        FileHeader.IsBigEndian = static_cast<BYTE>(!g_pScene->Settings().bLittleEndian);
+        FileHeader.IsBigEndian = static_cast<uint8_t>(!g_pScene->Settings().bLittleEndian);
 
-        FileHeader.NumFrames = static_cast<UINT>(g_FrameArray.size());
-        FileHeader.NumMaterials = static_cast<UINT>(g_MaterialArray.size());
-        FileHeader.NumMeshes = static_cast<UINT>(g_MeshHeaderArray.size());
-        FileHeader.NumTotalSubsets = static_cast<UINT>(g_SubsetArray.size());
-        FileHeader.NumIndexBuffers = static_cast<UINT>(g_IBHeaderArray.size());
-        FileHeader.NumVertexBuffers = static_cast<UINT>(g_VBHeaderArray.size());
+        FileHeader.NumFrames = static_cast<uint32_t>(g_FrameArray.size());
+        FileHeader.NumMaterials = static_cast<uint32_t>(g_MaterialArray.size());
+        FileHeader.NumMeshes = static_cast<uint32_t>(g_MeshHeaderArray.size());
+        FileHeader.NumTotalSubsets = static_cast<uint32_t>(g_SubsetArray.size());
+        FileHeader.NumIndexBuffers = static_cast<uint32_t>(g_IBHeaderArray.size());
+        FileHeader.NumVertexBuffers = static_cast<uint32_t>(g_VBHeaderArray.size());
 
         FileHeader.HeaderSize = sizeof(SDKMESH_HEADER) +
             FileHeader.NumVertexBuffers * sizeof(SDKMESH_VERTEX_BUFFER_HEADER) +
