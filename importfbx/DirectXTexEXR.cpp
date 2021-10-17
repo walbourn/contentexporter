@@ -57,7 +57,7 @@ namespace
             {
                 FILE_DISPOSITION_INFO info = {};
                 info.DeleteFile = TRUE;
-                (void)SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
+                std::ignore = SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
             }
         }
 
@@ -454,7 +454,7 @@ HRESULT DirectX::SaveToEXRFile(const Image& image, const wchar_t* szFile)
         }
         else
         {
-            uint64_t bytes = image.width * image.height;
+            const uint64_t bytes = image.width * image.height;
 
             if (bytes > UINT32_MAX)
             {

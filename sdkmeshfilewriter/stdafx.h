@@ -21,21 +21,27 @@
 #define NOSERVICE
 #define NOHELP
 
-#include <stdio.h>
-#include <tchar.h>
-#include <windows.h>
+#include <Windows.h>
 #include <WindowsX.h>
-#include <list>
-#include <vector>
-#include <unordered_map>
+
 #include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <cwchar>
+#include <list>
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include <commctrl.h>
 #include <richedit.h>
 #include <process.h>
-#include <assert.h>
-#include <stdio.h>
-#include <time.h>
 #include <shellapi.h>
 #include <dxgiformat.h>
 

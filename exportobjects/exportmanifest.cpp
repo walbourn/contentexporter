@@ -294,7 +294,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     }
     else if (_stricmp(ext, ".tga") == 0)
     {
-        HRESULT hr = LoadFromTGAFile(wSource, TGA_FLAGS_NONE, &info, *image);
+        const HRESULT hr = LoadFromTGAFile(wSource, TGA_FLAGS_NONE, &info, *image);
         if (FAILED(hr))
         {
             ExportLog::LogError("Could not load texture \"%s\" (TGA: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
@@ -304,7 +304,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     else if (_stricmp(ext, ".hdr") == 0)
     {
         ishdr = true;
-        HRESULT hr = LoadFromHDRFile(wSource, &info, *image);
+        const HRESULT hr = LoadFromHDRFile(wSource, &info, *image);
         if (FAILED(hr))
         {
             ExportLog::LogError("Could not load texture \"%s\" (HDR: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
@@ -315,7 +315,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     {
 #ifdef USE_OPENEXR
         ishdr = true;
-        HRESULT hr = LoadFromEXRFile(wSource, &info, *image);
+        const HRESULT hr = LoadFromEXRFile(wSource, &info, *image);
         if (FAILED(hr))
         {
             ExportLog::LogError("Could not load texture \"%s\" (EXR: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
@@ -332,7 +332,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         if (g_pScene->Settings().bIgnoreSRGB)
             wicFlags |= WIC_FLAGS_IGNORE_SRGB;
 
-        HRESULT hr = LoadFromWICFile(wSource, wicFlags, &info, *image);
+        const HRESULT hr = LoadFromWICFile(wSource, wicFlags, &info, *image);
         if (FAILED(hr))
         {
             ExportLog::LogError("Could not load texture \"%s\" (WIC: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
@@ -385,7 +385,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     {
         std::unique_ptr<ScratchImage> timage(new ScratchImage);
 
-        HRESULT hr = ComputeNormalMap(image->GetImages(), image->GetImageCount(), image->GetMetadata(),
+        const HRESULT hr = ComputeNormalMap(image->GetImages(), image->GetImageCount(), image->GetMetadata(),
             CNMAP_CHANNEL_LUMINANCE, 10.f, tformat, *timage);
         if (FAILED(hr))
         {
@@ -404,7 +404,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     {
         std::unique_ptr<ScratchImage> timage(new ScratchImage);
 
-        HRESULT hr = Convert(image->GetImages(), image->GetImageCount(), image->GetMetadata(),
+        const HRESULT hr = Convert(image->GetImages(), image->GetImageCount(), image->GetMetadata(),
             tformat, TEX_FILTER_DEFAULT, 0.5f, *timage);
         if (FAILED(hr))
         {
@@ -424,7 +424,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     {
         std::unique_ptr<ScratchImage> timage(new ScratchImage);
 
-        HRESULT hr = GenerateMipMaps(image->GetImages(), image->GetImageCount(), image->GetMetadata(), TEX_FILTER_DEFAULT, 0, *timage);
+        const HRESULT hr = GenerateMipMaps(image->GetImages(), image->GetImageCount(), image->GetMetadata(), TEX_FILTER_DEFAULT, 0, *timage);
         if (FAILED(hr))
         {
             ExportLog::LogError("Failing generating mimaps for \"%s\" (WIC: %08X).", strSourceFileName, static_cast<unsigned int>(hr));
@@ -448,7 +448,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
         {
             std::unique_ptr<ScratchImage> timage(new ScratchImage);
 
-            HRESULT hr = Compress(image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage);
+            const HRESULT hr = Compress(image->GetImages(), image->GetImageCount(), image->GetMetadata(), CompressedFormat, TEX_COMPRESS_DEFAULT, 0.5f, *timage);
             if (FAILED(hr))
             {
                 ExportLog::LogError("Failing compressing \"%s\" (WIC: %08X).", strSourceFileName, static_cast<unsigned int>(hr));

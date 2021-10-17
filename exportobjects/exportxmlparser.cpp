@@ -67,7 +67,7 @@ void XMLParser::FillBuffer()
     }
     else
     {
-        (void)ReadFile(m_hFile, m_pReadBuf, XML_READ_BUFFER_SIZE, &NChars, nullptr);
+        std::ignore = ReadFile(m_hFile, m_pReadBuf, XML_READ_BUFFER_SIZE, &NChars, nullptr);
     }
 
     m_dwCharsConsumed += NChars;
@@ -926,7 +926,7 @@ HRESULT XMLParser::ParseXMLBuffer(const CHAR* strBuffer, UINT uBufferSize)
     m_dwCharsTotal = m_uInXMLBufferCharsLeft;
     m_dwCharsConsumed = 0;
 
-    HRESULT hr = MainParseLoop();
+    const HRESULT hr = MainParseLoop();
 
     // we no longer own strFilename, so un-set it
     m_pISAXCallback->m_strFilename = nullptr;

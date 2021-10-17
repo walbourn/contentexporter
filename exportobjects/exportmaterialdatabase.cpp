@@ -261,7 +261,7 @@ bool ExportMaterialDatabase::Initialize(const CHAR* strFileName)
     MaterialDatabaseReader mdr;
     XMLParser xp;
     xp.RegisterSAXCallbackInterface(&mdr);
-    HRESULT hr = xp.ParseXMLFile(strFileName);
+    const HRESULT hr = xp.ParseXMLFile(strFileName);
     if (hr == S_OK)
     {
         strcpy_s(g_strMaterialDBFileName, strFileName);

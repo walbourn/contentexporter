@@ -337,7 +337,7 @@ bool MacroAttach(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
 {
 #ifdef _DEBUG
     ExportLog::LogMsg(0, "!!! Attach debugger NOW and then press any key...");
-    (void)_getch();
+    std::ignore = _getch();
 #endif
     return true;
 }
@@ -488,7 +488,7 @@ ExportSettingsEntry* FindCommand(const CHAR* strCommand)
 bool ParseMacroCommand(const CHAR* strCommand, const CHAR* strArgument, bool& pMacroFound, bool& bUsedArgument)
 {
     pMacroFound = false;
-    const size_t dwCount = _countof(g_MacroCommands);
+    const size_t dwCount =std::size(g_MacroCommands);
     for (size_t i = 0; i < dwCount; ++i)
     {
         const auto& Command = g_MacroCommands[i];

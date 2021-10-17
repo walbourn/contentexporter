@@ -455,7 +455,7 @@ namespace ATG
         g_pXMLWriter->StartElement("VertexDecl");
         g_pXMLWriter->AddAttributeFormat("Offset", "%d", Element.Offset);
 
-        const char* declType = (Element.Type < _countof(s_strVertexDeclType)) ? s_strVertexDeclType[Element.Type] : nullptr;
+        const char* declType = (Element.Type < std::size(s_strVertexDeclType)) ? s_strVertexDeclType[Element.Type] : nullptr;
         if (!declType)
         {
             switch (Element.Type)
