@@ -241,7 +241,7 @@ void ExportSettingsDialog::PopulateControls()
     RECT ClientRect;
     GetClientRect(m_hScrollingPane, &ClientRect);
     const DWORD dwClientWidth = ClientRect.right - ClientRect.left;
-    const DWORD dwClientMargin = 8;
+    constexpr DWORD dwClientMargin = 8;
 
     DWORD dwYPos = dwClientMargin;
     const DWORD dwXPosLabel = dwClientMargin;
@@ -487,21 +487,21 @@ LRESULT ExportSettingsDialog::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         return false;
     case WM_SIZE:
     {
-        const DWORD dwBorderSize = 4;
+        constexpr DWORD dwBorderSize = 4;
 
         GridLayout RootLayout(2, 1);
         RootLayout.SetRowSpec(0, 1.0f);
         RootLayout.SetRowSpec(1, 30);
         RootLayout.SetClientRect(m_hwnd, dwBorderSize);
 
-        const float fSplitterWidth = 5.0f;
+        constexpr float fSplitterWidth = 5.0f;
         GridLayout PanesLayout(1, 3);
         PanesLayout.SetColumnSpec(0, 200);
         PanesLayout.SetColumnSpec(1, fSplitterWidth);
         PanesLayout.SetColumnSpec(2, 1.0f);
         RootLayout.PlaceLayout(PanesLayout, 0, 0, 1, 1, dwBorderSize);
 
-        const float fButtonWidth = 100.0f;
+        constexpr float fButtonWidth = 100.0f;
         GridLayout ButtonsLayout(1, 3);
         ButtonsLayout.SetColumnSpec(0, 1.0f);
         ButtonsLayout.SetColumnSpec(1, fButtonWidth);

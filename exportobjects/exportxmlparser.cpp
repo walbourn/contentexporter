@@ -941,7 +941,7 @@ HRESULT XMLParser::ParseXMLBuffer(const CHAR* strBuffer, UINT uBufferSize)
 
 void XMLParser::Error(HRESULT hErr, const CHAR* strFormat, ...)
 {
-    const INT MAX_OUTPUT_STR = 160;
+    constexpr INT MAX_OUTPUT_STR = 160;
     CHAR strBuffer[MAX_OUTPUT_STR];
     va_list pArglist;
     va_start(pArglist, strFormat);

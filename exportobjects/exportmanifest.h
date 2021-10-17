@@ -54,7 +54,7 @@ namespace ATG
         void ClearFilesOfType(ExportFileType FileType);
         size_t AddFile(const ExportFileRecord& File);
         size_t AddFile(ExportString strSourceFileName, ExportString strIntermediateFileName, ExportFileType FileType = EFT_TEXTURE2D);
-        size_t GetFileCount() const { return m_Files.size(); }
+        size_t GetFileCount() const noexcept { return m_Files.size(); }
         ExportFileRecord& GetFile(size_t dwIndex) { return m_Files[dwIndex]; }
         size_t FindFile(ExportString strFileName) const;
 

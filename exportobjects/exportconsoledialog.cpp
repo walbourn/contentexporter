@@ -87,8 +87,8 @@ LRESULT ExportConsoleDialog::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         Layout.SetColumnSpec(0, 1);
         Layout.SetColumnSpec(1, 100);
 
-        const DWORD dwOuterBorder = 4;
-        const DWORD dwInnerBorder = 4;
+        constexpr DWORD dwOuterBorder = 4;
+        constexpr DWORD dwInnerBorder = 4;
         Layout.SetClientRect(m_hwnd, dwOuterBorder);
         Layout.PlaceWindow(m_hRichTextBox, 0, 0, 1, 2, dwInnerBorder);
         Layout.PlaceWindow(m_hProgressText, 1, 0, 1, 2, dwInnerBorder);

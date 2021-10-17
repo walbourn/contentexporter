@@ -36,7 +36,7 @@ namespace ATG
         ~ExportMutableString()
         {
         }
-        operator const CHAR* () const { return m_strValue.get(); }
+        operator const CHAR* () const noexcept { return m_strValue.get(); }
         ExportMutableString& operator=(const CHAR* strRHS)
         {
             SetAsCopy(strRHS);
@@ -72,10 +72,10 @@ namespace ATG
         ExportString& operator= (const ExportString& RHS) { m_strString = RHS.m_strString; return *this; }
         ExportString& operator= (const CHAR* strRHS) { m_strString = AddString(strRHS); return *this; }
 
-        bool operator== (const ExportString& RHS) const { return m_strString == RHS.m_strString; }
+        bool operator== (const ExportString& RHS) const noexcept { return m_strString == RHS.m_strString; }
         inline bool operator== (const CHAR* strRHS) const;
 
-        operator const CHAR* () const { return m_strString; }
+        operator const CHAR* () const noexcept { return m_strString; }
         inline const CHAR* SafeString() const;
         inline static BYTE HashString(const CHAR* strString);
     protected:

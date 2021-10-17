@@ -91,14 +91,14 @@ namespace ATG
 
         void ByteSwap();
 
-        size_t GetQuadPatchCount() const { return (m_pQuadPatchDataVB) ? m_pQuadPatchDataVB->GetVertexCount() : 0; }
-        ExportVB* GetQuadPatchDataVB() const { return m_pQuadPatchDataVB; }
-        ExportIB* GetQuadPatchIB() const { return m_pQuadPatchIB; }
-        size_t GetTrianglePatchCount() const { return (m_pTrianglePatchDataVB) ? m_pTrianglePatchDataVB->GetVertexCount() : 0; }
-        ExportVB* GetTrianglePatchDataVB() const { return m_pTrianglePatchDataVB; }
-        ExportIB* GetTriPatchIB() const { return m_pTrianglePatchIB; }
+        size_t GetQuadPatchCount() const noexcept { return (m_pQuadPatchDataVB) ? m_pQuadPatchDataVB->GetVertexCount() : 0; }
+        ExportVB* GetQuadPatchDataVB() const noexcept { return m_pQuadPatchDataVB; }
+        ExportIB* GetQuadPatchIB() const noexcept { return m_pQuadPatchIB; }
+        size_t GetTrianglePatchCount() const noexcept { return (m_pTrianglePatchDataVB) ? m_pTrianglePatchDataVB->GetVertexCount() : 0; }
+        ExportVB* GetTrianglePatchDataVB() const noexcept { return m_pTrianglePatchDataVB; }
+        ExportIB* GetTriPatchIB() const noexcept { return m_pTrianglePatchIB; }
 
-        size_t GetSubsetCount() const { return m_Subsets.size(); }
+        size_t GetSubsetCount() const noexcept { return m_Subsets.size(); }
         ExportSubDPatchSubset* GetSubset(size_t dwIndex) { return &m_Subsets[dwIndex]; }
         ExportSubDPatchSubset* FindSubset(ExportString strName);
 

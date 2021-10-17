@@ -516,7 +516,7 @@ void ExportSettingsManager::SetDefaultValues()
 
 bool ExportSettingsManager::SaveSettings(const CHAR* strFileName)
 {
-    const size_t dwBufferSize = 32 * 1024;
+    constexpr size_t dwBufferSize = 32 * 1024;
     auto strBuffer = std::make_unique<CHAR[]>(dwBufferSize);
     ZeroMemory(strBuffer.get(), dwBufferSize * sizeof(CHAR));
 
@@ -549,7 +549,7 @@ bool ExportSettingsManager::LoadSettings(const CHAR* strFileName)
         return false;
     }
 
-    const size_t dwBufferSize = 32 * 1024;
+    constexpr size_t dwBufferSize = 32 * 1024;
     auto strBuffer = std::make_unique<CHAR[]>(dwBufferSize);
     ZeroMemory(strBuffer.get(), dwBufferSize * sizeof(CHAR));
 

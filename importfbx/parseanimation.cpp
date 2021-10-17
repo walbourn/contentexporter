@@ -169,8 +169,8 @@ void ParseAnimStack(FbxScene* pFbxScene, FbxString* strAnimStackName)
     FbxTime FrameTime;
     FrameTime.SetTime(0, 0, 0, 1, 0, pFbxScene->GetGlobalSettings().GetTimeMode());
 
-    const float fFrameTime = (float)FrameTime.GetSecondDouble();
-    const float fSampleTime = fFrameTime / (float)g_pScene->Settings().iAnimSampleCountPerFrame;
+    const float fFrameTime = static_cast<float>(FrameTime.GetSecondDouble());
+    const float fSampleTime = fFrameTime / static_cast<float>(g_pScene->Settings().iAnimSampleCountPerFrame);
     assert(fSampleTime > 0);
 
     float fStartTime = 0;

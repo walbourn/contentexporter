@@ -51,19 +51,19 @@ namespace ATG
         void OptimizeKeys();
         void SortKeys();
         void EndianSwap();
-        float* GetPositionData() const { return (float*)(PositionKeys.data()); }
-        float* GetOrientationData() const { return (float*)(OrientationKeys.data()); }
-        float* GetScaleData() const { return (float*)(ScaleKeys.data()); }
-        size_t GetPositionDataSize() const { return PositionKeys.size() * 4 * sizeof(float); }
-        size_t GetOrientationDataSize() const { return OrientationKeys.size() * 5 * sizeof(float); }
-        size_t GetScaleDataSize() const { return ScaleKeys.size() * 4 * sizeof(float); }
-        ExportAnimationPositionKey* GetPositionKeys() { return PositionKeys.data(); }
-        size_t GetPositionKeyCount() const { return PositionKeys.size(); }
-        ExportAnimationOrientationKey* GetOrientationKeys() { return OrientationKeys.data(); }
-        size_t GetOrientationKeyCount() const { return OrientationKeys.size(); }
-        ExportAnimationScaleKey* GetScaleKeys() { return ScaleKeys.data(); }
-        size_t GetScaleKeyCount() const { return ScaleKeys.size(); }
-        bool IsTrackEmpty();
+        float* GetPositionData() const noexcept { return (float*)(PositionKeys.data()); }
+        float* GetOrientationData() const noexcept { return (float*)(OrientationKeys.data()); }
+        float* GetScaleData() const noexcept { return (float*)(ScaleKeys.data()); }
+        size_t GetPositionDataSize() const noexcept { return PositionKeys.size() * 4 * sizeof(float); }
+        size_t GetOrientationDataSize() const noexcept { return OrientationKeys.size() * 5 * sizeof(float); }
+        size_t GetScaleDataSize() const noexcept { return ScaleKeys.size() * 4 * sizeof(float); }
+        ExportAnimationPositionKey* GetPositionKeys() noexcept { return PositionKeys.data(); }
+        size_t GetPositionKeyCount() const noexcept { return PositionKeys.size(); }
+        ExportAnimationOrientationKey* GetOrientationKeys() noexcept { return OrientationKeys.data(); }
+        size_t GetOrientationKeyCount() const noexcept { return OrientationKeys.size(); }
+        ExportAnimationScaleKey* GetScaleKeys() noexcept { return ScaleKeys.data(); }
+        size_t GetScaleKeyCount() const noexcept { return ScaleKeys.size(); }
+        bool IsTrackEmpty() const;
     protected:
         void OptimizePositionKeys();
         void OptimizeOrientationKeys();
@@ -93,9 +93,9 @@ namespace ATG
         ExportAnimation();
         ~ExportAnimation();
         void AddTrack(ExportAnimationTrack* pTrack) { m_vTracks.push_back(pTrack); }
-        size_t GetTrackCount() const { return m_vTracks.size(); }
+        size_t GetTrackCount() const noexcept { return m_vTracks.size(); }
         ExportAnimationTrack* GetTrack(size_t dwIndex) { return m_vTracks[dwIndex]; }
-        float GetDuration() const { return fEndTime - fStartTime; }
+        float GetDuration() const noexcept { return fEndTime - fStartTime; }
         void Optimize();
         void EndianSwap();
         static void SetAnimationExportQuality(INT iPos, INT iOrientation, INT iScale);

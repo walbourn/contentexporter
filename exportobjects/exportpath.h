@@ -29,7 +29,7 @@ public:
     void SetPathOnly(const CHAR* strPath);
 
     ExportPath& operator=(const ExportPath& OtherPath);
-    operator const CHAR* () const { return m_strPath; }
+    operator const CHAR* () const noexcept { return m_strPath; }
 
     static ExportPath GetTempPath();
     static ExportPath GetCurrentPath();
@@ -38,11 +38,11 @@ public:
     ExportPath GetFileName() const;
     ExportPath GetFileNameWithoutExtension() const;
 
-    bool HasExtension() const { return m_strExtension != nullptr; }
+    bool HasExtension() const noexcept { return m_strExtension != nullptr; }
     bool HasFileName() const;
     const CHAR* GetExtension() const;
     bool IsAbsolutePath() const;
-    bool IsEmpty() const { return m_strPath[0] == '\0'; }
+    bool IsEmpty() const noexcept { return m_strPath[0] == '\0'; }
 
     void ChangeExtension(const CHAR* strExtension);
     void ChangeFileName(const CHAR* strFileName);

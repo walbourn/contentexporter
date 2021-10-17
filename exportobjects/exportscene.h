@@ -98,9 +98,9 @@ namespace ATG
         ExportMeshBase* FindMesh(void* pDCCObject);
         ExportAnimation* FindAnimation(void* pDCCObject);
 
-        size_t GetMaterialCount() const { return m_vMaterials.size(); }
-        size_t GetMeshCount() const { return m_vMeshes.size(); }
-        size_t GetAnimationCount() const { return m_vAnimations.size(); }
+        size_t GetMaterialCount() const noexcept { return m_vMaterials.size(); }
+        size_t GetMeshCount() const noexcept { return m_vMeshes.size(); }
+        size_t GetAnimationCount() const noexcept { return m_vAnimations.size(); }
 
         ExportMaterial* GetMaterial(size_t uIndex) { return m_vMaterials[uIndex]; }
         ExportMeshBase* GetMesh(size_t uIndex) { return m_vMeshes[uIndex]; }

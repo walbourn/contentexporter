@@ -82,7 +82,7 @@ namespace
             return s_str;
         }
 
-        HRESULT hr() const { return result; }
+        HRESULT hr() const noexcept { return result; }
 
     private:
         HRESULT result;

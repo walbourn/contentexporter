@@ -101,14 +101,14 @@ namespace ATG
             auto pDiffuse = pMaterial->FindParameter("DiffuseTexture");
             if (pDiffuse)
             {
-                ProcessTexture(Material2->AlbetoTexture, MAX_TEXTURE_NAME, pDiffuse->ValueString.SafeString());
+                ProcessTexture(Material2->AlbedoTexture, MAX_TEXTURE_NAME, pDiffuse->ValueString.SafeString());
 
                 // Derive other PBR texture names from base texture
                 char drive[_MAX_DRIVE] = {};
                 char dir[MAX_PATH] = {};
                 char fname[_MAX_FNAME] = {};
                 char ext[_MAX_EXT] = {};
-                _splitpath_s(Material2->AlbetoTexture, drive, dir, fname, ext);
+                _splitpath_s(Material2->AlbedoTexture, drive, dir, fname, ext);
 
                 std::string basename = fname;
                 const size_t pos = basename.find_last_of('_');

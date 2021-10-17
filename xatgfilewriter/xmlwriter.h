@@ -27,7 +27,7 @@ namespace ATG
         void Initialize(const CHAR* strFileName);
         void Close();
 
-        bool IsValid() const { return m_bValid; }
+        bool IsValid() const noexcept { return m_bValid; }
 
         void SetIndentCount(UINT uSpaces);
         void EnableNewlines(bool bWriteNewLines) { m_bWriteNewlines = bWriteNewLines; }

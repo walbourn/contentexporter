@@ -29,18 +29,18 @@ namespace ATG
 
         void AddChild(ExportFrame* pFrame) { m_vChildren.push_back(pFrame); }
         void RemoveChild(ExportFrame* pFrame);
-        size_t GetChildCount() const { return m_vChildren.size(); }
+        size_t GetChildCount() const noexcept { return m_vChildren.size(); }
         ExportFrame* GetChildByIndex(size_t uIndex) { return m_vChildren[uIndex]; }
 
-        size_t GetModelCount() const { return m_vModels.size(); }
+        size_t GetModelCount() const noexcept { return m_vModels.size(); }
         void AddModel(ExportModel* pModel) { m_vModels.push_back(pModel); }
         ExportModel* GetModelByIndex(size_t uIndex) { return m_vModels[uIndex]; }
 
-        size_t GetLightCount() const { return m_vLights.size(); }
+        size_t GetLightCount() const noexcept { return m_vLights.size(); }
         void AddLight(ExportLight* pLight) { m_vLights.push_back(pLight); }
         ExportLight* GetLightByIndex(size_t uIndex) { return m_vLights[uIndex]; }
 
-        size_t GetCameraCount() const { return m_vCameras.size(); }
+        size_t GetCameraCount() const noexcept { return m_vCameras.size(); }
         void AddCamera(ExportCamera* pCamera) { m_vCameras.push_back(pCamera); }
         ExportCamera* GetCameraByIndex(size_t uIndex) { return m_vCameras[uIndex]; }
 

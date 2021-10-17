@@ -253,7 +253,7 @@ HRESULT FBXImport::ImportFile(const CHAR* strFileName)
     ExportLog::LogMsg(2, "Compiled against %s", strTemp);
     ExportLog::LogMsg(1, "Loading FBX file \"%s\"...", strFileName);
 
-    const INT iFileFormat = -1;
+    constexpr INT iFileFormat = -1;
     bool bResult = g_pImporter->Initialize(strFileName, iFileFormat, g_pSDKManager->GetIOSettings());
 
     if (!bResult)

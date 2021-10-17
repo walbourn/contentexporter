@@ -14,7 +14,7 @@
 
 namespace ATG
 {
-    static const size_t SETTINGS_STRING_LENGTH = 256;
+    constexpr size_t SETTINGS_STRING_LENGTH = 256;
 
     class ExportVariant
     {
@@ -128,7 +128,7 @@ namespace ATG
 
         void SetDefaultValues();
 
-        size_t GetRootCategoryCount() const { return m_RootCategories.size(); }
+        size_t GetRootCategoryCount() const noexcept { return m_RootCategories.size(); }
         ExportSettingsEntry* GetRootCategory(size_t dwIndex) { return m_RootCategories[dwIndex]; }
 
         bool LoadSettings(const CHAR* strFileName);

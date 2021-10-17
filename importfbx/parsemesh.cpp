@@ -62,7 +62,7 @@ public:
         return pBoneWeights.get() + (dwIndex * dwVertexStride);
     }
 
-    DWORD GetBoneCount() const { return static_cast<DWORD>(InfluenceNodes.size()); }
+    DWORD GetBoneCount() const noexcept { return static_cast<DWORD>(InfluenceNodes.size()); }
 
     void InsertWeight(size_t dwIndex, DWORD dwBoneIndex, float fBoneWeight)
     {
@@ -120,7 +120,7 @@ bool ParseMeshSkinning(const FbxMesh* pMesh, SkinData* pSkinData)
     ExportLog::LogMsg(4, "Parsing skin weights on mesh %s", pMesh->GetName());
 
     const DWORD dwVertexCount = pMesh->GetControlPointsCount();
-    const DWORD dwStride = 4;
+    constexpr DWORD dwStride = 4;
     pSkinData->Alloc(dwVertexCount, dwStride);
 
     for (DWORD dwDeformerIndex = 0; dwDeformerIndex < dwDeformerCount; ++dwDeformerIndex)

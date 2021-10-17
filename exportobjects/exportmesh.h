@@ -84,10 +84,10 @@ namespace ATG
         }
 
         void SetVertexSize(DWORD uByteCount) { m_uVertexSizeBytes = uByteCount; }
-        DWORD GetVertexSize() const { return m_uVertexSizeBytes; }
+        DWORD GetVertexSize() const noexcept { return m_uVertexSizeBytes; }
 
         void SetVertexCount(size_t uVertexCount) { m_uVertexCount = uVertexCount; }
-        size_t GetVertexCount() const { return m_uVertexCount; }
+        size_t GetVertexCount() const noexcept { return m_uVertexCount; }
 
         void Allocate();
 
@@ -95,8 +95,8 @@ namespace ATG
         const uint8_t* GetVertex(size_t uIndex) const;
 
         uint8_t* GetVertexData() { return m_pVertexData.get(); }
-        const uint8_t* GetVertexData() const { return m_pVertexData.get(); }
-        size_t GetVertexDataSize() const { return m_uVertexSizeBytes * m_uVertexCount; }
+        const uint8_t* GetVertexData() const noexcept { return m_pVertexData.get(); }
+        size_t GetVertexDataSize() const noexcept { return m_uVertexSizeBytes * m_uVertexCount; }
 
         void ByteSwap(const D3DVERTEXELEMENT9* pVertexElements, const size_t dwVertexElementCount);
 
@@ -119,14 +119,14 @@ namespace ATG
         }
 
         void SetIndexSize(DWORD dwIndexSize) { assert(dwIndexSize == 2 || dwIndexSize == 4); m_dwIndexSize = dwIndexSize; }
-        DWORD GetIndexSize() const { return m_dwIndexSize; }
+        DWORD GetIndexSize() const noexcept { return m_dwIndexSize; }
 
         void SetIndexCount(size_t uIndexCount) { m_uIndexCount = uIndexCount; }
-        size_t GetIndexCount() const { return m_uIndexCount; }
+        size_t GetIndexCount() const noexcept { return m_uIndexCount; }
 
         void Allocate();
 
-        DWORD GetIndex(size_t uIndex) const
+        DWORD GetIndex(size_t uIndex) const noexcept
         {
             if (m_dwIndexSize == 2)
             {
@@ -153,8 +153,8 @@ namespace ATG
             }
         }
         uint8_t* GetIndexData() { return m_pIndexData.get(); }
-        const uint8_t* GetIndexData() const { return m_pIndexData.get(); }
-        size_t GetIndexDataSize() const { return m_uIndexCount * m_dwIndexSize; }
+        const uint8_t* GetIndexData() const noexcept { return m_pIndexData.get(); }
+        size_t GetIndexDataSize() const noexcept { return m_uIndexCount * m_dwIndexSize; }
 
         void ByteSwap();
 
@@ -183,10 +183,10 @@ namespace ATG
         void SetStartIndex(UINT uStartIndex) { m_uStartIndex = uStartIndex; }
         void IncrementIndexCount(UINT uSize) { m_uIndexCount += uSize; }
         void SetIndexCount(UINT uIndexCount) { m_uIndexCount = uIndexCount; }
-        UINT GetStartIndex() const { return m_uStartIndex; }
-        UINT GetIndexCount() const { return m_uIndexCount; }
+        UINT GetStartIndex() const noexcept { return m_uStartIndex; }
+        UINT GetIndexCount() const noexcept { return m_uIndexCount; }
         void SetPrimitiveType(PrimitiveType NewPT) { m_PrimitiveType = NewPT; }
-        PrimitiveType GetPrimitiveType() const { return m_PrimitiveType; }
+        PrimitiveType GetPrimitiveType() const noexcept { return m_PrimitiveType; }
     protected:
         UINT            m_uStartIndex;
         UINT            m_uIndexCount;
@@ -325,17 +325,17 @@ namespace ATG
         virtual MeshType GetMeshType() const = 0;
 
         void AddSubset(ExportIBSubset* pSubset) { m_vSubsets.push_back(pSubset); }
-        size_t GetSubsetCount() const { return m_vSubsets.size(); }
+        size_t GetSubsetCount() const noexcept { return m_vSubsets.size(); }
         ExportIBSubset* GetSubset(size_t uIndex) { return m_vSubsets[uIndex]; }
         ExportIBSubset* FindSubset(const ExportString Name);
 
         DirectX::BoundingSphere& GetBoundingSphere() { return m_BoundingSphere; }
         DirectX::BoundingBox& GetBoundingAABB() { return m_BoundingAABB; }
-        BoundsType GetSmallestBound() const { return m_SmallestBound; }
+        BoundsType GetSmallestBound() const noexcept { return m_SmallestBound; }
 
         virtual void AddInfluence(ExportString InfluenceName) { m_InfluenceNames.push_back(InfluenceName); }
-        size_t GetInfluenceCount() const { return m_InfluenceNames.size(); }
-        ExportString GetInfluence(size_t uIndex) const { return m_InfluenceNames[uIndex]; }
+        size_t GetInfluenceCount() const noexcept { return m_InfluenceNames.size(); }
+        ExportString GetInfluence(size_t uIndex) const noexcept { return m_InfluenceNames[uIndex]; }
 
     protected:
         DirectX::BoundingSphere         m_BoundingSphere;
@@ -371,8 +371,8 @@ namespace ATG
         void SetVertexNormalCount(UINT uCount);
         void SetVertexColorCount(UINT uCount) { m_VertexFormat.m_bVertexColor = (uCount > 0); }
 
-        size_t GetVertexDeclElementCount() const { return m_VertexElements.size(); }
-        const D3DVERTEXELEMENT9& GetVertexDeclElement(size_t uIndex) const { return m_VertexElements[uIndex]; }
+        size_t GetVertexDeclElementCount() const noexcept { return m_VertexElements.size(); }
+        const D3DVERTEXELEMENT9& GetVertexDeclElement(size_t uIndex) const noexcept { return m_VertexElements[uIndex]; }
 
         void AddRawTriangle(ExportMeshTriangle* pTriangle);
         void Optimize(DWORD dwFlags);
@@ -383,8 +383,8 @@ namespace ATG
 
         ExportSubDProcessMesh* GetSubDMesh() { return m_pSubDMesh; }
 
-        size_t GetTriangleCount() const { return m_TriangleToPolygonMapping.size(); }
-        INT GetPolygonForTriangle(size_t dwTriangleIndex) const { return m_TriangleToPolygonMapping[dwTriangleIndex]; }
+        size_t GetTriangleCount() const noexcept { return m_TriangleToPolygonMapping.size(); }
+        INT GetPolygonForTriangle(size_t dwTriangleIndex) const noexcept { return m_TriangleToPolygonMapping[dwTriangleIndex]; }
 
         void AddInfluence(ExportString InfluenceName) override { m_InfluenceNames.push_back(InfluenceName); m_VertexFormat.m_bSkinData = true; }
 
@@ -443,11 +443,11 @@ namespace ATG
         ~ExportModel();
         ExportMeshBase* GetMesh() { return m_pMesh; }
         bool SetSubsetBinding(ExportString SubsetName, ExportMaterial* pMaterial, bool bSkipValidation = false);
-        size_t GetBindingCount() const { return m_vBindings.size(); }
+        size_t GetBindingCount() const noexcept { return m_vBindings.size(); }
         ExportMaterialSubsetBinding* GetBinding(size_t i) { return m_vBindings[i]; }
 
-        bool IsShadowCaster() const { return m_bCastsShadows; }
-        bool IsShadowReceiver() const { return m_bReceivesShadows; }
+        bool IsShadowCaster() const noexcept { return m_bCastsShadows; }
+        bool IsShadowReceiver() const noexcept { return m_bReceivesShadows; }
         void SetCastsShadows(bool bValue) { m_bCastsShadows = bValue; }
         void SetReceivesShadows(bool bValue) { m_bReceivesShadows = bValue; }
 

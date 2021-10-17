@@ -22,13 +22,13 @@ namespace ATG
         void SetIdentity();
         bool Initialize(DirectX::CXMMATRIX matrix);
         bool Initialize(DirectX::XMFLOAT4X4 matrix);
-        const DirectX::XMFLOAT4X4& Matrix() const { return m_Matrix; }
+        const DirectX::XMFLOAT4X4& Matrix() const noexcept { return m_Matrix; }
         DirectX::XMFLOAT4X4& Matrix() { return m_Matrix; }
         void Multiply(const DirectX::XMFLOAT4X4& Matrix);
         void Normalize();
-        const DirectX::XMFLOAT3& Position() const { return m_Position; }
-        const DirectX::XMFLOAT4& Orientation() const { return m_Orientation; }
-        const DirectX::XMFLOAT3& Scale() const { return m_Scale; }
+        const DirectX::XMFLOAT3& Position() const noexcept { return m_Position; }
+        const DirectX::XMFLOAT4& Orientation() const noexcept { return m_Orientation; }
+        const DirectX::XMFLOAT3& Scale() const noexcept { return m_Scale; }
 
     protected:
         bool DecomposeMatrix();
@@ -47,11 +47,11 @@ namespace ATG
         ExportBase(ExportString name) : m_Name(name), m_pDCCObject(nullptr) {}
         virtual ~ExportBase();
 
-        ExportString GetName() const { return m_Name; }
+        ExportString GetName() const noexcept { return m_Name; }
         void SetName(ExportString newName) { m_Name = newName; }
 
         void SetDCCObject(void* pDCCObject) { m_pDCCObject = pDCCObject; }
-        void* GetDCCObject() const { return m_pDCCObject; }
+        void* GetDCCObject() const noexcept { return m_pDCCObject; }
     protected:
         ExportString        m_Name;
         void* m_pDCCObject;

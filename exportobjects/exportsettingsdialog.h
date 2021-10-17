@@ -36,7 +36,7 @@ namespace ATG
         static LRESULT CALLBACK ScrollPaneWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
         void Show() override;
-        DialogState GetDialogState() const { return m_DialogState; }
+        DialogState GetDialogState() const noexcept { return m_DialogState; }
 
     protected:
         void PopulateCategories(const ExportSettingsEntry* pEntry = nullptr, void* hParentItem = nullptr);

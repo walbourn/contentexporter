@@ -59,7 +59,7 @@ void InitializeExportDialogs(const CHAR* strTitle, HWND hParentWindow, HINSTANCE
     ExportLog::AddListener(&g_ConsoleDlg);
     g_pProgress = &g_ConsoleDlg;
 
-    const DWORD dwStackSize = 8192;
+    constexpr DWORD dwStackSize = 8192;
 
     _beginthreadex(nullptr, dwStackSize, ExportConsoleDialog::ThreadEntry, &g_ConsoleDlg, 0, nullptr);
     _beginthreadex(nullptr, dwStackSize, ExportSettingsDialog::ThreadEntry, &g_SettingsDlg, 0, nullptr);

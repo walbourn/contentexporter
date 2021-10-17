@@ -22,10 +22,10 @@ namespace ATG
 #define E_INVALID_XML_SYNTAX    MAKE_HRESULT(1, _ATGFAC, 0x0002 )
 
 
-    const UINT XML_MAX_ATTRIBUTES_PER_ELEMENT = 32;
-    const UINT XML_MAX_NAME_LENGTH = 128;
-    const UINT XML_READ_BUFFER_SIZE = 2048;
-    const UINT XML_WRITE_BUFFER_SIZE = 2048;
+    constexpr UINT XML_MAX_ATTRIBUTES_PER_ELEMENT = 32;
+    constexpr UINT XML_MAX_NAME_LENGTH = 128;
+    constexpr UINT XML_READ_BUFFER_SIZE = 2048;
+    constexpr UINT XML_WRITE_BUFFER_SIZE = 2048;
 
     // No tag can be longer than XML_WRITE_BUFFER_SIZE - an error will be returned if 
     // it is
@@ -63,9 +63,9 @@ namespace ATG
 
         virtual void     SetParseProgress(DWORD dwProgress) { }
 
-        const CHAR* GetFilename() { return m_strFilename; }
-        UINT             GetLineNumber() { return m_LineNum; }
-        UINT             GetLinePosition() { return m_LinePos; }
+        const CHAR* GetFilename() const noexcept { return m_strFilename; }
+        UINT             GetLineNumber() const noexcept { return m_LineNum; }
+        UINT             GetLinePosition() const noexcept { return m_LinePos; }
 
     private:
         const CHAR* m_strFilename;

@@ -53,18 +53,18 @@ namespace ATG
         ~ExportMaterial();
 
         void SetMaterialDefinition(const ExportMaterialDefinition* pDef) { m_pMaterialDefinition = pDef; }
-        const ExportMaterialDefinition* GetMaterialDefinition() const { return m_pMaterialDefinition; }
+        const ExportMaterialDefinition* GetMaterialDefinition() const noexcept { return m_pMaterialDefinition; }
 
         void SetDefaultMaterialName(const ExportString strDefaultName) { m_DefaultMaterialName = strDefaultName; }
-        ExportString GetDefaultMaterialName() const { return m_DefaultMaterialName; }
+        ExportString GetDefaultMaterialName() const noexcept { return m_DefaultMaterialName; }
 
         void AddParameter(const ExportMaterialParameter& Param) { m_Parameters.push_back(Param); }
         MaterialParameterList* GetParameterList() { return &m_Parameters; }
-        size_t GetParameterCount() const { return m_Parameters.size(); }
+        size_t GetParameterCount() const noexcept { return m_Parameters.size(); }
         ExportMaterialParameter* FindParameter(const ExportString strName);
 
         void SetTransparent(bool bTransparent) { m_bTransparent = bTransparent; }
-        bool IsTransparent() const { return m_bTransparent; }
+        bool IsTransparent() const noexcept { return m_bTransparent; }
 
         static ExportString GetDefaultDiffuseMapTextureName();
         static ExportString GetDefaultNormalMapTextureName();

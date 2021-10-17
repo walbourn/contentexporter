@@ -387,7 +387,7 @@ void ExportAnimationTransformTrack::EndianSwap()
     }
 }
 
-bool ExportAnimationTransformTrack::IsTrackEmpty()
+bool ExportAnimationTransformTrack::IsTrackEmpty() const
 {
     // If any key array has more than 1 key, the track is not empty
     if (PositionKeys.size() > 1 ||
