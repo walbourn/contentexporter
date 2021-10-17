@@ -58,9 +58,9 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2017\x64\release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2019\x64\release;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2017\x64\debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ContentExporter</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ContentExporter</TargetName>
   </PropertyGroup>
