@@ -578,6 +578,7 @@ ExportCoreSettings::ExportCoreSettings()
     };
     g_SettingsManager.AddEnum(pCategoryPlatform, "Data Endianness", "endian", 1, EndianEnums, ARRAYSIZE(EndianEnums), &bLittleEndian);
     static const ExportEnumValue FLTypes[] = {
+        { "Feature Level 12.2", "12.2", 0xc200 /*D3D_FEATURE_LEVEL_12_2*/ },
         { "Feature Level 12.1", "12.1", 0xc100 /*D3D_FEATURE_LEVEL_12_1*/ },
         { "Feature Level 12.0", "12.0", 0xc000 /*D3D_FEATURE_LEVEL_12_0*/ },
         { "Feature Level 11.1", "11.1", D3D_FEATURE_LEVEL_11_1 },
