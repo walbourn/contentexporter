@@ -6,6 +6,11 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### November 10, 2021
+* Fixed crash when a 0 polygon mesh is encountered (now emits a warning instead)
+* Added "12.2" to the ``-featurelevel`` switch
+* Updated for DirectXTex, DirectXMesh, and UVAtlas November 2021 releases
+
 ### October 21, 2021
 * Updated for DirectXTex August 2021 release
 * Updated for DirectXMesh and UVAtlas June 2021 releases
