@@ -181,6 +181,14 @@ void ParseMesh(FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, boo
     }
     CHAR strDecoratedName[512];
     sprintf_s(strDecoratedName, "%s_%s%s", g_pScene->Settings().strMeshNameDecoration, strName, strSuffix);
+
+    const DWORD dwPolyCount = pFbxMesh->GetPolygonCount();
+    if (!dwPolyCount)
+    {
+        ExportLog::LogWarning("Skipping the %s mesh as it contains no polygons", strName);
+        return;
+    }
+
     ExportMesh* pMesh = new ExportMesh(strDecoratedName);
     pMesh->SetDCCObject(pFbxMesh);
 
@@ -298,7 +306,6 @@ void ParseMesh(FbxNode* pNode, FbxMesh* pFbxMesh, ExportFrame* pParentFrame, boo
     if (g_pScene->Settings().bCompressVertexData)
         dwMeshOptimizationFlags |= ExportMesh::COMPRESS_VERTEX_DATA;
 
-    const DWORD dwPolyCount = pFbxMesh->GetPolygonCount();
     // Assume that polys are usually quads.
     g_MeshTriangleAllocator.SetSizeHint(dwPolyCount * 2);
 
