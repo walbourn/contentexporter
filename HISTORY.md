@@ -6,6 +6,10 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### February 28, 2022
+* Updated for FBX SDK 2020.3.1
+* Updated for DirectXTex, DirectXMesh, and UVAtlas February 2022 releases
+
 ### November 10, 2021
 * Fixed crash when a 0 polygon mesh is encountered (now emits a warning instead)
 * Added "12.2" to the ``-featurelevel`` switch
