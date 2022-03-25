@@ -6,6 +6,10 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### March 24, 2022
+* Updated for DirectXTex, DirectXMesh, and UVAtlas March 2022 releases
+* Update build switches for SDL recommendations
+
 ### February 28, 2022
 * Updated for FBX SDK 2020.3.1
 * Updated for DirectXTex, DirectXMesh, and UVAtlas February 2022 releases
