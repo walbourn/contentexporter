@@ -6,7 +6,7 @@ https://aka.ms/dxsdkcontentexporter
 
 Copyright (c) Microsoft Corporation.
 
-**December 31, 2023**
+**June 5, 2024**
 
 The **Samples Content Exporter** was shipped as a sample in the legacy DirectX SDK. It makes use of the [Autodesk FBX SDK](http://autodesk.com/fbx) to import an FBX file and then export the data as an ``.SDKMESH``. The ``.SDKMESH`` format is a runtime geometry format supported by the _DirectX Tool Kit_ for [DX11](http://go.microsoft.com/fwlink/?LinkId=248929) / [DX12](http://go.microsoft.com/fwlink/?LinkID=615561) and [DXUT](http://go.microsoft.com/fwlink/?LinkId=320437), and is used in the Windows sample [Marble Maze](https://docs.microsoft.com/samples/microsoft/windows-appsample-marble-maze/directx-marble-maze-game-sample/).
 
@@ -47,7 +47,7 @@ Use of OpenEXR is subject to it's own license terms, and requires the ZLIB libra
 
 ## Build Instructions
 
-Install the Autodesk FBX SDK 2019.2 or later (latest tested version is 2020.3.4) for Windows VS 2019.
+Install the Autodesk FBX SDK 2019.2 or later (latest tested version is 2020.3.7) for Windows VS 2019.
 
     http://autodesk.com/fbx
 

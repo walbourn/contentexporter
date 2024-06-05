@@ -58,16 +58,16 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2019\x64\release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2019\x64\release;$(FBX_SDK)\lib\x64\release;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2019\x64\debug;$(FBX_SDK)\lib\x64\debug;$(LibraryPath)</LibraryPath>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ContentExporter</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ContentExporter</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>USE_OPENEXR;WIN32;_DEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_OPENEXR;WIN32;_DEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -82,7 +82,7 @@
       <PreprocessorDefinitions>PRIVATE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk.lib;libxml2.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ContentExporter.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -98,7 +98,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>USE_OPENEXR;WIN32;NDEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_OPENEXR;WIN32;NDEBUG;_CONSOLE;KFBX_PLUGIN;KFBX_FBXSDK;KFBX_DLLINFO;K_PLUGIN;K_FBXSDK;FBXSDK_NEW_API;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>PRIVATE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk.lib;libxml2.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)ContentExporter.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -177,9 +177,9 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets" Condition="Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" />
     <Import Project="..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets" Condition="Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" />
-    <Import Project="..\packages\directxmesh_desktop_2019.2024.2.22.1\build\native\directxmesh_desktop_2019.targets" Condition="Exists('..\packages\directxmesh_desktop_2019.2024.2.22.1\build\native\directxmesh_desktop_2019.targets')" />
-    <Import Project="..\packages\directxtex_desktop_2019.2024.2.22.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('..\packages\directxtex_desktop_2019.2024.2.22.1\build\native\directxtex_desktop_2019.targets')" />
-    <Import Project="..\packages\uvatlas_desktop_2019.2024.2.23.1\build\native\uvatlas_desktop_2019.targets" Condition="Exists('..\packages\uvatlas_desktop_2019.2024.2.23.1\build\native\uvatlas_desktop_2019.targets')" />
+    <Import Project="..\packages\directxmesh_desktop_2019.2024.6.5.1\build\native\directxmesh_desktop_2019.targets" Condition="Exists('..\packages\directxmesh_desktop_2019.2024.6.5.1\build\native\directxmesh_desktop_2019.targets')" />
+    <Import Project="..\packages\directxtex_desktop_2019.2024.6.5.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('..\packages\directxtex_desktop_2019.2024.6.5.1\build\native\directxtex_desktop_2019.targets')" />
+    <Import Project="..\packages\uvatlas_desktop_2019.2024.6.5.1\build\native\uvatlas_desktop_2019.targets" Condition="Exists('..\packages\uvatlas_desktop_2019.2024.6.5.1\build\native\uvatlas_desktop_2019.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -187,8 +187,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets'))" />
     <Error Condition="!Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets'))" />
-    <Error Condition="!Exists('..\packages\directxmesh_desktop_2019.2024.2.22.1\build\native\directxmesh_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2019.2024.2.22.1\build\native\directxmesh_desktop_2019.targets'))" />
-    <Error Condition="!Exists('..\packages\directxtex_desktop_2019.2024.2.22.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2019.2024.2.22.1\build\native\directxtex_desktop_2019.targets'))" />
-    <Error Condition="!Exists('..\packages\uvatlas_desktop_2019.2024.2.23.1\build\native\uvatlas_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2019.2024.2.23.1\build\native\uvatlas_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\directxmesh_desktop_2019.2024.6.5.1\build\native\directxmesh_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2019.2024.6.5.1\build\native\directxmesh_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_2019.2024.6.5.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2019.2024.6.5.1\build\native\directxtex_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\uvatlas_desktop_2019.2024.6.5.1\build\native\uvatlas_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2019.2024.6.5.1\build\native\uvatlas_desktop_2019.targets'))" />
   </Target>
 </Project>
