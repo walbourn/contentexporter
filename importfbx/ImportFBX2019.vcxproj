@@ -64,6 +64,12 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ContentExporter</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ContentExporter</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CustomBuildAfterTargets>BuildLink</CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CustomBuildAfterTargets>BuildLink</CustomBuildAfterTargets>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -94,6 +100,12 @@
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
       <AdditionalOptions>/IGNORE:4075 /IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <CustomBuildStep>
+      <Command>copy "%25FBX_SDK%25\lib\x64\debug\*.dll" $(OutDir)</Command>
+      <Message>Copying Autodesk DLL</Message>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+      <Outputs>$(OutDir)\libfbxsdk.dll</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -129,6 +141,12 @@
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
       <AdditionalOptions>/IGNORE:4075 /IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <CustomBuildStep>
+      <Command>copy "%25FBX_SDK%25\lib\x64\debug\*.dll" $(OutDir)</Command>
+      <Message>Copying Autodesk DLL</Message>
+      <Outputs>$(OutDir)\libfbxsdk.dll</Outputs>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleMain.cpp" />
@@ -157,6 +175,9 @@
     <ResourceCompile Include="ContentExporter.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\cmofilewriter\CMOFileWriter2019.vcxproj">
+      <Project>{4d1b88df-35bf-4771-aba2-45559f4a9078}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ExportObjects\ExportObjects2019.vcxproj">
       <Project>{6afa24fb-37b3-49d3-9832-f7ea3de3ca2e}</Project>
     </ProjectReference>

@@ -86,6 +86,7 @@ enum ExportFileFormat
     FILEFORMAT_XATG = 0,
     FILEFORMAT_SDKMESH = 1,
     FILEFORMAT_SDKMESH_V2 = 2,
+    FILEFORMAT_CMO = 3,
 };
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -269,6 +270,12 @@ bool MacroXboxOne(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
     return true;
 }
 
+bool MacroCMO(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
+{
+    g_ExportFileFormat = FILEFORMAT_CMO;
+    return true;
+}
+
 bool MacroSDKMesh(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
 {
     g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -429,9 +436,10 @@ MacroCommand g_MacroCommands[] = {
     { "?", "", "Display help", MacroDisplayHelp },
     { "outputpath", " <path>", "Sets the output root path; files will appear in scenes/ and textures/ subdirectories", MacroSetOutputPath },
     { "verbose", "", "Displays more detailed output, equivalent to -loglevel 4", MacroSetVerbose },
-    { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
+    { "cmo", "", "Use the CMO output file format, equivalent to -fileformat cmo", MacroCMO },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
     { "sdkmesh2", "", "Use the SDKMESH (version 2) output file format, equivalent to -fileformat sdkmesh2", MacroSDKMesh2 },
+    { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "xbox360", "", "Sets export options for an Xbox 360 target", MacroXbox360 },
     { "xboxone", "", "Sets export options for an Xbox One target", MacroXboxOne },
     { "windowsd3d9", "", "Sets export options for a Windows Direct3D 9 target", MacroWindowsD3D9 },
@@ -763,13 +771,20 @@ void BuildOutputFileName(const ExportPath& InputFileName)
 
     g_CurrentOutputFileName.ChangeFileName(InputFileName);
 
-    if (g_ExportFileFormat == FILEFORMAT_SDKMESH || g_ExportFileFormat == FILEFORMAT_SDKMESH_V2)
+    switch (g_ExportFileFormat)
     {
+    case FILEFORMAT_SDKMESH:
+    case FILEFORMAT_SDKMESH_V2:
         g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_BINARYFILE_EXTENSION);
-    }
-    else
-    {
+        break;
+
+    case FILEFORMAT_CMO:
+        g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_CMO_EXTENSION);
+        break;
+
+    default:
         g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_FILE_EXTENSION);
+        break;
     }
 }
 
@@ -805,6 +820,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         { CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_FILE_EXTENSION, FILEFORMAT_XATG },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_BINARYFILE_EXTENSION, FILEFORMAT_SDKMESH },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION_V2, "sdkmesh2", FILEFORMAT_SDKMESH_V2 },
+        { CONTENT_EXPORTER_CMO_FILTER_DESCRIPTION, "cmo", FILEFORMAT_CMO },
     };
     g_SettingsManager.AddEnum(g_SettingsManager.GetRootCategory(0), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE(FileFormatEnums), &g_ExportFileFormat);
 
@@ -907,33 +923,56 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
 
         if (SUCCEEDED(hr))
         {
-            if (g_ExportFileFormat == FILEFORMAT_SDKMESH || g_ExportFileFormat == FILEFORMAT_SDKMESH_V2)
+            switch (g_ExportFileFormat)
             {
+            case FILEFORMAT_SDKMESH:
+            case FILEFORMAT_SDKMESH_V2:
                 ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "", true);
-                WriteSDKMeshFile(g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false);
+                if (!WriteSDKMeshFile(g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false))
+                {
+                    ExportLog::LogError("Could not write SDKMESH \"%s\".", (const CHAR*)g_CurrentOutputFileName);
+                    return 1;
+                }
                 if (bExportMaterials)
                 {
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                 }
-            }
-            else
-            {
+                break;
+
+            case FILEFORMAT_CMO:
+                if (!WriteCMOFile(g_CurrentOutputFileName, &g_Manifest))
+                {
+                    ExportLog::LogError("Could not write CMO \"%s\".", (const CHAR*)g_CurrentOutputFileName);
+                    return 1;
+                }
+                break;
+
+            default:
                 if (g_XATGSettings.bBundleTextures && bExportMaterials)
                 {
                     ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "textures\\", false);
-                    WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
+                    if (!WriteXATGFile(g_CurrentOutputFileName, &g_Manifest))
+                    {
+                        ExportLog::LogError("Could not write XATG \"%s\".", (const CHAR*)g_CurrentOutputFileName);
+                        return 1;
+                    }
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                     BundleTextures();
                 }
                 else
                 {
                     ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "textures\\", true);
-                    WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
+                    if (!WriteXATGFile(g_CurrentOutputFileName, &g_Manifest))
+                    {
+                        ExportLog::LogError("Could not write XATG \"%s\".", (const CHAR*)g_CurrentOutputFileName);
+                        return 1;
+                    }
                     if (bExportMaterials)
                     {
                         ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                     }
                 }
+                break;
             }
         }
 
