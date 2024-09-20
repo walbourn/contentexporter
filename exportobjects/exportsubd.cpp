@@ -354,7 +354,7 @@ void ExportSubDProcessMesh::BuildBoundaryEdgeTable()
     m_IncidentBoundaryEdgesPerPosition.resize(dwPositionCount, 0);
 
     EdgeMap::iterator iter = m_BoundaryEdges.begin();
-    EdgeMap::iterator end = m_BoundaryEdges.end();
+    const EdgeMap::iterator end = m_BoundaryEdges.end();
     while (iter != end)
     {
         const Edge& BoundaryEdge = (*iter).second;
@@ -416,7 +416,7 @@ INT ExportSubDProcessMesh::AddOrRemoveEdge(INT iPositionIndexA, INT iPositionInd
     }
 
     // search for the edge in the table
-    EdgeMap::iterator iter = m_BoundaryEdges.find(EdgeHashKey);
+    const EdgeMap::iterator iter = m_BoundaryEdges.find(EdgeHashKey);
 
     if (iter == m_BoundaryEdges.end())
     {
@@ -452,7 +452,7 @@ void ExportSubDProcessMesh::CreateDegenerateGeometry()
 
     // walk through the boundary edges
     EdgeMap::iterator iter = m_BoundaryEdges.begin();
-    EdgeMap::iterator end = m_BoundaryEdges.end();
+    const EdgeMap::iterator end = m_BoundaryEdges.end();
     while (iter != end)
     {
         const Edge& BoundaryEdge = (*iter).second;

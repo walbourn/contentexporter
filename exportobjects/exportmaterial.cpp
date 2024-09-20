@@ -34,7 +34,7 @@ ExportMaterial::~ExportMaterial()
 ExportMaterialParameter* ExportMaterial::FindParameter(const ExportString strName)
 {
     MaterialParameterList::iterator iter = m_Parameters.begin();
-    MaterialParameterList::iterator end = m_Parameters.end();
+    const MaterialParameterList::iterator end = m_Parameters.end();
     while (iter != end)
     {
         ExportMaterialParameter& param = *iter;

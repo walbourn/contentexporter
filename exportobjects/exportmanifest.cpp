@@ -87,7 +87,7 @@ void ExportTextureConverter::ProcessMaterial(ExportMaterial* pMaterial, ExportMa
 {
     MaterialParameterList* pParameters = pMaterial->GetParameterList();
     MaterialParameterList::iterator iter = pParameters->begin();
-    MaterialParameterList::iterator end = pParameters->end();
+    const MaterialParameterList::iterator end = pParameters->end();
     while (iter != end)
     {
         ExportMaterialParameter* pParameter = &(*iter);
@@ -285,7 +285,7 @@ void ConvertImageFormat(const CHAR* strSourceFileName, const CHAR* strDestFileNa
     if (_stricmp(ext, ".dds") == 0)
     {
         isdds = true;
-        HRESULT hr = LoadFromDDSFile(wSource, DDS_FLAGS_NONE, &info, *image);
+        const HRESULT hr = LoadFromDDSFile(wSource, DDS_FLAGS_NONE, &info, *image);
         if (FAILED(hr))
         {
             ExportLog::LogError("Could not load texture \"%s\" (DDS: %08X).", strSourceFileName, static_cast<unsigned int>(hr));

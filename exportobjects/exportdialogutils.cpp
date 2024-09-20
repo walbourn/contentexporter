@@ -40,6 +40,8 @@ LRESULT CALLBACK ThinDialog::DlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
     LRESULT lrt = FALSE;
 
     auto pDlg = GetInstance(hwndDlg);
+    if(!pDlg)
+        return 0;
 
     switch (uMsg)
     {
