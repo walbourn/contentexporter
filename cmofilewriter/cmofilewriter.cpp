@@ -11,7 +11,10 @@
 
 extern ATG::ExportScene* g_pScene;
 
+#include "CMO.h"
+
 using namespace DirectX;
+
 
 namespace ATG
 {

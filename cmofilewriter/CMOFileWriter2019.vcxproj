@@ -95,6 +95,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CMO.h" />
     <ClInclude Include="CMOFileWriter.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
