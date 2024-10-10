@@ -6,6 +6,9 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### October 9, 2024
+* Updated for DirectXTex, DirectXMesh, and UVAtlas September 2024 releases
+
 ### June 5, 2024
 * Updated for FBX SDK 2020.3.7
 * Updated for DirectXTex, DirectXMesh, and UVAtlas Jun 2024 releases
@@ -140,7 +143,7 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 * Added new command-line option:
     * ``-flipz`` (default+) to control negation of z component for LH vs. RH view coordinates
 * Fixed ``-applyglobaltrans`` to transform exported normals
-* Updated DirectXTex, UVAtlas, DirectXMesh libraries    
+* Updated DirectXTex, UVAtlas, DirectXMesh libraries
 * Minor code cleanup
 
 ### July 29, 2015
@@ -152,7 +155,7 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
     * ``-lightmaps`` macro to set up for exporting meshes using lightmap textures
 * Fixed problems with export of multiple uv sets and per-vertex colors
 * Added some more warnings related to uv sets
-* Updated DirectXTex, UVAtlas, DirectXMesh libraries    
+* Updated DirectXTex, UVAtlas, DirectXMesh libraries
 
 ### June 25, 2015
 * Added new command-line options:
