@@ -387,7 +387,7 @@ namespace ATG
                 // serialize effect parameters
                 const MaterialParameterList* pParameters = pMaterial->GetParameterList();
                 MaterialParameterList::const_iterator iter = pParameters->begin();
-                MaterialParameterList::const_iterator end = pParameters->end();
+                const MaterialParameterList::const_iterator end = pParameters->end();
                 while (iter != end)
                 {
                     const ExportMaterialParameter& ParamDesc = *iter;

@@ -58,7 +58,7 @@ ExportScene::~ExportScene()
 {
     {
         ExportAnimationList::iterator iter = m_vAnimations.begin();
-        ExportAnimationList::iterator end = m_vAnimations.end();
+        const ExportAnimationList::iterator end = m_vAnimations.end();
         while (iter != end)
         {
             delete* iter;
@@ -68,7 +68,7 @@ ExportScene::~ExportScene()
     }
     {
         ExportMeshBaseList::iterator iter = m_vMeshes.begin();
-        ExportMeshBaseList::iterator end = m_vMeshes.end();
+        const ExportMeshBaseList::iterator end = m_vMeshes.end();
         while (iter != end)
         {
             delete* iter;
@@ -78,7 +78,7 @@ ExportScene::~ExportScene()
     }
     {
         ExportMaterialList::iterator iter = m_vMaterials.begin();
-        ExportMaterialList::iterator end = m_vMaterials.end();
+        const ExportMaterialList::iterator end = m_vMaterials.end();
         while (iter != end)
         {
             delete* iter;
