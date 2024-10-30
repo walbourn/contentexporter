@@ -177,9 +177,9 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets" Condition="Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" />
     <Import Project="..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets" Condition="Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" />
-    <Import Project="..\packages\directxmesh_desktop_2019.2024.9.5.1\build\native\directxmesh_desktop_2019.targets" Condition="Exists('..\packages\directxmesh_desktop_2019.2024.9.5.1\build\native\directxmesh_desktop_2019.targets')" />
-    <Import Project="..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets')" />
-    <Import Project="..\packages\uvatlas_desktop_2019.2024.9.5.2\build\native\uvatlas_desktop_2019.targets" Condition="Exists('..\packages\uvatlas_desktop_2019.2024.9.5.2\build\native\uvatlas_desktop_2019.targets')" />
+    <Import Project="..\packages\directxmesh_desktop_2019.2024.10.29.1\build\native\directxmesh_desktop_2019.targets" Condition="Exists('..\packages\directxmesh_desktop_2019.2024.10.29.1\build\native\directxmesh_desktop_2019.targets')" />
+    <Import Project="..\packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('..\packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets')" />
+    <Import Project="..\packages\uvatlas_desktop_2019.2024.10.29.1\build\native\uvatlas_desktop_2019.targets" Condition="Exists('..\packages\uvatlas_desktop_2019.2024.10.29.1\build\native\uvatlas_desktop_2019.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -187,8 +187,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets'))" />
     <Error Condition="!Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets'))" />
-    <Error Condition="!Exists('..\packages\directxmesh_desktop_2019.2024.9.5.1\build\native\directxmesh_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2019.2024.9.5.1\build\native\directxmesh_desktop_2019.targets'))" />
-    <Error Condition="!Exists('..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2019.2024.9.5.1\build\native\directxtex_desktop_2019.targets'))" />
-    <Error Condition="!Exists('..\packages\uvatlas_desktop_2019.2024.9.5.2\build\native\uvatlas_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2019.2024.9.5.2\build\native\uvatlas_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\directxmesh_desktop_2019.2024.10.29.1\build\native\directxmesh_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2019.2024.10.29.1\build\native\directxmesh_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\uvatlas_desktop_2019.2024.10.29.1\build\native\uvatlas_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2019.2024.10.29.1\build\native\uvatlas_desktop_2019.targets'))" />
   </Target>
 </Project>
