@@ -95,7 +95,7 @@ namespace ATG
         StringList& CurrentList = s_StringLists[uBucketIndex];
 
         StringList::iterator iter = CurrentList.begin();
-        StringList::iterator end = CurrentList.end();
+        const StringList::iterator end = CurrentList.end();
 
         while (iter != end)
         {
