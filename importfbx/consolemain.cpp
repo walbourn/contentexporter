@@ -916,8 +916,8 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
             if (g_ExportFileFormat == FILEFORMAT_SDKMESH || g_ExportFileFormat == FILEFORMAT_SDKMESH_V2)
             {
                 ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "", true);
-                WriteSDKMeshFile(g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false);
-                if (bExportMaterials)
+                bool result = WriteSDKMeshFile(g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false);
+                if (result && bExportMaterials)
                 {
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                 }
@@ -932,15 +932,18 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
                 if (g_XATGSettings.bBundleTextures && bExportMaterials)
                 {
                     ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "textures\\", false);
-                    WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
-                    ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
-                    BundleTextures();
+                    bool result = WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
+                    if (result)
+                    {
+                        ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
+                        BundleTextures();
+                    }
                 }
                 else
                 {
                     ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "textures\\", true);
-                    WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
-                    if (bExportMaterials)
+                    bool result = WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
+                    if (result && bExportMaterials)
                     {
                         ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                     }
