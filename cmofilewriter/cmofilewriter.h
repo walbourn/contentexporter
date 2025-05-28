@@ -1,8 +1,8 @@
 //-------------------------------------------------------------------------------------
-// SDKMeshFileWriter.h
+// CMOFileWriter.h
 //
-// Entry point for writing SDKMESH files.  This file writer takes data from the
-// ExportScene stored in a global variable (g_pScene).
+// Entry point for writing Compiled Mesh Object (CMO) files.  This file writer takes
+// data from the ExportScene stored in a global variable (g_pScene).
 //
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
@@ -16,5 +16,5 @@ namespace ATG
 {
     class ExportManifest;
 
-    bool WriteSDKMeshFile(const CHAR* strFileName, ExportManifest* pManifest, bool version2);
+    bool WriteCMOMeshFile(const CHAR* strFileName, ExportManifest* pManifest);
 }
