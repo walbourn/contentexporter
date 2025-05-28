@@ -288,6 +288,13 @@ bool MacroXATG(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
     return true;
 }
 
+bool MacroCMO(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
+{
+    g_pScene->Settings().bFlipTriangles = false;
+    g_ExportFileFormat = FILEFORMAT_CMO;
+    return true;
+}
+
 bool MacroSubD11(const CHAR* strArgument, bool& bUsedArgument)
 {
     MacroWindowsD3D11(strArgument, bUsedArgument);
@@ -430,6 +437,7 @@ MacroCommand g_MacroCommands[] = {
     { "?", "", "Display help", MacroDisplayHelp },
     { "outputpath", " <path>", "Sets the output root path; files will appear in scenes/ and textures/ subdirectories", MacroSetOutputPath },
     { "verbose", "", "Displays more detailed output, equivalent to -loglevel 4", MacroSetVerbose },
+    { "cmo", "", "Use the CMO output file format, equivalent to -filformat cmo -fliptriangles-", MacroCMO },
     { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
     { "sdkmesh2", "", "Use the SDKMESH (version 2) output file format, equivalent to -fileformat sdkmesh2", MacroSDKMesh2 },
