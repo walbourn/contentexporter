@@ -84,8 +84,9 @@ ExportPath g_CurrentInputFileName;
 enum ExportFileFormat
 {
     FILEFORMAT_XATG = 0,
-    FILEFORMAT_SDKMESH = 1,
-    FILEFORMAT_SDKMESH_V2 = 2,
+    FILEFORMAT_SDKMESH,
+    FILEFORMAT_SDKMESH_V2,
+    FILEFORMAT_CMO
 };
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -767,6 +768,10 @@ void BuildOutputFileName(const ExportPath& InputFileName)
     {
         g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_BINARYFILE_EXTENSION);
     }
+    else if (g_ExportFileFormat == FILEFORMAT_CMO)
+    {
+        g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_VSFILE_EXTENSION);
+    }
     else
     {
         g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_FILE_EXTENSION);
@@ -805,6 +810,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         { CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_FILE_EXTENSION, FILEFORMAT_XATG },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_BINARYFILE_EXTENSION, FILEFORMAT_SDKMESH },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION_V2, "sdkmesh2", FILEFORMAT_SDKMESH_V2 },
+        { CONTENT_EXPORTER_VSFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_VSFILE_EXTENSION, FILEFORMAT_CMO },
     };
     g_SettingsManager.AddEnum(g_SettingsManager.GetRootCategory(0), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE(FileFormatEnums), &g_ExportFileFormat);
 
@@ -915,6 +921,11 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
                 {
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                 }
+            }
+            else if (g_ExportFileFormat == FILEFORMAT_CMO)
+            {
+                ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "", true);
+                WriteCMOMeshFile(g_CurrentOutputFileName, &g_Manifest);
             }
             else
             {

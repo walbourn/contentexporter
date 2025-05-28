@@ -1,8 +1,5 @@
 //-------------------------------------------------------------------------------------
-// SDKMeshFileWriter.h
-//
-// Entry point for writing SDKMESH files.  This file writer takes data from the
-// ExportScene stored in a global variable (g_pScene).
+// CMOFileWriter.cpp
 //
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
@@ -10,11 +7,20 @@
 //
 // http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
-#pragma once
+#include "stdafx.h"
+#include "CMOFileWriter.h"
+#include "CMO.h"
 
-namespace ATG
+extern ATG::ExportScene* g_pScene;
+
+using namespace DirectX;
+using namespace ATG;
+
+bool ATG::WriteCMOMeshFile(const CHAR* strFileName, ExportManifest* pManifest)
 {
-    class ExportManifest;
+    if (!g_pScene)
+        return false;
 
-    bool WriteSDKMeshFile(const CHAR* strFileName, ExportManifest* pManifest, bool version2);
+    // TODO
+    return false;
 }
