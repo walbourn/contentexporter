@@ -21,6 +21,8 @@ bool ATG::WriteCMOMeshFile(const CHAR* strFileName, ExportManifest* pManifest)
     if (!g_pScene)
         return false;
 
+    ExportLog::LogError("CMO not yet implemented");
+
     // TODO
     return false;
 }
