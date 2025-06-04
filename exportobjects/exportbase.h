@@ -2,7 +2,7 @@
 // ExportBase.h
 //
 // Base functionality for all of the export objects.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

@@ -2,7 +2,7 @@
 // ExportString.h
 //
 // A pooled string class that makes string manipulation easier within the export code.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

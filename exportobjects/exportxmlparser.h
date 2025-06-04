@@ -27,7 +27,7 @@ namespace ATG
     constexpr UINT XML_READ_BUFFER_SIZE = 2048;
     constexpr UINT XML_WRITE_BUFFER_SIZE = 2048;
 
-    // No tag can be longer than XML_WRITE_BUFFER_SIZE - an error will be returned if 
+    // No tag can be longer than XML_WRITE_BUFFER_SIZE - an error will be returned if
     // it is
 
     //-------------------------------------------------------------------------------------
@@ -88,15 +88,15 @@ namespace ATG
         ISAXCallback* GetSAXCallbackInterface();
 
         //      ParseXMLFile returns one of the following:
-        //         E_COULD_NOT_OPEN_FILE - couldn't open the file    
+        //         E_COULD_NOT_OPEN_FILE - couldn't open the file
         //         E_INVALID_XML_SYNTAX - bad XML syntax according to this parser
         //         E_NOINTERFACE - RegisterSAXCallbackInterface not called
         //         E_ABORT - callback returned a fail code
-        //         S_OK - file parsed and completed   
+        //         S_OK - file parsed and completed
 
         HRESULT    ParseXMLFile(const CHAR* strFilename);
 
-        //      Parses from a buffer- if you pass a WCHAR buffer (and cast it), it will 
+        //      Parses from a buffer- if you pass a WCHAR buffer (and cast it), it will
         //         correctly detect it and use unicode instead.  Return codes are the
         //         same as for ParseXMLFile
 
@@ -132,7 +132,7 @@ namespace ATG
         WCHAR           m_pWriteBuf[XML_WRITE_BUFFER_SIZE];
 
         BYTE* m_pReadPtr;
-        WCHAR* m_pWritePtr;        // write pointer within m_pBuf      
+        WCHAR* m_pWritePtr;        // write pointer within m_pBuf
 
         bool            m_bUnicode;         // true = 16-bits, false = 8-bits
         bool            m_bReverseBytes;    // true = reverse bytes, false = don't reverse

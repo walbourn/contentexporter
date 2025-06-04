@@ -90,9 +90,9 @@ LRESULT ExportSettingsDialog::OnInitDialog(HWND hwndFocusCtrl)
 
     m_hScrollingPane = CreateWindowEx(
         WS_EX_CLIENTEDGE | WS_EX_CONTROLPARENT,
-        "Static",       // window class 
-        nullptr,        // text for window title bar 
-        WS_CHILD |      // window styles 
+        "Static",       // window class
+        nullptr,        // text for window title bar
+        WS_CHILD |      // window styles
         WS_CLIPCHILDREN |
         WS_VSCROLL |
         WS_VISIBLE |
@@ -102,9 +102,9 @@ LRESULT ExportSettingsDialog::OnInitDialog(HWND hwndFocusCtrl)
         100,
         100,
         m_hwnd,
-        nullptr,        // window class menu 
-        g_hInstance,    // instance owning this window 
-        nullptr         // pointer not needed 
+        nullptr,        // window class menu
+        g_hInstance,    // instance owning this window
+        nullptr         // pointer not needed
     );
 
     SetWindowLongPtr(m_hScrollingPane, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));

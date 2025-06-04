@@ -2,7 +2,7 @@
 // ExportCamera.h
 //
 // A data structure representing a camera.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

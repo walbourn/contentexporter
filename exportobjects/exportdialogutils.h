@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 // ExportDialogUtils.h
-// 
+//
 // Wrapper code to build Win32 dialog boxes.
 //
 // Advanced Technology Group (ATG)

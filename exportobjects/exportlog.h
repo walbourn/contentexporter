@@ -4,7 +4,7 @@
 // Classes and interfaces for a DCC-independent pluggable message logging system.
 // The system supports warnings, errors, and different levels of message logging.
 // Two log listeners are implemented here - a debug spew listener and a file listener.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

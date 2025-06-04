@@ -2,7 +2,7 @@
 // ExportLight.h
 //
 // Classes to represent various types of lights found in a scene.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

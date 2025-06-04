@@ -2,7 +2,7 @@
 // ExportScene.h
 //
 // The root class of the scene hierarchy.  Exporter settings are also contained here.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

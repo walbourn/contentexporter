@@ -2,7 +2,7 @@
 // ExportManifest.h
 //
 // Data structures to track a list of files that are important to the export process.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 // ExportLog.cpp
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

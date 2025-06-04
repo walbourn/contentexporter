@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 // ExportXmlParser.cpp
-//  
+//
 // Simple callback non-validating XML parser implementation.
 //
 // Advanced Technology Group (ATG)
@@ -91,7 +91,7 @@ void XMLParser::SkipNextAdvance()
 
 //-------------------------------------------------------------------------------------
 // Name: XMLParser::ConsumeSpace
-// Desc: Skips spaces in the current stream 
+// Desc: Skips spaces in the current stream
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::ConsumeSpace()
 {
@@ -114,7 +114,7 @@ HRESULT XMLParser::ConsumeSpace()
 
 //-------------------------------------------------------------------------------------
 // Name: XMLParser::ConvertEscape
-// Desc: Copies and converts an escape sequence into m_pWriteBuf 
+// Desc: Copies and converts an escape sequence into m_pWriteBuf
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::ConvertEscape()
 {
@@ -124,7 +124,7 @@ HRESULT XMLParser::ConvertEscape()
     if (FAILED(hr = AdvanceCharacter()))
         return hr;
 
-    // all escape sequences start with &, so ignore the first character    
+    // all escape sequences start with &, so ignore the first character
 
     if (FAILED(hr = AdvanceCharacter()))
         return hr;
@@ -351,7 +351,7 @@ HRESULT XMLParser::AdvanceCharacter(bool bOkToFail)
     }
 
     // If we hit EOF in the middle of a character,
-    // it's ok-- we'll just have a corrupt last character 
+    // it's ok-- we'll just have a corrupt last character
     // (the buffer is padded with double NULLs )
 
     if (*m_pReadPtr == '\0')
@@ -405,7 +405,7 @@ HRESULT XMLParser::AdvanceCharacter(bool bOkToFail)
 
 //-------------------------------------------------------------------------------------
 // Name: XMLParser::AdvanceElement
-// Desc: Builds <element> data, calls callback 
+// Desc: Builds <element> data, calls callback
 //-------------------------------------------------------------------------------------
 HRESULT XMLParser::AdvanceElement()
 {
@@ -708,7 +708,7 @@ HRESULT XMLParser::AdvanceComment()
 
 //-------------------------------------------------------------------------------------
 // Name: XMLParser::RegisterSAXCallbackInterface
-// Desc: Registers callback interface 
+// Desc: Registers callback interface
 //-------------------------------------------------------------------------------------
 void XMLParser::RegisterSAXCallbackInterface(ISAXCallback* pISAXCallback)
 {
@@ -718,7 +718,7 @@ void XMLParser::RegisterSAXCallbackInterface(ISAXCallback* pISAXCallback)
 
 //-------------------------------------------------------------------------------------
 // Name: XMLParser::GetSAXCallbackInterface
-// Desc: Returns current callback interface 
+// Desc: Returns current callback interface
 //-------------------------------------------------------------------------------------
 ISAXCallback* XMLParser::GetSAXCallbackInterface()
 {
@@ -935,7 +935,7 @@ HRESULT XMLParser::ParseXMLBuffer(const CHAR* strBuffer, UINT uBufferSize)
 }
 
 //-------------------------------------------------------------------------------------
-// XMLParser::Error()      
+// XMLParser::Error()
 //      Logs an error through the callback interface
 //-------------------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@
 //
 // Data structures for keyframed animation curves, and code to manipulate and optimize
 // the keyframes.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

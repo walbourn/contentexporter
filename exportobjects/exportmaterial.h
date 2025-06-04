@@ -2,7 +2,7 @@
 // ExportMaterial.h
 //
 // Data structures representing parameterized materials (surface shaders).
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

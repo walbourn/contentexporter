@@ -2,7 +2,7 @@
 // ExportSubD.cpp
 //
 // Classes representing Catmull-Clark subdivision surfaces.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
