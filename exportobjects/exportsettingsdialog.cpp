@@ -433,6 +433,9 @@ LRESULT ExportSettingsDialog::OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwnd
             else
                 m_DialogState = DS_HIDDEN_CANCELED;
             return 0;
+
+        default:
+            break;
         }
         break;
     case IDC_DYNAMICCONTROL:
@@ -470,6 +473,9 @@ LRESULT ExportSettingsDialog::OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwnd
         }
         return true;
     }
+
+    default:
+        break;
     }
     return false;
 }
@@ -600,6 +606,9 @@ LRESULT ExportSettingsDialog::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             pEntry->SetValue(GetFloatFromNormalizedInt(pEntry, iPos));
         return false;
     }
+
+    default:
+        break;
     }
     return false;
 }
@@ -623,8 +632,14 @@ LRESULT ExportSettingsDialog::OnNotify(INT idCtrl, LPNMHDR pnmh)
             PopulateControls();
             return true;
         }
+
+        default:
+            break;
         }
         return true;
+
+    default:
+        break;
     }
     return false;
 }

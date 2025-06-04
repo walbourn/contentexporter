@@ -75,7 +75,7 @@ namespace ATG
 
     DWORD CaptureMaterial(ExportMaterial* pMaterial, bool version2)
     {
-        MaterialLookupMap::iterator iter = g_ExportMaterialToSDKMeshMaterialMap.find(pMaterial);
+        const MaterialLookupMap::iterator iter = g_ExportMaterialToSDKMeshMaterialMap.find(pMaterial);
         if (iter != g_ExportMaterialToSDKMeshMaterialMap.end())
         {
             return iter->second;
@@ -931,7 +931,7 @@ namespace ATG
 
         SDKANIMATION_FILE_HEADER AnimHeader = {};
 
-        const size_t dwKeyCount = size_t(pAnim->GetDuration() / pAnim->fSourceFrameInterval);
+        const size_t dwKeyCount = size_t(static_cast<int>(pAnim->GetDuration() / pAnim->fSourceFrameInterval));
         const size_t dwTrackHeadersDataSize = dwTrackCount * sizeof(SDKANIMATION_FRAME_DATA);
         const size_t dwSingleTrackDataSize = dwKeyCount * sizeof(SDKANIMATION_DATA);
 
@@ -939,7 +939,7 @@ namespace ATG
         AnimHeader.IsBigEndian = !g_pScene->Settings().bLittleEndian;
         AnimHeader.FrameTransformType = FTT_RELATIVE;
         AnimHeader.NumAnimationKeys = static_cast<UINT>(dwKeyCount);
-        AnimHeader.AnimationFPS = static_cast<UINT>(1.001f / pAnim->fSourceFrameInterval);
+        AnimHeader.AnimationFPS = static_cast<UINT>(static_cast<int>(1.001f / pAnim->fSourceFrameInterval));
         AnimHeader.NumFrames = static_cast<UINT>(dwTrackCount);
         AnimHeader.AnimationDataSize = dwTrackHeadersDataSize + dwTrackCount * dwSingleTrackDataSize;
         AnimHeader.AnimationDataOffset = sizeof(SDKANIMATION_FILE_HEADER);

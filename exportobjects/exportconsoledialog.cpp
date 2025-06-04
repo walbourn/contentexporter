@@ -61,7 +61,13 @@ LRESULT ExportConsoleDialog::OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwndC
         case BN_CLICKED:
             Hide();
             return true;
+
+        default:
+            break;
         }
+        break;
+
+    default:
         break;
     }
     return false;
@@ -79,23 +85,25 @@ LRESULT ExportConsoleDialog::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         KillTimer(m_hwnd, wParam);
         return false;
     case WM_SIZE:
-    {
-        GridLayout Layout(3, 2);
-        Layout.SetRowSpec(0, 1.0f);
-        Layout.SetRowSpec(1, 30);
-        Layout.SetRowSpec(2, 30);
-        Layout.SetColumnSpec(0, 1);
-        Layout.SetColumnSpec(1, 100);
+        {
+            GridLayout Layout(3, 2);
+            Layout.SetRowSpec(0, 1.0f);
+            Layout.SetRowSpec(1, 30);
+            Layout.SetRowSpec(2, 30);
+            Layout.SetColumnSpec(0, 1);
+            Layout.SetColumnSpec(1, 100);
 
-        constexpr DWORD dwOuterBorder = 4;
-        constexpr DWORD dwInnerBorder = 4;
-        Layout.SetClientRect(m_hwnd, dwOuterBorder);
-        Layout.PlaceWindow(m_hRichTextBox, 0, 0, 1, 2, dwInnerBorder);
-        Layout.PlaceWindow(m_hProgressText, 1, 0, 1, 2, dwInnerBorder);
-        Layout.PlaceWindow(m_hProgressBar, 2, 0, 1, 1, dwInnerBorder);
-        Layout.PlaceWindow(m_hOKButton, 2, 1, 1, 1, dwInnerBorder);
-        return false;
-    }
+            constexpr DWORD dwOuterBorder = 4;
+            constexpr DWORD dwInnerBorder = 4;
+            Layout.SetClientRect(m_hwnd, dwOuterBorder);
+            Layout.PlaceWindow(m_hRichTextBox, 0, 0, 1, 2, dwInnerBorder);
+            Layout.PlaceWindow(m_hProgressText, 1, 0, 1, 2, dwInnerBorder);
+            Layout.PlaceWindow(m_hProgressBar, 2, 0, 1, 1, dwInnerBorder);
+            Layout.PlaceWindow(m_hOKButton, 2, 1, 1, 1, dwInnerBorder);
+            return false;
+        }
+    default:
+        break;
     }
     return false;
 }
@@ -150,6 +158,8 @@ void ExportConsoleDialog::LogCommand(DWORD dwCommand, void* pData)
     case ExportLog::ELC_STARTEXPORT:
     case ExportLog::ELC_ENDEXPORT:
         Show();
+        break;
+    default:
         break;
     }
 }

@@ -445,6 +445,8 @@ bool ExportSettingsManager::UnMarshalAllSettings(const CHAR* strSrcBuffer)
         pToken = strtok_s(nullptr, strDelimiters, &strNextToken);
     }
 
+    strSrcTokenized.reset();
+
     return true;
 }
 
@@ -532,6 +534,7 @@ bool ExportSettingsManager::SaveSettings(const CHAR* strFileName)
     {
         fputs(strBuffer.get(), fp);
         fclose(fp);
+        strBuffer.reset();
         return true;
     }
     else
@@ -565,6 +568,7 @@ bool ExportSettingsManager::LoadSettings(const CHAR* strFileName)
         assert(dwReadBytes < dwBufferSize);
         strBuffer[dwReadBytes] = '\0';
         const bool bSuccess = UnMarshalAllSettings(strBuffer.get());
+        strBuffer.reset();
         return bSuccess;
     }
 }
