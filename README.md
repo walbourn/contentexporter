@@ -17,16 +17,16 @@ These components are designed to work without requiring any content from the leg
 ## Directory Layout
 
 * ``ImportFBX\``
-    * Contains the main entry point for the command-line exporter tool and code for capturing data from FBX files.
+  * Contains the main entry point for the command-line exporter tool and code for capturing data from FBX files.
 
 * ``ExportObjects\``
-    * Contains a library of support code for the exporter.
+  * Contains a library of support code for the exporter.
 
 * ``SDKMeshFileWriter\``
-    * Contains a library of code for writing out an .SDKMESH file from data captured as export objects.
+  * Contains a library of code for writing out an .SDKMESH file from data captured as export objects.
 
 * ``XATGFileWriter\``
-    * Contains a library of code for writing out a ``.XATG`` file from data captured as export objects.
+  * Contains a library of code for writing out a ``.XATG`` file from data captured as export objects.
 
 > ``.XATG`` was an XML based format used for older Xbox 360 samples
 
