@@ -6,7 +6,7 @@ https://aka.ms/dxsdkcontentexporter
 
 Copyright (c) Microsoft Corporation.
 
-**October 9, 2024**
+# October 9, 2024
 
 The **Samples Content Exporter** was shipped as a sample in the legacy DirectX SDK. It makes use of the [Autodesk FBX SDK](http://autodesk.com/fbx) to import an FBX file and then export the data as an ``.SDKMESH``. The ``.SDKMESH`` format is a runtime geometry format supported by the _DirectX Tool Kit_ for [DX11](http://go.microsoft.com/fwlink/?LinkId=248929) / [DX12](http://go.microsoft.com/fwlink/?LinkID=615561) and [DXUT](http://go.microsoft.com/fwlink/?LinkId=320437), and is used in the Windows sample [Marble Maze](https://docs.microsoft.com/samples/microsoft/windows-appsample-marble-maze/directx-marble-maze-game-sample/).
 
@@ -88,6 +88,6 @@ This project may contain trademarks or logos for projects, products, or services
 
 # Credits
 
-The *DirectX SDK Samples Content Exporter* is the work of Matt Lee with contributions from Chuck Walbourn.
+The _DirectX SDK Samples Content Exporter_ is the work of Matt Lee with contributions from Chuck Walbourn.
 
 Thanks to Shanon Drone for the SDKMESH file format.
