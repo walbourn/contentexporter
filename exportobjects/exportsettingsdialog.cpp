@@ -133,7 +133,7 @@ BOOL CALLBACK DestroyWindowCallback(HWND hWnd, LPARAM lParam)
 
 HWND CreateStaticLabel(HWND hParent, const CHAR* strText, HFONT hFont, DWORD dwX, DWORD dwY, DWORD dwWidth)
 {
-    HWND hLabel = CreateWindow("Static",
+    const HWND hLabel = CreateWindow("Static",
         strText,
         WS_CHILD | WS_VISIBLE,
         dwX, dwY,

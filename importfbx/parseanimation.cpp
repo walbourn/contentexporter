@@ -76,7 +76,7 @@ void AddKey(AnimationScanNode& asn, const AnimationScanNode* pParent, const FbxA
 {
     const XMFLOAT4X4 matGlobal = ConvertMatrix(matFBXGlobal);
     asn.matGlobal = matGlobal;
-    XMFLOAT4X4 matLocal = matGlobal;
+    const XMFLOAT4X4 matLocal = matGlobal;
     if (pParent)
     {
         XMMATRIX m = XMLoadFloat4x4(&pParent->matGlobal);
