@@ -5,7 +5,7 @@
 // The export front-end implements a subclass of ExportProgress that manipulates the
 // DCC user interface, and sets up the g_pProgress global pointer so the DCC-agnostic
 // code can report progress updates.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

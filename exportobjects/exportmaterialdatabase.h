@@ -3,7 +3,7 @@
 //
 // Data structures representing a list of custom material types that can be exposed
 // into the DCC package and assigned to objects.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

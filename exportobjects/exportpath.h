@@ -4,7 +4,7 @@
 // The ExportPath class manages a path string, representing a relative or absolute
 // path.  Common operations such as replacing the filename, replacing the extension,
 // and appending paths are supported.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

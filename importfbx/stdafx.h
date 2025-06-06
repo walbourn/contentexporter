@@ -63,8 +63,8 @@
 #include <fbxsdk.h>
 #pragma warning(pop)
 
-#include "..\XATGFileWriter\XATGFileWriter.h"
 #include "..\SDKMeshFileWriter\SDKMeshFileWriter.h"
+#include "..\XATGFileWriter\XATGFileWriter.h"
 
 #define CONTENT_EXPORTER_TITLE CONTENT_EXPORTER_GLOBAL_TITLE " for FBX"
 extern CHAR g_strExporterName[100];

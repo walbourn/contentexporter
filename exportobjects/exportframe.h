@@ -3,7 +3,7 @@
 //
 // A class representing a node in a scenegraph, containing a local transform, children,
 // and a parent pointer.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

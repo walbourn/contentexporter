@@ -3,7 +3,7 @@
 //
 // Classes representing static and skinned meshes.  Also included is code to optimize
 // mesh data and generate export-ready data from a non-indexed triangle list.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.

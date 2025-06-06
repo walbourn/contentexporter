@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 // ExportLog.cpp
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -108,7 +108,7 @@ void ExportLog::ResetCounters()
 void ATG::BroadcastMessage(UINT uMessageType, const CHAR* strMsg)
 {
     LogListenerList::iterator iter = g_Listeners.begin();
-    LogListenerList::iterator end = g_Listeners.end();
+    const LogListenerList::iterator end = g_Listeners.end();
 
     while (iter != end)
     {
@@ -132,7 +132,7 @@ void ATG::BroadcastMessage(UINT uMessageType, const CHAR* strMsg)
 void ExportLog::LogCommand(DWORD dwCommand, void* pData)
 {
     LogListenerList::iterator iter = g_Listeners.begin();
-    LogListenerList::iterator end = g_Listeners.end();
+    const LogListenerList::iterator end = g_Listeners.end();
 
     while (iter != end)
     {

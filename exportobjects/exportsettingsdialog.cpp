@@ -90,9 +90,9 @@ LRESULT ExportSettingsDialog::OnInitDialog(HWND hwndFocusCtrl)
 
     m_hScrollingPane = CreateWindowEx(
         WS_EX_CLIENTEDGE | WS_EX_CONTROLPARENT,
-        "Static",       // window class 
-        nullptr,        // text for window title bar 
-        WS_CHILD |      // window styles 
+        "Static",       // window class
+        nullptr,        // text for window title bar
+        WS_CHILD |      // window styles
         WS_CLIPCHILDREN |
         WS_VSCROLL |
         WS_VISIBLE |
@@ -102,9 +102,9 @@ LRESULT ExportSettingsDialog::OnInitDialog(HWND hwndFocusCtrl)
         100,
         100,
         m_hwnd,
-        nullptr,        // window class menu 
-        g_hInstance,    // instance owning this window 
-        nullptr         // pointer not needed 
+        nullptr,        // window class menu
+        g_hInstance,    // instance owning this window
+        nullptr         // pointer not needed
     );
 
     SetWindowLongPtr(m_hScrollingPane, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
@@ -133,7 +133,7 @@ BOOL CALLBACK DestroyWindowCallback(HWND hWnd, LPARAM lParam)
 
 HWND CreateStaticLabel(HWND hParent, const CHAR* strText, HFONT hFont, DWORD dwX, DWORD dwY, DWORD dwWidth)
 {
-    HWND hLabel = CreateWindow("Static",
+    const HWND hLabel = CreateWindow("Static",
         strText,
         WS_CHILD | WS_VISIBLE,
         dwX, dwY,
@@ -433,6 +433,9 @@ LRESULT ExportSettingsDialog::OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwnd
             else
                 m_DialogState = DS_HIDDEN_CANCELED;
             return 0;
+
+        default:
+            break;
         }
         break;
     case IDC_DYNAMICCONTROL:
@@ -470,6 +473,9 @@ LRESULT ExportSettingsDialog::OnCommand(WORD wNotifyCode, WORD idCtrl, HWND hwnd
         }
         return true;
     }
+
+    default:
+        break;
     }
     return false;
 }
@@ -600,6 +606,9 @@ LRESULT ExportSettingsDialog::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             pEntry->SetValue(GetFloatFromNormalizedInt(pEntry, iPos));
         return false;
     }
+
+    default:
+        break;
     }
     return false;
 }
@@ -623,8 +632,14 @@ LRESULT ExportSettingsDialog::OnNotify(INT idCtrl, LPNMHDR pnmh)
             PopulateControls();
             return true;
         }
+
+        default:
+            break;
         }
         return true;
+
+    default:
+        break;
     }
     return false;
 }

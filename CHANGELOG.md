@@ -141,7 +141,7 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 ### October 30, 2015
 * Updated with VS 2015 support using the Autodesk FBX SDK 2016.1 or later
 * Added new command-line option:
-    * ``-flipz`` (default+) to control negation of z component for LH vs. RH view coordinates
+  * ``-flipz`` (default+) to control negation of z component for LH vs. RH view coordinates
 * Fixed ``-applyglobaltrans`` to transform exported normals
 * Updated DirectXTex, UVAtlas, DirectXMesh libraries
 * Minor code cleanup
@@ -151,32 +151,32 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ### July 8, 2015
 * Added command-line options:
-    * ``-materialcolors`` (default+) to control export of material lambert/phong colors
-    * ``-lightmaps`` macro to set up for exporting meshes using lightmap textures
+  * ``-materialcolors`` (default+) to control export of material lambert/phong colors
+  * ``-lightmaps`` macro to set up for exporting meshes using lightmap textures
 * Fixed problems with export of multiple uv sets and per-vertex colors
 * Added some more warnings related to uv sets
 * Updated DirectXTex, UVAtlas, DirectXMesh libraries
 
 ### June 25, 2015
 * Added new command-line options:
-    * ``-useemissivetexture[+|-]`` Use EmissiveMapTexture as SpecularMapTexture
-    * ``-defaultspecmap [name]`` Sets the default specular map texture name
+  * ``-useemissivetexture[+|-]`` Use EmissiveMapTexture as SpecularMapTexture
+  * ``-defaultspecmap [name]`` Sets the default specular map texture name
 * Changed defaults for ``-defaultdiffusemap`` and ``-defaultnormalmap`` to blank
 * ``SDKMESH`` writer now fills in the SpecularTexture string in the material
 * Change the log messages about applying the default texture names to log level 2 messages rather than warnings
 
 ### May 6, 2015
 * Added command-line options:
-    * ``-optimizemeshes`` (default-) applies a vertex cache optimization to the VB/IB controlled by -vcache/-restart
-    * ``-cleanmeshes`` (default+ if using optimizemeshes, otherwise -) performs back-facing and/or bowtie cleanup
-    * ``-applyglobaltrans`` (default-) applies the global transformation matrix on vertex data if not exporting animations
-    * ``-tangentsindex`` (default 0) controls which set of texture coordinates are used when computing tangents & binormals
-    * ``-gsadjacency`` (default-) controls how adjacency is computed for cleanup, optmization, and UV atlas operations
-    * ``-texturebgra`` (default-) controls how uncompressed processed textures are written (BGRA vs. RGBA)
-    * ``-exportcolors`` (default+) controls export of per vertex colors
+  * ``-optimizemeshes`` (default-) applies a vertex cache optimization to the VB/IB controlled by -vcache/-restart
+  * ``-cleanmeshes`` (default+ if using optimizemeshes, otherwise -) performs back-facing and/or bowtie cleanup
+  * ``-applyglobaltrans`` (default-) applies the global transformation matrix on vertex data if not exporting animations
+  * ``-tangentsindex`` (default 0) controls which set of texture coordinates are used when computing tangents & binormals
+  * ``-gsadjacency`` (default-) controls how adjacency is computed for cleanup, optmization, and UV atlas operations
+  * ``-texturebgra`` (default-) controls how uncompressed processed textures are written (BGRA vs. RGBA)
+  * ``-exportcolors`` (default+) controls export of per vertex colors
 * Removed support for -compressednormaltype dec3n as there is no DXGI equivalent (i.e. legacy Direct3D 9 only)
 * Removed all dependencies on the legacy DirectX SDK and D3DX9
-    * Makes use of DirectXMath, DirectXMesh, DirectXTex, and UVAtlas instead
+  * Makes use of DirectXMath, DirectXMesh, DirectXTex, and UVAtlas instead
 
 ### April 16, 2015
 * Updated with VS 2012 support using the Autodesk FBX SDK 2014.1 or later

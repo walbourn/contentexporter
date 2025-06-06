@@ -2,7 +2,7 @@
 // ExportString.h
 //
 // A pooled string class that makes string manipulation easier within the export code.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -95,7 +95,7 @@ namespace ATG
         StringList& CurrentList = s_StringLists[uBucketIndex];
 
         StringList::iterator iter = CurrentList.begin();
-        StringList::iterator end = CurrentList.end();
+        const StringList::iterator end = CurrentList.end();
 
         while (iter != end)
         {

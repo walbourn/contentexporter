@@ -1,10 +1,10 @@
 //-------------------------------------------------------------------------------------
 // ExporterGlobals.h
-//  
+//
 // Common includes for the samples content exporter.
 // Version number, display name, and vendor are stored here, and each exporter
 // front-end project uses these defines in their builds.
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -37,10 +37,10 @@
 #define BUILD_FLAVOR "Release"
 #endif
 
-// The following ifdef block is the standard way of creating macros which make exporting 
+// The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the CONTENTEXPORTER_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see 
+// that uses this DLL. This way any other project whose source files include this file see
 // CONTENTEXPORTER_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 #ifdef CONTENTEXPORTER_EXPORTS

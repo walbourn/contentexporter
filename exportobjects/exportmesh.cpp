@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 // ExportMesh.cpp
-//  
+//
 // Advanced Technology Group (ATG)
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -343,6 +343,9 @@ void ExportVB::ByteSwap(const D3DVERTEXELEMENT9* pVertexElements, const size_t d
                 pElement++;
                 break;
             }
+
+            default:
+                break;
             }
         }
     }
@@ -387,7 +390,7 @@ void ExportIB::Allocate()
 void ExportMeshTriangleAllocator::Terminate()
 {
     AllocationBlockList::iterator iter = m_AllocationBlocks.begin();
-    AllocationBlockList::iterator end = m_AllocationBlocks.end();
+    const AllocationBlockList::iterator end = m_AllocationBlocks.end();
     while (iter != end)
     {
         AllocationBlock& block = *iter;
@@ -418,7 +421,7 @@ ExportMeshTriangle* ExportMeshTriangleAllocator::GetNewTriangle()
     UINT uIndex = m_uAllocatedCount;
     m_uAllocatedCount++;
     AllocationBlockList::iterator iter = m_AllocationBlocks.begin();
-    AllocationBlockList::iterator end = m_AllocationBlocks.end();
+    const AllocationBlockList::iterator end = m_AllocationBlocks.end();
     while (iter != end)
     {
         AllocationBlock& block = *iter;
@@ -939,6 +942,8 @@ void ExportMesh::ComputeVertexTangentSpaces()
         }
     }
 
+    tan1.reset();
+
     if (m_VertexFormat.m_bBinormal)
     {
         hr = writer->Write(tan2.get(), "BINORMAL", 0, nVerts, m_x2Bias);
@@ -947,6 +952,10 @@ void ExportMesh::ComputeVertexTangentSpaces()
             ExportLog::LogError("Mesh \"%s\" failed to write bi-normals (%08X).", GetName().SafeString(), static_cast<unsigned int>(hr));
         }
     }
+
+    tan2.reset();
+
+    writer.reset();
 }
 
 void ExportMesh::ComputeAdjacency()
@@ -1636,10 +1645,10 @@ void ExportMesh::BuildVertexBuffer(ExportMeshVertexArray& VertexArray, DWORD dwF
         {
             BYTE* pDest = pDestVertex + iSkinDataOffset;
             BYTE* pBoneWeights = pDest;
-            *pDest++ = static_cast<BYTE>(pSrcVertex->BoneWeights.x * 255.0f);
-            *pDest++ = static_cast<BYTE>(pSrcVertex->BoneWeights.y * 255.0f);
-            *pDest++ = static_cast<BYTE>(pSrcVertex->BoneWeights.z * 255.0f);
-            *pDest++ = static_cast<BYTE>(pSrcVertex->BoneWeights.w * 255.0f);
+            *pDest++ = static_cast<BYTE>(static_cast<int>(pSrcVertex->BoneWeights.x * 255.0f));
+            *pDest++ = static_cast<BYTE>(static_cast<int>(pSrcVertex->BoneWeights.y * 255.0f));
+            *pDest++ = static_cast<BYTE>(static_cast<int>(pSrcVertex->BoneWeights.z * 255.0f));
+            *pDest++ = static_cast<BYTE>(static_cast<int>(pSrcVertex->BoneWeights.w * 255.0f));
             NormalizeBoneWeights(pBoneWeights);
             *pDest++ = pSrcVertex->BoneIndices.x;
             *pDest++ = pSrcVertex->BoneIndices.y;
