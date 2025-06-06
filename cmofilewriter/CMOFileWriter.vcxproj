@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>SDKMeshFileWriter</ProjectName>
-    <ProjectGuid>{85495119-FC0E-4F85-8357-8823B6164F9E}</ProjectGuid>
-    <RootNamespace>SDKMeshFileWriter</RootNamespace>
+    <ProjectName>CMOFileWriter</ProjectName>
+    <ProjectGuid>{cfe617b5-8f19-4211-87b5-08a66b6ceef1}</ProjectGuid>
+    <RootNamespace>CMOFileWriter</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -89,15 +89,15 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SDKMeshFileWriter.cpp" />
+    <ClCompile Include="CMOFileWriter.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDKmesh.h" />
-    <ClInclude Include="SDKMeshFileWriter.h" />
+    <ClInclude Include="CMO.h" />
+    <ClInclude Include="cmofilewriter.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XATGFileWriter", "XATGFileW
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDKMeshFileWriter", "SDKMeshFileWriter\SDKMeshFileWriter2019.vcxproj", "{85495119-FC0E-4F85-8357-8823B6164F9E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CMOFileWriter", "cmofilewriter\CMOFileWriter.vcxproj", "{CFE617B5-8F19-4211-87B5-08A66B6CEEF1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -32,8 +34,15 @@ Global
 		{85495119-FC0E-4F85-8357-8823B6164F9E}.Debug|x64.Build.0 = Debug|x64
 		{85495119-FC0E-4F85-8357-8823B6164F9E}.Release|x64.ActiveCfg = Release|x64
 		{85495119-FC0E-4F85-8357-8823B6164F9E}.Release|x64.Build.0 = Release|x64
+		{CFE617B5-8F19-4211-87B5-08A66B6CEEF1}.Debug|x64.ActiveCfg = Debug|x64
+		{CFE617B5-8F19-4211-87B5-08A66B6CEEF1}.Debug|x64.Build.0 = Debug|x64
+		{CFE617B5-8F19-4211-87B5-08A66B6CEEF1}.Release|x64.ActiveCfg = Release|x64
+		{CFE617B5-8F19-4211-87B5-08A66B6CEEF1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {75CA6806-ED5F-400F-8E1A-D9C91074E1E1}
 	EndGlobalSection
 EndGlobal
