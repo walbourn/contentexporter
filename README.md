@@ -68,7 +68,7 @@ Usage: ``ContentExporter [options] <filename.fbx>``
 ``.SDKMESH`` has a long-time samples runtime geometry format for Microsoft since the retiring of the
 legacy .X file format. It has a number of limitations, and we don't recommend using it as a your
 production solution for meshes. It is, however, very useful for samples and itself serves as an
-example of such file containers. The documentation on the format can be found [here](https://github.com/walbourn/contentexporter/wiki/SDKMESH).
+example of such file containers. The documentation on the format can be found on the [wiki](https://github.com/walbourn/contentexporter/wiki/SDKMESH).
 
 ## Release Notes
 
