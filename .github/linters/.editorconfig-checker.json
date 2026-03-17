@@ -3,5 +3,9 @@
     "exclude": [
         ".git",
         "LICENSE"
-    ]
+    ],
+    "Disable": {
+        "Indentation": true,
+        "IndentSize": true
+    }
 }

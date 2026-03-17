@@ -8,6 +8,7 @@
 // http://go.microsoft.com/fwlink/?LinkId=226208
 //-------------------------------------------------------------------------------------
 #include "stdafx.h"
+#include "SDKMeshFileWriter.h"
 #include "SDKmesh.h"
 
 static_assert(sizeof(::D3DVERTEXELEMENT9) == sizeof(DXUT::D3DVERTEXELEMENT9), "Direct3D9 Decl structure size incorrect");

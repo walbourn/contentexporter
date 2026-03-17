@@ -84,8 +84,9 @@ ExportPath g_CurrentInputFileName;
 enum ExportFileFormat
 {
     FILEFORMAT_XATG = 0,
-    FILEFORMAT_SDKMESH = 1,
-    FILEFORMAT_SDKMESH_V2 = 2,
+    FILEFORMAT_SDKMESH,
+    FILEFORMAT_SDKMESH_V2,
+    FILEFORMAT_CMO
 };
 
 INT g_ExportFileFormat = FILEFORMAT_SDKMESH;
@@ -287,6 +288,13 @@ bool MacroXATG(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
     return true;
 }
 
+bool MacroCMO(const CHAR* /*strArgument*/, bool& /*bUsedArgument*/)
+{
+    g_pScene->Settings().bFlipTriangles = false;
+    g_ExportFileFormat = FILEFORMAT_CMO;
+    return true;
+}
+
 bool MacroSubD11(const CHAR* strArgument, bool& bUsedArgument)
 {
     MacroWindowsD3D11(strArgument, bUsedArgument);
@@ -429,6 +437,7 @@ MacroCommand g_MacroCommands[] = {
     { "?", "", "Display help", MacroDisplayHelp },
     { "outputpath", " <path>", "Sets the output root path; files will appear in scenes/ and textures/ subdirectories", MacroSetOutputPath },
     { "verbose", "", "Displays more detailed output, equivalent to -loglevel 4", MacroSetVerbose },
+    { "cmo", "", "Use the CMO output file format, equivalent to -filformat cmo -fliptriangles-", MacroCMO },
     { "xatg", "", "Use the XATG output file format, equivalent to -fileformat xatg", MacroXATG },
     { "sdkmesh", "", "Use the SDKMESH output file format, equivalent to -fileformat sdkmesh", MacroSDKMesh },
     { "sdkmesh2", "", "Use the SDKMESH (version 2) output file format, equivalent to -fileformat sdkmesh2", MacroSDKMesh2 },
@@ -767,6 +776,10 @@ void BuildOutputFileName(const ExportPath& InputFileName)
     {
         g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_BINARYFILE_EXTENSION);
     }
+    else if (g_ExportFileFormat == FILEFORMAT_CMO)
+    {
+        g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_VSFILE_EXTENSION);
+    }
     else
     {
         g_CurrentOutputFileName.ChangeExtension(CONTENT_EXPORTER_FILE_EXTENSION);
@@ -805,6 +818,7 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
         { CONTENT_EXPORTER_FILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_FILE_EXTENSION, FILEFORMAT_XATG },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_BINARYFILE_EXTENSION, FILEFORMAT_SDKMESH },
         { CONTENT_EXPORTER_BINARYFILE_FILTER_DESCRIPTION_V2, "sdkmesh2", FILEFORMAT_SDKMESH_V2 },
+        { CONTENT_EXPORTER_VSFILE_FILTER_DESCRIPTION, CONTENT_EXPORTER_VSFILE_EXTENSION, FILEFORMAT_CMO },
     };
     g_SettingsManager.AddEnum(g_SettingsManager.GetRootCategory(0), "Output File Format", "fileformat", FILEFORMAT_SDKMESH, FileFormatEnums, ARRAYSIZE(FileFormatEnums), &g_ExportFileFormat);
 
@@ -910,26 +924,34 @@ int __cdecl main(_In_ int argc, _In_z_count_(argc) char* argv[])
             if (g_ExportFileFormat == FILEFORMAT_SDKMESH || g_ExportFileFormat == FILEFORMAT_SDKMESH_V2)
             {
                 ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "", true);
-                WriteSDKMeshFile(g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false);
-                if (bExportMaterials)
+                bool result = WriteSDKMeshFile(g_CurrentOutputFileName, &g_Manifest, (g_ExportFileFormat == FILEFORMAT_SDKMESH_V2) ? true : false);
+                if (result && bExportMaterials)
                 {
                     ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                 }
+            }
+            else if (g_ExportFileFormat == FILEFORMAT_CMO)
+            {
+                ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "", true);
+                WriteCMOMeshFile(g_CurrentOutputFileName, &g_Manifest);
             }
             else
             {
                 if (g_XATGSettings.bBundleTextures && bExportMaterials)
                 {
                     ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "textures\\", false);
-                    WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
-                    ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
-                    BundleTextures();
+                    bool result = WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
+                    if (result)
+                    {
+                        ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
+                        BundleTextures();
+                    }
                 }
                 else
                 {
                     ExportTextureConverter::ProcessScene(g_pScene, &g_Manifest, "textures\\", true);
-                    WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
-                    if (bExportMaterials)
+                    bool result = WriteXATGFile(g_CurrentOutputFileName, &g_Manifest);
+                    if (result && bExportMaterials)
                     {
                         ExportTextureConverter::PerformTextureFileOperations(&g_Manifest);
                     }
