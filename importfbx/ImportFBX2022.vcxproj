@@ -22,12 +22,12 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)_2019\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)_2019\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)_2022\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)_2022\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EmbedManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)_2019\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)_2019\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)_2022\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)_2022\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EmbedManifest>
@@ -58,9 +58,9 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2019\x64\release;$(FBX_SDK)\lib\x64\release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(FBX_SDK)\lib\vs2022\x64\release;$(FBX_SDK)\lib\x64\release;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\include;$(FBX_SDK)\include\kbaselib;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2019\x64\debug;$(FBX_SDK)\lib\x64\debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(FBX_SDK)\lib\vs2022\x64\debug;$(FBX_SDK)\lib\x64\debug;$(LibraryPath)</LibraryPath>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ContentExporter</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ContentExporter</TargetName>
   </PropertyGroup>
@@ -175,13 +175,13 @@
     <ResourceCompile Include="ContentExporter.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExportObjects\ExportObjects2019.vcxproj">
+    <ProjectReference Include="..\ExportObjects\ExportObjects2022.vcxproj">
       <Project>{6afa24fb-37b3-49d3-9832-f7ea3de3ca2e}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\SDKMeshFileWriter\SDKMeshFileWriter2019.vcxproj">
+    <ProjectReference Include="..\SDKMeshFileWriter\SDKMeshFileWriter2022.vcxproj">
       <Project>{85495119-fc0e-4f85-8357-8823b6164f9e}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\XATGFileWriter\XATGFileWriter2019.vcxproj">
+    <ProjectReference Include="..\XATGFileWriter\XATGFileWriter2022.vcxproj">
       <Project>{3f3d7892-a3f4-43a9-87bf-b9c28e9069e8}</Project>
     </ProjectReference>
   </ItemGroup>
@@ -195,9 +195,9 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets" Condition="Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" />
     <Import Project="..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets" Condition="Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" />
-    <Import Project="..\packages\directxmesh_desktop_2019.2025.10.28.1\build\native\directxmesh_desktop_2019.targets" Condition="Exists('..\packages\directxmesh_desktop_2019.2025.10.28.1\build\native\directxmesh_desktop_2019.targets')" />
-    <Import Project="..\packages\directxtex_desktop_2019.2025.10.28.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('..\packages\directxtex_desktop_2019.2025.10.28.1\build\native\directxtex_desktop_2019.targets')" />
     <Import Project="..\packages\uvatlas_desktop_2019.2025.11.2.1\build\native\uvatlas_desktop_2019.targets" Condition="Exists('..\packages\uvatlas_desktop_2019.2025.11.2.1\build\native\uvatlas_desktop_2019.targets')" />
+    <Import Project="..\packages\directxtex_desktop_win10.2026.4.1.1\build\native\directxtex_desktop_win10.targets" Condition="Exists('..\packages\directxtex_desktop_win10.2026.4.1.1\build\native\directxtex_desktop_win10.targets')" />
+    <Import Project="..\packages\directxmesh_desktop_win10.2026.4.1.1\build\native\directxmesh_desktop_win10.targets" Condition="Exists('..\packages\directxmesh_desktop_win10.2026.4.1.1\build\native\directxmesh_desktop_win10.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -205,8 +205,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openexr-msvc-x64.2.3.0.8788\build\native\OpenEXR-msvc-x64.targets'))" />
     <Error Condition="!Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets'))" />
-    <Error Condition="!Exists('..\packages\directxmesh_desktop_2019.2025.10.28.1\build\native\directxmesh_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_2019.2025.10.28.1\build\native\directxmesh_desktop_2019.targets'))" />
-    <Error Condition="!Exists('..\packages\directxtex_desktop_2019.2025.10.28.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2019.2025.10.28.1\build\native\directxtex_desktop_2019.targets'))" />
     <Error Condition="!Exists('..\packages\uvatlas_desktop_2019.2025.11.2.1\build\native\uvatlas_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\uvatlas_desktop_2019.2025.11.2.1\build\native\uvatlas_desktop_2019.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_win10.2026.4.1.1\build\native\directxtex_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_win10.2026.4.1.1\build\native\directxtex_desktop_win10.targets'))" />
+    <Error Condition="!Exists('..\packages\directxmesh_desktop_win10.2026.4.1.1\build\native\directxmesh_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxmesh_desktop_win10.2026.4.1.1\build\native\directxmesh_desktop_win10.targets'))" />
   </Target>
 </Project>

@@ -6,6 +6,10 @@ Release available for download on [GitHub](https://github.com/walbourn/contentex
 
 ## Release History
 
+### April 1, 2026
+* Updated DirectXTex, DirectXMesh for March 2026 releases
+* Upgraded to VS 2022
+
 ### November 3, 2025
 * Updated for DirectXTex, DirectXMesh, and UVAtlas October 2025 releases
 
