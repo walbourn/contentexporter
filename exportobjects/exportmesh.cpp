@@ -1229,21 +1229,25 @@ void ExportMesh::OptimizeVcache()
     {
         if (useLRU)
         {
-            hr = OptimizeFacesLRUEx(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, m_pAttributes.get(), faceRemap.get());
+            hr = OptimizeFacesLRUEx(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, nVerts,
+                m_pAttributes.get(), faceRemap.get());
         }
         else
         {
-            hr = OptimizeFacesEx(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, m_pAdjacency.get(), m_pAttributes.get(),
+            hr = OptimizeFacesEx(reinterpret_cast<const uint16_t*>(m_pIB->GetIndexData()), nFaces, nVerts,
+                m_pAdjacency.get(), m_pAttributes.get(),
                 faceRemap.get(), vertexCache, restart);
         }
     }
     else if (useLRU)
     {
-        hr = OptimizeFacesLRUEx(reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, m_pAttributes.get(), faceRemap.get());
+        hr = OptimizeFacesLRUEx(reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, nVerts,
+            m_pAttributes.get(), faceRemap.get());
     }
     else
     {
-        hr = OptimizeFacesEx(reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, m_pAdjacency.get(), m_pAttributes.get(),
+        hr = OptimizeFacesEx(reinterpret_cast<const uint32_t*>(m_pIB->GetIndexData()), nFaces, nVerts,
+            m_pAdjacency.get(), m_pAttributes.get(),
             faceRemap.get(), vertexCache, restart);
     }
     if (FAILED(hr))
